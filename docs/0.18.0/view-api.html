@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Kite Views API</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="An open source data API for Hadoop.">
+    <link rel="canonical" href="http://kitesdk.org/docs/0.18.0/view-api.html">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/docs/0.18.0/css/main.css">
+    <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+
+
+    <body>
+
+    <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/docs/0.18.0/">Kite Software Development Kit</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      
+      <div class="sidebar">
+      
+        <h4>About Kite</h4>
+        <ul>
+          
+        </ul>
+      
+        <h4></h4>
+        <ul>
+          
+          
+          <li><a href="/docs/0.18.0/Kite-SDK-Guide.html">Kite Background</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
+          
+          
+        </ul>
+      
+        <h4>Kite CLI</h4>
+        <ul>
+          
+          
+          <li><a href="/docs/0.18.0/Install-Kite.html">Installing the CLI</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/cli-reference.html">Kite CLI Reference</a></li>
+          
+          
+        </ul>
+      
+        <h4>Kite API</h4>
+        <ul>
+          
+          
+          <li><a href="/docs/0.18.0/API-Overview.html">API Introduction</a></li>
+          
+          
+          
+          <li><b>Views API</b></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
+          
+          
+        </ul>
+      
+        <h4>Reference</h4>
+        <ul>
+          
+          
+          <li><a href="/docs/0.18.0/URIs.html">Kite URIs</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/Schema-Evolution.html">Schema Evolution</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/Partitioned-Datasets.html">Partitioned Datasets</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/HBase-Storage-Cells.html">HBase Storage</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/Column-Mapping.html">Column Mapping</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/lifecycle.html">Dataset Lifecycle</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/maven">Maven Plugin</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/dependencies">Dependency Info</a></li>
+          
+          
+        </ul>
+      
+      </div>
+      
+
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1>Kite Views API</h1>
+  </header>
+
+  <article class="post-content">
+  <p>Most of the time, you don’t need to work with all of the records stored in a dataset. It is common to work with subsets, like events <em>last month</em> rather than <em>all</em> events. The Views API is a way to express constraints for the records that Kite loads.</p>
+
+<p>If your dataset is partitioned, Kite intelligently determines which partitions to draw from based on a view’s constraints. You don’t have to specify the partitions yourself because Kite will filter out partitions that cannot contain matching records, automatically.</p>
+
+<p>Kite filters records so that you can express requirements for your data and have Kite enforce them. For example, <code>events.with("type")</code> is a view of <code>events</code> where each record loaded by the view will have a non-null value for the <em>type</em> field.</p>
+
+<h2 id="views">Views</h2>
+
+<p>Kite’s <a href="/docs/0.18.0/apidocs/org/kitesdk/data/View.html"><code>View</code></a> interface represents a logical collection of records in a dataset. It might seem as though a view is a subset of a dataset, but it is more accurate to think of a dataset as a view with no constraints applied.</p>
+
+<p>You can use a view as the input for a MapReduce job or read its content directly by using <a href="/docs/0.18.0/apidocs/org/kitesdk/data/View.html#newReader()"><code>View#newReader</code></a> to get a <code>DatasetReader</code> that returns only records in the view.</p>
+
+<p><code>View</code> instances are <a href="https://jsr-305.googlecode.com/svn/trunk/javadoc/javax/annotation/concurrent/Immutable.html">immutable</a>. You can pass the view to other operations, safe in the knowledge that it won’t be changed at all.</p>
+
+<h2 id="refining-a-view">Refining a View</h2>
+
+<p>You create a view by adding a constraint to an existing view or dataset using one of the following methods.</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>Method</td>
+      <td>Definition</td>
+      <td>Example</td>
+    </tr>
+    <tr>
+      <td><a href="/docs/0.18.0/apidocs/org/kitesdk/data/RefinableView.html#with(java.lang.String,%20java.lang.Object...)"><code>with</code></a></td>
+      <td>Add a non-null constraint for a field</td>
+      <td><code>events.with("level")</code></td>
+    </tr>
+    <tr>
+      <td><a href="/docs/0.18.0/apidocs/org/kitesdk/data/RefinableView.html#with(java.lang.String,%20java.lang.Object...)"><code>with</code></a></td>
+      <td>Add an equality constraint for a field</td>
+      <td><code>events.with("level", "FATAL")</code></td>
+    </tr>
+    <tr>
+      <td><a href="/docs/0.18.0/apidocs/org/kitesdk/data/RefinableView.html#with(java.lang.String,%20java.lang.Object...)"><code>with</code></a></td>
+      <td>Add a set-inclusion constraint for a field</td>
+      <td><code>events.with("level", "WARNING", "ERROR")</code></td>
+    </tr>
+    <tr>
+      <td><a href="/docs/0.18.0/apidocs/org/kitesdk/data/RefinableView.html#from(java.lang.String,%20java.lang.Comparable)"><code>from</code></a></td>
+      <td>Add a &gt;= constraint for a field</td>
+      <td><code>events.from("day", 1)</code></td>
+    </tr>
+    <tr>
+      <td><a href="/docs/0.18.0/apidocs/org/kitesdk/data/RefinableView.html#fromAfter(java.lang.String,%20java.lang.Comparable)"><code>fromAfter</code></a></td>
+      <td>Add a &gt; constraint for a field</td>
+      <td><code>events.fromAfter("day", 4)</code></td>
+    </tr>
+    <tr>
+      <td><a href="/docs/0.18.0/apidocs/org/kitesdk/data/RefinableView.html#to(java.lang.String,%20java.lang.Comparable)"><code>to</code></a></td>
+      <td>Add a &lt;= constraint for a field</td>
+      <td><code>events.to("year", 2014)</code></td>
+    </tr>
+    <tr>
+      <td><a href="/docs/0.18.0/apidocs/org/kitesdk/data/RefinableView.html#toBefore(java.lang.String,%20java.lang.Comparable)"><code>toBefore</code></a></td>
+      <td>Add a &lt; constraint for a field</td>
+      <td><code>events.toBefore("year", 2015)</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Each method returns a new <code>View</code> with the additional constraint added to the parent view<a href="#notes"><sup>1</sup></a>. </p>
+
+<p>For example, If you want to work with the <code>ratings</code> dataset and with numeric rating of <em>5</em>, you would use the <code>with</code> method.</p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+</pre></td>
+  <td class="code"><pre>ratings.with(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">rating</span><span style="color:#710">&quot;</span></span>, <span style="color:#00D">5</span>);
+</pre></td>
+</tr></table>
+</div>
+
+<p>Kite inspects each record and applies this constraint before passing records to your application. Only ratings with the value <em>5</em> are returned.</p>
+
+<p>The object you pass as a constraint must match the data type. For example, if the <em>rating</em> field is a String data type, sending the value <em>5</em> as a constraint will throw an exception.</p>
+
+<p>You can chain refinement method calls to create a more complicated view all at once. For example, if you’ve dfined <em>start</em> and <em>end</em> variables, you can select a range of times during which ratings are submitted by chaining <code>from</code> and <code>to</code> for the same record field.</p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+</pre></td>
+  <td class="code"><pre>ratings.from(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">time</span><span style="color:#710">&quot;</span></span>, start).to(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">time</span><span style="color:#710">&quot;</span></span>, end).with(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">rating</span><span style="color:#710">&quot;</span></span>, <span style="color:#00D">5</span>);
+</pre></td>
+</tr></table>
+</div>
+
+<p>If the ratings dataset is partitioned by <code>time</code>, then the view will automatically take advantage of dataset partitioning. Kite intelligently determines which partitions to draw from in response to this filter value. See <a href="/docs/0.18.0/Partitioned-Datasets.html" title="See [Partitioned Datasets][partitioned-datasets].">Partitioned Datasets</a>.</p>
+
+<h2 id="loading-a-view">Loading a View</h2>
+
+<p>In addition to creating a view with the API, you can load a view from a <a href="/docs/0.18.0/URIs.html#view-uris">view URI</a>. A view URIs is analogous to a dataset URI, where the scheme is <code>view:</code> instead of <code>dataset:</code> and constraints are added as query arguments.</p>
+
+<p>The following code snippet creates a view for a dataset of movie ratings submitted by the critic with <code>user_id</code> 125. </p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+</pre></td>
+  <td class="code"><pre><span style="color:#0a8;font-weight:bold">View</span>&lt;Record&gt; ratings = Datasets.load(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">view:hive:ratings?user_id=125</span><span style="color:#710">&quot;</span></span>);
+</pre></td>
+</tr></table>
+</div>
+
+<h2 id="inspecting-a-view">Inspecting a View</h2>
+
+<p>In some use cases, it might not be necessary to return a set of values, but only verify that values do or do not exist. For example, you might want to only submit a MapReduce job if there are values that would be processed. These methods allow you to inspect a view at runtime.</p>
+
+<h3 id="isempty">isEmpty</h3>
+
+<p>The <a href="/docs/0.18.0/apidocs/org/kitesdk/data/View.html#isEmpty()"><code>isEmpty</code></a> method returns whether your <code>View</code> contains any records at all.</p>
+
+<h3 id="geturi">getUri</h3>
+
+<p>The <a href="/docs/0.18.0/apidocs/org/kitesdk/data/View.html#getUri()"><code>getUri</code></a> method returns a URI for a <code>View</code> that can be passed to <code>Datasets.load</code>.</p>
+
+<h3 id="includes">includes</h3>
+
+<p>The <a href="/docs/0.18.0/apidocs/org/kitesdk/data/View.html#includes(E)"><code>includes</code></a> method returns whether an entity matches a view’s constraints. That is, whether the record would be included in this <code>View</code> if it were present in the <code>Dataset</code>.</p>
+
+<h2 id="working-with-records-in-a-view">Working with Records in a View</h2>
+
+<p>You can interact with records in a view the way you would work with records in a full dataset. You can use <code>newReader</code> and <code>newWriter</code> to get the same reader or writer objects, but they are restricted to operations on the view. </p>
+
+<h3 id="newreader">newReader</h3>
+
+<p>The <a href="/docs/0.18.0/apidocs/org/kitesdk/data/View.html#newReader()"><code>newReader</code></a> method creates an appropriate <code>DatasetReader</code> that returns only records that match the view’s constraints.</p>
+
+<h3 id="newwriter">newWriter</h3>
+
+<p>The <a href="/docs/0.18.0/apidocs/org/kitesdk/data/View.html#newWriter()"><code>newWriter</code></a> method creates an appropriate <code>DatasetWriter</code> that will write only records that match the view’s constraints. For more information, see <a href="/docs/0.18.0/writing-to-views.html">Writing to Views</a>.</p>
+
+<p>See [Restricted Views][restricted-views].</p>
+
+<h3 id="deleteall">deleteAll</h3>
+
+<p>The <a href="/docs/0.18.0/apidocs/org/kitesdk/data/View.html#deleteAll()"><code>deleteAll</code></a> method deletes all entities in the dataset that match the view’s constraints.</p>
+
+<p>If the delete cannot be completed cleanly, then the method throws an <code>UnsupportedOperationException</code>. In the FileSystem implementation, for example, individual records cannot be deleted, only entire files. That means that Kite only allows you to delete an entire partition directory.</p>
+
+<p>This method will delete records in a dataset, and will not delete the dataset itself. When called on a dataset, all records in the dataset will be removed. To delete a dataset in addition to the data stored in that dataset, use <a href="/docs/0.18.0/API-Overview.html#delete"><code>Datasets.delete</code></a>.</p>
+
+<hr />
+
+<h4 id="notes">Notes:</h4>
+<ol>
+  <li>Views are created by refining other views because they are <a href="https://jsr-305.googlecode.com/svn/trunk/javadoc/javax/annotation/concurrent/Immutable.html">immutable</a> and cannot be changed. This works like a Java’s <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html#substring(int)">String methods</a> that always return new strings.</li>
+</ol>
+
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrap columns">
+
+    <div class="left">
+      <h2 class="footer-heading">Kite Software Development Kit, 0.18.0</h2>
+
+      <ul>
+        <li>Kite is licensed under</li>
+        <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
+        <li>&nbsp;</li>
+        <li>Generated on 11 February 2015</li>
+      </ul>
+
+    </div>
+
+    <div class="middle">
+    </div>
+
+    <div class="right">
+      <p class="text">An open source data API for Hadoop.
+        <div class="columns">
+          <div class="left">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite"><i class="fa fa-github fa-lg"></i>&nbsp; Source</a></li>
+              <li><a href="https://issues.cloudera.org/browse/CDK"><i class="fa fa-bug fa-lg"></i>&nbsp; Issue tracking</a></li>
+              <li><a href="https://groups.google.com/a/cloudera.org/forum/#!forum/cdk-dev"><i class="fa fa-comments-o fa-lg"></i>&nbsp; Mailing list</a></li>
+              <li><a href="https://github.com/kite-sdk/kite/wiki/How-to-contribute"><i class="fa fa-cogs fa-lg"></i>&nbsp; How to contribute</a></li>
+            </ul>
+          </div>
+          <div class="right">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
+              <li><a href="/docs/0.18.0/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/0.18.0/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/docs/0.18.0/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+            </ul>
+          </div>
+        </div>
+      </p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+    </body>
+</html>
