@@ -18,7 +18,7 @@
   <parent>
     <groupId>org.kitesdk</groupId>
     <artifactId>kite-morphlines</artifactId>
-    <version>0.18.0</version>
+    <version>0.18.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>kite-morphlines-maxmind</artifactId>
