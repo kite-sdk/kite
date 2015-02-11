@@ -17,6 +17,7 @@
 package org.kitesdk.data.spi.filesystem;
 
 import au.com.bytecode.opencsv.CSVParser;
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -29,20 +30,18 @@ public class CSVRecordParser<E> {
   private final CSVParser parser;
   private final CSVRecordBuilder<E> builder;
 
-  public CSVRecordParser(CSVProperties props,
-                         View<E> view,
-                         List<String> header) {
+  public CSVRecordParser(CSVProperties props, View<E> view,
+                         @Nullable List<String> header) {
     this(props, view.getDataset().getDescriptor().getSchema(), view.getType(),
-        header);
+         header);
   }
 
-  public CSVRecordParser(CSVProperties props,
-                         Schema schema,
-                         Class<E> type,
-                         List<String> header) {
+  public CSVRecordParser(CSVProperties props, Schema schema, Class<E> type,
+                         @Nullable List<String> header) {
     this.parser = CSVUtil.newParser(props);
     this.builder = new CSVRecordBuilder<E>(
-        DataModelUtil.getReaderSchema(type, schema), type, header);
+        DataModelUtil.getReaderSchema(type, schema),
+        type, getHeader(props, header));
   }
 
   public E read(String line) {
@@ -55,5 +54,21 @@ public class CSVRecordParser<E> {
     } catch (IOException e) {
       throw new DatasetIOException("Cannot parse line: " + line, e);
     }
+  }
+
+  public static List<String> getHeader(CSVProperties props,
+                                       @Nullable List<String> header) {
+    if (header != null) {
+      return header;
+    } else if (props.header != null) {
+      try {
+        return Lists.newArrayList(
+            CSVUtil.newParser(props).parseLine(props.header));
+      } catch (IOException e) {
+        throw new DatasetIOException(
+            "Failed to parse header from properties: " + props.header, e);
+      }
+    }
+    return null;
   }
 }

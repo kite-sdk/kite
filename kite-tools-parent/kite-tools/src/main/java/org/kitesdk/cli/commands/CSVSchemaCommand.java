@@ -82,6 +82,10 @@ public class CSVSchemaCommand extends BaseCommand {
   @Parameter(names="--charset", description="Character set name", hidden = true)
   String charsetName = Charset.defaultCharset().displayName();
 
+  @Parameter(names="--header",
+      description="Line to use as a header. Must match the CSV settings.")
+  String header;
+
   @Parameter(names="--require",
       description="Do not allow null values for the given field")
   List<String> requiredFields;
@@ -93,10 +97,16 @@ public class CSVSchemaCommand extends BaseCommand {
     Preconditions.checkArgument(samplePaths.size() == 1,
         "Only one CSV sample can be given");
 
+    if (header != null) {
+      // if a header is given on the command line, do assume one is in the file
+      noHeader = true;
+    }
+
     CSVProperties props = new CSVProperties.Builder()
         .delimiter(delimiter)
         .escape(escape)
         .quote(quote)
+        .header(header)
         .hasHeader(!noHeader)
         .linesToSkip(linesToSkip)
         .charset(charsetName)
