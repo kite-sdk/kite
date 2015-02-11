@@ -113,6 +113,11 @@ public class CSVUtil {
       line = reader.readNext();
       Preconditions.checkNotNull(line, "No content to infer schema");
 
+    } else if (props.header != null) {
+      header = newParser(props).parseLine(props.header);
+      line = reader.readNext();
+      Preconditions.checkNotNull(line, "No content to infer schema");
+
     } else {
       // use the first line to create a header
       line = reader.readNext();

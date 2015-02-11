@@ -19,6 +19,7 @@ package org.kitesdk.data.spi.filesystem;
 import au.com.bytecode.opencsv.CSVReader;
 import java.io.InputStream;
 import com.google.common.collect.Lists;
+import java.util.List;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
@@ -116,12 +117,21 @@ public class CSVFileReader<E> extends AbstractDatasetReader<E> {
 
     this.reader = CSVUtil.newReader(incoming, props);
 
+    List<String> header = null;
     if (props.useHeader) {
       this.hasNext = advance();
+      header = Lists.newArrayList(next);
+    } else if (props.header != null) {
+      try {
+        header = Lists.newArrayList(
+            CSVUtil.newParser(props).parseLine(props.header));
+      } catch (IOException e) {
+        throw new DatasetIOException(
+            "Failed to parse header from properties: " + props.header, e);
+      }
     }
 
-    this.builder = new CSVRecordBuilder<E>(schema, recordClass,
-        next == null ? null : Lists.newArrayList((String[]) next));
+    this.builder = new CSVRecordBuilder<E>(schema, recordClass, header);
 
     // initialize by reading the first record
     this.hasNext = advance();

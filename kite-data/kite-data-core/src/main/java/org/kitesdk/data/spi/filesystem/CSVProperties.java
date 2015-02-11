@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.spi.filesystem;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.kitesdk.data.DatasetDescriptor;
@@ -31,6 +32,7 @@ public class CSVProperties {
   public static final String DELIMITER_PROPERTY = "kite.csv.delimiter";
   public static final String QUOTE_CHAR_PROPERTY = "kite.csv.quote-char";
   public static final String ESCAPE_CHAR_PROPERTY = "kite.csv.escape-char";
+  public static final String HEADER_PROPERTY = "kite.csv.header";
   public static final String HAS_HEADER_PROPERTY = "kite.csv.has-header";
   public static final String LINES_TO_SKIP_PROPERTY = "kite.csv.lines-to-skip";
 
@@ -53,15 +55,18 @@ public class CSVProperties {
   public final String delimiter;
   public final String quote;
   public final String escape;
+  public final String header;
   public final boolean useHeader;
   public final int linesToSkip;
 
   private CSVProperties(String charset, String delimiter, String quote,
-                       String escape, boolean useHeader, int linesToSkip) {
+                        String escape, String header, boolean useHeader,
+                        int linesToSkip) {
     this.charset = charset;
     this.delimiter = delimiter;
     this.quote = quote;
     this.escape = escape;
+    this.header = header;
     this.useHeader = useHeader;
     this.linesToSkip = linesToSkip;
   }
@@ -83,6 +88,7 @@ public class CSVProperties {
         descriptor.getProperty(ESCAPE_CHAR_PROPERTY),
         descriptor.getProperty(OLD_ESCAPE_CHAR_PROPERTY),
         DEFAULT_ESCAPE);
+    this.header = descriptor.getProperty(HEADER_PROPERTY);
     this.useHeader = Boolean.parseBoolean(coalesce(
         descriptor.getProperty(HAS_HEADER_PROPERTY),
         DEFAULT_HAS_HEADER));
@@ -116,14 +122,19 @@ public class CSVProperties {
   }
 
   public DatasetDescriptor addToDescriptor(DatasetDescriptor descriptor) {
-    return new DatasetDescriptor.Builder(descriptor)
+    DatasetDescriptor.Builder builder = new DatasetDescriptor.Builder(descriptor)
         .property(CHARSET_PROPERTY, charset)
         .property(DELIMITER_PROPERTY, delimiter)
         .property(ESCAPE_CHAR_PROPERTY, escape)
         .property(QUOTE_CHAR_PROPERTY, quote)
         .property(HAS_HEADER_PROPERTY, Boolean.toString(useHeader))
-        .property(LINES_TO_SKIP_PROPERTY, Integer.toString(linesToSkip))
-        .build();
+        .property(LINES_TO_SKIP_PROPERTY, Integer.toString(linesToSkip));
+
+    if (header != null) {
+      builder.property(HEADER_PROPERTY, header);
+    }
+
+    return builder.build();
   }
 
   public static CSVProperties fromDescriptor(DatasetDescriptor descriptor) {
@@ -137,6 +148,7 @@ public class CSVProperties {
     private String escape = DEFAULT_ESCAPE;
     private boolean useHeader = Boolean.valueOf(DEFAULT_HAS_HEADER);
     private int linesToSkip = DEFAULT_LINES_TO_SKIP;
+    private String header = null;
 
     public Builder charset(String charset) {
       this.charset = charset;
@@ -158,6 +170,11 @@ public class CSVProperties {
       return this;
     }
 
+    public Builder header(@Nullable String header) {
+      this.header = header;
+      return this;
+    }
+
     public Builder hasHeader() {
       this.useHeader = true;
       return this;
@@ -176,7 +193,7 @@ public class CSVProperties {
     public CSVProperties build() {
       return new CSVProperties(
           charset, delimiter, quote, escape,
-          useHeader, linesToSkip);
+          header, useHeader, linesToSkip);
     }
   }
 }

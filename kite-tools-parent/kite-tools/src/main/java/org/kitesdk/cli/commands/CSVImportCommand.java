@@ -76,6 +76,10 @@ public class CSVImportCommand extends BaseDatasetCommand {
   @Parameter(names="--charset", description="Character set name", hidden = true)
   String charsetName = Charset.defaultCharset().displayName();
 
+  @Parameter(names="--header",
+      description="Line to use as a header. Must match the CSV settings.")
+  String header;
+
   @Parameter(names="--skip-schema-check",
       description="Override schema checks (safety valve)", hidden = true)
   boolean skipSchemaChecks = false;
@@ -113,10 +117,16 @@ public class CSVImportCommand extends BaseDatasetCommand {
     Preconditions.checkArgument(sourceFS.exists(source),
         "CSV path does not exist: " + source);
 
+    if (header != null) {
+      // if a header is given on the command line, do assume one is in the file
+      noHeader = true;
+    }
+
     CSVProperties props = new CSVProperties.Builder()
         .delimiter(delimiter)
         .escape(escape)
         .quote(quote)
+        .header(header)
         .hasHeader(!noHeader)
         .linesToSkip(linesToSkip)
         .charset(charsetName)
