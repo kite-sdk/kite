@@ -25,6 +25,8 @@ package org.kitesdk.data;
  * <p>
  * Once data has been flushed, it will be tolerant to single-node and rack
  * failures.
+ *
+ * @since 0.18.0
  */
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
     value="NM_SAME_SIMPLE_NAME_AS_INTERFACE",

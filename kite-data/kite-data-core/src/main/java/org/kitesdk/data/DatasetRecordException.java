@@ -24,6 +24,8 @@ package org.kitesdk.data;
  * <p>
  * When reading, this exception indicates that a record could not be built from
  * record data, but that reader is still valid and able to read other records.
+ *
+ * @since 0.18.0
  */
 public class DatasetRecordException extends DatasetException {
   public DatasetRecordException(String message) {

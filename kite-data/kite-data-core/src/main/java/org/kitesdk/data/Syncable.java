@@ -22,6 +22,8 @@ package org.kitesdk.data;
  * When {@link #sync} returns, data already written is flushed to data nodes
  * responsible for replicas and persisted to disk, not just to the underlying
  * OS buffer.
+ *
+ * @since 0.18.0
  */
 public interface Syncable {
   /**
