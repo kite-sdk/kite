@@ -7,10 +7,10 @@
     <title>Kite CLI Reference</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="An open source data API for Hadoop.">
-    <link rel="canonical" href="http://kitesdk.org/docs/0.17.1/cli-reference.html">
+    <link rel="canonical" href="http://kitesdk.org/docs/0.18.0/cli-reference.html">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/docs/0.17.1/css/main.css">
+    <link rel="stylesheet" href="/docs/0.18.0/css/main.css">
     <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 
@@ -23,7 +23,7 @@
 
   <div class="wrap">
 
-    <a class="site-title" href="/docs/0.17.1/">Kite Software Development Kit</a>
+    <a class="site-title" href="/docs/0.18.0/">Kite Software Development Kit</a>
 
     <nav class="site-nav">
       <a href="#" class="menu-icon">
@@ -45,6 +45,105 @@
 
 
     <div class="page-content">
+      
+      <div class="sidebar">
+      
+        <h4>About Kite</h4>
+        <ul>
+          
+        </ul>
+      
+        <h4></h4>
+        <ul>
+          
+          
+          <li><a href="/docs/0.18.0/Kite-SDK-Guide.html">Kite Background</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
+          
+          
+        </ul>
+      
+        <h4>Kite CLI</h4>
+        <ul>
+          
+          
+          <li><a href="/docs/0.18.0/Install-Kite.html">Installing the CLI</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
+          
+          
+          
+          <li><b>Kite CLI Reference</b></li>
+          
+          
+        </ul>
+      
+        <h4>Kite API</h4>
+        <ul>
+          
+          
+          <li><a href="/docs/0.18.0/API-Overview.html">API Introduction</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/view-api.html">Views API</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
+          
+          
+        </ul>
+      
+        <h4>Reference</h4>
+        <ul>
+          
+          
+          <li><a href="/docs/0.18.0/URIs.html">Kite URIs</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/Schema-Evolution.html">Schema Evolution</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/Partitioned-Datasets.html">Partitioned Datasets</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/HBase-Storage-Cells.html">HBase Storage</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/Column-Mapping.html">Column Mapping</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/lifecycle.html">Dataset Lifecycle</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/maven">Maven Plugin</a></li>
+          
+          
+          
+          <li><a href="/docs/0.18.0/dependencies">Dependency Info</a></li>
+          
+          
+        </ul>
+      
+      </div>
+      
+
       <div class="wrap">
       <div class="post">
 
@@ -52,109 +151,10 @@
     <h1>Kite CLI Reference</h1>
   </header>
 
-  
-  <div class="sidebar">
-  
-    <h4>About Kite</h4>
-    <ul>
-      
-    </ul>
-  
-    <h4></h4>
-    <ul>
-      
-      
-      <li><a href="/docs/0.17.1/Kite-SDK-Guide.html">Kite Background</a></li>
-      
-      
-      
-      <li><a href="/docs/0.17.1/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
-      
-      
-    </ul>
-  
-    <h4>Kite CLI</h4>
-    <ul>
-      
-      
-      <li><a href="/docs/0.17.1/Install-Kite.html">Installing the CLI</a></li>
-      
-      
-      
-      <li><a href="/docs/0.17.1/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
-      
-      
-      
-      <li><b>Kite CLI Reference</b></li>
-      
-      
-    </ul>
-  
-    <h4>Kite API</h4>
-    <ul>
-      
-      
-      <li><a href="/docs/0.17.1/API-Overview.html">API Introduction</a></li>
-      
-      
-      
-      <li><a href="/docs/0.17.1/view-api.html">Views API</a></li>
-      
-      
-      
-      <li><a href="/docs/0.17.1/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
-      
-      
-    </ul>
-  
-    <h4>Reference</h4>
-    <ul>
-      
-      
-      <li><a href="/docs/0.17.1/URIs.html">Kite URIs</a></li>
-      
-      
-      
-      <li><a href="/docs/0.17.1/Schema-Evolution.html">Schema Evolution</a></li>
-      
-      
-      
-      <li><a href="/docs/0.17.1/Partitioned-Datasets.html">Partitioned Datasets</a></li>
-      
-      
-      
-      <li><a href="/docs/0.17.1/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
-      
-      
-      
-      <li><a href="/docs/0.17.1/HBase-Storage-Cells.html">HBase Storage</a></li>
-      
-      
-      
-      <li><a href="/docs/0.17.1/Column-Mapping.html">Column Mapping</a></li>
-      
-      
-      
-      <li><a href="/docs/0.17.1/lifecycle.html">Dataset Lifecycle</a></li>
-      
-      
-      
-      <li><a href="/docs/0.17.1/maven">Maven Plugin</a></li>
-      
-      
-      
-      <li><a href="/docs/0.17.1/dependencies">Dependency Info</a></li>
-      
-      
-    </ul>
-  
-  </div>
-  
-
   <article class="post-content">
   <p>The Kite Dataset command line interface (CLI) provides utility commands that let you perform essential tasks such as creating a schema and dataset, importing data from a CSV file, and viewing the results.</p>
 
-<p>Each command is described below. See <a href="/docs/0.17.1/Using-the-Kite-CLI-to-Create-a-Dataset.html">Using the Kite CLI to Create a Dataset</a> for a practical example of the CLI in use.</p>
+<p>Each command is described below. See <a href="/docs/0.18.0/Using-the-Kite-CLI-to-Create-a-Dataset.html">Using the Kite CLI to Create a Dataset</a> for a practical example of the CLI in use.</p>
 
 <p><a name="top"></a> </p>
 
@@ -172,8 +172,10 @@
   <li><a href="#schema">schema</a> : view the schema for an existing dataset.</li>
   <li><a href="#info">info</a>: show metadata for a dataset.</li>
   <li><a href="#show">show</a>: show the first <em>n</em> records of a dataset.</li>
-  <li><a href="#csv-schema">csv-schema</a>: create a schema from a CSV data file.</li>
-  <li><a href="#csv-import">csv-import</a>: import a CSV data file.</li>
+  <li><a href="#csv-schema">csv-schema</a>: create a schema from a CSV data sample.</li>
+  <li><a href="#csv-import">csv-import</a>: import CSV data.</li>
+  <li><a href="#json-schema">json-schema</a>: create a schema from a JSON data sample.</li>
+  <li><a href="#json-import">json-import</a>: import JSON data.</li>
   <li><a href="#obj-schema">obj-schema</a>: create a schema from a Java object.</li>
   <li><a href="#partition-config">partition-config</a>: create a partition strategy for a schema.</li>
   <li><a href="#mapping-config">mapping-config</a>: create a mapping strategy for a schema.</li>
@@ -247,6 +249,13 @@
 
 <p>Field schemas are set by inspecting the first non-empty value in each field. Fields are nullable unless the field’s name is passed using <code>--require</code>. Nullable fields default to <code>null</code>.</p>
 
+<p>The type is determined by the following rules:<br />
+* If the data is numeric and has a decimal point, the type is <code>double</code><br />
+* If the data is numeric and has no decimal point, the type is <code>long</code><br />
+* Otherwise, the type is <code>string</code></p>
+
+<p>See <a href="/docs/0.18.0/read-only-formats.html#csv">CSV format details</a>.</p>
+
 <h3 id="syntax">Syntax</h3>
 
 <pre><code>kite-dataset [-v] csv-schema &lt;sample csv path&gt; [command options]
@@ -313,18 +322,118 @@
 
 <hr />
 
+<h2 id="json-schema">json-schema</h2>
+
+<p>Build a schema from a JSON data sample.</p>
+
+<p>This command produces a Schema by inspecting the first few JSON objects in the data sample. Each JSON object is converted to a Schema that describes it, and the final Schema is the result of merging each sample object’s Schema.</p>
+
+<p>The following two-object data sample, for example</p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+</pre></td>
+  <td class="code"><pre>{ <span style="color:#606"><span style="color:#404">&quot;</span><span>id</span><span style="color:#404">&quot;</span></span>: <span style="color:#00D">1</span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>color</span><span style="color:#404">&quot;</span></span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">green</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>shade</span><span style="color:#404">&quot;</span></span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">dark</span><span style="color:#710">&quot;</span></span> }
+{ <span style="color:#606"><span style="color:#404">&quot;</span><span>id</span><span style="color:#404">&quot;</span></span>: <span style="color:#00D">2</span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>color</span><span style="color:#404">&quot;</span></span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">red</span><span style="color:#710">&quot;</span></span> }
+</pre></td>
+</tr></table>
+</div>
+
+<p>Produces the following merged Schema</p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+<a href="#n6" name="n6">6</a>
+<a href="#n7" name="n7">7</a>
+<a href="#n8" name="n8">8</a>
+<a href="#n9" name="n9">9</a>
+<strong><a href="#n10" name="n10">10</a></strong>
+<a href="#n11" name="n11">11</a>
+<a href="#n12" name="n12">12</a>
+<a href="#n13" name="n13">13</a>
+<a href="#n14" name="n14">14</a>
+<a href="#n15" name="n15">15</a>
+</pre></td>
+  <td class="code"><pre>{
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">record</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Sample</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>fields</span><span style="color:#404">&quot;</span></span> : [ {
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">id</span><span style="color:#710">&quot;</span></span>,
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">int</span><span style="color:#710">&quot;</span></span>
+  }, {
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">color</span><span style="color:#710">&quot;</span></span>,
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span>
+  }, {
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">shade</span><span style="color:#710">&quot;</span></span>,
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : [ <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">null</span><span style="color:#710">&quot;</span></span>, <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span> ],
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>default</span><span style="color:#404">&quot;</span></span> : <span style="color:#088">null</span>
+  } ]
+}
+</pre></td>
+</tr></table>
+</div>
+
+<p>See <a href="/docs/0.18.0/read-only-formats.html#json">JSON format details</a>.</p>
+
+<h3 id="syntax-1">Syntax</h3>
+
+<pre><code>kite-dataset [-v] json-schema &lt;sample json path&gt; [command options]
+</code></pre>
+
+<h3 id="options-1">Options</h3>
+
+<table>
+  <tbody>
+    <tr>
+      <td><code>--class,</code><br /><code>--record-name</code></td>
+      <td>A class name or record name for the schema result. This value is <strong>required</strong>.</td>
+    </tr>
+    <tr>
+      <td><code>-o, --output</code></td>
+      <td>Save schema avsc to path.</td>
+    </tr>
+    <tr>
+      <td><code>--minimize</code></td>
+      <td>Minimize schema file size by eliminating white space.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="examples-1">Examples</h3>
+
+<p>Print an inferred schema for <code>samples.json</code> to standard out</p>
+
+<pre><code>kite-dataset json-schema samples.json --record-name Sample
+</code></pre>
+
+<p>Write an inferred schema to <code>sample.avsc</code></p>
+
+<pre><code>kite-dataset json-schema samples.json --record-name Sample -o sample.avsc
+</code></pre>
+
+<hr />
+
+<p><a href="#top">Back to the Top</a></p>
+
+<hr />
+
 <h2 id="obj-schema">obj-schema</h2>
 
 <p>Build a schema from a Java class.</p>
 
 <p>Fields are assumed to be nullable if they are Objects, or required if they are primitives. You can edit the generated schema directly to remove the <code>null</code> option for specific fields.</p>
 
-<h3 id="syntax-1">Syntax</h3>
+<h3 id="syntax-2">Syntax</h3>
 
 <pre><code>kite-dataset [-v] obj-schema &lt;class name&gt; [command options]
 </code></pre>
 
-<h3 id="options-1">Options</h3>
+<h3 id="options-2">Options</h3>
 
 <table>
   <tbody>
@@ -347,7 +456,7 @@
   </tbody>
 </table>
 
-<h3 id="examples-1">Examples</h3>
+<h3 id="examples-2">Examples</h3>
 
 <p>Create a schema for an example User class:</p>
 
@@ -379,7 +488,7 @@
 <pre><code>kite-dataset [-v] create &lt;dataset&gt; [command options]
 </code></pre>
 
-<h3 id="options-2">Options</h3>
+<h3 id="options-3">Options</h3>
 
 <table>
   <tbody>
@@ -408,7 +517,7 @@
 
 <p><b>Note:</b> The dataset name must not contain a period (.).</p>
 
-<h3 id="examples-2">Examples:</h3>
+<h3 id="examples-3">Examples:</h3>
 
 <p>Create dataset “users” in Hive:</p>
 
@@ -442,12 +551,12 @@
 
 <p>Update the metadata descriptor for a dataset.</p>
 
-<h3 id="syntax-2">Syntax</h3>
+<h3 id="syntax-3">Syntax</h3>
 
 <pre><code>kite-dataset [-v] update &lt;dataset&gt; [command options]
 </code></pre>
 
-<h3 id="options-3">Options</h3>
+<h3 id="options-4">Options</h3>
 
 <table>
   <tbody>
@@ -462,7 +571,7 @@
   </tbody>
 </table>
 
-<h3 id="examples-3">Examples:</h3>
+<h3 id="examples-4">Examples:</h3>
 
 <p>Update schema for dataset “users” in Hive:</p>
 
@@ -486,12 +595,12 @@
 
 <p>Show the schema for a dataset.</p>
 
-<h3 id="syntax-3">Syntax</h3>
+<h3 id="syntax-4">Syntax</h3>
 
 <pre><code>kite-dataset [-v] schema &lt;dataset&gt; [command options]
 </code></pre>
 
-<h3 id="options-4">Options</h3>
+<h3 id="options-5">Options</h3>
 
 <table>
   <tbody>
@@ -506,7 +615,7 @@
   </tbody>
 </table>
 
-<h3 id="examples-4">Examples:</h3>
+<h3 id="examples-5">Examples:</h3>
 
 <p>Print the schema for dataset “users” to standard out:</p>
 
@@ -532,12 +641,14 @@
 
 <p>As Kite constructs each record, it validates values using the target field’s schema. Invalid values (in numeric fields) and null values (in required fields) cause exceptions. Kite handles empty strings as null values for numeric fields.</p>
 
-<h3 id="syntax-4">Syntax</h3>
+<p>See <a href="/docs/0.18.0/read-only-formats.html#csv">CSV format details</a>.</p>
+
+<h3 id="syntax-5">Syntax</h3>
 
 <pre><code>kite-dataset [-v] csv-import &lt;csv path&gt; &lt;dataset&gt; [command options]
 </code></pre>
 
-<h3 id="options-5">Options</h3>
+<h3 id="options-6">Options</h3>
 
 <table>
   <tbody>
@@ -561,14 +672,103 @@
       <td><code>--quote</code></td>
       <td>Quote character. Default is double quote (“).</td>
     </tr>
+    <tr>
+      <td><code>--num-writers</code></td>
+      <td>The number of writer processes to use</td>
+    </tr>
+    <tr>
+      <td><code>--no-compaction</code></td>
+      <td>Copy to output directly, without compacting the data</td>
+    </tr>
+    <tr>
+      <td><code>--jar</code></td>
+      <td>Add a jar to the runtime classpath</td>
+    </tr>
+    <tr>
+      <td><code>--transform</code></td>
+      <td>A transform DoFn class name</td>
+    </tr>
   </tbody>
 </table>
 
-<h3 id="examples-5">Examples</h3>
+<h3 id="examples-6">Examples</h3>
 
 <p>Copy the records from <code>sample.csv</code> to a Hive dataset named “sample”:</p>
 
 <pre><code>kite-dataset csv-import path/to/sample.csv sample
+</code></pre>
+
+<hr />
+
+<p><a href="#top">Back to the Top</a></p>
+
+<hr />
+
+<h2 id="json-import">json-import</h2>
+
+<p>Copy JSON objects into a dataset</p>
+
+<p>Kite uses the target dataset’s Schema to validate and store the JSON objects.</p>
+
+<ul>
+  <li>All values must match the type specified in the target Schema</li>
+  <li>JSON objects will match both record and map Schemas</li>
+  <li>When converting a JSON object with a record Schema:
+    <ul>
+      <li>Only the record’s fields are used, other key-value pairs are ignored</li>
+      <li>All fields must be present or have a default value in the record Schema</li>
+    </ul>
+  </li>
+  <li>When converting a JSON object with a map Schema, all key-value pairs are used</li>
+</ul>
+
+<p>Invalid values, missing record fields, and other problems cause exceptions.</p>
+
+<p>See <a href="/docs/0.18.0/read-only-formats.html#json">JSON format details</a>.</p>
+
+<h3 id="syntax-6">Syntax</h3>
+
+<pre><code>kite-dataset [-v] json-import &lt;json path&gt; &lt;dataset name&gt; [command options]
+</code></pre>
+
+<h3 id="options-7">Options</h3>
+
+<table>
+  <tbody>
+    <tr>
+      <td><code>--num-writers</code></td>
+      <td>The number of writer processes to use</td>
+    </tr>
+    <tr>
+      <td><code>--no-compaction</code></td>
+      <td>Copy to output directly, without compacting the data</td>
+    </tr>
+    <tr>
+      <td><code>--jar</code></td>
+      <td>Add a jar to the runtime classpath</td>
+    </tr>
+    <tr>
+      <td><code>--transform</code></td>
+      <td>A transform DoFn class name</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="examples-7">Examples</h3>
+
+<p>Copy the records from <code>sample.json</code> to dataset <code>sample</code></p>
+
+<pre><code>kite-dataset json-import path/to/sample.json sample
+</code></pre>
+
+<p>Copy the records from <code>sample.json</code> to a dataset URI</p>
+
+<pre><code>kite-dataset json-import path/to/sample.json dataset:hdfs:/user/me/datasets/sample
+</code></pre>
+
+<p>Copy the records from an HDFS directory to <code>sample</code></p>
+
+<pre><code>kite-dataset json-import hdfs:/data/path/samples/ sample
 </code></pre>
 
 <hr />
@@ -583,12 +783,12 @@
 
 <p>Print the first <em>n</em> records in a dataset.</p>
 
-<h3 id="syntax-5">Syntax</h3>
+<h3 id="syntax-7">Syntax</h3>
 
 <pre><code>kite-dataset [-v] show &lt;dataset&gt; [command options]
 </code></pre>
 
-<h3 id="options-6">Options</h3>
+<h3 id="options-8">Options</h3>
 
 <table>
   <tbody>
@@ -599,7 +799,7 @@
   </tbody>
 </table>
 
-<h3 id="examples-6">Examples</h3>
+<h3 id="examples-8">Examples</h3>
 
 <p>Show the first 10 records in dataset “users”:</p>
 
@@ -623,12 +823,12 @@
 
 <p>Copy records from one dataset to another.</p>
 
-<h3 id="syntax-6">Syntax</h3>
+<h3 id="syntax-8">Syntax</h3>
 
 <pre><code>kite-dataset [-v] copy &lt;source dataset&gt; &lt;destination dataset&gt; [command options]
 </code></pre>
 
-<h3 id="options-7">Options</h3>
+<h3 id="options-9">Options</h3>
 
 <table>
   <tbody>
@@ -643,7 +843,7 @@
   </tbody>
 </table>
 
-<h3 id="examples-7">Examples</h3>
+<h3 id="examples-9">Examples</h3>
 
 <p>Copy the contents of <code>movies_avro</code> to <code>movies_parquet</code>:</p>
 
@@ -667,12 +867,12 @@
 
 <p>Delete one or more datasets and related metadata.</p>
 
-<h3 id="syntax-7">Syntax</h3>
+<h3 id="syntax-9">Syntax</h3>
 
 <pre><code>kite-dataset [-v] delete &lt;datasets&gt; [command options]
 </code></pre>
 
-<h3 id="examples-8">Examples</h3>
+<h3 id="examples-10">Examples</h3>
 
 <p>Delete all data and metadata for the dataset “users”:</p>
 
@@ -691,7 +891,7 @@
 
 <p>Builds a partition strategy for a schema.</p>
 
-<p>The resulting partition strategy is a valid <a href="/docs/0.17.1/Partition-Strategy-Format.html">JSON partition strategy file</a>.</p>
+<p>The resulting partition strategy is a valid <a href="/docs/0.18.0/Partition-Strategy-Format.html">JSON partition strategy file</a>.</p>
 
 <p>Entries in the partition strategy are specified by <code>field:type</code> pairs, where <code>field</code> is the source field from the given schema and <code>type</code> can be:</p>
 
@@ -732,14 +932,14 @@
   </tbody>
 </table>
 
-<p>Provided partitioners do not reference a source field and instead require that a value is provided when writing. Values can be provided by writing to <a href="/docs/0.17.1/view-api.html">views</a>.</p>
+<p>Provided partitioners do not reference a source field and instead require that a value is provided when writing. Values can be provided by writing to <a href="/docs/0.18.0/view-api.html">views</a>.</p>
 
-<h3 id="syntax-8">Syntax</h3>
+<h3 id="syntax-10">Syntax</h3>
 
 <pre><code>kite-dataset [-v] partition-config &lt;field:type pairs&gt; [command options]
 </code></pre>
 
-<h3 id="options-8">Options:</h3>
+<h3 id="options-10">Options:</h3>
 
 <table>
   <tbody>
@@ -758,7 +958,7 @@
   </tbody>
 </table>
 
-<h3 id="examples-9">Examples</h3>
+<h3 id="examples-11">Examples</h3>
 
 <p>Partition by email address, balanced across 16 hash partitions and save to a file.</p>
 
@@ -780,7 +980,7 @@
 
 <h2 id="mapping-config">mapping-config</h2>
 
-<p>Builds a column mapping for a schema, required for HBase. The resulting mapping definition is a valid <a href="/docs/0.17.1/Column-Mapping.html">JSON mapping file</a>.</p>
+<p>Builds a column mapping for a schema, required for HBase. The resulting mapping definition is a valid <a href="/docs/0.18.0/Column-Mapping.html">JSON mapping file</a>.</p>
 
 <p>Mappings are specified by <code>field:type</code> pairs, where <code>field</code> is a source field from the given schema and <code>type</code> can be:</p>
 
@@ -803,12 +1003,12 @@
 
 <p>If the last option is used, the mapping type will determined by the source field type. Numbers will use <code>counter</code>, hash maps and records will use <code>keyAsColumn</code>, and all others will use <code>column</code>.</p>
 
-<h3 id="syntax-9">Syntax</h3>
+<h3 id="syntax-11">Syntax</h3>
 
 <pre><code>kite-dataset  [-v] create-column-mapping &lt;field:type pairs&gt; [command options]
 </code></pre>
 
-<h3 id="options-9">Options</h3>
+<h3 id="options-11">Options</h3>
 
 <table>
   <tbody>
@@ -827,7 +1027,7 @@
   </tbody>
 </table>
 
-<h3 id="examples-10">Examples</h3>
+<h3 id="examples-12">Examples</h3>
 
 <p>Store email in the key, other fields in column family <code>u</code>:</p>
 
@@ -856,12 +1056,12 @@
 
 <p>Retrieves details on the functions of one or more dataset commands.</p>
 
-<h3 id="syntax-10">Syntax</h3>
+<h3 id="syntax-12">Syntax</h3>
 
 <pre><code>kite-dataset  [-v] help &lt;commands&gt; [command options]
 </code></pre>
 
-<h3 id="examples-11">Examples</h3>
+<h3 id="examples-13">Examples</h3>
 
 <p>Retrieve details for the create, show, and delete commands.</p>
 
@@ -880,12 +1080,12 @@
 <h2 id="transform">transform</h2>
 <p>Transforms records from one dataset and stores them in another dataset.</p>
 
-<h3 id="syntax-11">Syntax</h3>
+<h3 id="syntax-13">Syntax</h3>
 
 <pre><code>kite-dataset transform &lt;source dataset&gt; &lt;destination dataset&gt; [command options]
 </code></pre>
 
-<h3 id="options-10">Options</h3>
+<h3 id="options-12">Options</h3>
 
 <table>
   <tbody>
@@ -908,7 +1108,7 @@
   </tbody>
 </table>
 
-<h3 id="examples-12">Examples</h3>
+<h3 id="examples-14">Examples</h3>
 
 <p>Transform the contents of <code>movies_src</code> using <code>com.example.TransformFn</code>:</p>
 
@@ -927,7 +1127,7 @@
 
 <p>Print all metadata for a dataset.</p>
 
-<h3 id="syntax-12">Syntax</h3>
+<h3 id="syntax-14">Syntax</h3>
 
 <pre><code>kite-dataset info &lt;dataset name&gt;
 </code></pre>
@@ -945,12 +1145,12 @@
 
 <p>Builds a log4j configuration to log events to a dataset.</p>
 
-<h3 id="syntax-13">Syntax</h3>
+<h3 id="syntax-15">Syntax</h3>
 
 <pre><code>kite-dataset log4j-config &lt;dataset name&gt; --host &lt;flume hostname&gt; [command options]
 </code></pre>
 
-<h3 id="options-11">Options</h3>
+<h3 id="options-13">Options</h3>
 
 <table>
   <tbody>
@@ -973,7 +1173,7 @@
   </tbody>
 </table>
 
-<h3 id="examples-13">Examples</h3>
+<h3 id="examples-15">Examples</h3>
 
 <p>Print log4j configuration to log to dataset “users”:</p>
 
@@ -1002,12 +1202,12 @@
 
 <p>Builds a Flume configuration to log events to a dataset.</p>
 
-<h3 id="syntax-14">Syntax</h3>
+<h3 id="syntax-16">Syntax</h3>
 
 <pre><code>kite-dataset flume-config &lt;dataset name or URI&gt; [command options]
 </code></pre>
 
-<h3 id="options-12">Options</h3>
+<h3 id="options-14">Options</h3>
 
 <table>
   <tbody>
@@ -1078,7 +1278,7 @@
   </tbody>
 </table>
 
-<h3 id="examples-14">Examples</h3>
+<h3 id="examples-16">Examples</h3>
 
 <p>Print Flume configuration to log to dataset “users”:</p>
 
@@ -1113,13 +1313,13 @@
   <div class="wrap columns">
 
     <div class="left">
-      <h2 class="footer-heading">Kite Software Development Kit, 0.17.1</h2>
+      <h2 class="footer-heading">Kite Software Development Kit, 0.18.0</h2>
 
       <ul>
         <li>Kite is licensed under</li>
         <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
         <li>&nbsp;</li>
-        <li>Generated on 24 December 2014</li>
+        <li>Generated on 11 February 2015</li>
       </ul>
 
     </div>
@@ -1141,9 +1341,9 @@
           <div class="right">
             <ul>
               <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
-              <li><a href="/docs/0.17.1/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
-              <li><a href="/docs/0.17.1/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
-              <li><a href="/docs/0.17.1/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+              <li><a href="/docs/0.18.0/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/0.18.0/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/docs/0.18.0/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
             </ul>
           </div>
         </div>
