@@ -19,6 +19,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetExistsException;
+import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.impl.Accessor;
@@ -70,6 +71,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
   private static final String METADATA_DIRECTORY = ".metadata";
   private static final String SCHEMA_FILE_NAME = "schema.avsc";
+  private static final String SCHEMA_DIRECTORY_NAME = "schemas";
   private static final String DESCRIPTOR_FILE_NAME = "descriptor.properties";
   private static final String PARTITION_EXPRESSION_FIELD_NAME = "partitionExpression";
   private static final String VERSION_FIELD_NAME = "version";
@@ -144,12 +146,37 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       builder.partitionStrategy(Accessor.getDefault().fromExpression(properties
           .getProperty(PARTITION_EXPRESSION_FIELD_NAME)));
     }
-    Path schemaPath = new Path(metadataPath, SCHEMA_FILE_NAME);
+
+    SchemaManager manager = SchemaManager.load(conf,
+        new Path(metadataPath, SCHEMA_DIRECTORY_NAME));
+
+    URI schemaURI;
+
+    if (manager == null) {
+
+      // If there is no schema manager directory we are working
+      // with a dataset written with an older version. Therefore
+      // we just use a reference to the existing schema.
+      Path schemaPath = new Path(metadataPath, SCHEMA_FILE_NAME);
+
+      checkExists(getFileSytem(), schemaPath);
+
+      schemaURI = rootFileSystem.makeQualified(schemaPath).toUri();
+
+    } else {
+      schemaURI = manager.getNewestSchemaURI();
+    }
+
+    if (schemaURI == null) {
+      throw new DatasetException("Maformed dataset metadata at " +
+          metadataPath + ". No schemas are present.");
+    }
+
     try {
-      builder.schemaUri(rootFileSystem.makeQualified(schemaPath).toUri());
+      builder.schemaUri(schemaURI);
     } catch (IOException e) {
       throw new DatasetIOException(
-          "Unable to load schema file:" + schemaPath + " for dataset:" + name, e);
+              "Unable to load schema file:" + schemaURI + " for dataset:" + name, e);
     }
 
     final Path location;
@@ -439,6 +466,8 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
     checkExists(fs, metadataLocation);
 
+    // write the schema to the previous file location so
+    // it can be read by earlier versions of Kite
     FSDataOutputStream outputStream = null;
     final Path schemaPath = new Path(metadataLocation, SCHEMA_FILE_NAME);
     boolean threw = true;
@@ -459,6 +488,12 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
         throw new DatasetIOException("Cannot close", e);
       }
     }
+
+    // use the SchemaManager for schema operations moving forward
+    SchemaManager manager = SchemaManager.create(fs.getConf(),
+        new Path(metadataLocation, SCHEMA_DIRECTORY_NAME));
+
+    manager.writeSchema(descriptor.getSchema());
 
     Properties properties = new Properties();
     properties.setProperty(VERSION_FIELD_NAME, METADATA_VERSION);

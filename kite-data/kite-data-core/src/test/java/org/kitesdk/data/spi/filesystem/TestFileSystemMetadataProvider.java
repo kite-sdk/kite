@@ -100,7 +100,7 @@ public class TestFileSystemMetadataProvider extends TestMetadataProviders {
     Path namedDirectory = new Path(testDirectory, new Path(NAMESPACE, NAME));
     Path metadataDirectory = new Path(namedDirectory, ".metadata");
     Path propertiesFile = new Path(metadataDirectory, "descriptor.properties");
-    Path schemaFile = new Path(metadataDirectory, "schema.avsc");
+    Path schemaDirectory = new Path(metadataDirectory, "schemas");
 
     Assert.assertTrue("Named directory should exist for name:" + NAME,
         fileSystem.exists(namedDirectory));
@@ -108,8 +108,8 @@ public class TestFileSystemMetadataProvider extends TestMetadataProviders {
         fileSystem.exists(metadataDirectory));
     Assert.assertTrue("Descriptor properties file should exist", 
         fileSystem.exists(propertiesFile));
-    Assert.assertTrue("Descriptor schema file should exist",
-        fileSystem.exists(schemaFile));
+    Assert.assertTrue("Descriptor schema directory should exist",
+        fileSystem.exists(schemaDirectory));
   }
 
   @Test
@@ -121,18 +121,82 @@ public class TestFileSystemMetadataProvider extends TestMetadataProviders {
     Path namedDirectory = new Path(loaded.getLocation());
     Path metadataDirectory = new Path(namedDirectory, ".metadata");
     Path propertiesFile = new Path(metadataDirectory, "descriptor.properties");
-    Path schemaFile = new Path(metadataDirectory, "schema.avsc");
+    Path schemaDirectory = new Path(metadataDirectory, "schemas");
 
     boolean result = provider.delete(NAMESPACE, NAME);
     Assert.assertTrue(result);
     Assert.assertFalse("Descriptor properties file should not exist",
         fileSystem.exists(propertiesFile));
-    Assert.assertFalse("Descriptor schema file should not exist",
-        fileSystem.exists(schemaFile));
+    Assert.assertFalse("Descriptor schema directory should not exist",
+        fileSystem.exists(schemaDirectory));
     Assert.assertFalse("Metadata directory should not exist",
         fileSystem.exists(metadataDirectory));
     Assert.assertTrue("Named directory should still exist for name:" + NAME,
         fileSystem.exists(namedDirectory));
   }
 
+  /**
+   * Converts the test repository to the old format.
+   */
+  private void useOldRepositoryFormat() throws IOException {
+    testCreateMetadataFiles();
+
+    // Create a placeholder descriptor that we'll modify to
+    // look like the old layout.
+    DatasetDescriptor placeholder = provider.load(NAMESPACE, NAME);
+
+    Path namedDirectory = new Path(placeholder.getLocation());
+    Path metadataDirectory = new Path(namedDirectory, ".metadata");
+    Path propertiesFile = new Path(metadataDirectory, "descriptor.properties");
+    Path schemaDirectory = new Path(metadataDirectory, "schemas");
+    Path oldSchemaLocation = new Path(metadataDirectory, "schema.avsc");
+
+    // Delete the new schema directory to simulate a dataset
+    // written using the older format. This works because
+    // the metadata provider writes schema to both the old and new locations.
+    fileSystem.delete(schemaDirectory, true);
+
+    Assert.assertTrue("Named directory should exist for name:" + NAME,
+        fileSystem.exists(namedDirectory));
+    Assert.assertTrue("Metadata directory should exist",
+        fileSystem.exists(metadataDirectory));
+    Assert.assertTrue("Descriptor properties file should exist",
+        fileSystem.exists(propertiesFile));
+    Assert.assertTrue("Old schema location should exist.",
+        fileSystem.exists(oldSchemaLocation));
+  }
+
+  @Test
+  public void testUsePreviousFormat() throws IOException {
+
+    useOldRepositoryFormat();
+
+    DatasetDescriptor oldFormatDescriptor = provider.load(NAMESPACE, NAME);
+
+    Assert.assertEquals(testDescriptor.getSchema(), oldFormatDescriptor.getSchema());
+  }
+
+  @Test
+  public void testUpdatePreviousFormat() throws IOException {
+
+    useOldRepositoryFormat();
+
+    DatasetDescriptor oldFormatDescriptor = provider.load(NAMESPACE, NAME);
+
+    Path namedDirectory = new Path(oldFormatDescriptor.getLocation());
+    Path metadataDirectory = new Path(namedDirectory, ".metadata");
+    Path schemaDirectory = new Path(metadataDirectory, "schemas");
+    Path newSchemaLocation = new Path(schemaDirectory, "1.avsc");
+
+    // Performing an update against a dataset in the old location should bring it
+    // into the new location.
+    DatasetDescriptor updated =  new DatasetDescriptor.Builder(oldFormatDescriptor).build();
+
+    provider.update(NAMESPACE, NAME, updated);
+
+    Assert.assertEquals(testDescriptor.getSchema(), oldFormatDescriptor.getSchema());
+
+    Assert.assertTrue("Schema should exist at the new location.",
+        fileSystem.exists(newSchemaLocation));
+  }
 }
