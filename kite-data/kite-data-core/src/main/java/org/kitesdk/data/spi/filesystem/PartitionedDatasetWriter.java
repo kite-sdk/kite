@@ -18,7 +18,6 @@ package org.kitesdk.data.spi.filesystem;
 import java.util.Map;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.Flushable;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.PartitionStrategy;
@@ -43,7 +42,8 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
+abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>> extends
+    AbstractDatasetWriter<E> {
 
   private static final Logger LOG = LoggerFactory
     .getLogger(PartitionedDatasetWriter.class);
@@ -54,7 +54,7 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
   private final int maxWriters;
 
   private final PartitionStrategy partitionStrategy;
-  protected LoadingCache<StorageKey, FileSystemWriter<E>> cachedWriters;
+  protected LoadingCache<StorageKey, W> cachedWriters;
 
   private final StorageKey reusedKey;
   private final EntityAccessor<E> accessor;
@@ -62,7 +62,7 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
 
   protected ReaderWriterState state;
 
-  static <E> PartitionedDatasetWriter<E> newWriter(FileSystemView<E> view) {
+  static <E> PartitionedDatasetWriter<E, ?> newWriter(FileSystemView<E> view) {
     DatasetDescriptor descriptor = view.getDataset().getDescriptor();
     Format format = descriptor.getFormat();
     if (Formats.PARQUET.equals(format)) {
@@ -71,12 +71,12 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
           FileSystemProperties.NON_DURABLE_PARQUET_PROP, descriptor)) {
         return new IncrementalPartitionedDatasetWriter<E>(view);
       } else {
-        return new PartitionedDatasetWriter<E>(view);
+        return new NonDurablePartitionedDatasetWriter<E>(view);
       }
     } else if (Formats.AVRO.equals(format) || Formats.CSV.equals(format)) {
       return new IncrementalPartitionedDatasetWriter<E>(view);
     } else {
-      return new PartitionedDatasetWriter<E>(view);
+      return new NonDurablePartitionedDatasetWriter<E>(view);
     }
   }
 
@@ -123,10 +123,12 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
 
     cachedWriters = CacheBuilder.newBuilder().maximumSize(maxWriters)
       .removalListener(new DatasetWriterCloser<E>())
-      .build(new DatasetWriterCacheLoader<E>(view));
+      .build(createCacheLoader());
 
     state = ReaderWriterState.OPEN;
   }
+
+  protected abstract CacheLoader<StorageKey, W> createCacheLoader();
 
   @Override
   public void write(E entity) {
@@ -221,6 +223,43 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
 
   }
 
+  private static class IncrementalDatasetWriterCacheLoader<E> extends
+      CacheLoader<StorageKey, FileSystemWriter.IncrementalWriter<E>> {
+
+    private final FileSystemView<E> view;
+    private final PathConversion convert;
+
+    public IncrementalDatasetWriterCacheLoader(FileSystemView<E> view) {
+      this.view = view;
+      this.convert = new PathConversion(
+          view.getDataset().getDescriptor().getSchema());
+    }
+
+    @Override
+    public FileSystemWriter.IncrementalWriter<E> load(StorageKey key) throws Exception {
+      Preconditions.checkState(view.getDataset() instanceof FileSystemDataset,
+          "FileSystemWriters cannot create writer for " + view.getDataset());
+
+      FileSystemDataset dataset = (FileSystemDataset) view.getDataset();
+      Path partition = convert.fromKey(key);
+      FileSystemWriter<E> writer = FileSystemWriter.newWriter(
+          dataset.getFileSystem(),
+          new Path(dataset.getDirectory(), partition),
+          dataset.getDescriptor());
+
+      PartitionListener listener = dataset.getPartitionListener();
+      if (listener != null) {
+        listener.partitionAdded(
+            dataset.getNamespace(), dataset.getName(), partition.toString());
+      }
+
+      writer.initialize();
+
+      return (FileSystemWriter.IncrementalWriter<E>) writer;
+    }
+
+  }
+
   private static class DatasetWriterCloser<E> implements
     RemovalListener<StorageKey, DatasetWriter<E>> {
 
@@ -238,11 +277,31 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
 
   }
 
+  private static class NonDurablePartitionedDatasetWriter<E> extends
+      PartitionedDatasetWriter<E, FileSystemWriter<E>> {
+
+    private NonDurablePartitionedDatasetWriter(FileSystemView<E> view) {
+      super(view);
+    }
+
+    @Override
+    protected CacheLoader<StorageKey, FileSystemWriter<E>> createCacheLoader() {
+      return new DatasetWriterCacheLoader<E>(view);
+    }
+  }
+
   private static class IncrementalPartitionedDatasetWriter<E> extends
-      PartitionedDatasetWriter<E> implements org.kitesdk.data.Flushable, Syncable {
+      PartitionedDatasetWriter<E, FileSystemWriter.IncrementalWriter<E>>
+      implements org.kitesdk.data.Flushable, Syncable {
 
     private IncrementalPartitionedDatasetWriter(FileSystemView<E> view) {
       super(view);
+    }
+
+    @Override
+    protected CacheLoader<StorageKey, FileSystemWriter.IncrementalWriter<E>>
+        createCacheLoader() {
+      return new IncrementalDatasetWriterCacheLoader<E>(view);
     }
 
     @Override
@@ -259,11 +318,9 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
      * this, but it will be difficult as Cache (ideally) uses multiple
      * partitions to prevent cached writer contention.
      */
-      for (FileSystemWriter<E> writer : cachedWriters.asMap().values()) {
+      for (FileSystemWriter.IncrementalWriter<E> writer : cachedWriters.asMap().values()) {
         LOG.debug("Flushing partition writer:{}", writer);
-        if (writer instanceof Flushable) {
-          ((Flushable) writer).flush();
-        }
+        writer.flush();
       }
     }
 
@@ -274,11 +331,9 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
 
       LOG.debug("Syncing all cached writers for view:{}", view);
 
-      for (FileSystemWriter<E> writer : cachedWriters.asMap().values()) {
+      for (FileSystemWriter.IncrementalWriter<E> writer : cachedWriters.asMap().values()) {
         LOG.debug("Syncing partition writer:{}", writer);
-        if (writer instanceof Syncable) {
-          ((Syncable) writer).sync();
-        }
+        writer.sync();
       }
     }
   }

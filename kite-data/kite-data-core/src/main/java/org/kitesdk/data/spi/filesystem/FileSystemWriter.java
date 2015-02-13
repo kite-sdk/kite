@@ -297,7 +297,7 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
     }
   }
 
-  private static class IncrementalWriter<E> extends FileSystemWriter<E>
+  static class IncrementalWriter<E> extends FileSystemWriter<E>
       implements Flushable, Syncable {
     private IncrementalWriter(FileSystem fs, Path path,
                               DatasetDescriptor descriptor) {

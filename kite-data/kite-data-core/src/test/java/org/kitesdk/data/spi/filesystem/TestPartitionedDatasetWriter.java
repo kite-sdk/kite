@@ -47,7 +47,7 @@ public class TestPartitionedDatasetWriter {
   private FileSystem fileSystem;
   private Path testDirectory;
   private FileSystemDatasetRepository repo;
-  private PartitionedDatasetWriter<Object> writer;
+  private PartitionedDatasetWriter<Object, ?> writer;
 
   @Before
   public void setUp() throws IOException {
