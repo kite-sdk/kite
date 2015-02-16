@@ -57,11 +57,13 @@
   <article class="post-content">
   <p>In this lab, you will get the QuickStart VM running on your laptop.</p>
 
-<p>Most of you have already downloaded a copy of the VM, but there are thumb drives with images if anyone needs them.</p>
-
 <p><strong>Please do not download the VM over the conference wireless!</strong></p>
 
 <p>(If you’re not at a conference right now, you can <a href="http://www.cloudera.com/content/cloudera/en/downloads/quickstart_vms/cdh-5-3-x.html">download the VM from Cloudera</a>.)</p>
+
+<p>Most of you have already downloaded a copy of the VM, but there are thumb drives with images if anyone needs them.</p>
+
+<p><strong>Please return the thumb drives after you’ve copied the image</strong></p>
 
 <h2 id="recommendations">Recommendations</h2>
 
@@ -145,7 +147,23 @@ all of the virtualization options</li>
   </li>
 </ul>
 
-<h3 id="explore-hue">2. Explore Hue</h3>
+<h3 id="update-the-kite-cli">2. Update the Kite CLI</h3>
+
+<p>Kite is a set of high-level tools for working with data in Hadoop.</p>
+
+<pre><code>curl http://central.maven.org/maven2/org/kitesdk/kite-tools/0.17.1/kite-tools-0.17.1-binary.jar -o kite-dataset
+chmod +x kite-dataset
+sudo mv kite-dataset /usr/lib/kite/bin/
+</code></pre>
+
+<p>You can check that this worked by running:</p>
+
+<pre><code>kite-dataset --version
+</code></pre>
+
+<p>The version should be 0.17.1.</p>
+
+<h3 id="explore-hue">3. Explore Hue</h3>
 
 <p>While we make sure everyone has the VM running, try out <a href="http://quickstart.cloudera:8888/about/">Hue</a>!</p>
 
@@ -174,7 +192,7 @@ all of the virtualization options</li>
         <li>Kite is licensed under</li>
         <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
         <li>&nbsp;</li>
-        <li>Generated on 04 February 2015</li>
+        <li>Generated on 16 February 2015</li>
       </ul>
 
     </div>
