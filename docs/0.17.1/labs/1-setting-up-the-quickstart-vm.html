@@ -149,19 +149,21 @@ all of the virtualization options</li>
 
 <h3 id="update-the-kite-cli">2. Update the Kite CLI</h3>
 
-<p>Kite is a set of high-level tools for working with data in Hadoop.</p>
+<p><strong>If you are using the VM linked from the conference site or copied from thumb drives, this step isn’t needed.</strong></p>
+
+<p>Check that the version of <code>kite-dataset</code> is 0.17.1 by running:</p>
+
+<pre><code>kite-dataset --version
+</code></pre>
+
+<p>You can update the version of Kite tools in the VM with these commands:</p>
 
 <pre><code>curl http://central.maven.org/maven2/org/kitesdk/kite-tools/0.17.1/kite-tools-0.17.1-binary.jar -o kite-dataset
 chmod +x kite-dataset
 sudo mv kite-dataset /usr/lib/kite/bin/
 </code></pre>
 
-<p>You can check that this worked by running:</p>
-
-<pre><code>kite-dataset --version
-</code></pre>
-
-<p>The version should be 0.17.1.</p>
+<p>The version should now be 0.17.1.</p>
 
 <h3 id="explore-hue">3. Explore Hue</h3>
 
@@ -192,7 +194,7 @@ sudo mv kite-dataset /usr/lib/kite/bin/
         <li>Kite is licensed under</li>
         <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
         <li>&nbsp;</li>
-        <li>Generated on 16 February 2015</li>
+        <li>Generated on 18 February 2015</li>
       </ul>
 
     </div>
