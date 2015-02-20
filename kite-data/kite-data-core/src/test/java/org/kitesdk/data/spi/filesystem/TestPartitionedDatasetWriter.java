@@ -64,8 +64,9 @@ public class TestPartitionedDatasetWriter {
             .schema(USER_SCHEMA)
             .partitionStrategy(partitionStrategy)
             .build());
+
     writer = PartitionedDatasetWriter.newWriter(
-        new FileSystemView<Object>(users, Object.class));
+        new FileSystemView<Object>(users, null, Object.class));
   }
 
   @After

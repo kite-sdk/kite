@@ -16,8 +16,10 @@
 
 package org.kitesdk.data.spi.hive;
 
+import org.apache.avro.generic.GenericData;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.RefinableView;
 import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.spi.PartitionKey;
@@ -109,6 +111,67 @@ public class TestHiveExternalDatasetRepository extends TestFileSystemDatasetRepo
     Assert.assertEquals("Should be one partition", 1,
         client.listPartitionNames(NAMESPACE, NAME2, (short) 10).size());
 
+  }
+
+  @SuppressWarnings("deprecation")
+  @Test
+  public void testDeletedPartitionRemovedFromHive() throws Exception {
+    final String NAME2 = "test2";
+
+    // use a multi-item partition strategy to ensure the system
+    // can convert it to the corresponding Hive partition
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
+        .identity("username")
+        .identity("email").build();
+
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schema(testSchema)
+        .partitionStrategy(partitionStrategy)
+        .build();
+
+    Dataset<GenericRecord> dataset = repo.create(NAMESPACE, NAME2, descriptor);
+
+    HiveTestUtils.assertTableExists(client, NAMESPACE, NAME2);
+    HiveTestUtils.assertTableIsExternal(client, NAMESPACE, NAME2);
+    Assert.assertTrue("No partitions yet",
+        client.listPartitionNames(NAMESPACE, NAME2, (short) 10).isEmpty());
+
+    GenericData.Record record1 = new GenericRecordBuilder(
+        dataset.getDescriptor().getSchema())
+        .set("username", "0").set("email", "0").build();
+
+    GenericData.Record record2 = new GenericRecordBuilder(
+        dataset.getDescriptor().getSchema())
+        .set("username", "1").set("email", "1").build();
+
+    DatasetWriter<GenericRecord> writer = dataset.newWriter();
+
+    try
+    {
+      writer.write(record1);
+      writer.write(record2);
+
+    } finally {
+
+      writer.close();
+    }
+
+    Assert.assertEquals("Should be two partitions", 2,
+        client.listPartitionNames(NAMESPACE, NAME2, (short) 10).size());
+
+    RefinableView view = dataset.with("username", "0").with("email", "0");
+
+    view.deleteAll();
+
+    Assert.assertEquals("Should be one partition", 1,
+        client.listPartitionNames(NAMESPACE, NAME2, (short) 10).size());
+
+    view = dataset.with("username", "1").with("email", "1");
+
+    view.deleteAll();
+
+    Assert.assertEquals("Should be no partitions", 0,
+        client.listPartitionNames(NAMESPACE, NAME2, (short) 10).size());
   }
 
   @SuppressWarnings({"deprecation", "unchecked"})
