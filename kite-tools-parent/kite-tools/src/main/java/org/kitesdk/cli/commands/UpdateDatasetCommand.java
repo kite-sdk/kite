@@ -94,7 +94,7 @@ public class UpdateDatasetCommand extends BaseDatasetCommand {
         "# Update schema for dataset \"users\" in Hive:",
         "users --schema user.avsc",
         "# Update HDFS dataset by URI, add property:",
-        "dataset:hdfs:/user/me/datasets/users --set kite.write.cache-size=20"
+        "dataset:hdfs:/user/me/datasets/users --set kite.writer.cache-size=20"
     );
   }
 
