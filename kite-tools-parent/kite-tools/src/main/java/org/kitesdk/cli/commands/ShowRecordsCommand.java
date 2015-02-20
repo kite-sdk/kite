@@ -52,13 +52,13 @@ public class ShowRecordsCommand extends BaseDatasetCommand {
     Preconditions.checkArgument(datasets.size() == 1,
         "Only one dataset name can be given");
 
-    View<GenericData.Record> dataset = load(datasets.get(0), GenericData.Record.class);
-    DatasetReader<GenericData.Record> reader = null;
+    View<Object> dataset = load(datasets.get(0), Object.class);
+    DatasetReader<Object> reader = null;
     boolean threw = true;
     try {
       reader = dataset.newReader();
       int i = 0;
-      for (GenericData.Record record : reader) {
+      for (Object record : reader) {
         if (i >= numRecords) {
           break;
         }
