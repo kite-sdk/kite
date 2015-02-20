@@ -236,6 +236,9 @@ abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>> extend
     }
 
     @Override
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+        value="BC_UNCONFIRMED_CAST_OF_RETURN_VALUE",
+        justification="Writer is known to be IncrementalWriter")
     public FileSystemWriter.IncrementalWriter<E> load(StorageKey key) throws Exception {
       Preconditions.checkState(view.getDataset() instanceof FileSystemDataset,
           "FileSystemWriters cannot create writer for " + view.getDataset());
