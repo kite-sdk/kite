@@ -46,6 +46,7 @@ import org.kitesdk.cli.commands.InputFormatImportCommand;
 import org.kitesdk.cli.commands.JSONImportCommand;
 import org.kitesdk.cli.commands.JSONSchemaCommand;
 import org.kitesdk.cli.commands.Log4jConfigCommand;
+import org.kitesdk.cli.commands.MergeSchemasCommand;
 import org.kitesdk.cli.commands.ObjectSchemaCommand;
 import org.kitesdk.cli.commands.SchemaCommand;
 import org.kitesdk.cli.commands.ShowRecordsCommand;
@@ -100,6 +101,7 @@ public class Main extends Configured implements Tool {
     jc.addCommand("schema", new SchemaCommand(console));
     jc.addCommand("info", new InfoCommand(console));
     jc.addCommand("show", new ShowRecordsCommand(console));
+    jc.addCommand("merge-schemas", new MergeSchemasCommand(console));
     jc.addCommand("obj-schema", new ObjectSchemaCommand(console));
     jc.addCommand("inputformat-import", new InputFormatImportCommand(console));
     jc.addCommand("csv-schema", new CSVSchemaCommand(console));
