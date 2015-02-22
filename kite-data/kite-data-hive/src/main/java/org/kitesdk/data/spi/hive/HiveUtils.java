@@ -344,7 +344,7 @@ class HiveUtils {
       PartitionStrategy ps = descriptor.getPartitionStrategy();
       table.getParameters().put(PARTITION_EXPRESSION_PROPERTY_NAME,
           Accessor.getDefault().toExpression(ps));
-      table.setPartitionKeys(partitionColumns(ps, descriptor.getSchema()));
+      // no need to set the partition columns; no changes to the Hive side
     }
 
     // keep the custom properties up-to-date

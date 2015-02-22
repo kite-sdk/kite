@@ -17,19 +17,35 @@
 package org.kitesdk.data.spi.filesystem;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 import java.io.IOException;
+import java.util.List;
+import javax.annotation.Nullable;
+import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.Format;
+import org.kitesdk.data.Formats;
+import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.ValidationException;
+import org.kitesdk.data.spi.Pair;
+import org.kitesdk.data.spi.SchemaUtil;
+import org.kitesdk.data.spi.Schemas;
+import org.kitesdk.data.spi.partition.ProvidedFieldPartitioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FileSystemUtil {
 
   private static final Logger LOG = LoggerFactory.getLogger(FileSystemUtil.class);
+
+  private static final List<Format> SUPPORTED_FORMATS = Lists.newArrayList(
+      Formats.AVRO, Formats.PARQUET, Formats.JSON, Formats.CSV);
 
   /**
    * Creates, if necessary, the given the location for {@code descriptor}.
@@ -106,4 +122,223 @@ public class FileSystemUtil {
       throw new DatasetIOException("Could not cleanly delete path:" + path, ex);
     }
   }
+
+  public static Schema schema(String name, FileSystem fs, Path location) throws IOException {
+    return visit(new GetSchema(name), fs, location);
+  }
+
+  public static PartitionStrategy strategy(FileSystem fs, Path location) throws IOException {
+    List<Pair<String, Class<? extends Comparable>>> pairs = visit(
+        new GetPartitionInfo(), fs, location);
+
+    if (pairs.isEmpty() || pairs.size() <= 1) {
+      return null;
+    }
+
+    PartitionStrategy.Builder builder = new PartitionStrategy.Builder();
+
+    // skip the initial partition because it is the containing directory
+    for (int i = 1; i < pairs.size(); i += 1) {
+      Pair<String, Class<? extends Comparable>> pair = pairs.get(i);
+      builder.provided(
+          pair.first() == null ? "partition_" + i : pair.first(),
+          ProvidedFieldPartitioner.valuesString(pair.second()));
+    }
+
+    return builder.build();
+  }
+
+  public static Format format(FileSystem fs, Path location) throws IOException {
+    Format format = visit(new GetFormat(), fs, location);
+    Preconditions.checkArgument(format != null,
+        "Cannot determine format: found no data files in " + location);
+    return format;
+  }
+
+  private static abstract class PathVisitor<T> {
+    abstract T directory(FileSystem fs, Path path, List<T> children) throws IOException;
+    abstract T file(FileSystem fs, Path path) throws IOException;
+  }
+
+  private static <T> T visit(PathVisitor<T> visitor, FileSystem fs, Path path)
+      throws IOException {
+    return visit(visitor, fs, path, Lists.<Path>newArrayList());
+  }
+
+  private static <T> T visit(PathVisitor<T> visitor, FileSystem fs, Path path,
+                      List<Path> followedLinks) throws IOException {
+    if (fs.getFileStatus(path).isFile()) {
+      return visitor.file(fs, path);
+    } else if (fs.getFileStatus(path).isSymlink()) {
+      Preconditions.checkArgument(!followedLinks.contains(path),
+          "Encountered recursive path structure at link: " + path);
+      followedLinks.add(path); // no need to remove
+      return visit(visitor, fs, fs.getLinkTarget(path), followedLinks);
+    }
+
+    List<T> children = Lists.newArrayList();
+
+    FileStatus[] statuses = fs.listStatus(path, PathFilters.notHidden());
+    for (FileStatus stat : statuses) {
+      children.add(visit(visitor, fs, stat.getPath()));
+    }
+
+    return visitor.directory(fs, path, children);
+  }
+
+  private static class GetPartitionInfo
+      extends PathVisitor<List<Pair<String, Class<? extends Comparable>>>> {
+    private static final Splitter EQUALS = Splitter.on('=').limit(2).trimResults();
+
+    @Override
+    List<Pair<String, Class<? extends Comparable>>> directory(
+        FileSystem fs, Path path, List<List<Pair<String, Class<? extends Comparable>>>> children)
+        throws IOException {
+
+      // merge the levels under this one
+      List<Pair<String, Class<? extends Comparable>>> accumulated = Lists.newArrayList();
+      for (List<Pair<String, Class<? extends Comparable>>> child : children) {
+        if (child == null) {
+          continue;
+        }
+
+        for (int i = 0; i < child.size(); i += 1) {
+          if (accumulated.size() > i) {
+            Pair<String, Class<? extends Comparable>> pair = merge(
+                accumulated.get(i), child.get(i));
+            accumulated.set(i, pair);
+          } else if (child.get(i) != null) {
+            accumulated.add(child.get(i));
+          }
+        }
+      }
+
+      List<String> parts = Lists.newArrayList(EQUALS.split(path.getName()));
+      String name;
+      String value;
+      if (parts.size() == 2) {
+        name = parts.get(0);
+        value = parts.get(1);
+      } else {
+        name = null;
+        value = parts.get(0);
+      }
+
+      accumulated.add(0,
+          new Pair<String, Class<? extends Comparable>>(name, dataClass(value)));
+
+      return accumulated;
+    }
+
+    @Override
+    List<Pair<String, Class<? extends Comparable>>> file(
+        FileSystem fs, Path path) throws IOException {
+      return null;
+    }
+
+    public Pair<String, Class<? extends Comparable>> merge(
+        Pair<String, Class<? extends Comparable>> left,
+        Pair<String, Class<? extends Comparable>> right) {
+      String name = left.first();
+      if (name == null || name.isEmpty()) {
+        name = right.first();
+      }
+
+      if (left.second() == String.class) {
+        return new Pair<String, Class<? extends Comparable>>(name, String.class);
+      } else if (right.second() == String.class) {
+        return new Pair<String, Class<? extends Comparable>>(name, String.class);
+      } else if (left.second() == Long.class) {
+        return new Pair<String, Class<? extends Comparable>>(name, Long.class);
+      } else if (right.second() == Long.class) {
+        return new Pair<String, Class<? extends Comparable>>(name, Long.class);
+      }
+      return new Pair<String, Class<? extends Comparable>>(name, Integer.class);
+    }
+
+    public Class<? extends Comparable> dataClass(String value) {
+      try {
+        Integer.parseInt(value);
+        return Integer.class;
+      } catch (NumberFormatException e) {
+        // not an integer
+      }
+      try {
+        Long.parseLong(value);
+        return Long.class;
+      } catch (NumberFormatException e) {
+        // not a long
+      }
+      return String.class;
+    }
+  }
+
+  private static class GetFormat extends PathVisitor<Format> {
+    @Override
+    Format directory(FileSystem fs, Path path, List<Format> formats) throws IOException {
+      Format format = null;
+      for (Format otherFormat : formats) {
+        if (format == null) {
+          format = otherFormat;
+        } else if (!format.equals(otherFormat)) {
+          throw new ValidationException(String.format(
+              "Path contains multiple formats (%s, %s): %s",
+              format, otherFormat, path));
+        }
+      }
+      return format;
+    }
+
+    @Override
+    Format file(FileSystem fs, Path path) throws IOException {
+      String filename = path.getName();
+      for (Format format : SUPPORTED_FORMATS) {
+        if (filename.endsWith(format.getExtension())) {
+          return format;
+        }
+      }
+      return null;
+    }
+  }
+
+  private static class GetSchema extends PathVisitor<Schema> {
+    private final String name;
+
+    public GetSchema(String name) {
+      this.name = name;
+    }
+
+    @Override
+    Schema directory(FileSystem fs, Path path, List<Schema> schemas) {
+      Schema merged = null;
+      for (Schema schema : schemas) {
+        merged = merge(merged, schema);
+      }
+      return merged;
+    }
+
+    @Override
+    Schema file(FileSystem fs, Path path) throws IOException {
+      String filename = path.getName();
+      if (filename.endsWith(Formats.AVRO.getExtension())) {
+        return Schemas.fromAvro(fs, path);
+      } else if (filename.endsWith(Formats.PARQUET.getExtension())) {
+        return Schemas.fromParquet(fs, path);
+      } else if (filename.endsWith(Formats.JSON.getExtension())) {
+        return Schemas.fromJSON(name, fs, path);
+      }
+      return null;
+    }
+
+    private static Schema merge(@Nullable Schema left, @Nullable Schema right) {
+      if (left == null) {
+        return right;
+      } else if (right == null) {
+        return left;
+      } else {
+        return SchemaUtil.merge(left, right);
+      }
+    }
+  }
+
 }

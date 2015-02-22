@@ -293,6 +293,14 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     return partitions;
   }
 
+  void addExistingPartitions() {
+    if (partitionListener != null) {
+      for (Path partition : pathIterator()) {
+        partitionListener.partitionAdded(namespace, name, partition.toString());
+      }
+    }
+  }
+
   @Override
   public String toString() {
     return Objects.toStringHelper(this).add("name", name)

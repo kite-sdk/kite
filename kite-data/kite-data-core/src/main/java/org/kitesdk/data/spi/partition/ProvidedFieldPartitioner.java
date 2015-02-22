@@ -106,7 +106,7 @@ public class ProvidedFieldPartitioner<T extends Comparable> extends FieldPartiti
     throw new ValidationException("Not a valid provided type: " + type);
   }
 
-  private static String valuesString(Class<? extends Comparable> type) {
+  public static String valuesString(Class<? extends Comparable> type) {
     if (String.class.isAssignableFrom(type)) {
       return STRING_TYPE;
     } else if (Integer.class.isAssignableFrom(type)) {

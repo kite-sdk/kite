@@ -141,7 +141,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
     LOG.debug("Created dataset: {} schema: {} datasetPath: {}", new Object[] {
         name, newDescriptor.getSchema(), newDescriptor.getLocation() });
 
-    return new FileSystemDataset.Builder<E>()
+    FileSystemDataset<E> dataset = new FileSystemDataset.Builder<E>()
         .namespace(namespace)
         .name(name)
         .configuration(conf)
@@ -151,6 +151,11 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
         .partitionKey(newDescriptor.isPartitioned() ? new PartitionKey() : null)
         .partitionListener(getPartitionListener())
         .build();
+
+    // notify the partition listener about any existing data partitions
+    dataset.addExistingPartitions();
+
+    return dataset;
   }
 
   @Override
@@ -277,7 +282,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
     return new TemporaryFileSystemDatasetRepository(conf, rootDirectory, namespace, key);
   }
 
-  private Path pathForDataset(String namespace, String name) {
+  public Path pathForDataset(String namespace, String name) {
     return fs.makeQualified(pathForDataset(rootDirectory, namespace, name));
   }
 

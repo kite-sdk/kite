@@ -36,10 +36,6 @@ import java.util.TreeSet;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.apache.avro.Schema;
-import org.apache.avro.file.DataFileReader;
-import org.apache.avro.file.DataFileStream;
-import org.apache.avro.generic.GenericDatumReader;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.reflect.ReflectData;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -50,6 +46,7 @@ import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.HadoopFileSystemURLStreamHandler;
 import org.kitesdk.data.spi.PartitionStrategyParser;
 import org.kitesdk.data.spi.SchemaUtil;
+import org.kitesdk.data.spi.Schemas;
 import org.kitesdk.data.spi.partition.IdentityFieldPartitioner;
 import org.kitesdk.data.spi.partition.ProvidedFieldPartitioner;
 
@@ -399,7 +396,7 @@ public class DatasetDescriptor {
      * @return An instance of the builder for method chaining.
      */
     public Builder schema(File file) throws IOException {
-      this.schema = new Schema.Parser().parse(file);
+      this.schema = Schemas.fromAvsc(file);
       // don't set schema URL since it is a local file not on a DFS
       return this;
     }
@@ -414,7 +411,7 @@ public class DatasetDescriptor {
      * @return An instance of the builder for method chaining.
      */
     public Builder schema(InputStream in) throws IOException {
-      this.schema = new Schema.Parser().parse(in);
+      this.schema = Schemas.fromAvsc(in);
       return this;
     }
 
@@ -432,16 +429,7 @@ public class DatasetDescriptor {
      */
     public Builder schemaUri(URI uri) throws IOException {
       this.schemaUri = qualifiedUri(uri);
-
-      InputStream in = null;
-      boolean threw = true;
-      try {
-        in = open(uri);
-        schema(in);
-        threw = false;
-      } finally {
-        Closeables.close(in, threw);
-      }
+      this.schema = Schemas.fromAvsc(conf, uri);
       return this;
     }
 
@@ -499,16 +487,7 @@ public class DatasetDescriptor {
      * @return An instance of the builder for method chaining.
      */
     public Builder schemaFromAvroDataFile(File file) throws IOException {
-      GenericDatumReader<GenericRecord> datumReader = new GenericDatumReader<GenericRecord>();
-      DataFileReader<GenericRecord> reader = null;
-      boolean threw = true;
-      try {
-        reader = new DataFileReader<GenericRecord>(file, datumReader);
-        this.schema = reader.getSchema();
-        threw = false;
-      } finally {
-        Closeables.close(reader, threw);
-      }
+      this.schema = Schemas.fromAvro(file);
       return this;
     }
 
@@ -522,16 +501,7 @@ public class DatasetDescriptor {
      * @return An instance of the builder for method chaining.
      */
     public Builder schemaFromAvroDataFile(InputStream in) throws IOException {
-      GenericDatumReader<GenericRecord> datumReader = new GenericDatumReader<GenericRecord>();
-      DataFileStream<GenericRecord> stream = null;
-      boolean threw = true;
-      try {
-        stream = new DataFileStream<GenericRecord>(in, datumReader);
-        this.schema = stream.getSchema();
-        threw = false;
-      } finally {
-        Closeables.close(stream, threw);
-      }
+      this.schema = Schemas.fromAvro(in);
       return this;
     }
 
@@ -544,15 +514,7 @@ public class DatasetDescriptor {
      * @return An instance of the builder for method chaining.
      */
     public Builder schemaFromAvroDataFile(URI uri) throws IOException {
-      InputStream in = null;
-      boolean threw = true;
-      try {
-        in = open(uri);
-        schemaFromAvroDataFile(in);
-        threw = false;
-      } finally {
-        Closeables.close(in, threw);
-      }
+      this.schema = Schemas.fromAvro(conf, uri);
       return this;
     }
 
