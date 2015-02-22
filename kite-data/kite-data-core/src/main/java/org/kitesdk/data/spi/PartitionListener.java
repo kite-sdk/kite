@@ -21,4 +21,6 @@ package org.kitesdk.data.spi;
  */
 public interface PartitionListener {
   void partitionAdded(String namespace, String name, String partition);
+
+  void partitionDeleted(String namespace, String name, String partition);
 }

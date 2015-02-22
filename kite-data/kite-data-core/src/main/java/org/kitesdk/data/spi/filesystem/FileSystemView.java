@@ -32,6 +32,7 @@ import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.InputFormatAccessor;
 import org.kitesdk.data.spi.LastModifiedAccessor;
 import org.kitesdk.data.spi.Pair;
+import org.kitesdk.data.spi.PartitionListener;
 import org.kitesdk.data.spi.SizeAccessor;
 import org.kitesdk.data.spi.StorageKey;
 import org.apache.hadoop.fs.FileStatus;
@@ -60,16 +61,20 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
   private final FileSystem fs;
   private final Path root;
 
-  FileSystemView(FileSystemDataset<E> dataset, Class<E> type) {
+  private final PartitionListener listener;
+
+  FileSystemView(FileSystemDataset<E> dataset, @Nullable PartitionListener listener, Class<E> type) {
     super(dataset, type);
     this.fs = dataset.getFileSystem();
     this.root = dataset.getDirectory();
+    this.listener = listener;
   }
 
   private FileSystemView(FileSystemView<E> view, Constraints c) {
     super(view, c);
     this.fs = view.fs;
     this.root = view.root;
+    this.listener = view.listener;
   }
 
   @Override
@@ -159,6 +164,15 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
     if (dataset.getDescriptor().isPartitioned()) {
       for (Pair<StorageKey, Path> partition : partitionIterator()) {
         deleted = FileSystemUtil.cleanlyDelete(fs, root, partition.second()) || deleted;
+
+        if (listener != null) {
+
+          // the relative path is the partition name, so we can simply delete it
+          // in Hive
+          listener.partitionDeleted(dataset.getNamespace(),
+              dataset.getName(), partition.second().toString());
+        }
+
       }
     }
     else {

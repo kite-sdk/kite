@@ -101,7 +101,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     this.convert = new PathConversion(descriptor.getSchema());
     this.uri = uri;
 
-    this.unbounded = new FileSystemView<E>(this, type);
+    this.unbounded = new FileSystemView<E>(this, partitionListener, type);
     // remove this.partitionKey for 0.14.0
     this.partitionKey = null;
   }

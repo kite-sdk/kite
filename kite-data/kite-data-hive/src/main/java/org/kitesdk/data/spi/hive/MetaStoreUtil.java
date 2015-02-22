@@ -285,6 +285,34 @@ public class MetaStoreUtil {
     }
   }
 
+  public void dropPartition(final String dbName, final String tableName,
+                            final String path) {
+    ClientAction<Void> dropPartition =
+        new ClientAction<Void>() {
+          @Override
+          public Void call() throws TException {
+
+            client.dropPartition(dbName, tableName, path, false);
+            return null;
+          }
+        };
+
+    try {
+      doWithRetry(dropPartition);
+    } catch (NoSuchObjectException e) {
+      // this is okay
+    } catch (InvalidObjectException e) {
+      throw new DatasetOperationException(
+          "Invalid partition for " + dbName + "." + tableName + ": " + path, e);
+    } catch (MetaException e) {
+      throw new DatasetOperationException("Hive MetaStore exception", e);
+    } catch (TException e) {
+      throw new DatasetOperationException(
+          "Exception communicating with the Hive MetaStore", e);
+    }
+  }
+
+
   public boolean exists(String dbName, String tableName) {
     return tableExists(dbName, tableName);
   }
