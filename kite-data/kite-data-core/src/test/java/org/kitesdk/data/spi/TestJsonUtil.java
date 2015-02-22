@@ -35,6 +35,18 @@ import org.junit.Test;
 
 public class TestJsonUtil {
   @Test
+  public void testConvertToAvroNull() {
+    Assert.assertNull("Avro null",
+        JsonUtil.convertToAvro(GenericData.get(), null, Schema.create(Schema.Type.NULL)));
+    Assert.assertNull("Avro nullable long",
+        JsonUtil.convertToAvro(GenericData.get(), null,
+            SchemaBuilder.nullable().longType()));
+    Assert.assertNull("Avro long",
+        JsonUtil.convertToAvro(GenericData.get(), null,
+            SchemaBuilder.builder().longType()));
+  }
+
+  @Test
   public void testSchemaInferencePrimitiveTypes() throws Exception {
     Schema recordSchema = SchemaBuilder.record("Test").fields()
         .requiredBoolean("aBool")
