@@ -106,13 +106,15 @@ public class CSVFileReader<E> extends AbstractDatasetReader<E> {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
         "A reader may not be opened more than once - current state:%s", state);
 
-    Preconditions.checkNotNull(fs, "FileSystem cannot be null");
-    Preconditions.checkNotNull(path, "Path cannot be null");
-    try {
-      this.incoming = fs.open(path);
-      this.size = fs.getFileStatus(path).getLen();
-    } catch (IOException ex) {
-      throw new DatasetIOException("Cannot open path: " + path, ex);
+    if (incoming == null) {
+      Preconditions.checkNotNull(fs, "FileSystem cannot be null");
+      Preconditions.checkNotNull(path, "Path cannot be null");
+      try {
+        this.incoming = fs.open(path);
+        this.size = fs.getFileStatus(path).getLen();
+      } catch (IOException ex) {
+        throw new DatasetIOException("Cannot open path: " + path, ex);
+      }
     }
 
     this.reader = CSVUtil.newReader(incoming, props);

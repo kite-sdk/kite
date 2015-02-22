@@ -84,13 +84,15 @@ public class JSONFileReader<E> extends AbstractDatasetReader<E> {
     Preconditions.checkArgument(Schema.Type.RECORD.equals(schema.getType()),
         "Schemas for JSON files should be record");
 
-    Preconditions.checkNotNull(fs, "FileSystem cannot be null");
-    Preconditions.checkNotNull(path, "Path cannot be null");
-    try {
-      this.incoming = fs.open(path);
-      this.size = fs.getFileStatus(path).getLen();
-    } catch (IOException ex) {
-      throw new DatasetIOException("Cannot open path: " + path, ex);
+    if (incoming == null) {
+      Preconditions.checkNotNull(fs, "FileSystem cannot be null");
+      Preconditions.checkNotNull(path, "Path cannot be null");
+      try {
+        this.incoming = fs.open(path);
+        this.size = fs.getFileStatus(path).getLen();
+      } catch (IOException ex) {
+        throw new DatasetIOException("Cannot open path: " + path, ex);
+      }
     }
 
     this.iterator = Iterators.transform(JsonUtil.parser(incoming),
