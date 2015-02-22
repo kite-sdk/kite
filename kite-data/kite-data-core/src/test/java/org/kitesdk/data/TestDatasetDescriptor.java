@@ -338,7 +338,7 @@ public class TestDatasetDescriptor {
   @Test
   public void testPartitionSourceMustBeSchemaField() {
     TestHelpers.assertThrows("Should reject partition source not in schema",
-        IllegalStateException.class, new Runnable() {
+        ValidationException.class, new Runnable() {
           @Override
           public void run() {
             new DatasetDescriptor.Builder()

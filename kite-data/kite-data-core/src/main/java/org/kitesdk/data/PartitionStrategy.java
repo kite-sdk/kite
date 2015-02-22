@@ -600,13 +600,9 @@ public class PartitionStrategy {
     }
 
     private void add(FieldPartitioner fp) {
-      // in 0.14.0, change to a Precondition
-      //Preconditions.checkState(!names.contains(fp.getName()),
-      //    "Partition name conflicts with an existing field or partition name");
-      if (names.contains(fp.getName())) {
-        LOG.warn(
-            "Partition name conflicts with an existing partition name");
-      }
+      ValidationException.check(!names.contains(fp.getName()),
+          "Partition name %s conflicts with an existing field or partition name",
+          fp.getName());
       fieldPartitioners.add(fp);
       names.add(fp.getName());
     }

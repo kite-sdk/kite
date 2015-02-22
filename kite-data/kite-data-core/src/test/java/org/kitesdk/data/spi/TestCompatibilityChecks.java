@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.TestHelpers;
+import org.kitesdk.data.ValidationException;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -96,7 +97,7 @@ public class TestCompatibilityChecks {
   public void testIllegalPartitionNames() {
     // no need to check sources because '.' and '-' aren't allowed in schemas
     TestHelpers.assertThrows("Should reject '-' in partition name",
-        IllegalStateException.class, new Runnable() {
+        ValidationException.class, new Runnable() {
       @Override
       public void run() {
         Compatibility.checkDescriptor(
@@ -109,7 +110,7 @@ public class TestCompatibilityChecks {
       }
     });
     TestHelpers.assertThrows("Should reject '.' in partition name",
-        IllegalStateException.class, new Runnable() {
+        ValidationException.class, new Runnable() {
       @Override
       public void run() {
         Compatibility.checkDescriptor(
@@ -127,7 +128,7 @@ public class TestCompatibilityChecks {
   public void testDuplicatePartitionNames() {
     TestHelpers.assertThrows(
         "Should reject partition names that duplicate partition names",
-        IllegalArgumentException.class, new Runnable() {
+        ValidationException.class, new Runnable() {
       @Override
       public void run() {
         Compatibility.checkDescriptor(
@@ -142,7 +143,7 @@ public class TestCompatibilityChecks {
     });
     TestHelpers.assertThrows(
         "Should reject partition names that duplicate source names",
-        IllegalStateException.class, new Runnable() {
+        ValidationException.class, new Runnable() {
       @Override
       public void run() {
         Compatibility.checkDescriptor(

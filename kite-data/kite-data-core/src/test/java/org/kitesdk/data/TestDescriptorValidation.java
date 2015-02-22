@@ -73,7 +73,7 @@ public class TestDescriptorValidation {
       }
     });
     TestHelpers.assertThrows("Should reject missing schema",
-        IllegalStateException.class, new Runnable() {
+        ValidationException.class, new Runnable() {
       @Override
       public void run() {
         new DatasetDescriptor.Builder()
@@ -96,7 +96,7 @@ public class TestDescriptorValidation {
   @Test
   public void testRejectsPartitioningWithNonRecordSchema() {
     TestHelpers.assertThrows("Should reject partitioning without a record",
-        IllegalStateException.class, new Runnable() {
+        ValidationException.class, new Runnable() {
       @Override
       public void run() {
         new DatasetDescriptor.Builder()
@@ -112,7 +112,7 @@ public class TestDescriptorValidation {
   @Test
   public void testRejectsPartitioningOnMissingField() {
     TestHelpers.assertThrows("Should reject partitioning on a missing field",
-        IllegalStateException.class, new Runnable() {
+        ValidationException.class, new Runnable() {
       @Override
       public void run() {
         new DatasetDescriptor.Builder()
@@ -132,7 +132,7 @@ public class TestDescriptorValidation {
   public void testRejectsSchemaPartitionerTypeMismatch() {
     // obvious type mismatches
     TestHelpers.assertThrows("Should reject int for long partitioner",
-        IllegalStateException.class, new Runnable() {
+        ValidationException.class, new Runnable() {
       @Override
       public void run() {
         new DatasetDescriptor.Builder()
@@ -146,7 +146,7 @@ public class TestDescriptorValidation {
       }
     });
     TestHelpers.assertThrows("Should reject string for int partitioner",
-        IllegalStateException.class, new Runnable() {
+        ValidationException.class, new Runnable() {
       @Override
       public void run() {
         new DatasetDescriptor.Builder()
@@ -160,7 +160,7 @@ public class TestDescriptorValidation {
       }
     });
     TestHelpers.assertThrows("Should reject int for string partitioner",
-        IllegalStateException.class, new Runnable() {
+        ValidationException.class, new Runnable() {
       @Override
       public void run() {
         new DatasetDescriptor.Builder()
@@ -175,7 +175,7 @@ public class TestDescriptorValidation {
     });
     // Null is not allowed when partitioning
     TestHelpers.assertThrows("Should reject optional int for int partitioner",
-        IllegalStateException.class, new Runnable() {
+        ValidationException.class, new Runnable() {
       @Override
       public void run() {
         new DatasetDescriptor.Builder()
@@ -190,7 +190,7 @@ public class TestDescriptorValidation {
     });
     // Cannot assign to a Long from an Integer
     TestHelpers.assertThrows("Should reject int for long partitioner",
-        IllegalStateException.class, new Runnable() {
+        ValidationException.class, new Runnable() {
       @Override
       public void run() {
         new DatasetDescriptor.Builder()

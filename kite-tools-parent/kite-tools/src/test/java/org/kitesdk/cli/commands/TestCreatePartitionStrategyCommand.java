@@ -92,7 +92,7 @@ public class TestCreatePartitionStrategyCommand {
   public void testUnknownSourceField() {
     command.partitions = Lists.newArrayList("id:copy");
     TestHelpers.assertThrows("Should reject missing field \"id\"",
-        IllegalStateException.class, new Callable() {
+        ValidationException.class, new Callable() {
           @Override
           public Object call() throws Exception {
             command.run();

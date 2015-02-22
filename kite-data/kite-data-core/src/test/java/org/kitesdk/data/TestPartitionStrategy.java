@@ -80,7 +80,7 @@ public class TestPartitionStrategy {
             .year("timestamp").month("timestamp")
             .build());
     TestHelpers.assertThrows("Should reject duplicate partition fields",
-        IllegalStateException.class, new Runnable() {
+        ValidationException.class, new Runnable() {
       @Override
       public void run() {
         new PartitionStrategy.Builder()

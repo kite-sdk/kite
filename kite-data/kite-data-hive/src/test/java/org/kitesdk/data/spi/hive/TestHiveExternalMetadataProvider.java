@@ -26,6 +26,7 @@ import org.junit.After;
 import org.junit.Test;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.TestHelpers;
+import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.spi.MetadataProvider;
 import org.kitesdk.data.spi.TestMetadataProviders;
 
@@ -76,7 +77,7 @@ public class TestHiveExternalMetadataProvider extends TestMetadataProviders {
             .build())
         .build();
     TestHelpers.assertThrows("Should reject duplicate field and partition name",
-        IllegalStateException.class, new Runnable() {
+        ValidationException.class, new Runnable() {
       @Override
       public void run() {
         provider.create(NAMESPACE, "reject", descriptor);

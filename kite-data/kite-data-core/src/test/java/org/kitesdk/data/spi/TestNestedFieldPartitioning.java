@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.TestHelpers;
+import org.kitesdk.data.ValidationException;
 
 public class TestNestedFieldPartitioning {
 
@@ -83,7 +84,7 @@ public class TestNestedFieldPartitioning {
             .build();
 
     TestHelpers.assertThrows("Should complain that p is missing",
-        IllegalStateException.class, new Runnable() {
+        ValidationException.class, new Runnable() {
           @Override
           public void run() {
             new DatasetDescriptor.Builder()
@@ -100,7 +101,7 @@ public class TestNestedFieldPartitioning {
             .build();
 
     TestHelpers.assertThrows("Should complain that position.long is missing",
-        IllegalStateException.class, new Runnable() {
+        ValidationException.class, new Runnable() {
           @Override
           public void run() {
             new DatasetDescriptor.Builder()
@@ -117,7 +118,7 @@ public class TestNestedFieldPartitioning {
             .build();
 
     TestHelpers.assertThrows("Should complain about mismatched expected type",
-        IllegalStateException.class, new Runnable() {
+        ValidationException.class, new Runnable() {
           @Override
           public void run() {
             new DatasetDescriptor.Builder()

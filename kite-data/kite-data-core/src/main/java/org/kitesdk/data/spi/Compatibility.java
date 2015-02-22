@@ -97,10 +97,10 @@ public abstract class Compatibility {
   public static void checkDatasetName(String namespace, String name) {
     Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
-    Preconditions.checkArgument(Compatibility.isCompatibleName(namespace),
+    ValidationException.check(Compatibility.isCompatibleName(namespace),
         "Namespace %s is not alphanumeric (plus '_')",
         namespace);
-    Preconditions.checkArgument(Compatibility.isCompatibleName(name),
+    ValidationException.check(Compatibility.isCompatibleName(name),
         "Dataset name %s is not alphanumeric (plus '_')",
         name);
   }
@@ -113,7 +113,7 @@ public abstract class Compatibility {
   public static void checkSchema(Schema schema) {
     Preconditions.checkNotNull(schema, "Schema cannot be null");
     List<String> incompatible = getIncompatibleNames(schema);
-    Preconditions.checkState(incompatible.isEmpty(),
+    ValidationException.check(incompatible.isEmpty(),
         "Field names are not alphanumeric (plus '_'): %s",
         Joiner.on(", ").join(incompatible));
   }
@@ -152,10 +152,10 @@ public abstract class Compatibility {
           names.add(name);
         }
       }
-      Preconditions.checkState(incompatible.isEmpty(),
+      ValidationException.check(incompatible.isEmpty(),
           "Partition names are not alphanumeric (plus '_'): %s",
           Joiner.on(", ").join(incompatible));
-      Preconditions.checkState(duplicates.isEmpty(),
+      ValidationException.check(duplicates.isEmpty(),
           "Partition names duplicate data fields: %s",
           Joiner.on(", ").join(duplicates));
     }

@@ -905,7 +905,7 @@ public class DatasetDescriptor {
      * @since 0.9.0
      */
     public DatasetDescriptor build() {
-      Preconditions.checkState(schema != null,
+      ValidationException.check(schema != null,
           "Descriptor schema is required and cannot be null");
 
       // if no partition strategy is defined, check for one in the schema
@@ -974,7 +974,6 @@ public class DatasetDescriptor {
       if (strategy == null) {
         return;
       }
-      // TODO: the exceptions thrown by this should all be ValidationException
       for (FieldPartitioner fp : strategy.getFieldPartitioners()) {
         if (fp instanceof ProvidedFieldPartitioner) {
           // provided partitioners are not based on the entity fields
@@ -982,7 +981,7 @@ public class DatasetDescriptor {
         }
 
         // check the entity is a record if there is a non-provided partitioner
-        Preconditions.checkState(schema.getType() == Schema.Type.RECORD,
+        ValidationException.check(schema.getType() == Schema.Type.RECORD,
             "Cannot partition non-records: " + schema);
 
         // the source name should be a field in the schema, but not necessarily
@@ -991,10 +990,10 @@ public class DatasetDescriptor {
         try {
           fieldSchema = SchemaUtil.fieldSchema(schema, fp.getSourceName());
         } catch (IllegalArgumentException e) {
-          throw new IllegalStateException(
+          throw new ValidationException(
               "Cannot partition on " + fp.getSourceName(), e);
         }
-        Preconditions.checkState(
+        ValidationException.check(
             SchemaUtil.isConsistentWithExpectedType(
                 fieldSchema.getType(), fp.getSourceType()),
             "Field type %s does not match partitioner %s",
@@ -1010,8 +1009,8 @@ public class DatasetDescriptor {
       return;
     }
 
-    Preconditions.checkState(format.getSupportedCompressionTypes()
-        .contains(compressionType),
+    ValidationException.check(format.getSupportedCompressionTypes()
+            .contains(compressionType),
         "Format %s doesn't support compression format %s", format.getName(),
         compressionType.getName());
   }
@@ -1022,7 +1021,7 @@ public class DatasetDescriptor {
     if (mappings == null) {
       return;
     }
-    Preconditions.checkState(schema.getType() == Schema.Type.RECORD,
+    ValidationException.check(schema.getType() == Schema.Type.RECORD,
         "Cannot map non-records: " + schema);
     Set<String> keyMappedFields = Sets.newHashSet();
     for (FieldMapping fm : mappings.getFieldMappings()) {
