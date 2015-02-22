@@ -36,9 +36,7 @@ import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.ColumnMappingParser;
 import org.kitesdk.data.spi.PartitionStrategyParser;
-import org.kitesdk.data.spi.SchemaValidationUtil;
 import org.kitesdk.data.spi.filesystem.CSVProperties;
-import org.kitesdk.data.spi.filesystem.CSVUtil;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 import org.kitesdk.data.spi.filesystem.TemporaryFileSystemDatasetRepository;
 import org.kitesdk.tools.CopyTask;
@@ -80,10 +78,6 @@ public class CSVImportCommand extends BaseDatasetCommand {
       description="Line to use as a header. Must match the CSV settings.")
   String header;
 
-  @Parameter(names="--skip-schema-check",
-      description="Override schema checks (safety valve)", hidden = true)
-  boolean skipSchemaChecks = false;
-
   @Parameter(names={"--no-compaction"},
       description="Copy to output directly, without compacting the data")
   boolean noCompaction = false;
@@ -105,12 +99,6 @@ public class CSVImportCommand extends BaseDatasetCommand {
   public int run() throws IOException {
     Preconditions.checkArgument(targets != null && targets.size() == 2,
         "CSV path and target dataset name are required.");
-
-    if (skipSchemaChecks) {
-      console.warn(
-          "--skip-schema-check is no longer used and will be removed in " +
-          "0.19.0\nSee CDK-800 for details.");
-    }
 
     Path source = qualifiedPath(targets.get(0));
     FileSystem sourceFS = source.getFileSystem(getConf());

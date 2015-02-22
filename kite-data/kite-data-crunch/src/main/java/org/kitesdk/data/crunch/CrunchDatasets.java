@@ -16,13 +16,10 @@
 package org.kitesdk.data.crunch;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.generic.IndexedRecord;
 import org.apache.crunch.DoFn;
 import org.apache.crunch.Emitter;
 import org.apache.crunch.MapFn;
@@ -43,7 +40,6 @@ import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.DataModelUtil;
 import org.kitesdk.data.spi.EntityAccessor;
-import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.PartitionStrategyParser;
 import org.kitesdk.data.spi.SchemaUtil;
 import org.kitesdk.data.spi.StorageKey;
@@ -206,32 +202,6 @@ public class CrunchDatasets {
     } else {
       return partition(collection, numWriters);
     }
-  }
-
-  /**
-   * Partitions {@code collection} to be stored efficiently in {@code dataset}.
-   * <p>
-   * This restructures the parallel collection so that all of the entities that
-   * will be stored in a given partition will be processed by the same writer.
-   * <p>
-   * If the dataset is not partitioned, then this will structure all of the
-   * entities to produce a number of files equal to {@code numWriters}.
-   *
-   * @param collection a collection of entities
-   * @param dataset a dataset to partition the collection for
-   * @param numWriters the number of writers that should be used
-   * @param <E> the type of entities in the collection and underlying dataset
-   * @return an equivalent collection of entities partitioned for the view
-   * @see #partition(PCollection, Dataset)
-   *
-   * @since 0.16.0
-   * @deprecated will be removed in 0.19.0; use partition(PCollection, View, int)
-   */
-  @Deprecated
-  public static <E> PCollection<E> partition(PCollection<E> collection,
-                                             Dataset<E> dataset,
-                                             int numWriters) {
-    return partition(collection, (View<E>) dataset, numWriters);
   }
 
   private static <E> PCollection<E> partition(PCollection<E> collection,

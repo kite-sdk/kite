@@ -923,7 +923,6 @@ public class DatasetDescriptor {
           this.columnMapping = ColumnMappingParser.parseFromSchemaFields(schema);
           if (partitionStrategy == null) {
             // For backward-compatibility, build a strategy from key values
-            // TODO: warn that this should be fixed before 1.0
             this.partitionStrategy = buildPartitionStrategyForKeyMappings(
                 ColumnMappingParser.parseKeyMappingsFromSchemaFields(schema));
           }
