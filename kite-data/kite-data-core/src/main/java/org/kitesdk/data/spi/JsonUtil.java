@@ -235,6 +235,9 @@ public class JsonUtil {
 
   public static Object convertToAvro(GenericData model, JsonNode datum,
                                      Schema schema) {
+    if (datum == null) {
+      return null;
+    }
     switch (schema.getType()) {
       case RECORD:
         DatasetRecordException.check(datum.isObject(),
