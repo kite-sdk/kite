@@ -22,6 +22,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
+import org.apache.avro.Schema;
+import org.kitesdk.data.spi.Compatibility;
+import org.kitesdk.data.spi.SchemaUtil;
 import org.slf4j.Logger;
 
 @Parameters(commandDescription = "Show the schema for a Dataset")
@@ -40,6 +43,10 @@ public class SchemaCommand extends BaseDatasetCommand {
       description="Minimize schema file size by eliminating white space")
   boolean minimize=false;
 
+  @Parameter(names="--merge",
+      description="Merge schemas into a single output schema")
+  boolean merge=false;
+
   public SchemaCommand(Logger console) {
     super(console);
   }
@@ -51,23 +58,22 @@ public class SchemaCommand extends BaseDatasetCommand {
     Preconditions.checkArgument(
         datasets != null && !datasets.isEmpty(),
         "Missing dataset name");
-    if (datasets.size() == 1) {
-      String schema = load(datasets.get(0), Object.class)
-          .getDataset()
-          .getDescriptor()
-          .getSchema()
-          .toString(!minimize);
-      output(schema, console, outputPath);
+    if (merge || datasets.size() == 1) {
+      Schema mergedSchema = null;
+      for (String uriOrPath : datasets) {
+        mergedSchema = merge(mergedSchema, schema(uriOrPath));
+      }
+
+      Preconditions.checkNotNull(mergedSchema, "No valid schema found");
+
+      output(mergedSchema.toString(!minimize), console, outputPath);
 
     } else {
       Preconditions.checkArgument(outputPath == null,
           "Cannot output multiple schemas to one file");
       for (String name : datasets) {
-        console.info("Dataset \"{}\" schema: {}", name, load(name, Object.class)
-            .getDataset()
-            .getDescriptor()
-            .getSchema()
-            .toString(!minimize));
+        console.info("Dataset \"{}\" schema: {}",
+            name, schema(name).toString(!minimize));
       }
     }
     return 0;
@@ -85,4 +91,23 @@ public class SchemaCommand extends BaseDatasetCommand {
     );
   }
 
+  private Schema schema(String uriOrPath) throws IOException {
+    if (!isDatasetOrViewUri(uriOrPath) &&
+        !Compatibility.isCompatibleName(uriOrPath)) {
+      return new Schema.Parser().parse(open(uriOrPath));
+    } else {
+      return load(uriOrPath, Object.class)
+          .getDataset().getDescriptor().getSchema();
+    }
+  }
+
+  private static Schema merge(Schema left, Schema right) {
+    if (left == null) {
+      return right;
+    } else if (right == null) {
+      return left;
+    } else {
+      return SchemaUtil.merge(left, right);
+    }
+  }
 }
