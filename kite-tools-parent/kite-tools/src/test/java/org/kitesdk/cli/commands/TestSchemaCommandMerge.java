@@ -20,7 +20,6 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.concurrent.Callable;
@@ -39,16 +38,13 @@ import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.ValidationException;
 import org.slf4j.Logger;
 
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.contains;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
-public class TestMergeSchemasCommand {
+public class TestSchemaCommandMerge {
 
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
@@ -57,7 +53,7 @@ public class TestMergeSchemasCommand {
   private static Schema userSchemaUpdate;
   private File schemaFile;
   private Logger console = null;
-  private MergeSchemasCommand command;
+  private SchemaCommand command;
 
   @BeforeClass
   public static void parseUserSchema() throws Exception {
@@ -77,7 +73,8 @@ public class TestMergeSchemasCommand {
 
     TestUtil.run("create", "users", "--schema", "resource:schema/user.avsc");
     this.console = mock(Logger.class);
-    this.command = new MergeSchemasCommand(console);
+    this.command = new SchemaCommand(console);
+    command.merge = true;
     command.setConf(new Configuration());
   }
 
@@ -90,7 +87,7 @@ public class TestMergeSchemasCommand {
 
   @Test
   public void testSingleSchemaDatasetURI() throws Exception {
-    command.schemas = Lists.newArrayList("users");
+    command.datasets = Lists.newArrayList("users");
     int rc = command.run();
     Assert.assertEquals("Should return success code", 0, rc);
     verify(console).info(argThat(TestUtil.matchesSchema(userSchema)));
@@ -100,7 +97,7 @@ public class TestMergeSchemasCommand {
 
   @Test
   public void testSingleSchemaResourceURI() throws Exception {
-    command.schemas = Lists.newArrayList("resource:schema/user.avsc");
+    command.datasets = Lists.newArrayList("resource:schema/user.avsc");
     int rc = command.run();
     Assert.assertEquals("Should return success code", 0, rc);
     verify(console).info(argThat(TestUtil.matchesSchema(userSchema)));
@@ -109,7 +106,7 @@ public class TestMergeSchemasCommand {
 
   @Test
   public void testSingleSchemaFile() throws Exception {
-    command.schemas = Lists.newArrayList(schemaFile.toString());
+    command.datasets = Lists.newArrayList(schemaFile.toString());
     int rc = command.run();
     Assert.assertEquals("Should return success code", 0, rc);
     verify(console).info(argThat(TestUtil.matchesSchema(userSchemaUpdate)));
@@ -118,7 +115,7 @@ public class TestMergeSchemasCommand {
 
   @Test
   public void testSchemaMerge() throws Exception {
-    command.schemas = Lists.newArrayList(
+    command.datasets = Lists.newArrayList(
         schemaFile.toString(),
         "resource:schema/user.avsc");
     int rc = command.run();
@@ -136,7 +133,7 @@ public class TestMergeSchemasCommand {
 
   @Test
   public void testIncompatibleMerge() throws Exception {
-    command.schemas = Lists.newArrayList(
+    command.datasets = Lists.newArrayList(
         "resource:schema/string.avsc",
         "resource:schema/user.avsc");
 
