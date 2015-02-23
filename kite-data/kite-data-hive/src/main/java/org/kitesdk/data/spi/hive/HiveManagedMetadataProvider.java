@@ -15,17 +15,13 @@
  */
 package org.kitesdk.data.spi.hive;
 
-import java.io.IOException;
 import java.net.URI;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetExistsException;
-import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.spi.Compatibility;
 import org.kitesdk.data.spi.filesystem.FileSystemUtil;
-import org.kitesdk.data.spi.filesystem.SchemaManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,10 +74,9 @@ class HiveManagedMetadataProvider extends HiveAbstractMetadataProvider {
           .build();
     }
 
-    // construct the table metadata from a descriptor, but without the Avro schema
-    // since we don't yet know its final location.
+    // construct the table metadata from a descriptor
     Table table = HiveUtils.tableForDescriptor(
-        namespace, name, toCreate, isExternal, false);
+        namespace, name, toCreate, isExternal);
 
     // create it
     getMetaStoreUtil().createTable(table);
@@ -89,28 +84,9 @@ class HiveManagedMetadataProvider extends HiveAbstractMetadataProvider {
     // load the created table to get the final data location
     Table newTable = getMetaStoreUtil().getTable(namespace, name);
 
-    Path managerPath = new Path(new Path(newTable.getSd().getLocation()), SCHEMA_DIRECTORY);
-
-    // Write the Avro schema to that location and update the table appropriately.
-    SchemaManager manager = SchemaManager.create(conf, managerPath);
-
-    URI schemaLocation = manager.writeSchema(descriptor.getSchema());
-
-    DatasetDescriptor newDescriptor = null;
-
-    try {
-      newDescriptor = new DatasetDescriptor.Builder(descriptor)
-          .location(newTable.getSd().getLocation())
-          .schemaUri(schemaLocation)
-          .build();
-    } catch (IOException e) {
-      throw new DatasetIOException("Unable to set schema.", e);
-    }
-
-    // Add the schema now that it exists at an established URI.
-    HiveUtils.updateTableSchema(newTable, newDescriptor);
-
-    getMetaStoreUtil().alterTable(newTable);
+    DatasetDescriptor newDescriptor = new DatasetDescriptor.Builder(descriptor)
+        .location(newTable.getSd().getLocation())
+        .build();
 
     if (isExternal) {
       FileSystemUtil.ensureLocationExists(newDescriptor, conf);

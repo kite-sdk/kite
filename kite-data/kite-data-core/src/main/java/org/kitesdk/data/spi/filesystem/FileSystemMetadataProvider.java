@@ -19,7 +19,6 @@ import com.google.common.annotations.VisibleForTesting;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetExistsException;
-import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.impl.Accessor;
@@ -71,11 +70,10 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
   private static final String METADATA_DIRECTORY = ".metadata";
   private static final String SCHEMA_FILE_NAME = "schema.avsc";
-  private static final String SCHEMA_DIRECTORY_NAME = "schemas";
   private static final String DESCRIPTOR_FILE_NAME = "descriptor.properties";
   private static final String PARTITION_EXPRESSION_FIELD_NAME = "partitionExpression";
   private static final String VERSION_FIELD_NAME = "version";
-  private static final String METADATA_VERSION = "2";
+  private static final String METADATA_VERSION = "1";
   private static final String FORMAT_FIELD_NAME = "format";
   private static final String LOCATION_FIELD_NAME = "location";
   private static final String COMPRESSION_TYPE_FIELD_NAME = "compressionType";
@@ -146,40 +144,12 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       builder.partitionStrategy(Accessor.getDefault().fromExpression(properties
           .getProperty(PARTITION_EXPRESSION_FIELD_NAME)));
     }
-
-    SchemaManager manager = SchemaManager.load(conf,
-        new Path(metadataPath, SCHEMA_DIRECTORY_NAME));
-
-    URI schemaURI;
-
-    if (manager == null) {
-
-      // If there is no schema manager directory we are working
-      // with a dataset written with an older version. We address this by
-      // importing the previous schema.
-      Path schemaPath = new Path(metadataPath, SCHEMA_FILE_NAME);
-
-      checkExists(getFileSytem(), schemaPath);
-
-      manager = SchemaManager.create(conf, new Path(metadataPath,
-          SCHEMA_DIRECTORY_NAME));
-
-      schemaURI = manager.importSchema(schemaPath);
-
-    } else {
-      schemaURI = manager.getNewestSchemaURI();
-    }
-
-    if (schemaURI == null) {
-      throw new DatasetException("Maformed dataset metadata at " +
-          metadataPath + ". No schemas are present.");
-    }
-
+    Path schemaPath = new Path(metadataPath, SCHEMA_FILE_NAME);
     try {
-      builder.schemaUri(schemaURI);
+      builder.schemaUri(rootFileSystem.makeQualified(schemaPath).toUri());
     } catch (IOException e) {
       throw new DatasetIOException(
-              "Unable to load schema file:" + schemaURI + " for dataset:" + name, e);
+          "Unable to load schema file:" + schemaPath + " for dataset:" + name, e);
     }
 
     final Path location;
@@ -469,10 +439,26 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
     checkExists(fs, metadataLocation);
 
-    SchemaManager manager = SchemaManager.create(fs.getConf(),
-        new Path(metadataLocation, SCHEMA_DIRECTORY_NAME));
-
-    manager.writeSchema(descriptor.getSchema());
+    FSDataOutputStream outputStream = null;
+    final Path schemaPath = new Path(metadataLocation, SCHEMA_FILE_NAME);
+    boolean threw = true;
+    try {
+      outputStream = fs.create(schemaPath, true /* overwrite */ );
+      outputStream.write(descriptor.getSchema().toString(true)
+          .getBytes(Charsets.UTF_8));
+      outputStream.flush();
+      threw = false;
+    } catch (IOException e) {
+      throw new DatasetIOException(
+          "Unable to save schema file: " + schemaPath +
+          " for dataset: " + name, e);
+    } finally {
+      try {
+        Closeables.close(outputStream, threw);
+      } catch (IOException e) {
+        throw new DatasetIOException("Cannot close", e);
+      }
+    }
 
     Properties properties = new Properties();
     properties.setProperty(VERSION_FIELD_NAME, METADATA_VERSION);
@@ -495,9 +481,8 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       properties.setProperty(property, descriptor.getProperty(property));
     }
 
-    FSDataOutputStream outputStream = null;
     final Path descriptorPath = new Path(metadataLocation, DESCRIPTOR_FILE_NAME);
-    boolean threw = true;
+    threw = true;
     try {
       outputStream = fs.create(descriptorPath, true /* overwrite */ );
       properties.store(outputStream, "Dataset descriptor for " + name);

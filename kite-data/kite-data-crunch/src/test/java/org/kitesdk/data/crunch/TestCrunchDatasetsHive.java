@@ -42,11 +42,8 @@ public class TestCrunchDatasetsHive extends TestCrunchDatasets {
   public void cleanHCatalog() {
     // ensures all tables are removed
     MetaStoreUtil hcat = new MetaStoreUtil(fileSystem.getConf());
-
-    for (String database: hcat.getAllDatabases()) {
-      for (String tableName : hcat.getAllTables(database)) {
-        hcat.dropTable(database, tableName);
-      }
+    for (String tableName : hcat.getAllTables("default")) {
+      hcat.dropTable("default", tableName);
     }
   }
 }

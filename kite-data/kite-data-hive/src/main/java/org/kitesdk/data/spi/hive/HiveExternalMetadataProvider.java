@@ -27,7 +27,6 @@ import org.kitesdk.data.DatasetExistsException;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.spi.Compatibility;
 import org.kitesdk.data.spi.filesystem.FileSystemUtil;
-import org.kitesdk.data.spi.filesystem.SchemaManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,25 +80,6 @@ class HiveExternalMetadataProvider extends HiveAbstractMetadataProvider {
       newDescriptor = new DatasetDescriptor.Builder(descriptor)
           .location(pathForDataset(namespace, name))
           .build();
-    }
-
-    if (descriptor.getSchemaUrl() == null) {
-
-      // No schema URL is provided, so create one based on the dataset.
-      Path managerPath = new Path(new Path(newDescriptor.getLocation()),
-          SCHEMA_DIRECTORY);
-
-      SchemaManager manager = SchemaManager.create(conf, managerPath);
-
-      URI schemaUri = manager.writeSchema(descriptor.getSchema());
-
-      try {
-        newDescriptor = new DatasetDescriptor.Builder(newDescriptor)
-                .schemaUri(schemaUri)
-                .build();
-      } catch (IOException e) {
-        throw new DatasetIOException("Unable to load schema", e);
-      }
     }
 
     // create the data directory first so it is owned by the current user, not Hive
