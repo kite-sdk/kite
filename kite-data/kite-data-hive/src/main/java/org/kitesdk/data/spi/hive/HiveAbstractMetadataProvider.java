@@ -20,25 +20,32 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+
+import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
+import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.URIBuilder;
 import org.kitesdk.data.spi.AbstractMetadataProvider;
 import org.kitesdk.data.spi.Compatibility;
 import org.kitesdk.data.spi.PartitionListener;
+import org.kitesdk.data.spi.filesystem.SchemaManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 abstract class HiveAbstractMetadataProvider extends AbstractMetadataProvider implements
     PartitionListener {
+
+  static final String SCHEMA_DIRECTORY = ".metadata/schemas";
 
   private static final Logger LOG = LoggerFactory
       .getLogger(HiveAbstractMetadataProvider.class);
@@ -109,7 +116,25 @@ abstract class HiveAbstractMetadataProvider extends AbstractMetadataProvider imp
     String resolved = resolveNamespace(namespace, name);
     if (resolved != null) {
       Table table = getMetaStoreUtil().getTable(resolved, name);
-      HiveUtils.updateTableSchema(table, descriptor);
+
+      Path managerPath = new Path(new Path(table.getSd().getLocation()),
+          SCHEMA_DIRECTORY);
+
+      SchemaManager manager = SchemaManager.create(conf, managerPath);
+
+      DatasetDescriptor newDescriptor;
+
+      try {
+        URI schemaURI = manager.writeSchema(descriptor.getSchema());
+
+        newDescriptor = new DatasetDescriptor.Builder(descriptor)
+            .schemaUri(schemaURI).build();
+
+      } catch (IOException e) {
+        throw new DatasetIOException("Unable to create schema", e);
+      }
+
+      HiveUtils.updateTableSchema(table, newDescriptor);
       getMetaStoreUtil().alterTable(table);
       return descriptor;
     }

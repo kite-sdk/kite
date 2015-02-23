@@ -21,9 +21,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
+
+import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -376,5 +379,33 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
         propValue, loaded.getProperty(propName));
     Assert.assertTrue("List should contain property name",
         created.listProperties().contains(propName));
+  }
+
+  @Test
+  public void testLargeSchema() {
+
+    // Only run this test in distributed mode, since non-HDFS schema URLs result
+    // in the schema being loaded into the Hive metastore, and large schemas
+    // can exceed the size limit of that.
+    Assume.assumeTrue(distributed);
+
+    Assert.assertFalse("Sanity check", provider.exists(NAMESPACE, "large_schema_test"));
+
+    // Create a schema with many fields to ensure the underlying store can handle it.
+    SchemaBuilder.FieldAssembler<Schema> fields = SchemaBuilder.record("Event").fields();
+
+    for (int i = 0; i < 1000; ++i) {
+      fields.requiredString("field_" + i);
+    }
+
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+            .format(Formats.AVRO)
+            .schema(fields.endRecord())
+            .build();
+
+    DatasetDescriptor created = provider.create(NAMESPACE, "large_schema_test", descriptor);
+
+    Assert.assertEquals("Large schemas should match",
+            descriptor.getSchema(), created.getSchema());
   }
 }

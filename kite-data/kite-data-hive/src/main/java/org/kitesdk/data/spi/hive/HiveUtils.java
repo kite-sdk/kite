@@ -198,6 +198,14 @@ class HiveUtils {
   static Table tableForDescriptor(String namespace, String name,
                                   DatasetDescriptor descriptor,
                                   boolean external) {
+
+    return tableForDescriptor(namespace, name, descriptor, external, true);
+  }
+
+  static Table tableForDescriptor(String namespace, String name,
+                                  DatasetDescriptor descriptor,
+                                  boolean external,
+                                  boolean includeSchema) {
     final Table table = createEmptyTable(namespace, name);
 
     if (external) {
@@ -223,24 +231,26 @@ class HiveUtils {
           "No known serde for format:" + format.getName());
     }
 
-    // copy schema info
-    boolean useLiteral;
-    final URL schemaURL = descriptor.getSchemaUrl();
-    try {
-      useLiteral = (schemaURL == null) ||
-          !HDFS_SCHEME.equals(schemaURL.toURI().getScheme());
-    } catch (URISyntaxException ex) {
-      useLiteral = true;
-    }
+    if (includeSchema) {
+      // copy schema info
+      boolean useLiteral;
+      final URL schemaURL = descriptor.getSchemaUrl();
+      try {
+        useLiteral = (schemaURL == null) ||
+                !HDFS_SCHEME.equals(schemaURL.toURI().getScheme());
+      } catch (URISyntaxException ex) {
+        useLiteral = true;
+      }
 
-    if (useLiteral) {
-      table.getParameters().put(
-          AVRO_SCHEMA_LITERAL_PROPERTY_NAME,
-          descriptor.getSchema().toString());
-    } else {
-      table.getParameters().put(
-          AVRO_SCHEMA_URL_PROPERTY_NAME,
-          schemaURL.toExternalForm());
+      if (useLiteral) {
+        table.getParameters().put(
+                AVRO_SCHEMA_LITERAL_PROPERTY_NAME,
+                descriptor.getSchema().toString());
+      } else {
+        table.getParameters().put(
+                AVRO_SCHEMA_URL_PROPERTY_NAME,
+                schemaURL.toExternalForm());
+      }
     }
 
     table.getParameters().put(COMPRESSION_TYPE_PROPERTY_NAME,
@@ -299,9 +309,23 @@ class HiveUtils {
           AVRO_SCHEMA_URL_PROPERTY_NAME,
           descriptor.getSchemaUrl().toExternalForm());
     } else {
-      throw new DatasetException("Cannot update Avro schema since neither " +
-          AVRO_SCHEMA_LITERAL_PROPERTY_NAME + " nor " +
-          AVRO_SCHEMA_URL_PROPERTY_NAME + " is set.");
+
+      // neither the literal or the URL are set, so add the URL if specified
+      // and the schema literal if not.
+      if (descriptor.getSchemaUrl() != null) {
+
+        table.getParameters().put(
+                AVRO_SCHEMA_URL_PROPERTY_NAME,
+                descriptor.getSchemaUrl().toExternalForm());
+
+      } else if (descriptor.getSchema() != null) {
+        table.getParameters().put(
+                AVRO_SCHEMA_LITERAL_PROPERTY_NAME,
+                descriptor.getSchema().toString());
+      } else {
+        throw new DatasetException("Table schema cannot be updated since it is" +
+                " not set on the descriptor.");
+      }
     }
     // keep the custom properties up-to-date
     addPropertiesForDescriptor(table, descriptor);
