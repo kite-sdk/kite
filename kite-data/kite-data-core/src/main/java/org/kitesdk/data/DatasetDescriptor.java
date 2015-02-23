@@ -982,7 +982,7 @@ public class DatasetDescriptor {
 
         // check the entity is a record if there is a non-provided partitioner
         ValidationException.check(schema.getType() == Schema.Type.RECORD,
-            "Cannot partition non-records: " + schema);
+            "Cannot partition non-records: %s", schema);
 
         // the source name should be a field in the schema, but not necessarily
         // the record.
@@ -1022,7 +1022,7 @@ public class DatasetDescriptor {
       return;
     }
     ValidationException.check(schema.getType() == Schema.Type.RECORD,
-        "Cannot map non-records: " + schema);
+        "Cannot map non-records: %s", schema);
     Set<String> keyMappedFields = Sets.newHashSet();
     for (FieldMapping fm : mappings.getFieldMappings()) {
       Schema.Field field = schema.getField(fm.getFieldName());
