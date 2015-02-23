@@ -135,6 +135,7 @@
    <!-- tika metadata -->
    <field name="content_type" type="lowercase" indexed="true" stored="true" />
 
+   <field name="_root_" type="string" indexed="true" stored="false"/>
    <field name="_version_" type="long" indexed="true" stored="true"/>
    <dynamicField name="ignored_*" type="ignored"/>
    

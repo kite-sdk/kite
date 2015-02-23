@@ -242,6 +242,27 @@ public class SolrMorphlineTest extends AbstractSolrMorphlineTest {
   }
     
   @Test
+  public void testLoadSolrWithChildDocuments() throws Exception {
+    morphline = createMorphline("test-morphlines" + File.separator + "loadSolrWithChildDocuments");    
+    Record record = new Record();
+    record.put(Fields.ID, "id0");
+    startSession();
+    Notifications.notifyBeginTransaction(morphline);
+    assertTrue(morphline.process(record));
+    assertEquals(1, collector.getNumStartEvents());
+    Notifications.notifyCommitTransaction(morphline);
+    
+    // This parent block join returns the parent records for records 
+    // where the child documents contain "bar" in the id field.
+    SolrDocumentList docs = query("{!parent which='content_type:parent'}id:bar").getResults();
+    assertEquals(1, docs.size());
+    assertEquals("id0", docs.get(0).getFirstValue(Fields.ID));
+    
+    docs = query("*:*").getResults();
+    assertEquals(3, docs.size());
+  }
+  
+  @Test
   public void testTokenizeText() throws Exception {
     morphline = createMorphline("test-morphlines" + File.separator + "tokenizeText");
     for (int i = 0; i < 3; i++) {

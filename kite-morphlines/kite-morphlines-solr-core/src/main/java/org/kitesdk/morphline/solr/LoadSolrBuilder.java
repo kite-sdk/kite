@@ -45,8 +45,9 @@ import com.typesafe.config.ConfigFactory;
 public final class LoadSolrBuilder implements CommandBuilder {
 
   public static final String SOLR_LOCATOR_PARAM = "solrLocator";
-  static final String LOAD_SOLR_DELETE_BY_ID = "_loadSolr_deleteById";
-  static final String LOAD_SOLR_DELETE_BY_QUERY = "_loadSolr_deleteByQuery";
+  public static final String LOAD_SOLR_DELETE_BY_ID = "_loadSolr_deleteById";
+  public static final String LOAD_SOLR_DELETE_BY_QUERY = "_loadSolr_deleteByQuery";
+  public static final String LOAD_SOLR_CHILD_DOCUMENTS = "_loadSolr_childDocuments";  
 
   @Override
   public Collection<String> getNames() {
@@ -175,8 +176,22 @@ public final class LoadSolrBuilder implements CommandBuilder {
       SolrInputDocument doc = new SolrInputDocument(new HashMap(2 * map.size()));
       for (Map.Entry<String, Collection<Object>> entry : map.entrySet()) {
         String key = entry.getKey();
-        doc.setField(key, entry.getValue(), getBoost(key));
-      }
+        if (LOAD_SOLR_CHILD_DOCUMENTS.equals(key)) {
+          for (Object value : entry.getValue()) {
+            if (value instanceof Record) {
+              value = convert((Record) value); // recurse
+            }
+            if (value instanceof SolrInputDocument) {
+              doc.addChildDocument((SolrInputDocument) value);
+            } else {
+              throw new MorphlineRuntimeException("Child document must be of class " + 
+                Record.class.getName() + " or " + SolrInputDocument.class.getName() + ": " + value);
+            }
+          }
+        } else {
+          doc.setField(key, entry.getValue(), getBoost(key));
+        }
+      }      
       return doc;
     }
 

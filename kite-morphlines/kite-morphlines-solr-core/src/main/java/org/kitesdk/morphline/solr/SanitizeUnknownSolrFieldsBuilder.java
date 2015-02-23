@@ -83,7 +83,8 @@ public final class SanitizeUnknownSolrFieldsBuilder implements CommandBuilder {
         String key = entry.getKey();
         if (schema.getFieldOrNull(key) == null 
             && !LoadSolrBuilder.LOAD_SOLR_DELETE_BY_ID.equals(key)
-            && !LoadSolrBuilder.LOAD_SOLR_DELETE_BY_QUERY.equals(key)) {
+            && !LoadSolrBuilder.LOAD_SOLR_DELETE_BY_QUERY.equals(key)
+            && !LoadSolrBuilder.LOAD_SOLR_CHILD_DOCUMENTS.equals(key)) {
           LOG.debug("Sanitizing unknown Solr field: {}", key);
           Collection values = entry.getValue();
           if (renameToPrefix != null) {
