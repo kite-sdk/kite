@@ -52,7 +52,8 @@ public class SchemaCommand extends BaseDatasetCommand {
   }
 
   @Override
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="NP_NULL_ON_SOME_PATH",
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+      value={"NP_GUARANTEED_DEREF", "NP_NULL_ON_SOME_PATH"},
       justification="Null case checked by precondition")
   public int run() throws IOException {
     Preconditions.checkArgument(
