@@ -7,10 +7,10 @@
     <title>Partitioned Datasets</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="An open source data API for Hadoop.">
-    <link rel="canonical" href="http://kitesdk.org/docs/staging/Partitioned-Datasets.html">
+    <link rel="canonical" href="http://kitesdk.org/Partitioned-Datasets.html">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/docs/staging/css/main.css">
+    <link rel="stylesheet" href="/css/main.css">
     <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 
@@ -23,7 +23,7 @@
 
   <div class="wrap">
 
-    <a class="site-title" href="/docs/staging/">Kite Software Development Kit</a>
+    <a class="site-title" href="/">Kite Software Development Kit</a>
 
     <nav class="site-nav">
       <a href="#" class="menu-icon">
@@ -45,111 +45,111 @@
 
 
     <div class="page-content">
+      
+      <div class="sidebar">
+      
+        <h4>About Kite</h4>
+        <ul>
+          
+        </ul>
+      
+        <h4></h4>
+        <ul>
+          
+          
+          <li><a href="/Kite-SDK-Guide.html">Kite Background</a></li>
+          
+          
+          
+          <li><a href="/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
+          
+          
+        </ul>
+      
+        <h4>Kite CLI</h4>
+        <ul>
+          
+          
+          <li><a href="/Install-Kite.html">Installing the CLI</a></li>
+          
+          
+          
+          <li><a href="/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
+          
+          
+          
+          <li><a href="/cli-reference.html">Kite CLI Reference</a></li>
+          
+          
+        </ul>
+      
+        <h4>Kite API</h4>
+        <ul>
+          
+          
+          <li><a href="/API-Overview.html">API Introduction</a></li>
+          
+          
+          
+          <li><a href="/view-api.html">Views API</a></li>
+          
+          
+          
+          <li><a href="/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
+          
+          
+        </ul>
+      
+        <h4>Reference</h4>
+        <ul>
+          
+          
+          <li><a href="/URIs.html">Kite URIs</a></li>
+          
+          
+          
+          <li><a href="/Schema-Evolution.html">Schema Evolution</a></li>
+          
+          
+          
+          <li><b>Partitioned Datasets</b></li>
+          
+          
+          
+          <li><a href="/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
+          
+          
+          
+          <li><a href="/HBase-Storage-Cells.html">HBase Storage</a></li>
+          
+          
+          
+          <li><a href="/Column-Mapping.html">Column Mapping</a></li>
+          
+          
+          
+          <li><a href="/lifecycle.html">Dataset Lifecycle</a></li>
+          
+          
+          
+          <li><a href="/maven">Maven Plugin</a></li>
+          
+          
+          
+          <li><a href="/dependencies">Dependency Info</a></li>
+          
+          
+        </ul>
+      
+      </div>
+      
+
       <div class="wrap">
       <div class="post">
 
   <header class="post-header">
     <h1>Partitioned Datasets</h1>
   </header>
-
-  
-  <div class="sidebar">
-  
-    <h4>About Kite</h4>
-    <ul>
-      
-    </ul>
-  
-    <h4></h4>
-    <ul>
-      
-      
-      <li><a href="/docs/staging/Kite-SDK-Guide.html">Kite Background</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
-      
-      
-    </ul>
-  
-    <h4>Kite CLI</h4>
-    <ul>
-      
-      
-      <li><a href="/docs/staging/Install-Kite.html">Installing the CLI</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/Kite-Dataset-Command-Line-Interface.html">Kite CLI Reference</a></li>
-      
-      
-    </ul>
-  
-    <h4>Kite API</h4>
-    <ul>
-      
-      
-      <li><a href="/docs/staging/API-Overview.html">API Introduction</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/view-api.html">Views API</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
-      
-      
-    </ul>
-  
-    <h4>Reference</h4>
-    <ul>
-      
-      
-      <li><a href="/docs/staging/URIs.html">Kite URIs</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/Schema-Evolution.html">Schema Evolution</a></li>
-      
-      
-      
-      <li><b>Partitioned Datasets</b></li>
-      
-      
-      
-      <li><a href="/docs/staging/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/HBase-Storage-Cells.html">HBase Storage</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/Column-Mapping.html">Column Mapping</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/lifecycle.html">Dataset Lifecycle</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/maven">Maven Plugin</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/dependencies">Dependency Info</a></li>
-      
-      
-    </ul>
-  
-  </div>
-  
 
   <article class="post-content">
   <p><a href="https://www.youtube.com/watch?v=rU1YAvmU6mY&amp;index=3&amp;list=PLGzsQf6UXBR-BJz5BGzJb2mMulWTfTu99">
@@ -172,7 +172,7 @@
 
 <p>For example, you might partition a database by Year and Month. You can send a query to locate data from February 2012. The system knows to only search for records in the partition for February in the year 2012. It doesn’t have to search any other year or any other month in the same year. This can lead to great improvement in performance.</p>
 
-<p>A partition strategy is configured with a <a href="/docs/staging/Partition-Strategy-Format.html">JSON-based format</a>. You can create a partition strategy by hand. However, it’s usually easier to use the CLI to create the definition in JSON format and check it against your schema. Then you can edit it, if needed.</p>
+<p>A partition strategy is configured with a <a href="/Partition-Strategy-Format.html">JSON-based format</a>. You can create a partition strategy by hand. However, it’s usually easier to use the CLI to create the definition in JSON format and check it against your schema. Then you can edit it, if needed.</p>
 
 <h3 id="defining-a-partitioning-strategy">Defining a Partitioning Strategy</h3>
 
@@ -260,7 +260,7 @@
 </tr></table>
 </div>
 
-<p>You can also use the command <code>partition-config</code> from the command line interface to generate the JSON file. See <a href="/docs/staging/Kite-Dataset-Command-Line-Interface.html#partition-config">partition-config</a>.</p>
+<p>You can also use the command <code>partition-config</code> from the command line interface to generate the JSON file. See <a href="/cli-reference.html#partition-config">partition-config</a>.</p>
 
 <h3 id="creating-a-dataset-that-uses-a-partition-strategy">Creating a Dataset That Uses a Partition Strategy</h3>
 
@@ -271,7 +271,7 @@
 <pre><code>kite-dataset create HighRollersClub -s HighRollers.avsc -p HighRollers.json 
 </code></pre>
 
-<p>See <a href="/docs/staging/Kite-Dataset-Command-Line-Interface.html#create">create</a> for more options when creating a dataset, and <a href="/docs/staging/Partition-Strategy-Format.html">Partition Strategy JSON Format</a> for available options when defining a partition strategy.</p>
+<p>See <a href="/cli-reference.html#create">create</a> for more options when creating a dataset, and <a href="/Partition-Strategy-Format.html">Partition Strategy JSON Format</a> for available options when defining a partition strategy.</p>
 
 <p>You can also use Kite to manage datasets in HBase, using the same tools and APIs. HBase datasets work differently than datasets stored in HDFS in two ways. First, HBase handles its own dataset partitions, and configures them differently. Second, HBase stores data as a group of values, or cells; you need to configure how Kite will divide your records into separate cells.</p>
 
@@ -288,13 +288,13 @@
   <div class="wrap columns">
 
     <div class="left">
-      <h2 class="footer-heading">Kite Software Development Kit, 0.17.1</h2>
+      <h2 class="footer-heading">Kite Software Development Kit, 1.0.0</h2>
 
       <ul>
         <li>Kite is licensed under</li>
         <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
         <li>&nbsp;</li>
-        <li>Generated on 23 December 2014</li>
+        <li>Generated on 24 February 2015</li>
       </ul>
 
     </div>
@@ -316,9 +316,9 @@
           <div class="right">
             <ul>
               <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
-              <li><a href="/docs/0.17.1/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
-              <li><a href="/docs/0.17.1/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
-              <li><a href="/docs/staging/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+              <li><a href="/docs/1.0.0/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/1.0.0/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
             </ul>
           </div>
         </div>

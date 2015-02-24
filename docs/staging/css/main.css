@@ -19,6 +19,7 @@ body {
   line-height: 1.5;
   font-weight: 400;
   background-color: #fdfdfd;
+  text-align: justify;
 }
 
 h1, h2, h3, h4, h5, h6 { font-size: 100%; font-weight: 400; }
@@ -29,7 +30,7 @@ a:visited { color: #205caa; }
 
 table {
   padding: 0.2em;
-  width: 100%;
+  min-width: 90%;
 }
 
 table th {
@@ -99,7 +100,7 @@ table td {
 .wrap:after { content:""; display:table; }
 .wrap:after { clear: both; }
 .wrap {
-  max-width: 800px;
+  max-width: 1000px;
   padding: 0 30px;
   margin: 0 auto;
   zoom: 1;
@@ -201,16 +202,18 @@ table td {
 .page-content {
   padding: 30px 0;
   background-color: #fff;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1440px;
 }
 
 .sidebar {
   border-left: 1px solid #d5d5e9;
+  margin-top: 4em;
   margin-left: 0.5em;
-  padding: 0.5em; /* supplied by negative right position */
+  padding-left: 8px;
   float: right;
-  width: 12em;
-  position: relative;
-  right: -1em;
+  width: 212px;
 }
 
 .sidebar h4 {
@@ -218,6 +221,10 @@ table td {
   line-height: 1;
   font-weight: 400;
   font-size: 14pt;
+}
+
+.sidebar ul {
+  list-style-position: inside;
 }
 
 

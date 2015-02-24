@@ -7,7 +7,7 @@
 <meta name="description" content="JDiff is a Javadoc doclet which generates an HTML report of all the packages, classes, constructors, methods, and fields which have been removed, added or changed in any way, including their documentation, when two APIs are compared.">
 <meta name="keywords" content="diff, jdiff, javadiff, java diff, java difference, API difference, difference between two APIs, API diff, Javadoc, doclet">
 <TITLE>
-org.kitesdk.morphline.base.Metrics
+org.kitesdk.data.DatasetWriter
 </TITLE>
 <LINK REL="stylesheet" TYPE="text/css" HREF="../stylesheet-jdiff.css" TITLE="Style">
 </HEAD>
@@ -18,9 +18,9 @@ org.kitesdk.morphline.base.Metrics
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/morphline/base/Metrics.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.17.1</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/DatasetWriter.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 1.0.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.morphline.base.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="jdiff_help.html"><FONT CLASS="NavBarFont1"><B>Help</B></FONT></A>&nbsp;</TD>
     </TR>
@@ -34,37 +34,49 @@ org.kitesdk.morphline.base.Metrics
 &nbsp;<B>NEXT CLASS</B>&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
-  &nbsp;<A HREF="org.kitesdk.morphline.base.Metrics.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
+  &nbsp;<A HREF="org.kitesdk.data.DatasetWriter.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell3"><FONT SIZE="-2"> DETAIL: &nbsp;
 CONSTRUCTORS&nbsp;|&nbsp;
-METHODS&nbsp;|&nbsp;
-<a href="#fields">FIELDS</a>
+<a href="#methods">METHODS</a>&nbsp;|&nbsp;
+FIELDS
   </FONT></TD>
 </TR>
 </TABLE>
 <HR>
 <!-- End of nav bar -->
 <H2>
-Class org.kitesdk.morphline.base.<A HREF="../../apidocs/org/kitesdk/morphline/base/Metrics.html" target="_top"><tt>Metrics</tt></A>
+Interface org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/DatasetWriter.html" target="_top"><tt>DatasetWriter</tt></A>
 </H2>
+<p><font size="+1">Removed interfaces <code>org.kitesdk.data.Flushable, org.kitesdk.data.Syncable</code>.<br></font>
 <a NAME="constructors"></a>
 <a NAME="methods"></a>
-<a NAME="fields"></a>
 <p>
-<a NAME="Added"></a>
-<TABLE summary="Added Fields" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<a NAME="Removed"></a>
+<TABLE summary="Removed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Fields</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Methods</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.morphline.base.Metrics.NUM_FINAL_CHILD_RECORDS"></A>
-  <nobr><code>String</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/morphline/base/Metrics.html#NUM_FINAL_CHILD_RECORDS" target="_top"><tt>NUM_FINAL_CHILD_RECORDS</tt></A></nobr>
+  <A NAME="org.kitesdk.data.DatasetWriter.flush_removed()"></A>
+  <nobr><code>void</code>&nbsp;flush()</nobr>
   </TD>
-  <TD>&nbsp;</TD>
+  <TD VALIGN="TOP"><p>
+ Force or commit any outstanding buffered data to the underlying stream if
+ supported.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.DatasetWriter.sync_removed()"></A>
+  <nobr><code>void</code>&nbsp;sync()</nobr>
+  </TD>
+  <TD VALIGN="TOP"><p>
+ Ensure that data in the underlying stream has been written to disk (optional
+ operation).</TD>
 </TR>
 </TABLE>
 &nbsp;
+<a NAME="fields"></a>
 <HR>
 <!-- Start of nav bar -->
 <TABLE summary="Navigation bar" BORDER="0" WIDTH="100%" CELLPADDING="1" CELLSPACING="0">
@@ -72,9 +84,9 @@ Class org.kitesdk.morphline.base.<A HREF="../../apidocs/org/kitesdk/morphline/ba
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/morphline/base/Metrics.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.17.1</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/DatasetWriter.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 1.0.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.morphline.base.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="jdiff_help.html"><FONT CLASS="NavBarFont1"><B>Help</B></FONT></A>&nbsp;</TD>
     </TR>
@@ -88,7 +100,7 @@ Class org.kitesdk.morphline.base.<A HREF="../../apidocs/org/kitesdk/morphline/ba
 &nbsp;<B>NEXT CLASS</B>&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
-  &nbsp;<A HREF="org.kitesdk.morphline.base.Metrics.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
+  &nbsp;<A HREF="org.kitesdk.data.DatasetWriter.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
 <TD BGCOLOR="0xFFFFFF" CLASS="NavBarCell3"></TD>
 </TR>
 </TABLE>

@@ -2,7 +2,7 @@
 <comments
   xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
   xsi:noNamespaceSchemaLocation='comments.xsd'
-  name="Kite_SDK_0.17.0_to_Kite_SDK_0.17.1"
+  name="Kite_SDK_0.18.0_to_Kite_SDK_1.0.0"
   jdversion="1.1.1">
 
 <!-- This file contains comments for a JDiff report. -->
@@ -22,7 +22,31 @@
   </text>
 </comment>
 <comment>
-  <identifier id="org.kitesdk.data.DatasetRecordException"/>
+  <identifier id="org.kitesdk.data.DatasetReaderException"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.DatasetWriter"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.DatasetWriter.flush_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.DatasetWriter.sync_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.DatasetWriterException"/>
   <text>
     InsertCommentsHere
   </text>
@@ -40,25 +64,7 @@
   </text>
 </comment>
 <comment>
-  <identifier id="org.kitesdk.data.crunch.CrunchDatasets.partition_changed(org.apache.crunch.PCollection&lt;E&gt;, org.kitesdk.data.Dataset&lt;E&gt;, int)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="org.kitesdk.morphline.base"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="org.kitesdk.morphline.base.Metrics"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="org.kitesdk.morphline.base.Metrics.NUM_FINAL_CHILD_RECORDS"/>
+  <identifier id="org.kitesdk.data.crunch.CrunchDatasets.partition_removed(org.apache.crunch.PCollection&lt;E&gt;, org.kitesdk.data.Dataset&lt;E&gt;, int)"/>
   <text>
     InsertCommentsHere
   </text>
@@ -70,61 +76,25 @@
   </text>
 </comment>
 <comment>
-  <identifier id="org.kitesdk.morphline.solr.DocumentLoader"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="org.kitesdk.morphline.solr.DocumentLoader.deleteById_added(java.lang.String)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="org.kitesdk.morphline.solr.DocumentLoader.deleteByQuery_added(java.lang.String)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
   <identifier id="org.kitesdk.morphline.solr.LoadSolrBuilder"/>
   <text>
     InsertCommentsHere
   </text>
 </comment>
 <comment>
-  <identifier id="org.kitesdk.morphline.solr.LoadSolrBuilder.SOLR_LOCATOR_PARAM"/>
+  <identifier id="org.kitesdk.morphline.solr.LoadSolrBuilder.LOAD_SOLR_CHILD_DOCUMENTS"/>
   <text>
     InsertCommentsHere
   </text>
 </comment>
 <comment>
-  <identifier id="org.kitesdk.morphline.solr.SolrLocator"/>
+  <identifier id="org.kitesdk.morphline.solr.LoadSolrBuilder.LOAD_SOLR_DELETE_BY_ID"/>
   <text>
     InsertCommentsHere
   </text>
 </comment>
 <comment>
-  <identifier id="org.kitesdk.morphline.solr.SolrLocator.getSolrServer_added()"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="org.kitesdk.morphline.solr.SolrServerDocumentLoader"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="org.kitesdk.morphline.solr.SolrServerDocumentLoader.deleteById_added(java.lang.String)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="org.kitesdk.morphline.solr.SolrServerDocumentLoader.deleteByQuery_added(java.lang.String)"/>
+  <identifier id="org.kitesdk.morphline.solr.LoadSolrBuilder.LOAD_SOLR_DELETE_BY_QUERY"/>
   <text>
     InsertCommentsHere
   </text>

@@ -7,10 +7,10 @@
     <title>Kite: A Data API for Hadoop</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="An open source data API for Hadoop.">
-    <link rel="canonical" href="http://kitesdk.org/docs/staging/">
+    <link rel="canonical" href="http://kitesdk.org/">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/docs/staging/css/main.css">
+    <link rel="stylesheet" href="/css/main.css">
     <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 
@@ -23,7 +23,7 @@
 
   <div class="wrap">
 
-    <a class="site-title" href="/docs/staging/">Kite Software Development Kit</a>
+    <a class="site-title" href="/">Kite Software Development Kit</a>
 
     <nav class="site-nav">
       <a href="#" class="menu-icon">
@@ -45,14 +45,14 @@
 
 
     <div class="page-content">
+      
+
       <div class="wrap">
       <div class="post">
 
   <header class="post-header">
     <h1>Kite: A Data API for Hadoop</h1>
   </header>
-
-  
 
   <article class="post-content">
   <p>Kite is a high-level data layer for Hadoop. It is an API and a set of tools that speed up development. You configure how Kite stores your data in Hadoop, instead of building and maintaining that infrastructure yourself.</p>
@@ -63,7 +63,7 @@
 
 <p>Dataset is a consistent interface for working with your data. You have control of implementation details, such as whether to use Avro or Parquet format, HDFS or HBase storage, and snappy compression or another. You only have to tell Kite what to do; Kite handles the implementation for you.</p>
 
-<div class="right">
+<div class="left">
 
 <div class="highlight"><pre><code class="language-text" data-lang="text">$&gt; kite-dataset csv-import ratings.csv \
               dataset:hbase:zk/ratings
@@ -73,9 +73,9 @@ Added 1000000 records to dataset &quot;ratings&quot;</code></pre></div>
 
 <p>Kite’s command-line interface helps you manage datasets with pre-built tasks like creating datasets, migrating schemas, and loading data. It also helps you configure Kite and other Hadoop projects.</p>
 
-<p><a href="/docs/staging/Using-the-Kite-CLI-to-Create-a-Dataset.html"><i class="fa fa-chevron-right"></i>  Get started with Kite’s CSV tutorial</a></p>
+<p><a href="/Using-the-Kite-CLI-to-Create-a-Dataset.html"><i class="fa fa-chevron-right"></i>  Get started with Kite’s CSV tutorial</a></p>
 
-<div class="left">
+<div class="right">
 
 <div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">View</span> <span class="n">latest</span> <span class="o">=</span> <span class="n">Datasets</span><span class="o">.</span><span class="na">load</span><span class="o">(</span><span class="n">uri</span><span class="o">)</span>
     <span class="o">.</span><span class="na">from</span><span class="o">(</span><span class="s">&quot;time&quot;</span><span class="o">,</span> <span class="n">startOfToday</span><span class="o">)</span>
@@ -85,7 +85,7 @@ Added 1000000 records to dataset &quot;ratings&quot;</code></pre></div>
 
 <p>Kite’s data API provides programmatic access to datasets. Using the API, you can build applications that directly interact with your datasets. For example, you can load a dataset and select a subset of it for a MapReduce pipeline.</p>
 
-<p><a href="/docs/staging/API-Overview.html"><i class="fa fa-chevron-right"></i>  Learn more about the Kite API</a></p>
+<p><a href="/API-Overview.html"><i class="fa fa-chevron-right"></i>  Learn more about the Kite API</a></p>
 
 <h2 id="low-level-control">Low-level control</h2>
 
@@ -124,13 +124,13 @@ Added 1000000 records to dataset &quot;ratings&quot;</code></pre></div>
   </div>
 </div>
 
-<p><a href="/docs/staging/Kite-Data-Module-Overview.html"><i class="fa fa-chevron-right"></i>  Learn more about Kite datasets</a></p>
+<p><a href="/Kite-Data-Module-Overview.html"><i class="fa fa-chevron-right"></i>  Learn more about Kite datasets</a></p>
 
 <h2 id="configuration-based-transformation">Configuration-based transformation</h2>
 
 <p>Kite morphlines is a flexible way to express data transformations as configuration.</p>
 
-<p><a href="/docs/staging/morphlines/"><i class="fa fa-chevron-right"></i>  Go to the Morphlines introduction</a> or <a href="/docs/staging/morphlines/morphlines-reference-guide.html">reference guide</a></p>
+<p><a href="/morphlines/"><i class="fa fa-chevron-right"></i>  Go to the Morphlines introduction</a> or <a href="/morphlines/morphlines-reference-guide.html">reference guide</a></p>
 
 
   </article>
@@ -145,13 +145,13 @@ Added 1000000 records to dataset &quot;ratings&quot;</code></pre></div>
   <div class="wrap columns">
 
     <div class="left">
-      <h2 class="footer-heading">Kite Software Development Kit, 0.17.1</h2>
+      <h2 class="footer-heading">Kite Software Development Kit, 1.0.0</h2>
 
       <ul>
         <li>Kite is licensed under</li>
         <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
         <li>&nbsp;</li>
-        <li>Generated on 23 December 2014</li>
+        <li>Generated on 24 February 2015</li>
       </ul>
 
     </div>
@@ -173,9 +173,9 @@ Added 1000000 records to dataset &quot;ratings&quot;</code></pre></div>
           <div class="right">
             <ul>
               <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
-              <li><a href="/docs/0.17.1/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
-              <li><a href="/docs/0.17.1/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
-              <li><a href="/docs/staging/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+              <li><a href="/docs/1.0.0/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/1.0.0/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
             </ul>
           </div>
         </div>
