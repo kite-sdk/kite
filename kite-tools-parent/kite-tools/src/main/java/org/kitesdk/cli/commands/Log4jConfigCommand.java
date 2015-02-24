@@ -73,7 +73,7 @@ public class Log4jConfigCommand extends BaseDatasetCommand {
     URL schemaUrl = load(datasetName.get(0), GenericRecord.class).getDataset()
         .getDescriptor().getSchemaUrl();
     if (schemaUrl == null) {
-      console.warn("Warning: The dataset {} doese not have a schema URL. The schema will be sent with each event.", datasetName.get(0));
+      console.warn("Warning: The dataset {} does not have a schema URL. The schema will be sent with each event.", datasetName.get(0));
     }
 
     StringBuilder sb = new StringBuilder();

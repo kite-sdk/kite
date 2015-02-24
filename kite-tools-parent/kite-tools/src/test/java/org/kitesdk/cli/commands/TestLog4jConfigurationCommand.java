@@ -93,10 +93,10 @@ public class TestLog4jConfigurationCommand {
         "log4j.appender.flume.Hostname = quickstart.cloudera\n" +
         "log4j.appender.flume.Port = 41415\n" +
         "log4j.appender.flume.UnsafeMode = true\n" +
-        "log4j.appender.flume.AvroSchemaUrl = file:.*/.metadata/schemas/1.avsc\n" +
         "\n" +
         "# Log events from the following Java class/package:\n" +
         "log4j.logger.org.kitesdk.test.logging = INFO, flume\n"));
+    verify(console).warn("Warning: The dataset {} does not have a schema URL. The schema will be sent with each event.", "users");
     verifyNoMoreInteractions(console);
   }
 
@@ -132,10 +132,10 @@ public class TestLog4jConfigurationCommand {
         "log4j.appender.flume.Hostname = quickstart.cloudera\n" +
         "log4j.appender.flume.Port = 41415\n" +
         "log4j.appender.flume.UnsafeMode = true\n" +
-        "log4j.appender.flume.AvroSchemaUrl = file:.*/.metadata/schemas/1.avsc\n" +
         "\n" +
         "# Log events from the following Java class/package:\n" +
         "log4j.logger.org.kitesdk.test.logging = INFO, flume\n"));
+    verify(console).warn("Warning: The dataset {} does not have a schema URL. The schema will be sent with each event.", "users");
     verifyNoMoreInteractions(console);
   }
 
