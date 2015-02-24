@@ -19,12 +19,12 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>kite-hbase-dependencies</artifactId>
   <packaging>pom</packaging>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
 
   <parent>
     <groupId>org.kitesdk</groupId>
     <artifactId>kite-hbase-deps-parent</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
   </parent>
 
   <name>Kite HBase Default Dependencies Module</name>

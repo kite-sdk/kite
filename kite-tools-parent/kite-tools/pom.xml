@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.kitesdk</groupId>
     <artifactId>kite-tools-parent</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
   </parent>
 
   <name>Kite Tools Runtime Module</name>

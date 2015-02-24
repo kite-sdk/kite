@@ -19,13 +19,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.kitesdk</groupId>
   <artifactId>kite-app-parent-modules</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <parent>
     <groupId>org.kitesdk</groupId>
     <artifactId>kite-parent</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
   </parent>
 
   <name>Kite Application POM Modules</name>
