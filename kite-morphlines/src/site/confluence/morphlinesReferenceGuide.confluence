@@ -3111,6 +3111,7 @@ Examples:
 - [#loadSolrPartialUpdate]
 - [#loadSolrDeleteById]
 - [#loadSolrDeleteByQuery]
+- [#loadSolrChildDocuments]
 
 {anchor:loadSolrUpdate}
 \\
@@ -3205,6 +3206,49 @@ loadSolr {
   <solrLocator goes here>
 }
 {code}
+
+{anchor:loadSolrChildDocuments}
+\\
+\\
+h3. Example loadSolr usage for child documents (aka nested documents)
+
+A record can contain (arbitrarily nested) child documents (aka nested documents aka nested records) 
+in the "\_loadSolr\_childDocuments" morphline record field. 
+If present, these are recognized and indexed by the {{loadSolr}} command, 
+and the parent\-child relationships become available to Solr queries, as shown below:
+
+{code}
+java { 
+  code: """
+    // Index a document that has a foo child document, which in turn has a bar child document
+    record.put("id", "12345");
+    record.put("content_type", "parent");
+    Record childDoc = new Record();            
+    childDoc.put("id", "foo");
+    childDoc.put("content_type", "child");
+    Record childDoc2 = new Record();
+    childDoc2.put("id", "bar");
+    childDoc2.put("content_type", "child");
+    childDoc.put("_loadSolr_childDocuments", childDoc2); // mark as child doc
+    record.put("_loadSolr_childDocuments", childDoc); // mark as child doc
+    return child.process(record);
+        """ 
+  } 
+}           
+
+loadSolr {
+  <solrLocator goes here>
+}
+{code}
+
+Example Solr parent block join that returns the parent records for records where the child documents 
+contain "bar" in the {{id}} field:
+
+{code}
+{!parent which='content_type:parent'}id:bar
+{code}
+
+For more background see [http://heliosearch.org/expand-block-join/]
 
 h2. generateSolrSequenceKey
 
