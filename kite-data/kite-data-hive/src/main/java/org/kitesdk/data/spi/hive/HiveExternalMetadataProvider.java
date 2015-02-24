@@ -18,14 +18,12 @@ package org.kitesdk.data.spi.hive;
 import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetExistsException;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.spi.Compatibility;

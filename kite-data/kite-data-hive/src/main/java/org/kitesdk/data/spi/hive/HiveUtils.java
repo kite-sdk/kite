@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -46,6 +47,7 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.DatasetOperationException;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.PartitionStrategy;
@@ -232,24 +234,15 @@ class HiveUtils {
     }
 
     if (includeSchema) {
-      // copy schema info
-      boolean useLiteral;
-      final URL schemaURL = descriptor.getSchemaUrl();
-      try {
-        useLiteral = (schemaURL == null) ||
-                !HDFS_SCHEME.equals(schemaURL.toURI().getScheme());
-      } catch (URISyntaxException ex) {
-        useLiteral = true;
-      }
-
-      if (useLiteral) {
+      URL schemaURL = descriptor.getSchemaUrl();
+      if (useSchemaURL(schemaURL)) {
         table.getParameters().put(
-                AVRO_SCHEMA_LITERAL_PROPERTY_NAME,
-                descriptor.getSchema().toString());
+            AVRO_SCHEMA_URL_PROPERTY_NAME,
+            descriptor.getSchemaUrl().toExternalForm());
       } else {
         table.getParameters().put(
-                AVRO_SCHEMA_URL_PROPERTY_NAME,
-                schemaURL.toExternalForm());
+            AVRO_SCHEMA_LITERAL_PROPERTY_NAME,
+            descriptor.getSchema().toString());
       }
     }
 
@@ -268,6 +261,15 @@ class HiveUtils {
     }
 
     return table;
+  }
+
+  private static boolean useSchemaURL(@Nullable URL schemaURL) {
+    try {
+      return ((schemaURL != null) &&
+          HDFS_SCHEME.equals(schemaURL.toURI().getScheme()));
+    } catch (URISyntaxException ex) {
+      return false;
+    }
   }
 
   static Table createEmptyTable(String namespace, String name) {
@@ -296,27 +298,36 @@ class HiveUtils {
   }
 
   public static void updateTableSchema(Table table, DatasetDescriptor descriptor) {
+    URL schemaURL = descriptor.getSchemaUrl();
+
     if (table.getParameters().get(AVRO_SCHEMA_LITERAL_PROPERTY_NAME) != null) {
-      table.getParameters().put(
-          AVRO_SCHEMA_LITERAL_PROPERTY_NAME,
-          descriptor.getSchema().toString());
+      if (useSchemaURL(schemaURL)) {
+        table.getParameters().remove(AVRO_SCHEMA_LITERAL_PROPERTY_NAME);
+        table.getParameters().put(AVRO_SCHEMA_URL_PROPERTY_NAME,
+            schemaURL.toExternalForm());
+      } else {
+        table.getParameters().put(
+            AVRO_SCHEMA_LITERAL_PROPERTY_NAME,
+            descriptor.getSchema().toString());
+      }
+
     } else if (table.getParameters().get(AVRO_SCHEMA_URL_PROPERTY_NAME) != null) {
-      if (descriptor.getSchemaUrl() == null) {
-        throw new DatasetException("Cannot update " + AVRO_SCHEMA_URL_PROPERTY_NAME +
+      if (schemaURL == null) {
+        throw new DatasetOperationException(
+            "Cannot update " + AVRO_SCHEMA_URL_PROPERTY_NAME +
             " since descriptor schema URL is not set.");
       }
       table.getParameters().put(
           AVRO_SCHEMA_URL_PROPERTY_NAME,
-          descriptor.getSchemaUrl().toExternalForm());
-    } else {
+          schemaURL.toExternalForm());
 
+    } else {
       // neither the literal or the URL are set, so add the URL if specified
       // and the schema literal if not.
-      if (descriptor.getSchemaUrl() != null) {
-
+      if (useSchemaURL(schemaURL)) {
         table.getParameters().put(
                 AVRO_SCHEMA_URL_PROPERTY_NAME,
-                descriptor.getSchemaUrl().toExternalForm());
+                schemaURL.toExternalForm());
 
       } else if (descriptor.getSchema() != null) {
         table.getParameters().put(
