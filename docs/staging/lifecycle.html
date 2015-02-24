@@ -7,10 +7,10 @@
     <title>Kite Dataset Lifecycle</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="An open source data API for Hadoop.">
-    <link rel="canonical" href="http://kitesdk.org/lifecycle.html">
+    <link rel="canonical" href="http://kitesdk.org/docs/staging/lifecycle.html">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/docs/staging/css/main.css">
     <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 
@@ -23,7 +23,7 @@
 
   <div class="wrap">
 
-    <a class="site-title" href="/">Kite Software Development Kit</a>
+    <a class="site-title" href="/docs/staging/">Kite Software Development Kit</a>
 
     <nav class="site-nav">
       <a href="#" class="menu-icon">
@@ -57,11 +57,11 @@
         <ul>
           
           
-          <li><a href="/Kite-SDK-Guide.html">Kite Background</a></li>
+          <li><a href="/docs/staging/Kite-SDK-Guide.html">Kite Background</a></li>
           
           
           
-          <li><a href="/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
+          <li><a href="/docs/staging/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
           
           
         </ul>
@@ -70,15 +70,15 @@
         <ul>
           
           
-          <li><a href="/Install-Kite.html">Installing the CLI</a></li>
+          <li><a href="/docs/staging/Install-Kite.html">Installing the CLI</a></li>
           
           
           
-          <li><a href="/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
+          <li><a href="/docs/staging/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
           
           
           
-          <li><a href="/cli-reference.html">Kite CLI Reference</a></li>
+          <li><a href="/docs/staging/cli-reference.html">Kite CLI Reference</a></li>
           
           
         </ul>
@@ -87,15 +87,15 @@
         <ul>
           
           
-          <li><a href="/API-Overview.html">API Introduction</a></li>
+          <li><a href="/docs/staging/API-Overview.html">API Introduction</a></li>
           
           
           
-          <li><a href="/view-api.html">Views API</a></li>
+          <li><a href="/docs/staging/view-api.html">Views API</a></li>
           
           
           
-          <li><a href="/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
+          <li><a href="/docs/staging/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
           
           
         </ul>
@@ -104,27 +104,27 @@
         <ul>
           
           
-          <li><a href="/URIs.html">Kite URIs</a></li>
+          <li><a href="/docs/staging/URIs.html">Kite URIs</a></li>
           
           
           
-          <li><a href="/Schema-Evolution.html">Schema Evolution</a></li>
+          <li><a href="/docs/staging/Schema-Evolution.html">Schema Evolution</a></li>
           
           
           
-          <li><a href="/Partitioned-Datasets.html">Partitioned Datasets</a></li>
+          <li><a href="/docs/staging/Partitioned-Datasets.html">Partitioned Datasets</a></li>
           
           
           
-          <li><a href="/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
+          <li><a href="/docs/staging/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
           
           
           
-          <li><a href="/HBase-Storage-Cells.html">HBase Storage</a></li>
+          <li><a href="/docs/staging/HBase-Storage-Cells.html">HBase Storage</a></li>
           
           
           
-          <li><a href="/Column-Mapping.html">Column Mapping</a></li>
+          <li><a href="/docs/staging/Column-Mapping.html">Column Mapping</a></li>
           
           
           
@@ -132,11 +132,11 @@
           
           
           
-          <li><a href="/maven">Maven Plugin</a></li>
+          <li><a href="/docs/staging/maven">Maven Plugin</a></li>
           
           
           
-          <li><a href="/dependencies">Dependency Info</a></li>
+          <li><a href="/docs/staging/dependencies">Dependency Info</a></li>
           
           
         </ul>
@@ -181,7 +181,7 @@
 
 <h2 id="preparation">Preparation</h2>
 
-<p>If you have not done so already, install the <a href="/Install-Kite.html">Kite command-line interface</a>.</p>
+<p>If you have not done so already, install the <a href="/docs/staging/Install-Kite.html">Kite command-line interface</a>.</p>
 
 <map name="lifecycle">
   <area shape="rect" coords="25,35,150,100" href="#generate" alt="Generate Schema" title="Generate Schema" />
@@ -237,7 +237,7 @@
 </pre></td>
 </tr></table>
 </div>
-<p>Use the CLI command <a href="/cli-reference.html#obj-schema"><code>obj-schema</code></a> to generate an Avro schema file based on the source Java class.</p>
+<p>Use the CLI command <a href="/docs/staging/cli-reference.html#obj-schema"><code>obj-schema</code></a> to generate an Avro schema file based on the source Java class.</p>
 
 <pre><code>kite-dataset obj-schema org.kitesdk.cli.example.Movie -o movie.avsc
 </code></pre>
@@ -283,7 +283,7 @@
 . . .
 </code></pre>
 
-<p>Use the CLI command <a href="/cli-reference.html#csv-schema"><code>csv-schema</code></a> to generate the Avro schema.</p>
+<p>Use the CLI command <a href="/docs/staging/cli-reference.html#csv-schema"><code>csv-schema</code></a> to generate the Avro schema.</p>
 
 <pre><code>kite-dataset csv-schema movie.csv --class Movie -o movie.avsc
 </code></pre>
@@ -361,15 +361,15 @@
 
 <pre><code>kite-dataset create movie --schema movie.avsc partition-by movie.json
 </code></pre>
-<p>See <a href="/Partitioned-Datasets.html">Partitioned Datasets</a> for more detail on partition strategies.</p>
+<p>See <a href="/docs/staging/Partitioned-Datasets.html">Partitioned Datasets</a> for more detail on partition strategies.</p>
 
 <h3 id="column-mapping">Column Mapping</h3>
 
-<p>Column mapping allows you to configure how your records should be stored in HBase for maximum performance and efficiency. You define the mapping based on the type of data you want to store, and Kite handles the infrastructure required to support your mapping strategy. See <a href="/Column-Mapping.html">Column Mapping</a>.</p>
+<p>Column mapping allows you to configure how your records should be stored in HBase for maximum performance and efficiency. You define the mapping based on the type of data you want to store, and Kite handles the infrastructure required to support your mapping strategy. See <a href="/docs/staging/Column-Mapping.html">Column Mapping</a>.</p>
 
 <h3 id="parquet">Parquet</h3>
 
-<p>If you typically work with a subset of the fields in your dataset rather than an entire row, you might want to create the dataset in Parquet format, rather than the default Avro format. See <a href="/Parquet-vs-Avro-Format.html">Parquet vs Avro Format</a>.</p>
+<p>If you typically work with a subset of the fields in your dataset rather than an entire row, you might want to create the dataset in Parquet format, rather than the default Avro format. See <a href="/docs/staging/Parquet-vs-Avro-Format.html">Parquet vs Avro Format</a>.</p>
 
 <pre><code>kite-dataset create movie --schema movie.avsc -f parquet
 </code></pre>
@@ -397,11 +397,11 @@
 <pre><code>kite-dataset csv-import /kite/example/movie.csv movie
 </code></pre>
 
-<p>See <a href="/cli-reference.html#csv-import"><code>csv-import</code></a> for additional options.</p>
+<p>See <a href="/docs/staging/cli-reference.html#csv-import"><code>csv-import</code></a> for additional options.</p>
 
 <h3 id="copy-dataset">Copy Dataset</h3>
 
-<p>Use the <a href="/cli-reference.html#copy"><code>copy</code></a> command to transfer the contents of one dataset into another.</p>
+<p>Use the <a href="/docs/staging/cli-reference.html#copy"><code>copy</code></a> command to transfer the contents of one dataset into another.</p>
 
 <pre><code>kite-dataset copy movie_parquet movie
 </code></pre>
@@ -415,7 +415,7 @@
 
 <h2 id="validate-dataset">Validate Dataset</h2>
 
-<p>Select the first few records of your dataset to ensure that they loaded properly. Use the <a href="/cli-reference.html#show"><code>show</code></a> command to view the first 10 records in your dataset.</p>
+<p>Select the first few records of your dataset to ensure that they loaded properly. Use the <a href="/docs/staging/cli-reference.html#show"><code>show</code></a> command to view the first 10 records in your dataset.</p>
 
 <pre><code>kite-dataset show movie
 </code></pre>
@@ -441,15 +441,15 @@
 
 <h3 id="loading-data">Loading Data</h3>
 
-<p>Once you have created your Kite dataset, you can add records as you would with any CDH dataset. If you use <a href="/cli-reference.html#csv-import"><code>csv-import</code></a> to add more records, they are appended to the dataset.</p>
+<p>Once you have created your Kite dataset, you can add records as you would with any CDH dataset. If you use <a href="/docs/staging/cli-reference.html#csv-import"><code>csv-import</code></a> to add more records, they are appended to the dataset.</p>
 
 <h3 id="compacting-the-dataset">Compacting the Dataset</h3>
 
-<p>One by-product of the <a href="/cli-reference.html#copy"><code>copy</code></a> command is that it compacts multiple files in a partition into one file. This can be particularly useful for datasets that use streaming input. You can periodically copy the active dataset to an archive, or copy the dataset, delete the current data, and copy the compacted data back to the active dataset.  </p>
+<p>One by-product of the <a href="/docs/staging/cli-reference.html#copy"><code>copy</code></a> command is that it compacts multiple files in a partition into one file. This can be particularly useful for datasets that use streaming input. You can periodically copy the active dataset to an archive, or copy the dataset, delete the current data, and copy the compacted data back to the active dataset.  </p>
 
 <h3 id="updating-the-dataset-schema">Updating the Dataset Schema</h3>
 
-<p>Over time, your dataset requirements might change. You can add, remove, or change the datatype of columns in your dataset, provided you don’t attempt a change that would result in the loss or corruption of data. Kite follows the guidelines for Schema resolution in the <a href="http://avro.apache.org/docs/current/spec.html#Schema+Resolution">Avro spec</a>. See <a href="/Schema-Evolution.html">Schema Evolution</a> for more detail and examples.</p>
+<p>Over time, your dataset requirements might change. You can add, remove, or change the datatype of columns in your dataset, provided you don’t attempt a change that would result in the loss or corruption of data. Kite follows the guidelines for Schema resolution in the <a href="http://avro.apache.org/docs/current/spec.html#Schema+Resolution">Avro spec</a>. See <a href="/docs/staging/Schema-Evolution.html">Schema Evolution</a> for more detail and examples.</p>
 
 <p><a name="annihilate"></a></p>
 
@@ -460,7 +460,7 @@
 
 <h2 id="annihilate-dataset">Annihilate Dataset</h2>
 
-<p>When you first create a dataset, you might want to tweak it before you go live. It can be much cleaner and easier to delete the nascent dataset and start over. It could also be the case that your dataset is no longer needed. Regardless of your motivation, you can permanently remove one or more datasets from CDH using the CLI command <a href="/cli-reference.html#delete"><code>delete</code></a>.</p>
+<p>When you first create a dataset, you might want to tweak it before you go live. It can be much cleaner and easier to delete the nascent dataset and start over. It could also be the case that your dataset is no longer needed. Regardless of your motivation, you can permanently remove one or more datasets from CDH using the CLI command <a href="/docs/staging/cli-reference.html#delete"><code>delete</code></a>.</p>
 
 <p>For example, to remove the <em>movies</em> dataset, you can use the following command.</p>
 
@@ -510,7 +510,7 @@
               <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
               <li><a href="/docs/1.0.0/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
               <li><a href="/docs/1.0.0/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
-              <li><a href="/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+              <li><a href="/docs/staging/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
             </ul>
           </div>
         </div>

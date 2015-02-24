@@ -7,10 +7,10 @@
     <title>Introduction to Datasets</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="An open source data API for Hadoop.">
-    <link rel="canonical" href="http://kitesdk.org/introduction-to-datasets.html">
+    <link rel="canonical" href="http://kitesdk.org/docs/staging/introduction-to-datasets.html">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/docs/staging/css/main.css">
     <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 
@@ -23,7 +23,7 @@
 
   <div class="wrap">
 
-    <a class="site-title" href="/">Kite Software Development Kit</a>
+    <a class="site-title" href="/docs/staging/">Kite Software Development Kit</a>
 
     <nav class="site-nav">
       <a href="#" class="menu-icon">
@@ -57,11 +57,11 @@
         <ul>
           
           
-          <li><a href="/Kite-SDK-Guide.html">Kite Background</a></li>
+          <li><a href="/docs/staging/Kite-SDK-Guide.html">Kite Background</a></li>
           
           
           
-          <li><a href="/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
+          <li><a href="/docs/staging/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
           
           
         </ul>
@@ -70,15 +70,15 @@
         <ul>
           
           
-          <li><a href="/Install-Kite.html">Installing the CLI</a></li>
+          <li><a href="/docs/staging/Install-Kite.html">Installing the CLI</a></li>
           
           
           
-          <li><a href="/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
+          <li><a href="/docs/staging/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
           
           
           
-          <li><a href="/cli-reference.html">Kite CLI Reference</a></li>
+          <li><a href="/docs/staging/cli-reference.html">Kite CLI Reference</a></li>
           
           
         </ul>
@@ -87,15 +87,15 @@
         <ul>
           
           
-          <li><a href="/API-Overview.html">API Introduction</a></li>
+          <li><a href="/docs/staging/API-Overview.html">API Introduction</a></li>
           
           
           
-          <li><a href="/view-api.html">Views API</a></li>
+          <li><a href="/docs/staging/view-api.html">Views API</a></li>
           
           
           
-          <li><a href="/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
+          <li><a href="/docs/staging/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
           
           
         </ul>
@@ -104,39 +104,39 @@
         <ul>
           
           
-          <li><a href="/URIs.html">Kite URIs</a></li>
+          <li><a href="/docs/staging/URIs.html">Kite URIs</a></li>
           
           
           
-          <li><a href="/Schema-Evolution.html">Schema Evolution</a></li>
+          <li><a href="/docs/staging/Schema-Evolution.html">Schema Evolution</a></li>
           
           
           
-          <li><a href="/Partitioned-Datasets.html">Partitioned Datasets</a></li>
+          <li><a href="/docs/staging/Partitioned-Datasets.html">Partitioned Datasets</a></li>
           
           
           
-          <li><a href="/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
+          <li><a href="/docs/staging/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
           
           
           
-          <li><a href="/HBase-Storage-Cells.html">HBase Storage</a></li>
+          <li><a href="/docs/staging/HBase-Storage-Cells.html">HBase Storage</a></li>
           
           
           
-          <li><a href="/Column-Mapping.html">Column Mapping</a></li>
+          <li><a href="/docs/staging/Column-Mapping.html">Column Mapping</a></li>
           
           
           
-          <li><a href="/lifecycle.html">Dataset Lifecycle</a></li>
+          <li><a href="/docs/staging/lifecycle.html">Dataset Lifecycle</a></li>
           
           
           
-          <li><a href="/maven">Maven Plugin</a></li>
+          <li><a href="/docs/staging/maven">Maven Plugin</a></li>
           
           
           
-          <li><a href="/dependencies">Dependency Info</a></li>
+          <li><a href="/docs/staging/dependencies">Dependency Info</a></li>
           
           
         </ul>
@@ -156,7 +156,7 @@
 
 <p>To define a dataset, Kite minimally requires a <a href="#uris">URI</a> and a <a href="#schemas">schema</a>. Other considerations would include deciding how to partition your data and additional configuration options.</p>
 
-<p>When using the CLI, you define your dataset using the <a href="/cli-reference.html#create"><code>create</code></a> command. When using the API, you define your dataset using the <a href="/apidocs/org/kitesdk/data/Datasets.html#create(java.net.URI,%20org.kitesdk.data.DatasetDescriptor)">Datasets.create</a> method.</p>
+<p>When using the CLI, you define your dataset using the <a href="/docs/staging/cli-reference.html#create"><code>create</code></a> command. When using the API, you define your dataset using the <a href="/docs/staging/apidocs/org/kitesdk/data/Datasets.html#create(java.net.URI,%20org.kitesdk.data.DatasetDescriptor)">Datasets.create</a> method.</p>
 
 <h2 id="uris">URIs</h2>
 
@@ -170,7 +170,7 @@
 
 <h3 id="uri-schemes">URI Schemes</h3>
 
-<p>You can create datasets in Hive, HDFS, HBase, or as local files. The dataset schemes are defined using scheme-specific URI patterns. See <a href="/URIs.html">Dataset and View URIs</a>.</p>
+<p>You can create datasets in Hive, HDFS, HBase, or as local files. The dataset schemes are defined using scheme-specific URI patterns. See <a href="/docs/staging/URIs.html">Dataset and View URIs</a>.</p>
 
 <p>Note that a URI <em>scheme</em>, which describes the storage location type, is different than a dataset <em>schema</em>, which describes the format of records in the dataset.</p>
 
@@ -219,12 +219,12 @@
   </thead>
   <tbody>
     <tr>
-      <td><a href="/Inferring-a-Schema-from-a-Java-Class.html">Inferring a schema from a Java Class</a></td>
-      <td><a href="/cli-reference.html#obj-schema">Inferring a schema from a Java class</a></td>
+      <td><a href="/docs/staging/Inferring-a-Schema-from-a-Java-Class.html">Inferring a schema from a Java Class</a></td>
+      <td><a href="/docs/staging/cli-reference.html#obj-schema">Inferring a schema from a Java class</a></td>
     </tr>
     <tr>
-      <td><a href="/Inferring-a-Schema-from-an-Avro-Data-File.html">Using the schema of an Avro data file</a></td>
-      <td><a href="/cli-reference.html#csv-schema">Inferring a schema from a CSV file</a></td>
+      <td><a href="/docs/staging/Inferring-a-Schema-from-an-Avro-Data-File.html">Using the schema of an Avro data file</a></td>
+      <td><a href="/docs/staging/cli-reference.html#csv-schema">Inferring a schema from a CSV file</a></td>
     </tr>
   </tbody>
 </table>
@@ -237,9 +237,9 @@
 
 <p>Kite validates your partition strategy using the dataset schema. This catches problems early. For example, if you mistakenly type in your partition definition <em>timestmap</em>, validation catches the typo because the schema has a <em>timestamp</em> column. Kite also validates that field types can be partitioned on the selected value. For example, you can’t extract a year from a string.</p>
 
-<p>You define your partition strategy in <a href="/Partition-Strategy-Format.html">partition strategy JSON format</a> and apply it when you create your dataset. See <a href="/Partitioned-Datasets.html#partition-strategies">Partitioned Datasets</a>.</p>
+<p>You define your partition strategy in <a href="/docs/staging/Partition-Strategy-Format.html">partition strategy JSON format</a> and apply it when you create your dataset. See <a href="/docs/staging/Partitioned-Datasets.html#partition-strategies">Partitioned Datasets</a>.</p>
 
-<p>For example, you can create a partition strategy using the CLI command <a href="/cli-reference.html#partition-config"><code>partition-config</code></a> with name:value pairs to specify that the dataset should be partitioned on a timestamp (<code>ts</code>) field by year, month, and day.</p>
+<p>For example, you can create a partition strategy using the CLI command <a href="/docs/staging/cli-reference.html#partition-config"><code>partition-config</code></a> with name:value pairs to specify that the dataset should be partitioned on a timestamp (<code>ts</code>) field by year, month, and day.</p>
 
 <pre><code>$ kite-dataset partition-config ts:year ts:month ts:day -s rating.avsc
 </code></pre>
@@ -288,7 +288,7 @@
 
 <p>When you use an HBase scheme, Kite requires a column mapping to configure how your records are stored. You define column mapping in JSON format. Kite stores and retrieves HBase data seamlessly, using the same commands as with other storage schemes.</p>
 
-<p>See <a href="/Column-Mapping.html">Column Mapping</a>. See also the <a href="/cli-reference.html#mapping-config">CLI mapping-config command</a>.</p>
+<p>See <a href="/docs/staging/Column-Mapping.html">Column Mapping</a>. See also the <a href="/docs/staging/cli-reference.html#mapping-config">CLI mapping-config command</a>.</p>
 
 <h3 id="properties">Properties</h3>
 
@@ -299,11 +299,11 @@
 <pre><code>kite-dataset create users --schema user.avsc --set kite.writer.cache-size=20
 </code></pre>
 
-<p>You can also create custom properties for your own applications. See <a href="/using-kite-properties.html">Using Kite Properties</a>.</p>
+<p>You can also create custom properties for your own applications. See <a href="/docs/staging/using-kite-properties.html">Using Kite Properties</a>.</p>
 
 <h2 id="next-steps">Next Steps</h2>
 
-<p>The example <a href="/Using-the-Kite-CLI-to-Create-a-Dataset.html">Using the Kite Command Line Interface to Create a Dataset</a> demonstrates many of the features described above, and shows you how to create your own Hadoop dataset using only three commands.</p>
+<p>The example <a href="/docs/staging/Using-the-Kite-CLI-to-Create-a-Dataset.html">Using the Kite Command Line Interface to Create a Dataset</a> demonstrates many of the features described above, and shows you how to create your own Hadoop dataset using only three commands.</p>
 
 <hr />
 
@@ -354,7 +354,7 @@
               <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
               <li><a href="/docs/1.0.0/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
               <li><a href="/docs/1.0.0/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
-              <li><a href="/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+              <li><a href="/docs/staging/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
             </ul>
           </div>
         </div>
