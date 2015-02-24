@@ -20,13 +20,19 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
+
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericData.Record;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.crunch.CrunchRuntimeException;
+import org.apache.crunch.MapFn;
 import org.apache.crunch.PCollection;
 import org.apache.crunch.Pipeline;
 import org.apache.crunch.Target;
 import org.apache.crunch.impl.mr.MRPipeline;
+import org.apache.crunch.types.avro.Avros;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.After;
@@ -37,6 +43,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetReader;
+import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.MiniDFSTest;
@@ -47,6 +55,7 @@ import org.kitesdk.data.spi.PartitionedDataset;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.LastModifiedAccessor;
 import org.kitesdk.data.URIBuilder;
+import org.kitesdk.data.user.NewUserRecord;
 
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.USER_SCHEMA;
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.checkTestUsers;
@@ -410,6 +419,126 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     checkTestUsers(outputDataset, 1);
     Assert.assertTrue(((LastModifiedAccessor) outputDataset).getLastModified() > lastModified);
   }
+  // Statically typed identify function to ensure the expected record is used.
+  static class UserRecordIdentityFn extends MapFn<NewUserRecord, NewUserRecord> {
+
+    @Override
+    public NewUserRecord map(NewUserRecord input) {
+      return input;
+    }
+  }
+
+  @Test
+     public void testUseReaderSchema() throws IOException {
+
+    // Create a schema with only a username, so we can test reading it
+    // with an enhanced record structure.
+    Schema oldRecordSchema = SchemaBuilder.record("org.kitesdk.data.user.OldUserRecord")
+        .fields()
+        .requiredString("username")
+        .endRecord();
+
+    // create the dataset
+    Dataset<Record> in = repo.create("ns", "in", new DatasetDescriptor.Builder()
+        .schema(oldRecordSchema).build());
+    Dataset<Record> out = repo.create("ns", "out", new DatasetDescriptor.Builder()
+        .schema(oldRecordSchema).build());
+    Record oldUser = new Record(oldRecordSchema);
+    oldUser.put("username", "user");
+
+    DatasetWriter<Record> writer = in.newWriter();
+
+    try {
+
+      writer.write(oldUser);
+
+    } finally {
+      writer.close();
+    }
+
+    Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
+
+    // read data from updated dataset that has the new schema.
+    // At this point, User class has the old schema
+    PCollection<NewUserRecord> data = pipeline.read(CrunchDatasets.asSource(in.getUri(),
+        NewUserRecord.class));
+
+    PCollection<NewUserRecord> processed = data.parallelDo(new UserRecordIdentityFn(),
+        Avros.records(NewUserRecord.class));
+
+    pipeline.write(processed, CrunchDatasets.asTarget(out));
+
+    DatasetReader reader = out.newReader();
+
+    Assert.assertTrue("Pipeline failed.", pipeline.run().succeeded());
+
+    try {
+
+      // there should be one record that is equal to our old user generic record.
+      Assert.assertEquals(oldUser, reader.next());
+      Assert.assertFalse(reader.hasNext());
+
+    } finally {
+      reader.close();
+    }
+  }
+
+  @Test
+  public void testUseReaderSchemaParquet() throws IOException {
+
+    // Create a schema with only a username, so we can test reading it
+    // with an enhanced record structure.
+    Schema oldRecordSchema = SchemaBuilder.record("org.kitesdk.data.user.OldUserRecord")
+        .fields()
+        .requiredString("username")
+        .endRecord();
+
+    // create the dataset
+    Dataset<Record> in = repo.create("ns", "in", new DatasetDescriptor.Builder()
+        .format(Formats.PARQUET).schema(oldRecordSchema).build());
+
+    Dataset<Record> out = repo.create("ns", "out", new DatasetDescriptor.Builder()
+        .format(Formats.PARQUET).schema(oldRecordSchema).build());
+    Record oldUser = new Record(oldRecordSchema);
+    oldUser.put("username", "user");
+
+    DatasetWriter<Record> writer = in.newWriter();
+
+    try {
+
+      writer.write(oldUser);
+
+    } finally {
+      writer.close();
+    }
+
+    Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
+
+    // read data from updated dataset that has the new schema.
+    // At this point, User class has the old schema
+    PCollection<NewUserRecord> data = pipeline.read(CrunchDatasets.asSource(in.getUri(),
+        NewUserRecord.class));
+
+    PCollection<NewUserRecord> processed = data.parallelDo(new UserRecordIdentityFn(),
+        Avros.records(NewUserRecord.class));
+
+    pipeline.write(processed, CrunchDatasets.asTarget(out));
+
+    DatasetReader reader = out.newReader();
+
+    Assert.assertTrue("Pipeline failed.", pipeline.run().succeeded());
+
+    try {
+
+      // there should be one record that is equal to our old user generic record.
+      Assert.assertEquals(oldUser, reader.next());
+      Assert.assertFalse(reader.hasNext());
+
+    } finally {
+      reader.close();
+    }
+  }
+
 
   private void runCheckpointPipeline(Dataset<Record> inputDataset,
       Dataset<Record> outputDataset) {
