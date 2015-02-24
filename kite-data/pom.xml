@@ -27,7 +27,6 @@
     <module>kite-data-hive</module>
     <module>kite-data-crunch</module>
     <module>kite-data-flume</module>
-    <module>kite-data-hcatalog</module>
     <module>kite-data-hbase</module>
     <module>kite-data-mapreduce</module>
     <module>kite-data-spark</module>
