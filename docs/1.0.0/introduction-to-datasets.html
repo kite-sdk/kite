@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Introduction to Datasets</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="An open source data API for Hadoop.">
+    <link rel="canonical" href="http://kitesdk.org/docs/1.0.0/introduction-to-datasets.html">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/docs/1.0.0/css/main.css">
+    <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+
+
+    <body>
+
+    <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/docs/1.0.0/">Kite Software Development Kit</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      
+      <div class="sidebar">
+      
+        <h4>About Kite</h4>
+        <ul>
+          
+        </ul>
+      
+        <h4></h4>
+        <ul>
+          
+          
+          <li><a href="/docs/1.0.0/Kite-SDK-Guide.html">Kite Background</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
+          
+          
+        </ul>
+      
+        <h4>Kite CLI</h4>
+        <ul>
+          
+          
+          <li><a href="/docs/1.0.0/Install-Kite.html">Installing the CLI</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/cli-reference.html">Kite CLI Reference</a></li>
+          
+          
+        </ul>
+      
+        <h4>Kite API</h4>
+        <ul>
+          
+          
+          <li><a href="/docs/1.0.0/API-Overview.html">API Introduction</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/view-api.html">Views API</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
+          
+          
+        </ul>
+      
+        <h4>Reference</h4>
+        <ul>
+          
+          
+          <li><a href="/docs/1.0.0/URIs.html">Kite URIs</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/Schema-Evolution.html">Schema Evolution</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/Partitioned-Datasets.html">Partitioned Datasets</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/HBase-Storage-Cells.html">HBase Storage</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/Column-Mapping.html">Column Mapping</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/lifecycle.html">Dataset Lifecycle</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/maven">Maven Plugin</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/dependencies">Dependency Info</a></li>
+          
+          
+        </ul>
+      
+      </div>
+      
+
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1>Introduction to Datasets</h1>
+  </header>
+
+  <article class="post-content">
+  <p>A dataset is a collection of records, similar to a relational database table. Records are similar to table rows, but the columns can contain not only strings or numbers, but also nested data structures such as lists, maps, and other records.</p>
+
+<p>To define a dataset, Kite minimally requires a <a href="#uris">URI</a> and a <a href="#schemas">schema</a>. Other considerations would include deciding how to partition your data and additional configuration options.</p>
+
+<p>When using the CLI, you define your dataset using the <a href="/docs/1.0.0/cli-reference.html#create"><code>create</code></a> command. When using the API, you define your dataset using the <a href="/docs/1.0.0/apidocs/org/kitesdk/data/Datasets.html#create(java.net.URI,%20org.kitesdk.data.DatasetDescriptor)">Datasets.create</a> method.</p>
+
+<h2 id="uris">URIs</h2>
+
+<p>Kite identifies datasets by URI. The URI you provide tells Kite how and where to store data. For example, a dataset created with the URI <code>dataset:hdfs:/user/cloudera/fact_tables/ratings</code> is stored in the <code>/user/cloudera/fact_tables/ratings</code> directory in HDFS.</p>
+
+<h3 id="names-and-namespaces">Names and Namespaces</h3>
+
+<p>URIs also define a name and namespace for your dataset. Kite uses these values when the underlying system has the same concept (for example, Hive). The name and namespace are typically the last two values in a URI. For example, if you create a dataset using the URI <code>dataset:hive:fact_tables/ratings</code>, Kite stores a Hive table <em>ratings</em> in the <em>fact</em><em>_tables</em> Hive database. If you create a dataset using the URI <code>dataset:hdfs:/user/cloudera/fact_tables/ratings</code>, Kite stores an HDFS dataset named <em>ratings</em> in the <em>fact</em><em>_tables</em> namespace.</p>
+
+<p>To ensure compatibility with Hive and other underlying systems, names and namespaces in URIs must be made of alphanumeric or underscore (_) characters  and cannot start with a number.</p>
+
+<h3 id="uri-schemes">URI Schemes</h3>
+
+<p>You can create datasets in Hive, HDFS, HBase, or as local files. The dataset schemes are defined using scheme-specific URI patterns. See <a href="/docs/1.0.0/URIs.html">Dataset and View URIs</a>.</p>
+
+<p>Note that a URI <em>scheme</em>, which describes the storage location type, is different than a dataset <em>schema</em>, which describes the format of records in the dataset.</p>
+
+<h2 id="schemas">Schemas</h2>
+
+<p>A schema defines the field names and datatypes for a dataset. Kite relies on an Apache Avro schema definition for all datasets. Kite standardizes data definition by using Avro schemas for both Parquet and Avro, and supports the standard Avro object models <em>generic</em> and <em>specific</em>.</p>
+
+<p>For example, this is the schema definition for a table using four columns from the <code>movies</code> dataset.<a href="#notes"><sup>1</sup></a></p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+<a href="#n6" name="n6">6</a>
+<a href="#n7" name="n7">7</a>
+<a href="#n8" name="n8">8</a>
+<a href="#n9" name="n9">9</a>
+<strong><a href="#n10" name="n10">10</a></strong>
+<a href="#n11" name="n11">11</a>
+</pre></td>
+  <td class="code"><pre>{
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">record</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Movie</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>namespace</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">org.kitesdk.examples.data</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>fields</span><span style="color:#404">&quot;</span></span>:[
+    {<span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">id</span><span style="color:#710">&quot;</span></span>,<span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">int</span><span style="color:#710">&quot;</span></span>},
+    {<span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">title</span><span style="color:#710">&quot;</span></span>,<span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span>},
+    {<span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">release_date</span><span style="color:#710">&quot;</span></span>,<span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span>},
+    {<span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">imdb_url</span><span style="color:#710">&quot;</span></span>,<span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span>}
+  ]
+}
+</pre></td>
+</tr></table>
+</div>
+
+<p>The following links provide examples for inferring schemas from data files or Java classes.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Java API</th>
+      <th>Command Line Interface</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="/docs/1.0.0/Inferring-a-Schema-from-a-Java-Class.html">Inferring a schema from a Java Class</a></td>
+      <td><a href="/docs/1.0.0/cli-reference.html#obj-schema">Inferring a schema from a Java class</a></td>
+    </tr>
+    <tr>
+      <td><a href="/docs/1.0.0/Inferring-a-Schema-from-an-Avro-Data-File.html">Using the schema of an Avro data file</a></td>
+      <td><a href="/docs/1.0.0/cli-reference.html#csv-schema">Inferring a schema from a CSV file</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="partition-strategies">Partition Strategies</h2>
+
+<p>Partitions define logical divisions for data storage. For example, you might most often work with data using time-based queries. You can define a partitioning strategy by year, month, and day. When you are using data from January 8, 2015, Hadoop only has to access data stored in the partition <code>/year=2015/month=1/day=8</code>. By using partitions that correspond to your most common queries, your applications run more quickly.</p>
+
+<p>You should always consider partitioning as a best practice when planning your dataset. Partitioning is optional because there are times when partitioning is not the most efficient solution. </p>
+
+<p>Kite validates your partition strategy using the dataset schema. This catches problems early. For example, if you mistakenly type in your partition definition <em>timestmap</em>, validation catches the typo because the schema has a <em>timestamp</em> column. Kite also validates that field types can be partitioned on the selected value. For example, you can’t extract a year from a string.</p>
+
+<p>You define your partition strategy in <a href="/docs/1.0.0/Partition-Strategy-Format.html">partition strategy JSON format</a> and apply it when you create your dataset. See <a href="/docs/1.0.0/Partitioned-Datasets.html#partition-strategies">Partitioned Datasets</a>.</p>
+
+<p>For example, you can create a partition strategy using the CLI command <a href="/docs/1.0.0/cli-reference.html#partition-config"><code>partition-config</code></a> with name:value pairs to specify that the dataset should be partitioned on a timestamp (<code>ts</code>) field by year, month, and day.</p>
+
+<pre><code>$ kite-dataset partition-config ts:year ts:month ts:day -s rating.avsc
+</code></pre>
+
+<p>The result is a partition definition in JSON format. </p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+<a href="#n6" name="n6">6</a>
+<a href="#n7" name="n7">7</a>
+<a href="#n8" name="n8">8</a>
+<a href="#n9" name="n9">9</a>
+<strong><a href="#n10" name="n10">10</a></strong>
+<a href="#n11" name="n11">11</a>
+<a href="#n12" name="n12">12</a>
+<a href="#n13" name="n13">13</a>
+</pre></td>
+  <td class="code"><pre>[ {
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">year</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>source</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">ts</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">year</span><span style="color:#710">&quot;</span></span>
+}, {
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">month</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>source</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">ts</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">month</span><span style="color:#710">&quot;</span></span>
+}, {
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">day</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>source</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">ts</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">day</span><span style="color:#710">&quot;</span></span>
+} ]
+</pre></td>
+</tr></table>
+</div>
+
+<p>If you want to save the partition definition for use with the CLI or API, you can use the <code>-o</code> option to output the result to a <code>.json</code> file.</p>
+
+<h2 id="additional-configuration">Additional Configuration</h2>
+
+<p>While you need only a URI and schema to create a dataset, you can use column mapping and properties for additional control over how Kite reads or writes your data.</p>
+
+<h3 id="column-mapping">Column Mapping</h3>
+
+<p>When you use an HBase scheme, Kite requires a column mapping to configure how your records are stored. You define column mapping in JSON format. Kite stores and retrieves HBase data seamlessly, using the same commands as with other storage schemes.</p>
+
+<p>See <a href="/docs/1.0.0/Column-Mapping.html">Column Mapping</a>. See also the <a href="/docs/1.0.0/cli-reference.html#mapping-config">CLI mapping-config command</a>.</p>
+
+<h3 id="properties">Properties</h3>
+
+<p>You can set properties at creation time for additional control over how Kite reads or writes your data.</p>
+
+<p>For example, Kite’s default cache size is 10. This is the number of files that are open at any one time; each file represents a partition in the dataset written to by your application. In the CLI, you can use the <code>--set</code> option to increase the cache size to 20.</p>
+
+<pre><code>kite-dataset create users --schema user.avsc --set kite.writer.cache-size=20
+</code></pre>
+
+<p>You can also create custom properties for your own applications. See <a href="/docs/1.0.0/using-kite-properties.html">Using Kite Properties</a>.</p>
+
+<h2 id="next-steps">Next Steps</h2>
+
+<p>The example <a href="/docs/1.0.0/Using-the-Kite-CLI-to-Create-a-Dataset.html">Using the Kite Command Line Interface to Create a Dataset</a> demonstrates many of the features described above, and shows you how to create your own Hadoop dataset using only three commands.</p>
+
+<hr />
+
+<h4 id="notes">Notes:</h4>
+<ol>
+  <li>The MovieLens data set was created by the GroupLens Research Group at the University of Minnesota and is available at <a href="http://grouplens.org/datasets/movielens/">http://grouplens.org/datasets/movielens/</a>.</li>
+</ol>
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrap columns">
+
+    <div class="left">
+      <h2 class="footer-heading">Kite Software Development Kit, 1.0.0</h2>
+
+      <ul>
+        <li>Kite is licensed under</li>
+        <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
+        <li>&nbsp;</li>
+        <li>Generated on 24 February 2015</li>
+      </ul>
+
+    </div>
+
+    <div class="middle">
+    </div>
+
+    <div class="right">
+      <p class="text">An open source data API for Hadoop.
+        <div class="columns">
+          <div class="left">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite"><i class="fa fa-github fa-lg"></i>&nbsp; Source</a></li>
+              <li><a href="https://issues.cloudera.org/browse/CDK"><i class="fa fa-bug fa-lg"></i>&nbsp; Issue tracking</a></li>
+              <li><a href="https://groups.google.com/a/cloudera.org/forum/#!forum/cdk-dev"><i class="fa fa-comments-o fa-lg"></i>&nbsp; Mailing list</a></li>
+              <li><a href="https://github.com/kite-sdk/kite/wiki/How-to-contribute"><i class="fa fa-cogs fa-lg"></i>&nbsp; How to contribute</a></li>
+            </ul>
+          </div>
+          <div class="right">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
+              <li><a href="/docs/1.0.0/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/1.0.0/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/docs/1.0.0/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+            </ul>
+          </div>
+        </div>
+      </p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+    </body>
+</html>

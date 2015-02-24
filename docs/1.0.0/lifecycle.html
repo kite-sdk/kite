@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Kite Dataset Lifecycle</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="An open source data API for Hadoop.">
+    <link rel="canonical" href="http://kitesdk.org/docs/1.0.0/lifecycle.html">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/docs/1.0.0/css/main.css">
+    <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+
+
+    <body>
+
+    <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/docs/1.0.0/">Kite Software Development Kit</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      
+      <div class="sidebar">
+      
+        <h4>About Kite</h4>
+        <ul>
+          
+        </ul>
+      
+        <h4></h4>
+        <ul>
+          
+          
+          <li><a href="/docs/1.0.0/Kite-SDK-Guide.html">Kite Background</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
+          
+          
+        </ul>
+      
+        <h4>Kite CLI</h4>
+        <ul>
+          
+          
+          <li><a href="/docs/1.0.0/Install-Kite.html">Installing the CLI</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/cli-reference.html">Kite CLI Reference</a></li>
+          
+          
+        </ul>
+      
+        <h4>Kite API</h4>
+        <ul>
+          
+          
+          <li><a href="/docs/1.0.0/API-Overview.html">API Introduction</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/view-api.html">Views API</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
+          
+          
+        </ul>
+      
+        <h4>Reference</h4>
+        <ul>
+          
+          
+          <li><a href="/docs/1.0.0/URIs.html">Kite URIs</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/Schema-Evolution.html">Schema Evolution</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/Partitioned-Datasets.html">Partitioned Datasets</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/HBase-Storage-Cells.html">HBase Storage</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/Column-Mapping.html">Column Mapping</a></li>
+          
+          
+          
+          <li><b>Dataset Lifecycle</b></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/maven">Maven Plugin</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/dependencies">Dependency Info</a></li>
+          
+          
+        </ul>
+      
+      </div>
+      
+
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1>Kite Dataset Lifecycle</h1>
+  </header>
+
+  <article class="post-content">
+  <p>Datasets have a fairly predictable lifecycle: creation, population, validation, modification, and, ultimately, annihilation.</p>
+
+<p>In truth, the lifecycle looks something like this.</p>
+
+<p align="center">
+
+<img src="images/lifecycleflow.jpg" width="550" />
+</p>
+
+<p>For the sake of simplicity, let’s break it down into six general steps.</p>
+
+<ul>
+  <li><a href="#generate">Generate</a> a schema for your dataset.</li>
+  <li><a href="#create">Create</a> the dataset.</li>
+  <li><a href="#populate">Populate</a> the dataset.</li>
+  <li><a href="#validate">Validate</a> the dataset.</li>
+  <li><a href="#update">Update</a> the dataset.</li>
+  <li><a href="#annihilate">Annihilate</a> the dataset.</li>
+</ul>
+
+<p><a name="generate"></a></p>
+
+<p align="center">
+
+<img src="images/simplelifecycleflow1.jpg" usemap="#lifecycle" />
+</p>
+
+<h2 id="preparation">Preparation</h2>
+
+<p>If you have not done so already, install the <a href="/docs/1.0.0/Install-Kite.html">Kite command-line interface</a>.</p>
+
+<map name="lifecycle">
+  <area shape="rect" coords="25,35,150,100" href="#generate" alt="Generate Schema" title="Generate Schema" />
+  <area shape="rect" coords="190,35,300,100" href="#create" alt="Create Dataset" title="Create Dataset" />
+  <area shape="rect" coords="335,35,460,100" href="#populate" alt="Populate Dataset" title="Populate Dataset" />
+  <area shape="rect" coords="500,35,615,100" href="#validate" alt="Validate Dataset" title="Validate Dataset" />
+  <area shape="rect" coords="650,35,760,100" href="#update" alt="Update Dataset" title="Update Dataset" />
+  <area shape="rect" coords="800,35,925,100" href="#annihilate" alt="Annihilate Dataset" title="Annihilate Dataset" />
+</map>
+
+<h2 id="generate-a-schema-for-the-dataset">Generate a Schema for the Dataset</h2>
+
+<p align="center">
+<img src="images/generateschema.jpg" usemap="#lifecycle" />
+</p>
+
+<p>You define a Kite dataset using an Avro schema. The schema defines the fields for each row in your dataset.</p>
+
+<p>You can create the schema yourself as a plain text file. Avro schema syntax is designed to be concise, rather than easy to read. It can be tricky to create and troubleshoot a schema definition. See <a href="http://avro.apache.org/docs/1.7.6/gettingstartedjava.html#Defining+a+schema">Defining a schema</a> in the Apache Avro documentation for more information on writing your own Avro schema.</p>
+
+<p>In most cases, it’s easier to generate a schema definition than to create one by hand. You can generate an Avro schema based on a Java object or a CSV data file.</p>
+
+<h3 id="inferring-a-schema-from-a-java-class">Inferring a Schema from a Java Class</h3>
+
+<p>You can use the CLI Command <code>object-schema</code> to infer a dataset schema from the instance variable fields of a Java class. Classes are mapped to Avro records. Avro reflect only supports concrete classes with no-argument constructors. Avro reflect includes all inherited fields that are not static or transient. Fields cannot be null unless annotated by Nullable or a Union containing null.</p>
+
+<p>For example, the following code sample excerpts the pertinent lines from a class that defines a Java object that describes a dataset about movies.</p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+<a href="#n6" name="n6">6</a>
+<a href="#n7" name="n7">7</a>
+<a href="#n8" name="n8">8</a>
+<a href="#n9" name="n9">9</a>
+<strong><a href="#n10" name="n10">10</a></strong>
+<a href="#n11" name="n11">11</a>
+</pre></td>
+  <td class="code"><pre> <span style="color:#080;font-weight:bold">package</span> <span style="color:#707;font-weight:bold">org.kitesdk.examples.data</span>;
+ <span style="color:#777">/** Movie class */</span>
+ <span style="color:#339;font-weight:bold">class</span> <span style="color:#B06;font-weight:bold">Movie</span> {
+   <span style="color:#088;font-weight:bold">private</span> <span style="color:#339;font-weight:bold">int</span> id;
+   <span style="color:#088;font-weight:bold">private</span> <span style="color:#0a8;font-weight:bold">String</span> title;
+   <span style="color:#088;font-weight:bold">private</span> <span style="color:#0a8;font-weight:bold">String</span> releaseDate;
+ . . . 
+   public Movie() {
+     <span style="color:#777">// Empty constructor for serialization purposes</span>
+   }
+
+</pre></td>
+</tr></table>
+</div>
+<p>Use the CLI command <a href="/docs/1.0.0/cli-reference.html#obj-schema"><code>obj-schema</code></a> to generate an Avro schema file based on the source Java class.</p>
+
+<pre><code>kite-dataset obj-schema org.kitesdk.cli.example.Movie -o movie.avsc
+</code></pre>
+
+<p>The CLI uses the names and data types of the instance variables in the Java object to construct an Avro schema definition. For the Movie class, it looks like this.</p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+<a href="#n6" name="n6">6</a>
+<a href="#n7" name="n7">7</a>
+<a href="#n8" name="n8">8</a>
+<a href="#n9" name="n9">9</a>
+<strong><a href="#n10" name="n10">10</a></strong>
+</pre></td>
+  <td class="code"><pre>{
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">record</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Movie</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>namespace</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">org.kitesdk.examples.data</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>fields</span><span style="color:#404">&quot;</span></span>:[
+    {<span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">id</span><span style="color:#710">&quot;</span></span>,<span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">int</span><span style="color:#710">&quot;</span></span>},
+    {<span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">title</span><span style="color:#710">&quot;</span></span>,<span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span>},
+    {<span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">releaseDate</span><span style="color:#710">&quot;</span></span>,<span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span>},
+  ]
+}
+</pre></td>
+</tr></table>
+</div>
+<p>For more insight into Avro reflection, see the Javadoc entry for <a href="http://javadox.com/org.apache.avro/avro/1.7.7/org/apache/avro/reflect/ReflectData.html">Avro reflect</a>.</p>
+
+<h3 id="inferring-a-schema-from-a-csv-file">Inferring a Schema from a CSV File</h3>
+
+<p>The Kite CLI can generate an Avro schema based on a CSV data file.</p>
+
+<p>The CSV data file for the Movie dataset might start off like this.</p>
+
+<pre><code>id, title,releaseDate
+1,Sam and the Big Dog,"August 14, 2014"
+2,Crocophiles,"November 18, 1995"
+. . .
+</code></pre>
+
+<p>Use the CLI command <a href="/docs/1.0.0/cli-reference.html#csv-schema"><code>csv-schema</code></a> to generate the Avro schema.</p>
+
+<pre><code>kite-dataset csv-schema movie.csv --class Movie -o movie.avsc
+</code></pre>
+
+<p>The Kite CLI infers field names from the values in the first row and data types from the values in the second row of the CSV file.</p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+<a href="#n6" name="n6">6</a>
+<a href="#n7" name="n7">7</a>
+<a href="#n8" name="n8">8</a>
+<a href="#n9" name="n9">9</a>
+<strong><a href="#n10" name="n10">10</a></strong>
+</pre></td>
+  <td class="code"><pre>{
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">record</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Movie</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>namespace</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">org.kitesdk.examples.data</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>fields</span><span style="color:#404">&quot;</span></span>:[
+    {<span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">id</span><span style="color:#710">&quot;</span></span>,<span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">int</span><span style="color:#710">&quot;</span></span>},
+    {<span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">title</span><span style="color:#710">&quot;</span></span>,<span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span>},
+    {<span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">releaseDate</span><span style="color:#710">&quot;</span></span>,<span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span>},
+  ]
+}
+</pre></td>
+</tr></table>
+</div>
+
+<p><a name="create"></a></p>
+
+<p align="center">
+
+<img src="images/simplelifecycleflow2.jpg" usemap="#lifecycle" />
+</p>
+
+<h2 id="create-dataset">Create Dataset</h2>
+
+<p align="center">
+
+<img src="images/createdataset.jpg" />
+</p>
+
+<p>Once you have an Avro schema, you can create your dataset.</p>
+
+<pre><code>kite-dataset create movie --schema movie.avsc
+</code></pre>
+
+<h3 id="partition-strategy">Partition Strategy</h3>
+
+<p>In some cases, you can improve the performance of your dataset by creating logical partitions. For example, the <em>Movie</em> dataset could be partitioned by ID. Searches by ID would only search the containing folder, rather than the entire dataset. If you were searching for movie ID 3215, the search would be limited to the partition with records 3001-4000.</p>
+
+<p>You define a partition strategy in JSON format. The following code sample defines the partition strategy movie.json for the <em>Movie</em> dataset.</p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+</pre></td>
+  <td class="code"><pre>[ {
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>source</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">id</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">int</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">id</span><span style="color:#710">&quot;</span></span>
+}]
+</pre></td>
+</tr></table>
+</div>
+
+<p>Include the <code>partition-by</code> argument when you execute the <code>create</code> command.</p>
+
+<pre><code>kite-dataset create movie --schema movie.avsc partition-by movie.json
+</code></pre>
+<p>See <a href="/docs/1.0.0/Partitioned-Datasets.html">Partitioned Datasets</a> for more detail on partition strategies.</p>
+
+<h3 id="column-mapping">Column Mapping</h3>
+
+<p>Column mapping allows you to configure how your records should be stored in HBase for maximum performance and efficiency. You define the mapping based on the type of data you want to store, and Kite handles the infrastructure required to support your mapping strategy. See <a href="/docs/1.0.0/Column-Mapping.html">Column Mapping</a>.</p>
+
+<h3 id="parquet">Parquet</h3>
+
+<p>If you typically work with a subset of the fields in your dataset rather than an entire row, you might want to create the dataset in Parquet format, rather than the default Avro format. See <a href="/docs/1.0.0/Parquet-vs-Avro-Format.html">Parquet vs Avro Format</a>.</p>
+
+<pre><code>kite-dataset create movie --schema movie.avsc -f parquet
+</code></pre>
+
+<p><a name="populate"></a></p>
+
+<p align="center">
+
+<img src="images/simplelifecycleflow3.jpg" usemap="#lifecycle" />
+</p>
+
+<h2 id="populate-dataset">Populate Dataset</h2>
+
+<p align="center">
+
+<img src="images/populatedataset.jpg" />
+</p>
+
+<p>Once you create the dataset, you can insert data in a number of ways.</p>
+
+<h3 id="import-csv">Import CSV</h3>
+
+<p>You can use the CLI command <code>csv-import</code> to insert records from a CSV file to your dataset.</p>
+
+<pre><code>kite-dataset csv-import /kite/example/movie.csv movie
+</code></pre>
+
+<p>See <a href="/docs/1.0.0/cli-reference.html#csv-import"><code>csv-import</code></a> for additional options.</p>
+
+<h3 id="copy-dataset">Copy Dataset</h3>
+
+<p>Use the <a href="/docs/1.0.0/cli-reference.html#copy"><code>copy</code></a> command to transfer the contents of one dataset into another.</p>
+
+<pre><code>kite-dataset copy movie_parquet movie
+</code></pre>
+
+<p><a name="validate"></a></p>
+
+<p align="center">
+
+<img src="images/simplelifecycleflow4.jpg" usemap="#lifecycle" />
+</p>
+
+<h2 id="validate-dataset">Validate Dataset</h2>
+
+<p>Select the first few records of your dataset to ensure that they loaded properly. Use the <a href="/docs/1.0.0/cli-reference.html#show"><code>show</code></a> command to view the first 10 records in your dataset.</p>
+
+<pre><code>kite-dataset show movie
+</code></pre>
+
+<p>10 records is the default. You can set the number of records you want returned when you execute the command. For example, this would return the first 50 records.</p>
+
+<pre><code>kite-dataset show movie -n 50
+</code></pre>
+
+<p><a name="update"></a></p>
+
+<p align="center">
+
+<img src="images/simplelifecycleflow5.jpg" usemap="#lifecycle" />
+</p>
+
+<h2 id="update-dataset">Update Dataset</h2>
+
+<p align="center">
+
+<img src="images/updatedataset.jpg" />
+</p>
+
+<h3 id="loading-data">Loading Data</h3>
+
+<p>Once you have created your Kite dataset, you can add records as you would with any CDH dataset. If you use <a href="/docs/1.0.0/cli-reference.html#csv-import"><code>csv-import</code></a> to add more records, they are appended to the dataset.</p>
+
+<h3 id="compacting-the-dataset">Compacting the Dataset</h3>
+
+<p>One by-product of the <a href="/docs/1.0.0/cli-reference.html#copy"><code>copy</code></a> command is that it compacts multiple files in a partition into one file. This can be particularly useful for datasets that use streaming input. You can periodically copy the active dataset to an archive, or copy the dataset, delete the current data, and copy the compacted data back to the active dataset.  </p>
+
+<h3 id="updating-the-dataset-schema">Updating the Dataset Schema</h3>
+
+<p>Over time, your dataset requirements might change. You can add, remove, or change the datatype of columns in your dataset, provided you don’t attempt a change that would result in the loss or corruption of data. Kite follows the guidelines for Schema resolution in the <a href="http://avro.apache.org/docs/current/spec.html#Schema+Resolution">Avro spec</a>. See <a href="/docs/1.0.0/Schema-Evolution.html">Schema Evolution</a> for more detail and examples.</p>
+
+<p><a name="annihilate"></a></p>
+
+<p align="center">
+
+<img src="images/simplelifecycleflow6.jpg" usemap="#lifecycle" />
+</p>
+
+<h2 id="annihilate-dataset">Annihilate Dataset</h2>
+
+<p>When you first create a dataset, you might want to tweak it before you go live. It can be much cleaner and easier to delete the nascent dataset and start over. It could also be the case that your dataset is no longer needed. Regardless of your motivation, you can permanently remove one or more datasets from CDH using the CLI command <a href="/docs/1.0.0/cli-reference.html#delete"><code>delete</code></a>.</p>
+
+<p>For example, to remove the <em>movies</em> dataset, you can use the following command.</p>
+
+<pre><code>$ kite-dataset delete movies
+</code></pre>
+
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrap columns">
+
+    <div class="left">
+      <h2 class="footer-heading">Kite Software Development Kit, 1.0.0</h2>
+
+      <ul>
+        <li>Kite is licensed under</li>
+        <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
+        <li>&nbsp;</li>
+        <li>Generated on 24 February 2015</li>
+      </ul>
+
+    </div>
+
+    <div class="middle">
+    </div>
+
+    <div class="right">
+      <p class="text">An open source data API for Hadoop.
+        <div class="columns">
+          <div class="left">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite"><i class="fa fa-github fa-lg"></i>&nbsp; Source</a></li>
+              <li><a href="https://issues.cloudera.org/browse/CDK"><i class="fa fa-bug fa-lg"></i>&nbsp; Issue tracking</a></li>
+              <li><a href="https://groups.google.com/a/cloudera.org/forum/#!forum/cdk-dev"><i class="fa fa-comments-o fa-lg"></i>&nbsp; Mailing list</a></li>
+              <li><a href="https://github.com/kite-sdk/kite/wiki/How-to-contribute"><i class="fa fa-cogs fa-lg"></i>&nbsp; How to contribute</a></li>
+            </ul>
+          </div>
+          <div class="right">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
+              <li><a href="/docs/1.0.0/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/1.0.0/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/docs/1.0.0/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+            </ul>
+          </div>
+        </div>
+      </p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+    </body>
+</html>

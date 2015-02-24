@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Dependency Information</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="An open source data API for Hadoop.">
+    <link rel="canonical" href="http://kitesdk.org/docs/1.0.0/dependencies/">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/docs/1.0.0/css/main.css">
+    <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+
+
+    <body>
+
+    <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/docs/1.0.0/">Kite Software Development Kit</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      
+      <div class="sidebar">
+      
+        <h4>About Kite</h4>
+        <ul>
+          
+        </ul>
+      
+        <h4></h4>
+        <ul>
+          
+          
+          <li><a href="/docs/1.0.0/Kite-SDK-Guide.html">Kite Background</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
+          
+          
+        </ul>
+      
+        <h4>Kite CLI</h4>
+        <ul>
+          
+          
+          <li><a href="/docs/1.0.0/Install-Kite.html">Installing the CLI</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/cli-reference.html">Kite CLI Reference</a></li>
+          
+          
+        </ul>
+      
+        <h4>Kite API</h4>
+        <ul>
+          
+          
+          <li><a href="/docs/1.0.0/API-Overview.html">API Introduction</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/view-api.html">Views API</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
+          
+          
+        </ul>
+      
+        <h4>Reference</h4>
+        <ul>
+          
+          
+          <li><a href="/docs/1.0.0/URIs.html">Kite URIs</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/Schema-Evolution.html">Schema Evolution</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/Partitioned-Datasets.html">Partitioned Datasets</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/HBase-Storage-Cells.html">HBase Storage</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/Column-Mapping.html">Column Mapping</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/lifecycle.html">Dataset Lifecycle</a></li>
+          
+          
+          
+          <li><a href="/docs/1.0.0/maven">Maven Plugin</a></li>
+          
+          
+          
+          <li><b>Dependency Info</b></li>
+          
+          
+        </ul>
+      
+      </div>
+      
+
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1>Dependency Information</h1>
+  </header>
+
+  <article class="post-content">
+  <p>The simplest way to specify Kite and Hadoop dependencies is to use the Kite App Parent POM. This ensures that you inherit a compatible set of dependencies and that the Kite plugins are suitably configured. Add the following to your POM:</p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+</pre></td>
+  <td class="code"><pre><span style="color:#070;font-weight:bold">&lt;parent&gt;</span>
+  <span style="color:#070;font-weight:bold">&lt;groupId&gt;</span>org.kitesdk<span style="color:#070;font-weight:bold">&lt;/groupId&gt;</span>
+  <span style="color:#070;font-weight:bold">&lt;artifactId&gt;</span>kite-app-parent-cdh4<span style="color:#070;font-weight:bold">&lt;/artifactId&gt;</span>
+  <span style="color:#070;font-weight:bold">&lt;version&gt;</span>1.0.0<span style="color:#070;font-weight:bold">&lt;/version&gt;</span>
+<span style="color:#070;font-weight:bold">&lt;/parent&gt;</span>
+</pre></td>
+</tr></table>
+</div>
+
+<p>Alternatively, if you choose not to use the Kite App Parent POM add the Cloudera repository to your Maven POM:</p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+<a href="#n6" name="n6">6</a>
+<a href="#n7" name="n7">7</a>
+<a href="#n8" name="n8">8</a>
+</pre></td>
+  <td class="code"><pre><span style="color:#070;font-weight:bold">&lt;repository&gt;</span>
+  <span style="color:#070;font-weight:bold">&lt;id&gt;</span>cdh.repo<span style="color:#070;font-weight:bold">&lt;/id&gt;</span>
+  <span style="color:#070;font-weight:bold">&lt;url&gt;</span>https://repository.cloudera.com/artifactory/cloudera-repos<span style="color:#070;font-weight:bold">&lt;/url&gt;</span>
+  <span style="color:#070;font-weight:bold">&lt;name&gt;</span>Cloudera Repositories<span style="color:#070;font-weight:bold">&lt;/name&gt;</span>
+  <span style="color:#070;font-weight:bold">&lt;snapshots&gt;</span>
+    <span style="color:#070;font-weight:bold">&lt;enabled&gt;</span>false<span style="color:#070;font-weight:bold">&lt;/enabled&gt;</span>
+  <span style="color:#070;font-weight:bold">&lt;/snapshots&gt;</span>
+<span style="color:#070;font-weight:bold">&lt;/repository&gt;</span>
+</pre></td>
+</tr></table>
+</div>
+
+<p>Then add a dependency for each module you want to use by referring to the information listed on the Dependency Information pages listed below. You can also view the transitive dependencies for each module.</p>
+
+<h2 id="hadoop-component-dependencies">Hadoop Component Dependencies</h2>
+
+<p>As a general rule, Kite modules mark Hadoop component dependencies as having <code>provided</code> <a href="http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Transitive_Dependencies">scope</a>, since in many cases the dependencies are provided by the container that the code is running in.</p>
+
+<p>For example,</p>
+
+<ul>
+  <li>Kite Data has a <code>provided</code> dependency on the core Hadoop libraries</li>
+  <li>Kite Crunch has a <code>provided</code> dependency on Crunch and the core Hadoop libraries</li>
+  <li>Kite HCatalog has a <code>provided</code> dependency on Hive</li>
+</ul>
+
+<p>The following containers provide the dependencies listed:</p>
+
+<ul>
+  <li>The <code>hadoop jar</code> command provides the core Hadoop dependencies.</li>
+  <li>The MapReduce task environment provides the core Hadoop dependencies.</li>
+  <li>When used from then Kite App Parent POM the Kite Maven Plugin provides the Hadoop, HBase and Hive dependencies. If the Kite App Parent POM is not being used, then these dependencies should be specified in the plugin’s dependencies section of the POM.</li>
+</ul>
+
+<p>However, there are some cases where you may have to provide the relevant Hadoop component dependencies yourself, and Kite has <a href="http://books.sonatype.com/mvnref-book/reference/pom-relationships-sect-pom-best-practice.html">grouping dependencies</a> for this purpose.</p>
+
+<p>There is a grouping dependency for each flavor of Hadoop distribution, which differ by Maven artifact ID:</p>
+
+<ul>
+  <li>Apache Hadoop 2 (the default), <code>kite-hadoop2-dependencies</code></li>
+  <li>Apache Hadoop 1, <code>kite-hadoop1-dependencies</code></li>
+  <li>CDH 4, <code>kite-hadoop-cdh4-dependencies</code></li>
+  <li>CDH 5, <code>kite-hadoop-cdh5-dependencies</code></li>
+</ul>
+
+<p>This is how you would specify a dependency on the CDH 5 dependencies:</p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+<a href="#n6" name="n6">6</a>
+<a href="#n7" name="n7">7</a>
+</pre></td>
+  <td class="code"><pre><span style="color:#070;font-weight:bold">&lt;dependency&gt;</span>
+  <span style="color:#070;font-weight:bold">&lt;groupId&gt;</span>org.kitesdk<span style="color:#070;font-weight:bold">&lt;/groupId&gt;</span>
+  <span style="color:#070;font-weight:bold">&lt;artifactId&gt;</span>kite-hadoop-cdh5-dependencies<span style="color:#070;font-weight:bold">&lt;/artifactId&gt;</span>
+  <span style="color:#070;font-weight:bold">&lt;version&gt;</span>1.0.0<span style="color:#070;font-weight:bold">&lt;/version&gt;</span>
+  <span style="color:#070;font-weight:bold">&lt;type&gt;</span>pom<span style="color:#070;font-weight:bold">&lt;/type&gt;</span>
+  <span style="color:#070;font-weight:bold">&lt;scope&gt;</span>compile<span style="color:#070;font-weight:bold">&lt;/scope&gt;</span>
+<span style="color:#070;font-weight:bold">&lt;/dependency&gt;</span>
+</pre></td>
+</tr></table>
+</div>
+
+<p>There are an analogous set of grouping dependencies for HBase:</p>
+
+<ul>
+  <li>Apache Hadoop 2 (the default), <code>kite-hbase2-dependencies</code></li>
+  <li>Apache Hadoop 1, <code>kite-hbase1-dependencies</code></li>
+  <li>CDH 4, <code>kite-hbase-cdh4-dependencies</code></li>
+  <li>CDH 5, <code>kite-hbase-cdh5-dependencies</code></li>
+</ul>
+
+<p>Here are some scenarios when you need to provide Hadoop component dependencies:</p>
+
+<ul>
+  <li>Crunch jobs, even those running in the containers listed above. However, if using<br />
+ the Kite App Parent POM Crunch is provided (<a href="https://github.com/cloudera/kite-examples/tree/master/demo/demo-crunch">example</a>)</li>
+  <li>Standalone Java programs, not run using <code>kite:run-tool</code> or <code>hadoop jar</code> (<a href="https://github.com/cloudera/kite-examples/tree/master/dataset">example</a>)</li>
+  <li>Web apps (<a href="https://github.com/cloudera/kite-examples/tree/master/logging-webapp">example</a>)</li>
+</ul>
+
+<h2 id="kite-data-modules">Kite Data Modules</h2>
+
+<ul>
+  <li>Kite Data Core - <a href="kite-data-core.html#Dependency_Information">Dependency Information</a>, <a href="kite-data-core.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Data Hive - <a href="kite-data-hive.html#Dependency_Information">Dependency Information</a>, <a href="kite-data-hive.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Data HBase - <a href="kite-data-hbase.html#Dependency_Information">Dependency Information</a>, <a href="kite-data-hbase.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Data Crunch - <a href="kite-data-crunch.html#Dependency_Information">Dependency Information</a>, <a href="kite-data-crunch.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Data MapReduce - <a href="kite-data-mapreduce.html#Dependency_Information">Dependency Information</a>, <a href="kite-data-mapreduce.html#Project_Dependencies">Dependencies</a></li>
+</ul>
+
+<h2 id="kite-morphlines-modules">Kite Morphlines Modules</h2>
+
+<ul>
+  <li>Kite Morphlines Core - <a href="kite-morphlines-core.html#Dependency_Information">Dependency Information</a>, <a href="kite-morphlines-core.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Morphlines Avro - <a href="kite-morphlines-avro.html#Dependency_Information">Dependency Information</a>, <a href="kite-morphlines-avro.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Morphlines JSON - <a href="kite-morphlines-json.html#Dependency_Information">Dependency Information</a>, <a href="kite-morphlines-json.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Morphlines protobuf - <a href="kite-morphlines-protobuf.html#Dependency_Information">Dependency Information</a>, <a href="kite-morphlines-protobuf.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Morphlines Hadoop Core - <a href="kite-morphlines-hadoop-core.html#Dependency_Information">Dependency Information</a>, <a href="kite-morphlines-hadoop-core.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Morphlines Hadoop Parquet Avro - <a href="kite-morphlines-hadoop-parquet-avro.html#Dependency_Information">Dependency Information</a>, <a href="kite-morphlines-hadoop-parquet-avro.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Morphlines Hadoop RC File - <a href="kite-morphlines-hadoop-rcfile.html#Dependency_Information">Dependency Information</a>, <a href="kite-morphlines-hadoop-rcfile.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Morphlines Hadoop Sequence File - <a href="kite-morphlines-hadoop-sequencefile.html#Dependency_Information">Dependency Information</a>, <a href="kite-morphlines-hadoop-sequencefile.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Morphlines Maxmind - <a href="kite-morphlines-maxmind.html#Dependency_Information">Dependency Information</a>, <a href="kite-morphlines-maxmind.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Morphlines Metrics Servlets - <a href="kite-morphlines-metrics-servlets.html#Dependency_Information">Dependency Information</a>, <a href="kite-morphlines-metrics-servlets.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Morphlines Saxon - <a href="kite-morphlines-saxon.html#Dependency_Information">Dependency Information</a>, <a href="kite-morphlines-saxon.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Morphlines Solr Core - <a href="kite-morphlines-solr-core.html#Dependency_Information">Dependency Information</a>, <a href="kite-morphlines-solr-core.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Morphlines Solr Cell - <a href="kite-morphlines-solr-cell.html#Dependency_Information">Dependency Information</a>, <a href="kite-morphlines-solr-cell.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Morphlines Tika Core - <a href="kite-morphlines-tika-core.html#Dependency_Information">Dependency Information</a>, <a href="kite-morphlines-tika-core.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Morphlines Tika Decompress -  <a href="kite-morphlines-tika-decompress.html#Dependency_Information">Dependency Information</a>, <a href="kite-morphlines-tika-decompress.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Morphlines Twitter - <a href="kite-morphlines-twitter.html#Dependency_Information">Dependency Information</a>, <a href="kite-morphlines-twitter.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Morphlines UserAgent - <a href="kite-morphlines-useragent.html#Dependency_Information">Dependency Information</a>, <a href="kite-morphlines-useragent.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Morphlines All - <a href="kite-morphlines-all.html#Dependency_Information">Dependency Information</a>, <a href="kite-morphlines-all.html#Project_Dependencies">Dependencies</a></li>
+  <li>Kite Morphlines All Except Solr - <a href="kite-morphlines-all-except-solr.html#Dependency_Information">Dependency Information</a>, <a href="kite-morphlines-all-except-solr.html#Project_Dependencies">Dependencies</a></li>
+</ul>
+
+<h2 id="kite-tools-modules">Kite Tools Modules</h2>
+
+<ul>
+  <li>Kite Tools - <a href="kite-tools.html#Dependency_Information">Dependency Information</a>, <a href="kite-tools.html#Project_Dependencies">Dependencies</a></li>
+</ul>
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrap columns">
+
+    <div class="left">
+      <h2 class="footer-heading">Kite Software Development Kit, 1.0.0</h2>
+
+      <ul>
+        <li>Kite is licensed under</li>
+        <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
+        <li>&nbsp;</li>
+        <li>Generated on 24 February 2015</li>
+      </ul>
+
+    </div>
+
+    <div class="middle">
+    </div>
+
+    <div class="right">
+      <p class="text">An open source data API for Hadoop.
+        <div class="columns">
+          <div class="left">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite"><i class="fa fa-github fa-lg"></i>&nbsp; Source</a></li>
+              <li><a href="https://issues.cloudera.org/browse/CDK"><i class="fa fa-bug fa-lg"></i>&nbsp; Issue tracking</a></li>
+              <li><a href="https://groups.google.com/a/cloudera.org/forum/#!forum/cdk-dev"><i class="fa fa-comments-o fa-lg"></i>&nbsp; Mailing list</a></li>
+              <li><a href="https://github.com/kite-sdk/kite/wiki/How-to-contribute"><i class="fa fa-cogs fa-lg"></i>&nbsp; How to contribute</a></li>
+            </ul>
+          </div>
+          <div class="right">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
+              <li><a href="/docs/1.0.0/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/1.0.0/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/docs/1.0.0/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+            </ul>
+          </div>
+        </div>
+      </p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+    </body>
+</html>
