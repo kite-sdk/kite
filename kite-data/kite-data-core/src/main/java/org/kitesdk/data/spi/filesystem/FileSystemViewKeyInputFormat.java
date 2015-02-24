@@ -24,6 +24,8 @@ import org.apache.avro.hadoop.io.AvroSerialization;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapreduce.AvroJob;
 import org.apache.avro.mapreduce.AvroKeyInputFormat;
+import org.apache.avro.specific.SpecificData;
+import org.apache.avro.specific.SpecificRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
@@ -45,11 +47,16 @@ import org.kitesdk.data.spi.FilteredRecordReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parquet.avro.AvroParquetInputFormat;
+import parquet.avro.AvroReadSupport;
 
 class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
 
   private static final Logger LOG =
       LoggerFactory.getLogger(FileSystemViewKeyInputFormat.class);
+
+  // Constant from AvroJob copied here so we can set it on the Configuration
+  // given to this class.
+  private static final String AVRO_SCHEMA_INPUT_KEY = "avro.schema.input.key";
 
   // this is required for 1.7.4 because setDataModelClass is not available
   private static final DynMethods.StaticMethod setModel =
@@ -67,9 +74,27 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
     LOG.debug("Dataset: {}", dataset);
 
     Format format = dataset.getDescriptor().getFormat();
+
+    boolean isSpecific = SpecificRecord.class.isAssignableFrom(dataset.getType());
+
     if (Formats.AVRO.equals(format)) {
       setModel.invoke(conf,
           DataModelUtil.getDataModelForType(dataset.getType()).getClass());
+
+      // Use the reader's schema type if provided.
+      if (isSpecific) {
+
+        conf.set(AVRO_SCHEMA_INPUT_KEY,
+            SpecificData.get().getSchema(dataset.getType()).toString());
+      }
+    } else if (Formats.PARQUET.equals(format)) {
+
+      // Use the reader's schema type if provided.
+      if (isSpecific) {
+
+        AvroReadSupport.setAvroReadSchema(conf,
+            SpecificData.get().getSchema(dataset.getType()));
+      }
     }
   }
 

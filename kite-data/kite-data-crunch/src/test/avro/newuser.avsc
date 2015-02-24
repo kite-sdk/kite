@@ -1,0 +1,17 @@
+{
+  "namespace": "org.kitesdk.data.user",
+  "type": "record",
+  "name": "NewUserRecord",
+  "aliases": ["org.kitesdk.data.user.OldUserRecord"],
+  "fields": [
+    {
+      "type": "string",
+      "name": "username"
+    },
+    {
+      "type": ["null", "string"],
+      "name": "email",
+      "default": null
+    }
+  ]
+}
