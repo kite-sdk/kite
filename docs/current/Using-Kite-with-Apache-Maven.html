@@ -7,10 +7,10 @@
     <title>Using Kite with Apache Maven</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="An open source data API for Hadoop.">
-    <link rel="canonical" href="http://kitesdk.org/docs/0.18.0/Using-Kite-with-Apache-Maven.html">
+    <link rel="canonical" href="http://kitesdk.org/docs/1.0.0/Using-Kite-with-Apache-Maven.html">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/docs/0.18.0/css/main.css">
+    <link rel="stylesheet" href="/docs/1.0.0/css/main.css">
     <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 
@@ -23,7 +23,7 @@
 
   <div class="wrap">
 
-    <a class="site-title" href="/docs/0.18.0/">Kite Software Development Kit</a>
+    <a class="site-title" href="/docs/1.0.0/">Kite Software Development Kit</a>
 
     <nav class="site-nav">
       <a href="#" class="menu-icon">
@@ -57,11 +57,11 @@
         <ul>
           
           
-          <li><a href="/docs/0.18.0/Kite-SDK-Guide.html">Kite Background</a></li>
+          <li><a href="/docs/1.0.0/Kite-SDK-Guide.html">Kite Background</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
+          <li><a href="/docs/1.0.0/introduction-to-datasets.html">Datasets Overview</a></li>
           
           
         </ul>
@@ -70,15 +70,15 @@
         <ul>
           
           
-          <li><a href="/docs/0.18.0/Install-Kite.html">Installing the CLI</a></li>
+          <li><a href="/docs/1.0.0/Install-Kite.html">Installing the CLI</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
+          <li><a href="/docs/1.0.0/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/cli-reference.html">Kite CLI Reference</a></li>
+          <li><a href="/docs/1.0.0/cli-reference.html">Kite CLI Reference</a></li>
           
           
         </ul>
@@ -87,11 +87,11 @@
         <ul>
           
           
-          <li><a href="/docs/0.18.0/API-Overview.html">API Introduction</a></li>
+          <li><a href="/docs/1.0.0/API-Overview.html">API Introduction</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/view-api.html">Views API</a></li>
+          <li><a href="/docs/1.0.0/view-api.html">Views API</a></li>
           
           
           
@@ -104,39 +104,39 @@
         <ul>
           
           
-          <li><a href="/docs/0.18.0/URIs.html">Kite URIs</a></li>
+          <li><a href="/docs/1.0.0/URIs.html">Kite URIs</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Schema-Evolution.html">Schema Evolution</a></li>
+          <li><a href="/docs/1.0.0/Schema-Evolution.html">Schema Evolution</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Partitioned-Datasets.html">Partitioned Datasets</a></li>
+          <li><a href="/docs/1.0.0/Partitioned-Datasets.html">Partitioned Datasets</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
+          <li><a href="/docs/1.0.0/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/HBase-Storage-Cells.html">HBase Storage</a></li>
+          <li><a href="/docs/1.0.0/HBase-Storage-Cells.html">HBase Storage</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Column-Mapping.html">Column Mapping</a></li>
+          <li><a href="/docs/1.0.0/Column-Mapping.html">Column Mapping</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/lifecycle.html">Dataset Lifecycle</a></li>
+          <li><a href="/docs/1.0.0/lifecycle.html">Dataset Lifecycle</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/maven">Maven Plugin</a></li>
+          <li><a href="/docs/1.0.0/maven">Maven Plugin</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/dependencies">Dependency Info</a></li>
+          <li><a href="/docs/1.0.0/dependencies">Dependency Info</a></li>
           
           
         </ul>
@@ -163,7 +163,7 @@
 <div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;parent&gt;</span>
   <span class="nt">&lt;groupId&gt;</span>org.kitesdk<span class="nt">&lt;/groupId&gt;</span>
   <span class="nt">&lt;artifactId&gt;</span>kite-app-parent-cdh5<span class="nt">&lt;/artifactId&gt;</span>
-  <span class="nt">&lt;version&gt;</span>0.18.0<span class="nt">&lt;/version&gt;</span>
+  <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
 <span class="nt">&lt;/parent&gt;</span></code></pre></div>
 
 <p>Currently, Kite has an application parent POM for CDH4 and CDH5. You can select the one you want to use by setting the <code>artifactId</code> to <code>kite-app-parent-cdh4</code> for CDH4 or <code>kite-app-parent-cdh5</code> for CDH5.</p>
@@ -206,13 +206,13 @@
   <div class="wrap columns">
 
     <div class="left">
-      <h2 class="footer-heading">Kite Software Development Kit, 0.18.0</h2>
+      <h2 class="footer-heading">Kite Software Development Kit, 1.0.0</h2>
 
       <ul>
         <li>Kite is licensed under</li>
         <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
         <li>&nbsp;</li>
-        <li>Generated on 11 February 2015</li>
+        <li>Generated on 24 February 2015</li>
       </ul>
 
     </div>
@@ -234,9 +234,9 @@
           <div class="right">
             <ul>
               <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
-              <li><a href="/docs/0.18.0/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
-              <li><a href="/docs/0.18.0/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
-              <li><a href="/docs/0.18.0/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+              <li><a href="/docs/1.0.0/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/1.0.0/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/docs/1.0.0/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
             </ul>
           </div>
         </div>

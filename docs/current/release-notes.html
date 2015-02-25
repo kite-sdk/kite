@@ -7,10 +7,10 @@
     <title>Kite SDK Release Notes</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="An open source data API for Hadoop.">
-    <link rel="canonical" href="http://kitesdk.org/docs/0.18.0/release-notes.html">
+    <link rel="canonical" href="http://kitesdk.org/docs/1.0.0/release-notes.html">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/docs/0.18.0/css/main.css">
+    <link rel="stylesheet" href="/docs/1.0.0/css/main.css">
     <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 
@@ -23,7 +23,7 @@
 
   <div class="wrap">
 
-    <a class="site-title" href="/docs/0.18.0/">Kite Software Development Kit</a>
+    <a class="site-title" href="/docs/1.0.0/">Kite Software Development Kit</a>
 
     <nav class="site-nav">
       <a href="#" class="menu-icon">
@@ -57,11 +57,11 @@
         <ul>
           
           
-          <li><a href="/docs/0.18.0/Kite-SDK-Guide.html">Kite Background</a></li>
+          <li><a href="/docs/1.0.0/Kite-SDK-Guide.html">Kite Background</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
+          <li><a href="/docs/1.0.0/introduction-to-datasets.html">Datasets Overview</a></li>
           
           
         </ul>
@@ -70,15 +70,15 @@
         <ul>
           
           
-          <li><a href="/docs/0.18.0/Install-Kite.html">Installing the CLI</a></li>
+          <li><a href="/docs/1.0.0/Install-Kite.html">Installing the CLI</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
+          <li><a href="/docs/1.0.0/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/cli-reference.html">Kite CLI Reference</a></li>
+          <li><a href="/docs/1.0.0/cli-reference.html">Kite CLI Reference</a></li>
           
           
         </ul>
@@ -87,15 +87,15 @@
         <ul>
           
           
-          <li><a href="/docs/0.18.0/API-Overview.html">API Introduction</a></li>
+          <li><a href="/docs/1.0.0/API-Overview.html">API Introduction</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/view-api.html">Views API</a></li>
+          <li><a href="/docs/1.0.0/view-api.html">Views API</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
+          <li><a href="/docs/1.0.0/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
           
           
         </ul>
@@ -104,39 +104,39 @@
         <ul>
           
           
-          <li><a href="/docs/0.18.0/URIs.html">Kite URIs</a></li>
+          <li><a href="/docs/1.0.0/URIs.html">Kite URIs</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Schema-Evolution.html">Schema Evolution</a></li>
+          <li><a href="/docs/1.0.0/Schema-Evolution.html">Schema Evolution</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Partitioned-Datasets.html">Partitioned Datasets</a></li>
+          <li><a href="/docs/1.0.0/Partitioned-Datasets.html">Partitioned Datasets</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
+          <li><a href="/docs/1.0.0/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/HBase-Storage-Cells.html">HBase Storage</a></li>
+          <li><a href="/docs/1.0.0/HBase-Storage-Cells.html">HBase Storage</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Column-Mapping.html">Column Mapping</a></li>
+          <li><a href="/docs/1.0.0/Column-Mapping.html">Column Mapping</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/lifecycle.html">Dataset Lifecycle</a></li>
+          <li><a href="/docs/1.0.0/lifecycle.html">Dataset Lifecycle</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/maven">Maven Plugin</a></li>
+          <li><a href="/docs/1.0.0/maven">Maven Plugin</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/dependencies">Dependency Info</a></li>
+          <li><a href="/docs/1.0.0/dependencies">Dependency Info</a></li>
           
           
         </ul>
@@ -154,6 +154,33 @@
   <article class="post-content">
   <p>All past Kite releases are documented on this page. Upcoming release dates can be found in
 <a href="https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel">JIRA</a>.</p>
+
+<h2 id="version-100">Version 1.0.0</h2>
+
+<p>Release date: 23 February 2015</p>
+
+<p>Version 1.0.0 contains the following notable changes:</p>
+
+<ul>
+  <li>All deprecated classes and methods have been removed from the data modules.</li>
+  <li><code>DatasetWriter</code> no longer has a <code>flush()</code> or a <code>sync()</code> method (see <a href="https://issues.cloudera.org/browse/CDK-892">CDK-892</a>). Some (but not all) implementations of <code>DatasetWriter</code> implement the <code>org.kitesdk.data.Flushable</code> or <code>org.kitesdk.data.Syncable</code> interfaces, so you need to use the following idiom to flush the stream. (Calling <code>sync()</code> is similar.)
+<code>
+DatasetWriter&lt;Record&gt; writer = ...
+if (writer instanceof Flushable) {
+((Flushable) writer).flush();
+}
+</code></li>
+  <li>Avro schemas are now stored in HDFS for Hive datasets. This overcomes the 4K limit on schema size, as well as providing better schema evolution checking since all versions of the schema are stored. See <a href="https://issues.cloudera.org/browse/CDK-969">CDK-969</a></li>
+  <li>Removing a partition from a dataset now removes the partition from the Hive metastore (see <a href="https://issues.cloudera.org/browse/CDK-924">CDK-924</a>).</li>
+  <li>Morphlines Library
+    <ul>
+      <li>Added support for <a href="kite-morphlines/morphlinesReferenceGuide.html#loadSolrChildDocuments">nested documents</a> aka child documents to loadSolr morphline command.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>The full <a href="https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10513">change log</a><br />
+is available from JIRA.</p>
 
 <h2 id="version-0180">Version 0.18.0</h2>
 
@@ -823,13 +850,13 @@ information about API compatibility guarantees.</p>
   <div class="wrap columns">
 
     <div class="left">
-      <h2 class="footer-heading">Kite Software Development Kit, 0.18.0</h2>
+      <h2 class="footer-heading">Kite Software Development Kit, 1.0.0</h2>
 
       <ul>
         <li>Kite is licensed under</li>
         <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
         <li>&nbsp;</li>
-        <li>Generated on 11 February 2015</li>
+        <li>Generated on 24 February 2015</li>
       </ul>
 
     </div>
@@ -851,9 +878,9 @@ information about API compatibility guarantees.</p>
           <div class="right">
             <ul>
               <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
-              <li><a href="/docs/0.18.0/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
-              <li><a href="/docs/0.18.0/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
-              <li><a href="/docs/0.18.0/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+              <li><a href="/docs/1.0.0/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/1.0.0/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/docs/1.0.0/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
             </ul>
           </div>
         </div>

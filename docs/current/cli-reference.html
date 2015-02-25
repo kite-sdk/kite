@@ -7,10 +7,10 @@
     <title>Kite CLI Reference</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="An open source data API for Hadoop.">
-    <link rel="canonical" href="http://kitesdk.org/docs/0.18.0/cli-reference.html">
+    <link rel="canonical" href="http://kitesdk.org/docs/1.0.0/cli-reference.html">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/docs/0.18.0/css/main.css">
+    <link rel="stylesheet" href="/docs/1.0.0/css/main.css">
     <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 
@@ -23,7 +23,7 @@
 
   <div class="wrap">
 
-    <a class="site-title" href="/docs/0.18.0/">Kite Software Development Kit</a>
+    <a class="site-title" href="/docs/1.0.0/">Kite Software Development Kit</a>
 
     <nav class="site-nav">
       <a href="#" class="menu-icon">
@@ -57,11 +57,11 @@
         <ul>
           
           
-          <li><a href="/docs/0.18.0/Kite-SDK-Guide.html">Kite Background</a></li>
+          <li><a href="/docs/1.0.0/Kite-SDK-Guide.html">Kite Background</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
+          <li><a href="/docs/1.0.0/introduction-to-datasets.html">Datasets Overview</a></li>
           
           
         </ul>
@@ -70,11 +70,11 @@
         <ul>
           
           
-          <li><a href="/docs/0.18.0/Install-Kite.html">Installing the CLI</a></li>
+          <li><a href="/docs/1.0.0/Install-Kite.html">Installing the CLI</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
+          <li><a href="/docs/1.0.0/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
           
           
           
@@ -87,15 +87,15 @@
         <ul>
           
           
-          <li><a href="/docs/0.18.0/API-Overview.html">API Introduction</a></li>
+          <li><a href="/docs/1.0.0/API-Overview.html">API Introduction</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/view-api.html">Views API</a></li>
+          <li><a href="/docs/1.0.0/view-api.html">Views API</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
+          <li><a href="/docs/1.0.0/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
           
           
         </ul>
@@ -104,39 +104,39 @@
         <ul>
           
           
-          <li><a href="/docs/0.18.0/URIs.html">Kite URIs</a></li>
+          <li><a href="/docs/1.0.0/URIs.html">Kite URIs</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Schema-Evolution.html">Schema Evolution</a></li>
+          <li><a href="/docs/1.0.0/Schema-Evolution.html">Schema Evolution</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Partitioned-Datasets.html">Partitioned Datasets</a></li>
+          <li><a href="/docs/1.0.0/Partitioned-Datasets.html">Partitioned Datasets</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
+          <li><a href="/docs/1.0.0/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/HBase-Storage-Cells.html">HBase Storage</a></li>
+          <li><a href="/docs/1.0.0/HBase-Storage-Cells.html">HBase Storage</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Column-Mapping.html">Column Mapping</a></li>
+          <li><a href="/docs/1.0.0/Column-Mapping.html">Column Mapping</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/lifecycle.html">Dataset Lifecycle</a></li>
+          <li><a href="/docs/1.0.0/lifecycle.html">Dataset Lifecycle</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/maven">Maven Plugin</a></li>
+          <li><a href="/docs/1.0.0/maven">Maven Plugin</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/dependencies">Dependency Info</a></li>
+          <li><a href="/docs/1.0.0/dependencies">Dependency Info</a></li>
           
           
         </ul>
@@ -154,7 +154,7 @@
   <article class="post-content">
   <p>The Kite Dataset command line interface (CLI) provides utility commands that let you perform essential tasks such as creating a schema and dataset, importing data from a CSV file, and viewing the results.</p>
 
-<p>Each command is described below. See <a href="/docs/0.18.0/Using-the-Kite-CLI-to-Create-a-Dataset.html">Using the Kite CLI to Create a Dataset</a> for a practical example of the CLI in use.</p>
+<p>Each command is described below. See <a href="/docs/1.0.0/Using-the-Kite-CLI-to-Create-a-Dataset.html">Using the Kite CLI to Create a Dataset</a> for a practical example of the CLI in use.</p>
 
 <p><a name="top"></a> </p>
 
@@ -254,7 +254,7 @@
 * If the data is numeric and has no decimal point, the type is <code>long</code><br />
 * Otherwise, the type is <code>string</code></p>
 
-<p>See <a href="/docs/0.18.0/read-only-formats.html#csv">CSV format details</a>.</p>
+<p>See <a href="/docs/1.0.0/read-only-formats.html#csv">CSV format details</a>.</p>
 
 <h3 id="syntax">Syntax</h3>
 
@@ -378,7 +378,7 @@
 </tr></table>
 </div>
 
-<p>See <a href="/docs/0.18.0/read-only-formats.html#json">JSON format details</a>.</p>
+<p>See <a href="/docs/1.0.0/read-only-formats.html#json">JSON format details</a>.</p>
 
 <h3 id="syntax-1">Syntax</h3>
 
@@ -641,7 +641,7 @@
 
 <p>As Kite constructs each record, it validates values using the target field’s schema. Invalid values (in numeric fields) and null values (in required fields) cause exceptions. Kite handles empty strings as null values for numeric fields.</p>
 
-<p>See <a href="/docs/0.18.0/read-only-formats.html#csv">CSV format details</a>.</p>
+<p>See <a href="/docs/1.0.0/read-only-formats.html#csv">CSV format details</a>.</p>
 
 <h3 id="syntax-5">Syntax</h3>
 
@@ -724,7 +724,7 @@
 
 <p>Invalid values, missing record fields, and other problems cause exceptions.</p>
 
-<p>See <a href="/docs/0.18.0/read-only-formats.html#json">JSON format details</a>.</p>
+<p>See <a href="/docs/1.0.0/read-only-formats.html#json">JSON format details</a>.</p>
 
 <h3 id="syntax-6">Syntax</h3>
 
@@ -891,7 +891,7 @@
 
 <p>Builds a partition strategy for a schema.</p>
 
-<p>The resulting partition strategy is a valid <a href="/docs/0.18.0/Partition-Strategy-Format.html">JSON partition strategy file</a>.</p>
+<p>The resulting partition strategy is a valid <a href="/docs/1.0.0/Partition-Strategy-Format.html">JSON partition strategy file</a>.</p>
 
 <p>Entries in the partition strategy are specified by <code>field:type</code> pairs, where <code>field</code> is the source field from the given schema and <code>type</code> can be:</p>
 
@@ -932,7 +932,7 @@
   </tbody>
 </table>
 
-<p>Provided partitioners do not reference a source field and instead require that a value is provided when writing. Values can be provided by writing to <a href="/docs/0.18.0/view-api.html">views</a>.</p>
+<p>Provided partitioners do not reference a source field and instead require that a value is provided when writing. Values can be provided by writing to <a href="/docs/1.0.0/view-api.html">views</a>.</p>
 
 <h3 id="syntax-10">Syntax</h3>
 
@@ -980,7 +980,7 @@
 
 <h2 id="mapping-config">mapping-config</h2>
 
-<p>Builds a column mapping for a schema, required for HBase. The resulting mapping definition is a valid <a href="/docs/0.18.0/Column-Mapping.html">JSON mapping file</a>.</p>
+<p>Builds a column mapping for a schema, required for HBase. The resulting mapping definition is a valid <a href="/docs/1.0.0/Column-Mapping.html">JSON mapping file</a>.</p>
 
 <p>Mappings are specified by <code>field:type</code> pairs, where <code>field</code> is a source field from the given schema and <code>type</code> can be:</p>
 
@@ -1313,13 +1313,13 @@
   <div class="wrap columns">
 
     <div class="left">
-      <h2 class="footer-heading">Kite Software Development Kit, 0.18.0</h2>
+      <h2 class="footer-heading">Kite Software Development Kit, 1.0.0</h2>
 
       <ul>
         <li>Kite is licensed under</li>
         <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
         <li>&nbsp;</li>
-        <li>Generated on 11 February 2015</li>
+        <li>Generated on 24 February 2015</li>
       </ul>
 
     </div>
@@ -1341,9 +1341,9 @@
           <div class="right">
             <ul>
               <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
-              <li><a href="/docs/0.18.0/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
-              <li><a href="/docs/0.18.0/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
-              <li><a href="/docs/0.18.0/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+              <li><a href="/docs/1.0.0/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/1.0.0/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/docs/1.0.0/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
             </ul>
           </div>
         </div>

@@ -18,7 +18,7 @@ org.kitesdk.data.DatasetWriter
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/DatasetWriter.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.18.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/DatasetWriter.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 1.0.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -30,8 +30,8 @@ org.kitesdk.data.DatasetWriter
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="org.kitesdk.data.DatasetReaderException.html"><B>PREV CLASS</B></A>
-&nbsp;<A HREF="org.kitesdk.data.DatasetWriterException.html"><B>NEXT CLASS</B></A>
+&nbsp;<B>PREV CLASS</B>&nbsp;
+&nbsp;<B>NEXT CLASS</B>&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="org.kitesdk.data.DatasetWriter.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
@@ -47,34 +47,32 @@ FIELDS
 <H2>
 Interface org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/DatasetWriter.html" target="_top"><tt>DatasetWriter</tt></A>
 </H2>
-<p><font size="+1">Removed interface <code>java.io.Flushable</code>.<br> Added interfaces <code>org.kitesdk.data.Flushable, org.kitesdk.data.Syncable</code>.<br></font>
+<p><font size="+1">Removed interfaces <code>org.kitesdk.data.Flushable, org.kitesdk.data.Syncable</code>.<br></font>
 <a NAME="constructors"></a>
 <a NAME="methods"></a>
 <p>
-<a NAME="Changed"></a>
-<TABLE summary="Changed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<a NAME="Removed"></a>
+<TABLE summary="Removed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=3><FONT SIZE="+1"><B>Changed Methods</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Methods</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.DatasetWriter.flush_changed()"></A>
-  <nobr><code>void</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/DatasetWriter.html#flush()" target="_top"><tt>flush</tt></A>()  </nobr>
+  <A NAME="org.kitesdk.data.DatasetWriter.flush_removed()"></A>
+  <nobr><code>void</code>&nbsp;flush()</nobr>
   </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-<b>Now deprecated</b>.<br>
-  </TD>
-  <TD VALIGN="TOP">will be removed after 0.18.0; use {@link Flushable#flush}</TD>
+  <TD VALIGN="TOP"><p>
+ Force or commit any outstanding buffered data to the underlying stream if
+ supported.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.DatasetWriter.sync_changed()"></A>
-  <nobr><code>void</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/DatasetWriter.html#sync()" target="_top"><tt>sync</tt></A>()  </nobr>
+  <A NAME="org.kitesdk.data.DatasetWriter.sync_removed()"></A>
+  <nobr><code>void</code>&nbsp;sync()</nobr>
   </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-<b>Now deprecated</b>.<br>
-  </TD>
-  <TD VALIGN="TOP">will be removed after 0.18.0; use {@link Syncable#sync}</TD>
+  <TD VALIGN="TOP"><p>
+ Ensure that data in the underlying stream has been written to disk (optional
+ operation).</TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -86,7 +84,7 @@ Interface org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/DatasetWriter
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/DatasetWriter.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.18.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/DatasetWriter.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 1.0.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -98,8 +96,8 @@ Interface org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/DatasetWriter
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="org.kitesdk.data.DatasetReaderException.html"><B>PREV CLASS</B></A>
-&nbsp;<A HREF="org.kitesdk.data.DatasetWriterException.html"><B>NEXT CLASS</B></A>
+&nbsp;<B>PREV CLASS</B>&nbsp;
+&nbsp;<B>NEXT CLASS</B>&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="org.kitesdk.data.DatasetWriter.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>

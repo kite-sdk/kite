@@ -7,10 +7,10 @@
     <title>Kite Dataset API</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="An open source data API for Hadoop.">
-    <link rel="canonical" href="http://kitesdk.org/docs/0.18.0/API-Overview.html">
+    <link rel="canonical" href="http://kitesdk.org/docs/1.0.0/API-Overview.html">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/docs/0.18.0/css/main.css">
+    <link rel="stylesheet" href="/docs/1.0.0/css/main.css">
     <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 
@@ -23,7 +23,7 @@
 
   <div class="wrap">
 
-    <a class="site-title" href="/docs/0.18.0/">Kite Software Development Kit</a>
+    <a class="site-title" href="/docs/1.0.0/">Kite Software Development Kit</a>
 
     <nav class="site-nav">
       <a href="#" class="menu-icon">
@@ -57,11 +57,11 @@
         <ul>
           
           
-          <li><a href="/docs/0.18.0/Kite-SDK-Guide.html">Kite Background</a></li>
+          <li><a href="/docs/1.0.0/Kite-SDK-Guide.html">Kite Background</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
+          <li><a href="/docs/1.0.0/introduction-to-datasets.html">Datasets Overview</a></li>
           
           
         </ul>
@@ -70,15 +70,15 @@
         <ul>
           
           
-          <li><a href="/docs/0.18.0/Install-Kite.html">Installing the CLI</a></li>
+          <li><a href="/docs/1.0.0/Install-Kite.html">Installing the CLI</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
+          <li><a href="/docs/1.0.0/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/cli-reference.html">Kite CLI Reference</a></li>
+          <li><a href="/docs/1.0.0/cli-reference.html">Kite CLI Reference</a></li>
           
           
         </ul>
@@ -91,11 +91,11 @@
           
           
           
-          <li><a href="/docs/0.18.0/view-api.html">Views API</a></li>
+          <li><a href="/docs/1.0.0/view-api.html">Views API</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
+          <li><a href="/docs/1.0.0/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
           
           
         </ul>
@@ -104,39 +104,39 @@
         <ul>
           
           
-          <li><a href="/docs/0.18.0/URIs.html">Kite URIs</a></li>
+          <li><a href="/docs/1.0.0/URIs.html">Kite URIs</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Schema-Evolution.html">Schema Evolution</a></li>
+          <li><a href="/docs/1.0.0/Schema-Evolution.html">Schema Evolution</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Partitioned-Datasets.html">Partitioned Datasets</a></li>
+          <li><a href="/docs/1.0.0/Partitioned-Datasets.html">Partitioned Datasets</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
+          <li><a href="/docs/1.0.0/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/HBase-Storage-Cells.html">HBase Storage</a></li>
+          <li><a href="/docs/1.0.0/HBase-Storage-Cells.html">HBase Storage</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/Column-Mapping.html">Column Mapping</a></li>
+          <li><a href="/docs/1.0.0/Column-Mapping.html">Column Mapping</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/lifecycle.html">Dataset Lifecycle</a></li>
+          <li><a href="/docs/1.0.0/lifecycle.html">Dataset Lifecycle</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/maven">Maven Plugin</a></li>
+          <li><a href="/docs/1.0.0/maven">Maven Plugin</a></li>
           
           
           
-          <li><a href="/docs/0.18.0/dependencies">Dependency Info</a></li>
+          <li><a href="/docs/1.0.0/dependencies">Dependency Info</a></li>
           
           
         </ul>
@@ -152,7 +152,7 @@
   </header>
 
   <article class="post-content">
-  <p>Most of the time, you can create datasets and system prototypes using the <a href="/docs/0.18.0/Using-the-Kite-CLI-to-Create-a-Dataset.html">Kite command line interface</a> (CLI). When you want to perform these tasks using a Java program, you can use the Kite API. With the Kite API, you can perform tasks such as reading a dataset, defining and reading views of a dataset, and using MapReduce to process a dataset.</p>
+  <p>Most of the time, you can create datasets and system prototypes using the <a href="/docs/1.0.0/Using-the-Kite-CLI-to-Create-a-Dataset.html">Kite command line interface</a> (CLI). When you want to perform these tasks using a Java program, you can use the Kite API. With the Kite API, you can perform tasks such as reading a dataset, defining and reading views of a dataset, and using MapReduce to process a dataset.</p>
 
 <h2 id="dataset">Dataset</h2>
 
@@ -169,7 +169,7 @@
 <pre><code>dataset:hive:products
 </code></pre>
 
-<p>Common dataset URI patterns are Hive, HDFS, Local FileSystem, and HBase. See <a href="/docs/0.18.0/URIs.html">Dataset and View URIs</a>.</p>
+<p>Common dataset URI patterns are Hive, HDFS, Local FileSystem, and HBase. See <a href="/docs/1.0.0/URIs.html">Dataset and View URIs</a>.</p>
 
 <h3 id="datasetdescriptors">DatasetDescriptors</h3>
 
@@ -177,7 +177,7 @@
 
 <p>When you create a <code>Dataset</code>, you supply a <code>DatasetDescriptor</code>. That descriptor is saved and used by Kite when you interact with the dataset.</p>
 
-<p>At a minimum, a <code>DatasetDescriptor</code> requires the record <a href="#avro-schema">schema</a>, which describes the records. You create a <code>DatasetDescriptor</code> object using the fluent <a href="/docs/0.18.0/apidocs/org/kitesdk/data/DatasetDescriptor.Builder.html"><code>DatasetDescriptor.Builder</code></a> to set the schema and other configuration. See <a href="#datasetdescriptor-options">DatasetDescriptor Options</a> for more configuration options.</p>
+<p>At a minimum, a <code>DatasetDescriptor</code> requires the record <a href="#avro-schema">schema</a>, which describes the records. You create a <code>DatasetDescriptor</code> object using the fluent <a href="/docs/1.0.0/apidocs/org/kitesdk/data/DatasetDescriptor.Builder.html"><code>DatasetDescriptor.Builder</code></a> to set the schema and other configuration. See <a href="#datasetdescriptor-options">DatasetDescriptor Options</a> for more configuration options.</p>
 
 <h2 id="datasets">Datasets</h2>
 
@@ -219,7 +219,7 @@ Dataset&lt;Record&gt; products = Datasets.create(<span style="background-color:h
 
 <p>Once you load the dataset, you can retrieve and view the dataset records using <a href="#datasetreader"><code>DatasetReader</code></a>.</p>
 
-<p>The <code>load</code> method can also be used with a <a href="/docs/0.18.0/URIs.html#view-uris">view URI</a>.</p>
+<p>The <code>load</code> method can also be used with a <a href="/docs/1.0.0/URIs.html#view-uris">view URI</a>.</p>
 
 <h3 id="update">update</h3>
 
@@ -317,7 +317,7 @@ Datasets.update(<span style="background-color:hsla(0,100%,50%,0.05)"><span style
 
 <h3 id="datasetdescriptor-options">DatasetDescriptor Options</h3>
 
-<p>A <code>DatasetDescriptor</code> encapsulates the configuration needed to read and write a dataset. A <code>DatasetDescriptor</code> is <a href="https://jsr-305.googlecode.com/svn/trunk/javadoc/javax/annotation/concurrent/Immutable.html">immutable</a>, and is created by <a href="/docs/0.18.0/apidocs/org/kitesdk/data/DatasetDescriptor.Builder.html"><code>DatasetDescriptor.Builder</code></a>.</p>
+<p>A <code>DatasetDescriptor</code> encapsulates the configuration needed to read and write a dataset. A <code>DatasetDescriptor</code> is <a href="https://jsr-305.googlecode.com/svn/trunk/javadoc/javax/annotation/concurrent/Immutable.html">immutable</a>, and is created by <a href="/docs/1.0.0/apidocs/org/kitesdk/data/DatasetDescriptor.Builder.html"><code>DatasetDescriptor.Builder</code></a>.</p>
 
 <p>There are several options available when creating a descriptor:<br />
 * <a href="#schema">Set the record schema</a>, <strong>required</strong><br />
@@ -327,7 +327,7 @@ Datasets.update(<span style="background-color:hsla(0,100%,50%,0.05)"><span style
 
 <h4 id="schema">Schema</h4>
 
-<p>A key element of the dataset descriptor is the record schema. There are a number of ways to find and set the schema using the <a href="/docs/0.18.0/apidocs/org/kitesdk/data/DatasetDescriptor.Builder.html#schema(org.apache.avro.Schema)"><code>DatasetDescriptor.Builder#schema</code></a> methods. For example, you can read a schema definition file from HDFS or the classpath, you can use the schema from an existing data file, or you can use the builder to inspect any Java class and build a schema for it.</p>
+<p>A key element of the dataset descriptor is the record schema. There are a number of ways to find and set the schema using the <a href="/docs/1.0.0/apidocs/org/kitesdk/data/DatasetDescriptor.Builder.html#schema(org.apache.avro.Schema)"><code>DatasetDescriptor.Builder#schema</code></a> methods. For example, you can read a schema definition file from HDFS or the classpath, you can use the schema from an existing data file, or you can use the builder to inspect any Java class and build a schema for it.</p>
 
 <p>This example reads a schema definition file, <em>product.avsc</em>, from a project’s JAR that was built with the schema in <code>src/main/resources/</code>.</p>
 
@@ -345,7 +345,7 @@ Datasets.update(<span style="background-color:hsla(0,100%,50%,0.05)"><span style
 
 <h4 id="partition-strategy">Partition Strategy</h4>
 
-<p>Datasets commonly use a partition strategy to control the data layout for efficient storage and retrieval. You can pass both a <a href="/docs/0.18.0/apidocs/org/kitesdk/data/PartitionStrategy.html"><code>PartitionStrategy</code></a> object or a <a href="/docs/0.18.0/Partition-Strategy-Format.html">partition strategy JSON definition</a> to <a href="/docs/0.18.0/apidocs/org/kitesdk/data/DatasetDescriptor.Builder.html#partitionStrategy(org.kitesdk.data.PartitionStrategy)"><code>DatasetDescriptor.Builder#partitionStrategy</code></a>. See <a href="/docs/0.18.0/Partitioned-Datasets.html">Partitioned Datasets</a> for a conceptual introduction. </p>
+<p>Datasets commonly use a partition strategy to control the data layout for efficient storage and retrieval. You can pass both a <a href="/docs/1.0.0/apidocs/org/kitesdk/data/PartitionStrategy.html"><code>PartitionStrategy</code></a> object or a <a href="/docs/1.0.0/Partition-Strategy-Format.html">partition strategy JSON definition</a> to <a href="/docs/1.0.0/apidocs/org/kitesdk/data/DatasetDescriptor.Builder.html#partitionStrategy(org.kitesdk.data.PartitionStrategy)"><code>DatasetDescriptor.Builder#partitionStrategy</code></a>. See <a href="/docs/1.0.0/Partitioned-Datasets.html">Partitioned Datasets</a> for a conceptual introduction. </p>
 
 <p>This example constructs a descriptor with its partition strategy created by [<code>PartitionStrategy.Builder</code>][javadoc-strategy-builder].</p>
 
@@ -379,7 +379,7 @@ DatasetDescriptor descriptor = <span style="color:#080;font-weight:bold">new</sp
 
 <h4 id="storage-format">Storage Format</h4>
 
-<p>Storage format is set when you create a dataset and cannot be changed. See <a href="/docs/0.18.0/apidocs/org/kitesdk/data/DatasetDescriptor.Builder.html#format(java.lang.String)"><code>DatasetDescriptor.Builder#format</code></a>.</p>
+<p>Storage format is set when you create a dataset and cannot be changed. See <a href="/docs/1.0.0/apidocs/org/kitesdk/data/DatasetDescriptor.Builder.html#format(java.lang.String)"><code>DatasetDescriptor.Builder#format</code></a>.</p>
 
 <p>The default storage format is Avro, which is the recommended format for most use cases.</p>
 
@@ -389,7 +389,7 @@ DatasetDescriptor descriptor = <span style="color:#080;font-weight:bold">new</sp
 
 <h4 id="compression-type">Compression Type</h4>
 
-<p>Kite uses <em>Snappy</em> compression by default. You also have the option of using <em>Deflate</em>, <em>Bzip2</em>, <em>Lzo</em>, or <em>Uncompressed</em> compression. See <a href="/docs/0.18.0/apidocs/org/kitesdk/data/DatasetDescriptor.Builder.html#compressionType(java.lang.String)"><code>DatasetDescriptor.Builder#compressionType</code></a></p>
+<p>Kite uses <em>Snappy</em> compression by default. You also have the option of using <em>Deflate</em>, <em>Bzip2</em>, <em>Lzo</em>, or <em>Uncompressed</em> compression. See <a href="/docs/1.0.0/apidocs/org/kitesdk/data/DatasetDescriptor.Builder.html#compressionType(java.lang.String)"><code>DatasetDescriptor.Builder#compressionType</code></a></p>
 
 <h3 id="datasetwriter">DatasetWriter</h3>
 
@@ -497,21 +497,21 @@ DatasetReader&lt;Record&gt; reader = <span style="color:#069">null</span>;
 </tr></table>
 </div>
 
-<p>If you don’t need the entire dataset, you can use the <a href="/docs/0.18.0/view-api.html">View API</a> to select a subset of its records.</p>
+<p>If you don’t need the entire dataset, you can use the <a href="/docs/1.0.0/view-api.html">View API</a> to select a subset of its records.</p>
 
 <h2 id="kite-data-artifacts">Kite Data Artifacts</h2>
 
 <p>You can use the Kite data API by adding dependencies for the artifacts described below.</p>
 
 <ul>
-  <li><a href="/docs/0.18.0/dependencies/kite-data-core.html"><code>kite-data-core</code></a> has the Kite data API, including all of the Kite classes used in this introduction. It also includes the Dataset implementation for both HDFS and local file systems.</li>
-  <li><a href="/docs/0.18.0/dependencies/kite-data-hive.html"><code>kite-data-hive</code></a> is a Dataset implementation that creates Datasets as Hive tables and stores metadata in the Hive MetaStore. Add a dependency on kite-data-hive if you want to interact with your data through Hive or Impala</li>
-  <li><a href="/docs/0.18.0/dependencies/kite-data-hbase.html"><code>kite-data-hbase</code></a> is an experimental Dataset implementation that creates datasets as HBase tables.</li>
-  <li><a href="/docs/0.18.0/dependencies/kite-data-crunch.html"><code>kite-data-crunch</code></a> provides helpers to use a Kite dataset as a source or target in a Crunch pipeline.</li>
-  <li><a href="/docs/0.18.0/dependencies/kite-data-mapreduce.html"><code>kite-data-mapreduce</code></a> provides MR input and output formats that read from or write to Kite datasets.</li>
+  <li><a href="/docs/1.0.0/dependencies/kite-data-core.html"><code>kite-data-core</code></a> has the Kite data API, including all of the Kite classes used in this introduction. It also includes the Dataset implementation for both HDFS and local file systems.</li>
+  <li><a href="/docs/1.0.0/dependencies/kite-data-hive.html"><code>kite-data-hive</code></a> is a Dataset implementation that creates Datasets as Hive tables and stores metadata in the Hive MetaStore. Add a dependency on kite-data-hive if you want to interact with your data through Hive or Impala</li>
+  <li><a href="/docs/1.0.0/dependencies/kite-data-hbase.html"><code>kite-data-hbase</code></a> is an experimental Dataset implementation that creates datasets as HBase tables.</li>
+  <li><a href="/docs/1.0.0/dependencies/kite-data-crunch.html"><code>kite-data-crunch</code></a> provides helpers to use a Kite dataset as a source or target in a Crunch pipeline.</li>
+  <li><a href="/docs/1.0.0/dependencies/kite-data-mapreduce.html"><code>kite-data-mapreduce</code></a> provides MR input and output formats that read from or write to Kite datasets.</li>
 </ul>
 
-<p>See the <a href="/docs/0.18.0/dependencies/">dependencies</a> article for more information.</p>
+<p>See the <a href="/docs/1.0.0/dependencies/">dependencies</a> article for more information.</p>
 
 
   </article>
@@ -526,13 +526,13 @@ DatasetReader&lt;Record&gt; reader = <span style="color:#069">null</span>;
   <div class="wrap columns">
 
     <div class="left">
-      <h2 class="footer-heading">Kite Software Development Kit, 0.18.0</h2>
+      <h2 class="footer-heading">Kite Software Development Kit, 1.0.0</h2>
 
       <ul>
         <li>Kite is licensed under</li>
         <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
         <li>&nbsp;</li>
-        <li>Generated on 11 February 2015</li>
+        <li>Generated on 24 February 2015</li>
       </ul>
 
     </div>
@@ -554,9 +554,9 @@ DatasetReader&lt;Record&gt; reader = <span style="color:#069">null</span>;
           <div class="right">
             <ul>
               <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
-              <li><a href="/docs/0.18.0/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
-              <li><a href="/docs/0.18.0/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
-              <li><a href="/docs/0.18.0/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+              <li><a href="/docs/1.0.0/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/1.0.0/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/docs/1.0.0/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
             </ul>
           </div>
         </div>
