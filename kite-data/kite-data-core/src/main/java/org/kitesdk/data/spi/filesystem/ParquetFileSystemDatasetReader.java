@@ -16,7 +16,10 @@
 package org.kitesdk.data.spi.filesystem;
 
 import java.util.NoSuchElementException;
+
+import org.apache.hadoop.conf.Configuration;
 import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.spi.DataModelUtil;
 import org.kitesdk.data.spi.ReaderWriterState;
 import org.kitesdk.data.spi.AbstractDatasetReader;
 import com.google.common.base.Objects;
@@ -31,12 +34,14 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parquet.avro.AvroParquetReader;
+import parquet.avro.AvroReadSupport;
 
 class ParquetFileSystemDatasetReader<E extends IndexedRecord> extends AbstractDatasetReader<E> {
 
   private FileSystem fileSystem;
   private Path path;
   private Schema schema;
+  private Schema readerSchema;
   private Class<E> type;
 
   private ReaderWriterState state;
@@ -60,6 +65,7 @@ class ParquetFileSystemDatasetReader<E extends IndexedRecord> extends AbstractDa
     this.path = path;
     this.schema = schema;
     this.type = type;
+    this.readerSchema = DataModelUtil.getReaderSchema(type, schema);
 
     this.state = ReaderWriterState.NEW;
   }
@@ -72,8 +78,10 @@ class ParquetFileSystemDatasetReader<E extends IndexedRecord> extends AbstractDa
     LOG.debug("Opening reader on path:{}", path);
 
     try {
+      final Configuration conf = fileSystem.getConf();
+      AvroReadSupport.setAvroReadSchema(conf, readerSchema);
       reader = new AvroParquetReader<E>(
-          fileSystem.getConf(), fileSystem.makeQualified(path));
+          conf, fileSystem.makeQualified(path));
     } catch (IOException e) {
       throw new DatasetIOException("Unable to create reader path:" + path, e);
     }
