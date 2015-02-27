@@ -1,0 +1,19 @@
+{
+  "name": "Value",
+  "namespace": "org.kitesdk.data.event",
+  "type": "record",
+  "doc": "A small, single valued event",
+  "fields": [
+    {
+      "name": "id",
+      "type": ["null", "string"],
+      "default" : null,
+      "doc": "Id of the event"
+    },
+    {
+      "name": "value",
+      "type": "long",
+      "doc": "A value"
+    }
+  ]
+}
