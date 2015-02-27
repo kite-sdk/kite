@@ -32,7 +32,6 @@ import java.util.Set;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecordBuilder;
-import org.apache.avro.util.Utf8;
 import org.junit.Assert;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.InitializeAccessor;
@@ -42,6 +41,7 @@ public class DatasetTestUtilities {
 
   public final static Schema STRING_SCHEMA = loadSchema("schema/string.avsc");
   public final static Schema USER_SCHEMA = loadSchema("schema/user.avsc");
+  public final static Schema OLD_VALUE_SCHEMA = loadSchema("schema/old_value.avsc");
   public final static URI USER_SCHEMA_URL = findSchemaURI("schema/user.avsc");
 
   private static Schema loadSchema(String resource) {
