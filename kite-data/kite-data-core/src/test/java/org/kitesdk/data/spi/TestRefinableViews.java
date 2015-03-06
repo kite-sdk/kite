@@ -119,7 +119,7 @@ public abstract class TestRefinableViews extends MiniDFSTest {
     }
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = ValidationException.class)
   public void testNonExistentField() {
     unbounded.with("nosuchfield");
   }

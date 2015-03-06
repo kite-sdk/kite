@@ -235,11 +235,11 @@ public class SchemaUtil {
     List<String> levels = Lists.newArrayList();
     for (String level : NAME_SPLITTER.split(name)) {
       levels.add(level);
-      Preconditions.checkArgument(Schema.Type.RECORD == schema.getType(),
+      ValidationException.check(Schema.Type.RECORD == schema.getType(),
           "Cannot get schema for %s: %s is not a record schema: %s",
           name, NAME_JOINER.join(levels), nested.toString(true));
       Schema.Field field = nested.getField(level);
-      Preconditions.checkArgument(field != null,
+      ValidationException.check(field != null,
           "Cannot get schema for %s: %s is not a field",
           name, NAME_JOINER.join(levels));
       nested = field.schema();

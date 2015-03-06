@@ -13,6 +13,23 @@
     {
       "type": "long",
       "name": "created_at"
+    },
+    {
+      "type": {
+        "type": "record",
+        "name": "address",
+        "fields": [
+          {
+            "type": "string",
+            "name": "line1"
+          },
+          {
+            "type": "string",
+            "name": "line2"
+          }
+        ]
+      },
+      "name": "address"
     }
   ]
 }
