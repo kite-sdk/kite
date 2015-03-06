@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 public class CreatePartitionStrategyCommand extends BaseCommand {
 
   private static final Pattern PARTITION_FIELD = Pattern.compile(
-      "(\\w+):(\\w+)(?:\\[(\\d+)\\])?");
+      "((?:\\w|\\.)+):(\\w+)(?:\\[(\\d+)\\])?");
 
   private final Logger console;
 
@@ -66,28 +66,29 @@ public class CreatePartitionStrategyCommand extends BaseCommand {
         String fieldName = m.group(1);
         ValidationException.check(fieldName != null && !fieldName.isEmpty(),
             "Invalid field name: %s", String.valueOf(fieldName));
-        if ("hash".equals(m.group(2))) {
+        String partitionerType = m.group(2);
+        if ("hash".equals(partitionerType)) {
           String width = m.group(3);
           ValidationException.check(width != null,
               "Missing number of hash partitions: %s:hash[?]", fieldName);
           strategyBuilder.hash(fieldName, Integer.parseInt(width));
-        } else if ("copy".equals(m.group(2))) {
+        } else if ("copy".equals(partitionerType)) {
           strategyBuilder.identity(fieldName);
-        } else if ("year".equals(m.group(2))) {
+        } else if ("year".equals(partitionerType)) {
           strategyBuilder.year(fieldName);
-        } else if ("month".equals(m.group(2))) {
+        } else if ("month".equals(partitionerType)) {
           strategyBuilder.month(fieldName);
-        } else if ("day".equals(m.group(2))) {
+        } else if ("day".equals(partitionerType)) {
           strategyBuilder.day(fieldName);
-        } else if ("hour".equals(m.group(2))) {
+        } else if ("hour".equals(partitionerType)) {
           strategyBuilder.hour(fieldName);
-        } else if ("minute".equals(m.group(2))) {
+        } else if ("minute".equals(partitionerType)) {
           strategyBuilder.minute(fieldName);
-        } else if ("provided".equals(m.group(2))) {
+        } else if ("provided".equals(partitionerType)) {
           strategyBuilder.provided(fieldName);
         } else {
           throw new ValidationException(
-              "Unknown partitioner type: " + m.group(2));
+              "Unknown partitioner type: " + partitionerType);
         }
       } else {
         throw new ValidationException(

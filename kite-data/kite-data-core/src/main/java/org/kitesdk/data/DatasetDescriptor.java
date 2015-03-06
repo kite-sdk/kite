@@ -1024,14 +1024,12 @@ public class DatasetDescriptor {
         "Cannot map non-records: %s", schema);
     Set<String> keyMappedFields = Sets.newHashSet();
     for (FieldMapping fm : mappings.getFieldMappings()) {
-      Schema.Field field = schema.getField(fm.getFieldName());
-      ValidationException.check(field != null,
-          "Cannot map field %s (missing from schema)", fm.getFieldName());
+      Schema fieldSchema = SchemaUtil.fieldSchema(schema, fm.getFieldName());
       ValidationException.check(
           SchemaUtil.isConsistentWithMappingType(
-              field.schema().getType(), fm.getMappingType()),
+              fieldSchema.getType(), fm.getMappingType()),
           "Field type %s is not compatible with mapping %s",
-          field.schema().getType(), fm);
+          fieldSchema.getType(), fm);
       if (FieldMapping.MappingType.KEY == fm.getMappingType()) {
         keyMappedFields.add(fm.getFieldName());
       }

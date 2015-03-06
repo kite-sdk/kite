@@ -33,6 +33,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.TestHelpers;
+import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.spi.partition.HashFieldPartitioner;
 import org.kitesdk.data.spi.predicates.Predicates;
 import org.kitesdk.data.spi.predicates.Ranges;
@@ -646,7 +647,7 @@ public class TestConstraints {
   @Test
   public void testRejectsNonSchemaOrPartitionFields() {
     TestHelpers.assertThrows("Should reject unknown field name",
-        IllegalArgumentException.class, new Runnable() {
+        ValidationException.class, new Runnable() {
           @Override
           public void run() {
             emptyConstraints.with("prescription", 34);

@@ -57,6 +57,18 @@ public class TestCreatePartitionStrategyCommand {
   }
 
   @Test
+  public void testNested() throws Exception {
+    command.partitions = Lists.newArrayList("address.line1:copy");
+    command.run();
+
+    PartitionStrategy strategy = new PartitionStrategy.Builder()
+        .identity("address.line1")
+        .build();
+    verify(console).info(strategy.toString(true));
+    verifyNoMoreInteractions(console);
+  }
+
+  @Test
   public void testTime() throws Exception {
     command.partitions = Lists.newArrayList(
         "created_at:year", "created_at:month", "created_at:day",
