@@ -79,7 +79,7 @@ public class HBaseMetadataProviderTest {
         new DatasetDescriptor.Builder().schemaLiteral(testEntity).build());
     ColumnMapping columnMapping = desc.getColumnMapping();
     PartitionStrategy partStrat = desc.getPartitionStrategy();
-    assertEquals(9, columnMapping.getFieldMappings().size());
+    assertEquals(10, columnMapping.getFieldMappings().size());
     assertEquals(2, Accessor.getDefault().getFieldPartitioners(partStrat).size());
   }
 

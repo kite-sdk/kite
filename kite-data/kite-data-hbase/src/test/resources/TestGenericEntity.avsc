@@ -64,6 +64,10 @@
       "mapping": { "type": "column", "value": "meta:field5" }
     },
 
+    { "name": "field6", "type": ["null", "string"], "default" : null, "mapping":
+      { "type": "column", "value": "meta:field6" }
+    },
+
     {
       "name": "version",
       "type": "long",
