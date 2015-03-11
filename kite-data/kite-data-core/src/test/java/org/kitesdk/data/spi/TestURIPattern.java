@@ -178,6 +178,22 @@ public class TestURIPattern {
   }
 
   @Test
+  public void testIgnoreTrailingSlash() throws URISyntaxException {
+    URIPattern pattern = new URIPattern("mysql:/:db/:table");
+    String uri = "mysql:/myDB/myTable/";
+    Assert.assertTrue(pattern.matches(uri));
+
+    Map<String, String> actual = pattern.getMatch(uri);
+    expected.put("uri:scheme", "mysql");
+    expected.put("db", "myDB");
+    expected.put("table", "myTable");
+    Assert.assertEquals(expected, actual);
+
+    URI constructed = pattern.construct(expected);
+    Assert.assertEquals(URI.create("mysql:/myDB/myTable"), constructed);
+  }
+
+  @Test
   public void testPathVariablesWithGlob() throws URISyntaxException {
     URIPattern pattern = new URIPattern("mysql:/:db/:table/*the-rest");
     String uri = "mysql:/myDB/myTable/a/b/c";

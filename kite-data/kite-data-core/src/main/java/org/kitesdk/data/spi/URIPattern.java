@@ -283,6 +283,20 @@ public class URIPattern {
         PATH_SPLITTER.split(pattern));
     LinkedList<String> parts = Lists.newLinkedList(PATH_SPLITTER.split(path));
 
+    // if the data URI ends in a trailing slash, ignore it unless:
+    // 1. the pattern ends with a glob
+    // 2. the pattern ends with a slash that should be considered a match
+    if (parts.peekLast().isEmpty()) {
+      // don't change glob handling
+      if (!patternParts.peekLast().startsWith("*")) {
+        parts.removeLast();
+      }
+      // match the trailing slash for the pattern, if present
+      if (patternParts.peekLast().isEmpty()) {
+        patternParts.removeLast();
+      }
+    }
+
     // consume URI parts moving forward until exhausted or a glob pattern
     String globPattern = null;
     while (!patternParts.isEmpty()) {
