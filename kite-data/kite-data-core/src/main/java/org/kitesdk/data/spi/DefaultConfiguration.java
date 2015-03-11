@@ -17,6 +17,7 @@
 package org.kitesdk.data.spi;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 
 /**
  * Manages a default Hadoop {@link Configuration}.
@@ -33,7 +34,19 @@ import org.apache.hadoop.conf.Configuration;
 public class DefaultConfiguration {
 
   // initialize the default configuration from the environment
-  private static Configuration conf = new Configuration();
+  private static Configuration conf;
+
+  static{
+    //read system property for Oozie Action Configuration XML
+    String oozieActionXml = System.getProperty("oozie.action.conf.xml");
+    if(oozieActionXml != null && oozieActionXml.length() > 0) {
+      Configuration.addDefaultResource(new Path("file:///", oozieActionXml).toString());
+    }
+
+    conf = new Configuration();
+  }
+
+
 
   /**
    * Get a copy of the default Hadoop {@link Configuration}.
