@@ -64,8 +64,14 @@ public class Loader implements Loadable {
       FileSystem fs;
       try {
         fs = FileSystem.get(fileSystemURI(match), conf);
-      } catch (IOException ex) {
-        throw new DatasetIOException("Could not get a FileSystem", ex);
+      } catch (IOException e) {
+        // "Incomplete HDFS URI, no host" => add a helpful suggestion
+        if (e.getMessage().startsWith("Incomplete")) {
+          throw new DatasetIOException("Could not get a FileSystem: " +
+              "make sure the default " + match.get(URIPattern.SCHEME) +
+              " URI is configured.", e);
+        }
+        throw new DatasetIOException("Could not get a FileSystem", e);
       }
       return new FileSystemDatasetRepository.Builder()
           .configuration(new Configuration(conf)) // make a modifiable copy

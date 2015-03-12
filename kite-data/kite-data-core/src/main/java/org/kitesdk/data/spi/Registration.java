@@ -17,8 +17,10 @@
 package org.kitesdk.data.spi;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import org.kitesdk.data.DatasetNotFoundException;
@@ -69,7 +71,7 @@ public class Registration {
         return Pair.of(datasetPattern, match);
       }
     }
-    throw new IllegalArgumentException("Unknown repository URI: " + uri);
+    throw new IllegalArgumentException("Unknown repository URI pattern: dataset:" + uri);
   }
 
   public static Pair<URIPattern, Map<String, String>> lookupDatasetPattern(URI uri) {
@@ -79,7 +81,7 @@ public class Registration {
         return Pair.of(pattern, match);
       }
     }
-    throw new IllegalArgumentException("Unknown dataset URI: " + uri);
+    throw new IllegalArgumentException("Unknown dataset URI pattern: dataset:" + uri);
   }
 
   public static Pair<DatasetRepository, Map<String, String>>
@@ -90,7 +92,7 @@ public class Registration {
         return Pair.of(REPO_PATTERNS.get(pattern).getFromOptions(match), match);
       }
     }
-    throw new IllegalArgumentException("Unknown repository URI: " + repoUri);
+    throw new IllegalArgumentException("Unknown repository URI pattern: repo:" + repoUri);
   }
 
   @SuppressWarnings("unchecked")
@@ -100,15 +102,30 @@ public class Registration {
 
   public static Pair<DatasetRepository, Map<String, String>>
       lookupDatasetUri(URI datasetUri) {
+    String scheme = datasetUri.getScheme();
+    List<String> schemeMatches = Lists.newArrayList();
+
     for (URIPattern pattern : DATASET_PATTERNS.keySet()) {
       Map<String, String> match = pattern.getMatch(datasetUri);
       if (match != null) {
         return Pair.of(DATASET_PATTERNS.get(pattern).getFromOptions(match), match);
+      } else if (pattern.getScheme() != null && pattern.getScheme().equals(scheme)) {
+        schemeMatches.add(pattern.getPatternString());
       }
     }
-    throw new DatasetNotFoundException(String.format("Unknown dataset URI: %s. Check " +
-        "that JARs for %s datasets are on the classpath.", datasetUri,
-        datasetUri.getScheme()));
+
+    String message = "Unknown dataset URI pattern: dataset:" + datasetUri;
+    if (schemeMatches.isEmpty()) {
+      // no known patterns for the scheme, maybe jars are missing
+      message += "\nCheck that JARs for " + scheme +
+          " datasets are on the classpath";
+    } else {
+      // show the known patterns in case it's a simple error
+      message += "\nKnown patterns for " + scheme + ":\n  dataset:" +
+          Joiner.on("\n  dataset:").join(schemeMatches);
+    }
+
+    throw new DatasetNotFoundException(message);
   }
 
   static {

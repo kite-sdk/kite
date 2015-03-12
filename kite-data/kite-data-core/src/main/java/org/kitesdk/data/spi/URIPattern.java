@@ -86,6 +86,14 @@ public class URIPattern {
     this(URI.create(uri));
   }
 
+  public String getScheme() {
+    return pattern.getScheme();
+  }
+
+  public String getPatternString() {
+    return pattern.toString();
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

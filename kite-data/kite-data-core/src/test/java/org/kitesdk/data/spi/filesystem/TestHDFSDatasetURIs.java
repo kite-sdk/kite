@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.MiniDFSTest;
@@ -44,6 +45,17 @@ public class TestHDFSDatasetURIs extends MiniDFSTest {
     descriptor = new DatasetDescriptor.Builder()
         .schemaUri("resource:schema/user.avsc")
         .build();
+  }
+
+  @Test
+  public void testMissingHDFSAuthority() {
+    try {
+      Datasets.load("dataset:hdfs:/tmp/data/ns/test", Object.class);
+      Assert.fail("Shouldn't be able to connect to HDFS");
+    } catch (DatasetIOException e) {
+      Assert.assertTrue("Should have helpful error message",
+          e.getMessage().contains("make sure the default hdfs URI is configured"));
+    }
   }
 
   @Test
