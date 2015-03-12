@@ -45,6 +45,7 @@ import org.kitesdk.cli.commands.InfoCommand;
 import org.kitesdk.cli.commands.InputFormatImportCommand;
 import org.kitesdk.cli.commands.JSONImportCommand;
 import org.kitesdk.cli.commands.JSONSchemaCommand;
+import org.kitesdk.cli.commands.ListCommand;
 import org.kitesdk.cli.commands.Log4jConfigCommand;
 import org.kitesdk.cli.commands.ObjectSchemaCommand;
 import org.kitesdk.cli.commands.SchemaCommand;
@@ -92,6 +93,7 @@ public class Main extends Configured implements Tool {
     this.help = new Help(jc, console);
     jc.setProgramName(DEFAULT_PROGRAM_NAME);
     jc.addCommand("help", help, "-h", "-help", "--help");
+    jc.addCommand("list", new ListCommand(console));
     jc.addCommand("create", new CreateDatasetCommand(console));
     jc.addCommand("copy", new CopyCommand(console));
     jc.addCommand("transform", new TransformCommand(console));
