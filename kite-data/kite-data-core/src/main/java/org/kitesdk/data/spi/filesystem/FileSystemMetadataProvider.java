@@ -295,8 +295,8 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
   @SuppressWarnings("deprecation")
   @Override
-  public List<String> namespaces() {
-    List<String> namespaces = Lists.newArrayList();
+  public Set<String> namespaces() {
+    Set<String> namespaces = Sets.newHashSet();
     try {
       FileStatus[] entries = rootFileSystem.listStatus(rootDirectory,
           PathFilters.notHidden());
@@ -323,10 +323,10 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
   @SuppressWarnings("deprecation")
   @Override
-  public List<String> datasets(String namespace) {
+  public Set<String> datasets(String namespace) {
     Preconditions.checkNotNull(namespace, "Namespace cannot be null");
 
-    List<String> datasets = Lists.newArrayList();
+    Set<String> datasets = Sets.newHashSet();
 
     try {
       // if using the default namespace, add datasets with no namespace dir
