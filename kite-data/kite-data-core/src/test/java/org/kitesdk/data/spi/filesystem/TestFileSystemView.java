@@ -266,7 +266,7 @@ public class TestFileSystemView extends TestRefinableViews {
     final Path nov11 = new Path("target/data/ns/test/year=2013/month=11/day=11");
     assertDirectoriesExist(fs, root, y2013, sep, sep12, oct, oct12, nov, nov11);
 
-    Assert.assertTrue("Delete should return false to indicate no changes",
+    Assert.assertTrue("Delete should return true to indicate data was deleted.",
         unbounded.deleteAll());
     assertDirectoriesDoNotExist(fs, y2013, sep12, sep, oct12, oct, nov11, nov);
     assertDirectoriesExist(fs, root);
