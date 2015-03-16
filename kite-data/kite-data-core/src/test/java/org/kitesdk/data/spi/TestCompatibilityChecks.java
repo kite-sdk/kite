@@ -30,6 +30,13 @@ import static org.kitesdk.data.spi.Compatibility.isCompatibleName;
 
 public class TestCompatibilityChecks {
 
+  public static final Schema PROVIDED_TEST_SCHEMA = SchemaBuilder
+      .record("Test").fields()
+      .requiredLong("l")
+      .requiredInt("i")
+      .requiredString("s")
+      .endRecord();
+
   private static final Schema schema = SchemaBuilder.record("Record").fields()
       .requiredString("message")
       .requiredBoolean("bool")
@@ -156,6 +163,199 @@ public class TestCompatibilityChecks {
                 .build());
       }
     });
+  }
+
+  @Test
+  public void testProvidedPartitionIntUpdate() {
+    final PartitionStrategy provided = new PartitionStrategy.Builder()
+        .provided("part", "int")
+        .build();
+
+    // existing partition data can be any int value
+
+    Compatibility.checkStrategyUpdate(
+        provided,
+        new PartitionStrategy.Builder()
+            .hash("s", "part", 16)
+            .build(),
+        PROVIDED_TEST_SCHEMA);
+
+    Compatibility.checkStrategyUpdate(
+        provided,
+        new PartitionStrategy.Builder()
+            .identity("l", "part")
+            .build(),
+        PROVIDED_TEST_SCHEMA);
+
+    Compatibility.checkStrategyUpdate(
+        provided,
+        new PartitionStrategy.Builder()
+            .identity("s", "part")
+            .build(),
+        PROVIDED_TEST_SCHEMA);
+
+  }
+
+  @Test
+  public void testProvidedPartitionLongUpdate() {
+    final PartitionStrategy provided = new PartitionStrategy.Builder()
+        .provided("part", "long")
+        .build();
+
+    // existing partition data can be any long value
+
+    Compatibility.checkStrategyUpdate(
+        provided,
+        new PartitionStrategy.Builder()
+            .identity("l", "part")
+            .build(),
+        PROVIDED_TEST_SCHEMA);
+
+    Compatibility.checkStrategyUpdate(
+        provided,
+        new PartitionStrategy.Builder()
+            .identity("s", "part")
+            .build(),
+        PROVIDED_TEST_SCHEMA);
+
+    TestHelpers.assertThrows("Should not allow long to int update",
+        ValidationException.class, new Runnable() {
+          @Override
+          public void run() {
+            Compatibility.checkStrategyUpdate(
+                provided,
+                new PartitionStrategy.Builder()
+                    .identity("i", "part")
+                    .build(),
+                PROVIDED_TEST_SCHEMA);
+          }
+        });
+  }
+
+  @Test
+  public void testProvidedPartitionStringUpdate() {
+    final PartitionStrategy provided = new PartitionStrategy.Builder()
+        .provided("part", "string")
+        .build();
+
+    // existing partition data can be any string value
+
+    Compatibility.checkStrategyUpdate(
+        provided,
+        new PartitionStrategy.Builder()
+            .identity("s", "part")
+            .build(),
+        PROVIDED_TEST_SCHEMA);
+
+    TestHelpers.assertThrows("Should not allow string to int update",
+        ValidationException.class, new Runnable() {
+          @Override
+          public void run() {
+            Compatibility.checkStrategyUpdate(
+                provided,
+                new PartitionStrategy.Builder()
+                    .identity("i", "part")
+                    .build(),
+                PROVIDED_TEST_SCHEMA);
+          }
+        });
+
+    TestHelpers.assertThrows("Should not allow string to long update",
+        ValidationException.class, new Runnable() {
+          @Override
+          public void run() {
+            Compatibility.checkStrategyUpdate(
+                provided,
+                new PartitionStrategy.Builder()
+                    .identity("i", "part")
+                    .build(),
+                PROVIDED_TEST_SCHEMA);
+          }
+        });
+  }
+
+  @Test
+  public void testProvidedPartitionNameUpdate() {
+    final PartitionStrategy provided = new PartitionStrategy.Builder()
+        .provided("part", "string")
+        .build();
+
+    TestHelpers.assertThrows("Should not allow changing the partition name",
+        ValidationException.class, new Runnable() {
+          @Override
+          public void run() {
+            Compatibility.checkStrategyUpdate(
+                provided,
+                new PartitionStrategy.Builder()
+                    .identity("s", "other")
+                    .build(),
+                PROVIDED_TEST_SCHEMA);
+          }
+        });
+  }
+
+  @Test
+  public void testProvidedPartitionSizeChange() {
+    final PartitionStrategy provided = new PartitionStrategy.Builder()
+        .provided("part", "string")
+        .provided("part2", "string")
+        .build();
+
+    TestHelpers.assertThrows("Should not allow fewer partitions",
+        ValidationException.class, new Runnable() {
+          @Override
+          public void run() {
+            Compatibility.checkStrategyUpdate(
+                provided,
+                new PartitionStrategy.Builder()
+                    .identity("s", "part")
+                    .build(),
+                PROVIDED_TEST_SCHEMA);
+          }
+        });
+
+    Compatibility.checkStrategyUpdate(
+        provided,
+        new PartitionStrategy.Builder()
+            .identity("s", "part")
+            .identity("s", "part2")
+            .build(),
+        PROVIDED_TEST_SCHEMA);
+
+    TestHelpers.assertThrows("Should not allow more partitions",
+        ValidationException.class, new Runnable() {
+          @Override
+          public void run() {
+            Compatibility.checkStrategyUpdate(
+                provided,
+                new PartitionStrategy.Builder()
+                    .identity("s", "part")
+                    .identity("s", "part2")
+                    .identity("s", "part3")
+                    .build(),
+                PROVIDED_TEST_SCHEMA);
+          }
+        });
+  }
+
+  @Test
+  public void testUpdateNonProvided() {
+    final PartitionStrategy provided = new PartitionStrategy.Builder()
+        .identity("s", "part")
+        .build();
+
+    TestHelpers.assertThrows("Should not allow replacing if not provided",
+        ValidationException.class, new Runnable() {
+          @Override
+          public void run() {
+            Compatibility.checkStrategyUpdate(
+                provided,
+                new PartitionStrategy.Builder()
+                    .dateFormat("l", "part", "yyyy-MM-dd")
+                    .build(),
+                PROVIDED_TEST_SCHEMA);
+          }
+        });
   }
 
 }

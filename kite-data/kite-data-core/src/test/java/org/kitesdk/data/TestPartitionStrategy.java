@@ -16,6 +16,8 @@
 package org.kitesdk.data;
 
 import java.util.List;
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;

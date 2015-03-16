@@ -309,4 +309,36 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
       repo.delete(NAMESPACE, name);
     }
   }
+
+  @Test
+  public void testReplaceProvidedPartition() {
+    Schema event = SchemaBuilder.record("Event").fields()
+        .requiredLong("created_at")
+        .requiredLong("version")
+        .name("properties").type().optional().map().values().stringType()
+        .endRecord();
+
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schema(event)
+        .partitionStrategy(new PartitionStrategy.Builder()
+            .provided("v", "int")
+            .year("created_at")
+            .month("created_at")
+            .day("created_at")
+            .build())
+        .build();
+
+    Dataset<?> ds = repo.create("ns", "test", descriptor);
+
+    DatasetDescriptor update = new DatasetDescriptor.Builder(ds.getDescriptor())
+        .partitionStrategy(new PartitionStrategy.Builder()
+            .identity("version", "v")
+            .year("created_at")
+            .month("created_at")
+            .day("created_at")
+            .build())
+        .build();
+
+    repo.update("ns", "test", update);
+  }
 }

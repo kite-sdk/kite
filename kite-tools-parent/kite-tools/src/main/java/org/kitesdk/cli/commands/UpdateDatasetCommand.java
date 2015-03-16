@@ -41,6 +41,10 @@ public class UpdateDatasetCommand extends BaseDatasetCommand {
       description = "The file containing the Avro schema.")
   String avroSchemaFile = null;
 
+  @Parameter(names = {"-p", "--partition-by"},
+      description = "A file containing a JSON-formatted partition strategy.")
+  String partitionStrategyFile;
+
   @Parameter(names = {"--set", "--property"},
       description = "Add a property pair: prop.name=value")
   List<String> properties;
@@ -64,6 +68,11 @@ public class UpdateDatasetCommand extends BaseDatasetCommand {
 
     if (avroSchemaFile != null) {
       descriptorBuilder.schemaUri(qualifiedURI(avroSchemaFile));
+    }
+
+    if (partitionStrategyFile != null) {
+      descriptorBuilder.partitionStrategyUri(
+          qualifiedURI(partitionStrategyFile));
     }
 
     if (properties != null) {

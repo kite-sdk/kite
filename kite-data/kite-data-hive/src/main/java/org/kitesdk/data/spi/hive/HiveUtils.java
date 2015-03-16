@@ -338,6 +338,15 @@ class HiveUtils {
                 " not set on the descriptor.");
       }
     }
+
+    // copy partitioning info
+    if (descriptor.isPartitioned()) {
+      PartitionStrategy ps = descriptor.getPartitionStrategy();
+      table.getParameters().put(PARTITION_EXPRESSION_PROPERTY_NAME,
+          Accessor.getDefault().toExpression(ps));
+      table.setPartitionKeys(partitionColumns(ps, descriptor.getSchema()));
+    }
+
     // keep the custom properties up-to-date
     addPropertiesForDescriptor(table, descriptor);
   }

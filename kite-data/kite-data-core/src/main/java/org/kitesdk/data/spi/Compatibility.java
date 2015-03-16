@@ -27,8 +27,10 @@ import javax.annotation.Nullable;
 import org.apache.avro.Schema;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.IncompatibleSchemaException;
+import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.impl.Accessor;
+import org.kitesdk.data.spi.partition.ProvidedFieldPartitioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -246,8 +248,10 @@ public abstract class Compatibility {
         existing.isPartitioned(), test.isPartitioned());
 
     if (existing.isPartitioned()) {
-      checkNotChanged("partition strategy",
-          existing.getPartitionStrategy(), test.getPartitionStrategy());
+      checkStrategyUpdate(
+          existing.getPartitionStrategy(),
+          test.getPartitionStrategy(),
+          test.getSchema());
     }
 
     // check can read records written with old schema using new schema
@@ -270,4 +274,60 @@ public abstract class Compatibility {
         what, String.valueOf(existing), String.valueOf(test));
   }
 
+  public static void checkStrategyUpdate(PartitionStrategy existing,
+                                         PartitionStrategy other,
+                                         Schema schema) {
+    List<FieldPartitioner> existingFields = Accessor.getDefault()
+        .getFieldPartitioners(existing);
+    List<FieldPartitioner> otherFields = Accessor.getDefault()
+        .getFieldPartitioners(other);
+    ValidationException.check(existingFields.size() == otherFields.size(),
+        "Not compatible: cannot replace %s partitioners with %s partitioners",
+        existingFields.size(), otherFields.size());
+
+    for (int i = 0; i < existingFields.size(); i += 1) {
+      FieldPartitioner fp = existingFields.get(i);
+      FieldPartitioner replacement = otherFields.get(i);
+      if (fp.equals(replacement)) {
+        continue;
+      }
+
+      ValidationException.check(fp instanceof ProvidedFieldPartitioner,
+          "Cannot replace partition %s: not a provided partitioner",
+          fp.getName());
+      ValidationException.check(fp.getName().equals(replacement.getName()),
+          "Cannot change the name of partition %s (to %s)",
+          fp.getName(), replacement.getName());
+      Class<?> outputType = SchemaUtil.getPartitionType(replacement, schema);
+      ValidationException.check(
+          isCompatibleWithProvidedType(fp.getType(), outputType),
+          "Cannot change the data type of partition %s", fp.getName());
+    }
+  }
+
+  /**
+   * Check whether data already written to a provided partition can be read
+   * using the new partition type.
+   * <p>
+   * For example, existing ints can be read as strings, but existing strings
+   * can't be read as ints.
+   *
+   * @param providedClass the class from a provided partitioner
+   * @param replacementClass the partition class of the replacement partitioner
+   * @return {@code true} iff replacement class can be used with existing data
+   */
+  private static boolean isCompatibleWithProvidedType(Class<?> providedClass,
+                                                      Class<?> replacementClass) {
+    if (Integer.class.isAssignableFrom(providedClass)) {
+      return (replacementClass == String.class ||
+          replacementClass == Integer.class ||
+          replacementClass == Long.class);
+    } else if (Long.class.isAssignableFrom(providedClass)) {
+      return (replacementClass == String.class ||
+          replacementClass == Long.class);
+    } else if (String.class.isAssignableFrom(providedClass)) {
+      return replacementClass == String.class;
+    }
+    return false;
+  }
 }
