@@ -25,6 +25,7 @@
   <modules>
     <module>kite-data-core</module>
     <module>kite-data-hive</module>
+    <module>kite-data-s3</module>
     <module>kite-data-crunch</module>
     <module>kite-data-flume</module>
     <module>kite-data-hbase</module>

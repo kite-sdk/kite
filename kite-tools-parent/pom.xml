@@ -96,6 +96,12 @@
 
     <dependency>
       <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-s3</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-hbase</artifactId>
       <version>${project.version}</version>
     </dependency>
