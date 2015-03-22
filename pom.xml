@@ -175,6 +175,8 @@
     <vers.jodatime>2.3</vers.jodatime>
     <vers.jcommander>1.35</vers.jcommander>
     <vers.spark>1.0.0</vers.spark>
+    <vers.thrift>0.9.2</vers.thrift>
+    <vers.thrift-plugin>0.1.11</vers.thrift-plugin>
 
     <!-- Plugin versions -->
     <vers.doxia-module-markdown>1.4</vers.doxia-module-markdown>
@@ -204,6 +206,7 @@
     <url.jira>http://issues.cloudera.com/browse/CDK</url.jira>
 
     <github.global.server>github</github.global.server>
+    <thrift.executable>thrift</thrift.executable>
   </properties>
 
   <repositories>
@@ -660,6 +663,11 @@
           <artifactId>maven-assembly-plugin</artifactId>
           <version>${vers.maven-assembly-plugin}</version>
         </plugin>
+        <plugin>
+          <groupId>org.apache.thrift.tools</groupId>
+          <artifactId>maven-thrift-plugin</artifactId>
+          <version>${vers.thrift-plugin}</version>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
@@ -929,6 +937,16 @@
         <artifactId>opencsv</artifactId>
         <version>${vers.opencsv}</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.avro</groupId>
+        <artifactId>avro-thrift</artifactId>
+        <version>${vers.avro}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.thrift</groupId>
+        <artifactId>libthrift</artifactId>
+        <version>${vers.thrift}</version>
+      </dependency>
 
 
       <!-- Apache commons artifacts
@@ -1190,6 +1208,44 @@
                 </goals>
               </execution>
             </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>thrift-source-gen</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.thrift.tools</groupId>
+            <artifactId>maven-thrift-plugin</artifactId>
+            <version>${vers.thrift-plugin}</version>
+            <executions>
+              <execution>
+                <id>thrift-sources</id>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>compile</goal>
+                </goals>
+                <configuration>
+                  <thriftTestSourceRoot>${basedir}/src/main/thrift</thriftTestSourceRoot>
+                </configuration>
+              </execution>
+              <execution>
+                <id>thrift-test-sources</id>
+                <phase>generate-test-sources</phase>
+                <goals>
+                  <goal>testCompile</goal>
+                </goals>
+                <configuration>
+                  <thriftTestSourceRoot>${basedir}/src/test/thrift</thriftTestSourceRoot>
+                </configuration>
+              </execution>
+            </executions>
+            <configuration>
+              <thriftExecutable>${thrift.executable}</thriftExecutable>
+            </configuration>
           </plugin>
         </plugins>
       </build>

@@ -33,7 +33,10 @@ import org.apache.avro.reflect.ReflectDatumReader;
 import org.apache.avro.specific.SpecificData;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificRecord;
+import org.apache.avro.thrift.ThriftData;
+import org.kitesdk.compat.DynClasses;
 import org.kitesdk.data.IncompatibleSchemaException;
+import org.kitesdk.data.SchemaNotFoundException;
 
 /**
  * Utilities for determining the appropriate data model at runtime.
@@ -41,6 +44,11 @@ import org.kitesdk.data.IncompatibleSchemaException;
  * @since 0.15.0
  */
 public class DataModelUtil {
+
+  private static final Class<?> TBASE_CLASS = new DynClasses.Builder()
+      .impl("org.apache.thrift.TBase")
+      .defaultNull()
+      .build();
 
   // Replace this with ReflectData.AllowNull once AVRO-1589 is available
   @VisibleForTesting
@@ -95,6 +103,8 @@ public class DataModelUtil {
       return new SpecificData(type.getClassLoader());
     } else if (IndexedRecord.class.isAssignableFrom(type)) {
       return GenericData.get();
+    } else if (TBASE_CLASS != null && TBASE_CLASS.isAssignableFrom(type)) {
+      return ThriftData.get();
     } else {
       return AllowNulls.get();
     }
@@ -116,6 +126,8 @@ public class DataModelUtil {
       return new ReflectDatumReader<E>(writerSchema, readerSchema, (ReflectData)dataModel);
     } else if (dataModel instanceof SpecificData) {
       return new SpecificDatumReader<E>(writerSchema, readerSchema, (SpecificData)dataModel);
+    } else if (dataModel instanceof ThriftData) {
+      return dataModel.createDatumReader(writerSchema, readerSchema);
     } else {
       return new GenericDatumReader<E>(writerSchema, readerSchema, dataModel);
     }
@@ -156,6 +168,32 @@ public class DataModelUtil {
   }
 
   /**
+   * Get the schema of the given type. If necessary, the schema will be
+   * generated from the class's structure by reflection or conversion from
+   * another supported format, like thrift.
+   *
+   * @param <E> The entity type
+   * @param type The Java class of the entity type
+   * @return An Avro Schema based on the Java class
+   */
+  public static <E> Schema getTypeSchema(Class<E> type) {
+    // check whether the class is generic
+    if (isGenericClass(type)) {
+      throw new SchemaNotFoundException(
+          "Cannot determine schema of a generic class: " + type.getName());
+    }
+
+    GenericData dataModel = getDataModelForType(type);
+    if (dataModel instanceof SpecificData) {
+      return ((SpecificData) dataModel).getSchema(type);
+    } else if (dataModel instanceof ThriftData) {
+      return ((ThriftData) dataModel).getSchema(type);
+    }
+
+    return AllowNulls.get().getSchema(type);
+  }
+
+  /**
    * Get the reader schema based on the given type and writer schema.
    *
    * @param <E> The entity type
@@ -169,6 +207,8 @@ public class DataModelUtil {
 
     if (dataModel instanceof SpecificData) {
       readerSchema = ((SpecificData)dataModel).getSchema(type);
+    } else if (dataModel instanceof ThriftData) {
+      readerSchema = ((ThriftData) dataModel).getSchema(type);
     }
 
     return readerSchema;
@@ -191,9 +231,7 @@ public class DataModelUtil {
   @SuppressWarnings("unchecked")
   public static <E> E createRecord(Class<E> type, Schema schema) {
     // Don't instantiate SpecificRecords or interfaces.
-    if (!SpecificRecord.class.isAssignableFrom(type) &&
-        GenericRecord.class.isAssignableFrom(type) &&
-        !type.isInterface()) {
+    if (isGenericClass(type) && !type.isInterface()) {
       if (GenericData.Record.class.equals(type)) {
         return (E) GenericData.get().newRecord(null, schema);
       }
@@ -207,4 +245,19 @@ public class DataModelUtil {
     return new EntityAccessor<E>(type, schema);
   }
 
+  /**
+   * Test whether the class is a generic {@link GenericRecord}. This is
+   * necessary instead of testing if {@code GenericRecord} is assignable from
+   * the class because {@link org.apache.avro.specific.SpecificRecordBase}
+   * implements {@code GenericRecord}.
+   *
+   * @param type a class
+   * @return true if the class is an Avro generic and not specific
+   */
+  private static boolean isGenericClass(Class<?> type) {
+    return (
+        !SpecificRecord.class.isAssignableFrom(type) &&
+        GenericRecord.class.isAssignableFrom(type)
+    );
+  }
 }

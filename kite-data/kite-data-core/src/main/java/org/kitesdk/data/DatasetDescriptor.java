@@ -45,6 +45,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.spi.ColumnMappingParser;
+import org.kitesdk.data.spi.DataModelUtil;
 import org.kitesdk.data.spi.DefaultConfiguration;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.HadoopFileSystemURLStreamHandler;
@@ -486,7 +487,7 @@ public class DatasetDescriptor {
      * @since 0.2.0
      */
     public <T> Builder schema(Class<T> type) {
-      this.schema = ReflectData.get().getSchema(type);
+      this.schema = DataModelUtil.getTypeSchema(type);
       return this;
     }
 
