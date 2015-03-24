@@ -246,4 +246,7 @@ public abstract class CompositeBaseDao<E, S> implements CompositeDao<E, S> {
     return baseDao.getPartitionStrategy();
   }
 
+  public Dao<E> getDao() {
+    return baseDao;
+  }
 }

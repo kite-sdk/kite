@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.hbase.impl;
 
+import com.google.common.collect.ImmutableList;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.spi.PartitionKey;
 import com.google.common.annotations.VisibleForTesting;
@@ -82,44 +83,60 @@ public class HBaseClientTemplate {
 
   /**
    * Register a GetModifier to be called before every Get is executed on HBase.
-   * Multiple GetModifiers can be registered by invoking this function multiple
-   * times. GetModifiers will be called in the order they are added to the
+   * This GetModifier will be replaced if already registered and added if not.
+   * Equality is checked by calling the equals() on the getModifier passed.
+   * GetModifiers will be called in the order they are added to the
    * template, so if any modifier is destructive, it must be added in the right
    * order.
-   * 
-   * @param getModifier
-   *          The GetModifier to register.
+   *
+   * Not Thread Safe
+   * @param getModifier The GetModifier to register.
    */
   public void registerGetModifier(GetModifier getModifier) {
-    getModifiers.add(getModifier);
+    int currentIndex = getModifiers.indexOf(getModifier);
+    if(currentIndex == -1) {
+      getModifiers.add(getModifier);
+    } else {
+      getModifiers.set(currentIndex, getModifier);
+    }
+  }
+
+  /**
+   * Returns a list of Get Modifiers currently registered
+   *
+   * @return List of GetModifier
+   */
+  public List<GetModifier> getGetModifiers() {
+    return ImmutableList.copyOf(getModifiers);
   }
 
   /**
    * Register a PutActionModifier to be called before every Put is executed on
-   * HBase. Multiple PutActionModifiers can be registered by invoking this
-   * function multiple times. PutActionModifiers will be called in the order
-   * they are added to the template, so if any modifier is destructive, it must
-   * be added in the right order.
-   * 
-   * @param putActionModifier
-   *          The PutActionModifier to register.
+   * HBase. This PutActionModifier will be replaced if already registered and
+   * added if not. Equality is checked by calling the equals() on the
+   * putActionModifier passed. PutActionModifiers will be called in the order
+   * they are added, so if any modifier is destructive,
+   * it must be added in the right order.
+   *
+   * Not Thread Safe
+   * @param putActionModifier The PutActionModifier to register.
    */
   public void registerPutActionModifier(PutActionModifier putActionModifier) {
-    putActionModifiers.add(putActionModifier);
+    int currentIndex = putActionModifiers.indexOf(putActionModifier);
+    if(currentIndex == -1) {
+      putActionModifiers.add(putActionModifier);
+    } else {
+      putActionModifiers.set(currentIndex, putActionModifier);
+    }
   }
 
   /**
-   * Registers a PutActionModifier to be called before every Put, if the given
-   * modifier is not already registered. This allows the user to prevent adding
-   * the same modifier multiple times.
-   * 
-   * @param putActionModifier
+   * Returns a list of Put Modifiers currently registered
+   *
+   * @return List of PutActionModifier
    */
-  public void registerUniquePutActionModifier(
-      PutActionModifier putActionModifier) {
-    if (!putActionModifiers.contains(putActionModifier)) {
-      registerPutActionModifier(putActionModifier);
-    }
+  public List<PutActionModifier> getPutActionModifiers() {
+    return ImmutableList.copyOf(putActionModifiers);
   }
 
   @VisibleForTesting
@@ -129,30 +146,60 @@ public class HBaseClientTemplate {
 
   /**
    * Register a DeleteActionModifier to be called before every Delete is
-   * executed on HBase. Multiple DeleteActionModifiers can be registered by
-   * invoking this function multiple times. DeleteActionModifiers will be called
-   * in the order they are added to the template, so if any modifier is
-   * destructive, it must be added in the right order.
-   * 
-   * @param deleteActionModifier
-   *          The DeleteActionModifier to register.
+   * executed on HBase. This DeleteActionModifier will be replaced if already
+   * registered and added if its not. Equality is checked by calling the equals()
+   * on the deleteActionModifier passed. DeleteActionModifiers will be called
+   * in the order they are added, so if any modifier is destructive,
+   * it must be added in the right order.
+   *
+   * Not Thread Safe
+   * @param deleteActionModifier The DeleteActionModifier to register.
    */
   public void registerDeleteModifier(DeleteActionModifier deleteActionModifier) {
-    deleteActionModifiers.add(deleteActionModifier);
+    int currentIndex = deleteActionModifiers.indexOf(deleteActionModifier);
+    if(currentIndex == -1) {
+      deleteActionModifiers.add(deleteActionModifier);
+    } else {
+      deleteActionModifiers.set(currentIndex, deleteActionModifier);
+    }
+  }
+
+  /**
+   * Returns a list of Delete Modifiers currently registered
+   *
+   * @return List of DeleteActionModifier
+   */
+  public List<DeleteActionModifier> getDeleteActionModifiers() {
+    return ImmutableList.copyOf(deleteActionModifiers);
   }
 
   /**
    * Register a ScanModifier to be called before every Scan is executed on
-   * HBase. Multiple ScanModifiers can be registered by invoking this function
-   * multiple times. ScanModifiers will be called in the order they are added to
-   * the template, so if any modifier is destructive, it must be added in the
+   * HBase. This ScanModifier will be replaced if already registered and added
+   * if not. Equality is checked by calling the equals() on the scanModifier passed.
+   * ScanModifiers will be called in the order they are added,
+   * so if any modifier is destructive, it must be added in the
    * right order.
-   * 
-   * @param scanModifier
-   *          The ScanModifier to register.
+   *
+   * Not Thread Safe
+   * @param scanModifier The ScanModifier to register.
    */
   public void registerScanModifier(ScanModifier scanModifier) {
-    scanModifiers.add(scanModifier);
+    int currentIndex = scanModifiers.indexOf(scanModifier);
+    if(currentIndex == -1) {
+      scanModifiers.add(scanModifier);
+    } else {
+      scanModifiers.set(currentIndex, scanModifier);
+    }
+  }
+
+  /**
+   * Returns a list of Scan Modifiers currently registered
+   *
+   * @return List of ScanModifier
+   */
+  public List<ScanModifier> getScanModifiers() {
+    return ImmutableList.copyOf(scanModifiers);
   }
 
   /**
