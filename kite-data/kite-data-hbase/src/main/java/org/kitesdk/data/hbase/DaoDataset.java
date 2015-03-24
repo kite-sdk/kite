@@ -17,11 +17,20 @@ package org.kitesdk.data.hbase;
 
 import com.google.common.base.Preconditions;
 import java.net.URI;
+import java.util.List;
+
 import org.apache.avro.generic.IndexedRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.Key;
+import org.kitesdk.data.hbase.impl.BaseDao;
+import org.kitesdk.data.hbase.impl.CompositeBaseDao;
+import org.kitesdk.data.hbase.impl.DeleteActionModifier;
+import org.kitesdk.data.hbase.impl.GetModifier;
+import org.kitesdk.data.hbase.impl.PutActionModifier;
+import org.kitesdk.data.hbase.impl.ScanModifier;
+import org.kitesdk.data.hbase.spi.HBaseActionModifiable;
 import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
@@ -33,7 +42,7 @@ import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.InputFormatAccessor;
 
 class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>,
-    InputFormatAccessor<E> {
+    InputFormatAccessor<E>, HBaseActionModifiable {
 
   private final String namespace;
   private final String name;
@@ -139,5 +148,90 @@ class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>
   @Override
   public InputFormat<E, Void> getInputFormat(Configuration conf) {
     return new HBaseViewKeyInputFormat<E>(this);
+  }
+
+  @SuppressWarnings("unchecked")
+  private BaseDao<E> getBaseDao() {
+    Dao<E> dao = getDao();
+    if(dao instanceof CompositeBaseDao) {
+      dao = ((CompositeBaseDao) dao).getDao();
+    }
+    if (dao instanceof BaseDao) {
+      return (BaseDao<E>) dao;
+    }
+    throw new UnsupportedOperationException(
+        "Action not supported for Dao " + dao.getClass());
+  }
+
+  @Override
+  public void registerGetModifier(GetModifier getModifier) {
+    getBaseDao().getHBaseClientTemplate().registerGetModifier(getModifier);
+  }
+
+  @Override
+  public List<GetModifier> getGetModifiers() {
+    return getBaseDao().getHBaseClientTemplate().getGetModifiers();
+  }
+
+  @Override
+  public void registerPutActionModifier(
+      PutActionModifier putActionModifier) {
+    getBaseDao().getHBaseClientTemplate()
+        .registerPutActionModifier(putActionModifier);
+  }
+
+  @Override
+  public List<PutActionModifier> getPutActionModifiers() {
+    return getBaseDao().getHBaseClientTemplate().getPutActionModifiers();
+  }
+
+  @Override
+  public void registerDeleteModifier(
+      DeleteActionModifier deleteActionModifier) {
+    getBaseDao().getHBaseClientTemplate()
+        .registerDeleteModifier(deleteActionModifier);
+  }
+
+  @Override
+  public List<DeleteActionModifier> getDeleteActionModifiers() {
+    return getBaseDao().getHBaseClientTemplate().getDeleteActionModifiers();
+  }
+
+  @Override
+  public void registerScanModifier(ScanModifier scanModifier) {
+    getBaseDao().getHBaseClientTemplate().registerScanModifier(scanModifier);
+  }
+
+  @Override
+  public List<ScanModifier> getScanModifiers() {
+    return getBaseDao().getHBaseClientTemplate().getScanModifiers();
+  }
+
+  @Override
+  public void clearGetModifiers() {
+    getBaseDao().getHBaseClientTemplate().clearGetModifiers();
+  }
+
+  @Override
+  public void clearPutActionModifiers() {
+    getBaseDao().getHBaseClientTemplate().clearPutActionModifiers();
+  }
+
+  @Override
+  public void clearDeleteActionModifiers() {
+    getBaseDao().getHBaseClientTemplate().clearDeleteActionModifiers();
+  }
+
+  @Override
+  public void clearScanModifiers() {
+    getBaseDao().getHBaseClientTemplate().clearScanModifiers();
+  }
+
+  @Override
+  public void clearAllModifiers() {
+    clearGetModifiers();
+    clearPutActionModifiers();
+    clearDeleteActionModifiers();
+    clearScanModifiers();
   }
 }
