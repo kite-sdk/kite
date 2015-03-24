@@ -24,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 public class TestPartitionStrategy {
 
@@ -70,6 +72,31 @@ public class TestPartitionStrategy {
     assertEquals(7, fp1.getCardinality());
 
     assertEquals(12 * 7, p.getCardinality()); // useful for writers
+  }
+
+  @Test
+  public void testImmutable() throws Exception {
+    final PartitionStrategy p = new PartitionStrategy.Builder()
+        .identity("year", "year_value")
+        .identity("month", "month_ordinal", 12)
+        .asImmutable()
+        .hash("userId", 7)
+        .build();
+
+    List<FieldPartitioner> fieldPartitioners = p.getFieldPartitioners();
+    Assert.assertEquals(3, fieldPartitioners.size());
+
+    FieldPartitioner fp0 = fieldPartitioners.get(0);
+    assertEquals("year_value", fp0.getName());
+    assertTrue(fp0.isImmutable());
+
+    FieldPartitioner fp1 = fieldPartitioners.get(1);
+    assertEquals("month_ordinal", fp1.getName());
+    assertTrue(fp1.isImmutable());
+
+    FieldPartitioner fp2 = fieldPartitioners.get(2);
+    assertEquals("userId_hash", fp2.getName());
+    assertFalse(fp2.isImmutable());
   }
 
   @Test

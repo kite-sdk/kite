@@ -48,6 +48,12 @@ public class CalendarFieldPartitioner extends FieldPartitioner<Long, Integer> {
     this.calendarField = calendarField;
   }
 
+  protected CalendarFieldPartitioner(CalendarFieldPartitioner partitioner,
+                                     boolean immutable) {
+    super(partitioner, immutable);
+    this.calendarField = partitioner.calendarField;
+  }
+
   @Override
   public Integer apply(@Nonnull Long timestamp) {
     Calendar cal = Calendar.getInstance(UTC);
@@ -63,6 +69,16 @@ public class CalendarFieldPartitioner extends FieldPartitioner<Long, Integer> {
   @Override
   public Predicate<Integer> projectStrict(Predicate<Long> predicate) {
     return null;
+  }
+
+  @Override
+  public CalendarFieldPartitioner asImmutable() {
+    return new CalendarFieldPartitioner(this, true);
+  }
+
+  @Override
+  public CalendarFieldPartitioner asMutable() {
+    return new CalendarFieldPartitioner(this, false);
   }
 
   public int getCalendarField() {
@@ -83,7 +99,8 @@ public class CalendarFieldPartitioner extends FieldPartitioner<Long, Integer> {
     CalendarFieldPartitioner that = (CalendarFieldPartitioner) o;
     return Objects.equal(this.getSourceName(), that.getSourceName()) &&
         Objects.equal(this.getName(), that.getName()) &&
-        Objects.equal(this.getCardinality(), that.getCardinality());
+        Objects.equal(this.getCardinality(), that.getCardinality()) &&
+        this.isImmutable() == that.isImmutable();
   }
 
   @Override

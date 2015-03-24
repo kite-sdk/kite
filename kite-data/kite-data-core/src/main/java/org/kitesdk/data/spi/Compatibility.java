@@ -246,8 +246,11 @@ public abstract class Compatibility {
         existing.isPartitioned(), test.isPartitioned());
 
     if (existing.isPartitioned()) {
+      // mutable and immutable partitions are compatible for merging
+      // purposes, so just normalize them for this comparison
       checkNotChanged("partition strategy",
-          existing.getPartitionStrategy(), test.getPartitionStrategy());
+          Accessor.getDefault().asMutable(existing.getPartitionStrategy()),
+          Accessor.getDefault().asMutable(test.getPartitionStrategy()));
     }
 
     // check can read records written with old schema using new schema

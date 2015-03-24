@@ -37,9 +37,11 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Datasets;
+import org.kitesdk.data.PartitionExistsException;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.TypeNotFoundException;
 import org.kitesdk.data.View;
+import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.DataModelUtil;
@@ -369,6 +371,42 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
       Dataset<E> jobDataset = repo.load(TEMP_NAMESPACE, jobDatasetName);
       ((Mergeable<Dataset<E>>) targetView.getDataset()).merge(jobDataset);
 
+      // Handle special case of writing to a target when there was no data.
+      // We still want to create target partition for immutable datasets
+      // so downstream consumers have an indication that there was no data
+      // in that partition.
+      if (targetView.getDataset().getDescriptor().isPartitioned()) {
+
+        PartitionStrategy strategy = targetView.getDataset().getDescriptor().getPartitionStrategy();
+        boolean immutableTarget = Accessor.getDefault().immutablePartitionerCount(strategy) > 0;
+
+        // Only create the partition if the view had a query in the URI,
+        // indicating the target isn't just a top-level dataset.
+        if (immutableTarget && targetView.getUri().toString().indexOf('?') > 0) {
+
+          DatasetWriter<E> writer = null;
+
+          try {
+            writer = targetView.newWriter();
+
+            try {
+
+            } finally {
+
+              if (writer != null) {
+                writer.close();
+              }
+            }
+          } catch (PartitionExistsException e) {
+            // this is okay, since the partition may have been created in the job.
+            // an outer catch block is used since this could be thrown
+            // in the above close.
+          }
+        }
+      }
+
+
+
       if (isTemp) {
         ((TemporaryDatasetRepository) repo).delete();
       } else {
@@ -593,10 +631,20 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   private static DatasetDescriptor copy(DatasetDescriptor descriptor) {
     // don't reuse the previous dataset's location and don't use durable
     // parquet writers because fault-tolerance is handled by OutputCommitter
-    return new DatasetDescriptor.Builder(descriptor)
+
+    DatasetDescriptor.Builder builder = new DatasetDescriptor.Builder(descriptor)
         .property(FileSystemProperties.NON_DURABLE_PARQUET_PROP, "true")
-        .location((URI) null)
-        .build();
+        .location((URI) null);
+
+    // use a mutable partition strategy for since the target is
+    // is temporary and used by multiple writer tasks.
+    if (descriptor.isPartitioned()) {
+      PartitionStrategy strategy = descriptor.getPartitionStrategy();
+
+      builder.partitionStrategy(Accessor.getDefault().asMutable(strategy));
+    }
+
+    return builder.build();
   }
 
 }

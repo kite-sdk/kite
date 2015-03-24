@@ -116,6 +116,22 @@ public class PartitionStrategy {
   }
 
   /**
+   * Returns a partition strategy equivalent to the current one, but
+   * with mutable partitions. This is useful to create temporary partitions
+   * as a staging area.
+   */
+  PartitionStrategy asMutable() {
+
+    List<FieldPartitioner> partitioners = Lists.newArrayList();
+
+    for (FieldPartitioner partitioner: this.fieldPartitioners) {
+      partitioners.add(partitioner.asMutable());
+    }
+
+    return new PartitionStrategy(partitioners);
+  }
+
+  /**
    * <p>
    * Return the cardinality produced by the contained field partitioners.
    * </p>
@@ -158,6 +174,43 @@ public class PartitionStrategy {
     }
     return new PartitionStrategy(fieldPartitioners.subList(startIndex,
         fieldPartitioners.size()));
+  }
+
+  /**
+   * Returns the list of partitioners that are immutable, or an empty list
+   * if there are none.
+   * </p>
+   * <p>
+   * Immutable {@link FieldPartitioner}s are returned in the same order they
+   * are used during partition selection.
+   * </p>
+   */
+  List<FieldPartitioner> getImmutablePartitioners() {
+
+    List<FieldPartitioner> partitions = Lists.newArrayList();
+
+    for (FieldPartitioner partitioner: getFieldPartitioners()) {
+
+      if (!partitioner.isImmutable())
+        break;
+
+      partitions.add(partitioner);
+    }
+
+    return partitions;
+  }
+
+  int immutablePartitionerCount() {
+    int count = 0;
+
+    for (FieldPartitioner partitioner: getFieldPartitioners()) {
+
+      if (!partitioner.isImmutable())
+        break;
+
+      count++;
+    }
+    return count;
   }
 
   @Override
@@ -583,6 +636,24 @@ public class PartitionStrategy {
      */
     public Builder provided(String name, @Nullable String valuesType) {
       add(PartitionFunctions.provided(name, valuesType));
+      return this;
+    }
+
+    /**
+     * Make the partition immutable by setting all previous
+     * field partitioners to be immutable.
+     *
+     * @return This builder for method chaining
+     *
+     * @since 1.1.0
+     */
+    public Builder asImmutable() {
+
+      for (int i = 0; i < fieldPartitioners.size(); i++) {
+
+        fieldPartitioners.set(i, fieldPartitioners.get(i).asImmutable());
+      }
+
       return this;
     }
 

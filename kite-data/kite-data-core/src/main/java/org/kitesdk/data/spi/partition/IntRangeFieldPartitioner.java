@@ -50,6 +50,12 @@ public class IntRangeFieldPartitioner extends FieldPartitioner<Integer, Integer>
     this.upperBounds = upperBounds;
   }
 
+  protected IntRangeFieldPartitioner(IntRangeFieldPartitioner partitioner,
+                                     boolean immutable) {
+    super(partitioner, immutable);
+    this.upperBounds = partitioner.upperBounds;
+  }
+
   @Override
   public Integer apply(Integer value) {
     for (int i = 0; i < upperBounds.length; i++) {
@@ -149,6 +155,16 @@ public class IntRangeFieldPartitioner extends FieldPartitioner<Integer, Integer>
   }
 
   @Override
+  public IntRangeFieldPartitioner asImmutable() {
+    return new IntRangeFieldPartitioner(this, true);
+  }
+
+  @Override
+  public IntRangeFieldPartitioner asMutable() {
+    return new IntRangeFieldPartitioner(this, false);
+  }
+
+  @Override
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(
       value="NP_METHOD_PARAMETER_TIGHTENS_ANNOTATION",
       justification="Default annotation is not correct for equals")
@@ -161,7 +177,8 @@ public class IntRangeFieldPartitioner extends FieldPartitioner<Integer, Integer>
     }
     IntRangeFieldPartitioner that = (IntRangeFieldPartitioner) o;
     return Objects.equal(this.getName(), that.getName()) &&
-        Objects.equal(Ints.asList(this.upperBounds), Ints.asList(that.upperBounds));
+        Objects.equal(Ints.asList(this.upperBounds), Ints.asList(that.upperBounds)) &&
+        this.isImmutable() == that.isImmutable();
   }
 
   @Override

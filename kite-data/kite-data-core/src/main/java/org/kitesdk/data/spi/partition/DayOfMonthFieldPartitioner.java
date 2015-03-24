@@ -15,6 +15,8 @@
  */
 package org.kitesdk.data.spi.partition;
 
+import org.kitesdk.data.spi.FieldPartitioner;
+
 import java.text.NumberFormat;
 import java.util.Calendar;
 import javax.annotation.Nullable;
@@ -38,5 +40,22 @@ public class DayOfMonthFieldPartitioner extends CalendarFieldPartitioner {
     format = NumberFormat.getIntegerInstance();
     format.setMinimumIntegerDigits(2);
     format.setMaximumIntegerDigits(2);
+  }
+
+  protected DayOfMonthFieldPartitioner(DayOfMonthFieldPartitioner partitioner,
+                                       boolean immutable) {
+
+    super (partitioner, immutable);
+    this.format = partitioner.format;
+  }
+
+  @Override
+  public DayOfMonthFieldPartitioner asImmutable() {
+    return new DayOfMonthFieldPartitioner(this, true);
+  }
+
+  @Override
+  public DayOfMonthFieldPartitioner asMutable() {
+    return new DayOfMonthFieldPartitioner(this, false);
   }
 }

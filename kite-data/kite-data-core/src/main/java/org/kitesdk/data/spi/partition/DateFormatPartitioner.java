@@ -78,6 +78,12 @@ public class DateFormatPartitioner extends FieldPartitioner<Long, String> {
     this.format.setTimeZone(zone);
   }
 
+  protected DateFormatPartitioner(DateFormatPartitioner partitioner,
+                                  boolean immutable) {
+    super(partitioner, immutable);
+    this.format = partitioner.format;
+  }
+
   public String getPattern() {
     return format.toPattern();
   }
@@ -114,6 +120,16 @@ public class DateFormatPartitioner extends FieldPartitioner<Long, String> {
   }
 
   @Override
+  public DateFormatPartitioner asImmutable() {
+    return new DateFormatPartitioner(this, true);
+  }
+
+  @Override
+  public DateFormatPartitioner asMutable() {
+    return new DateFormatPartitioner(this, false);
+  }
+
+  @Override
   public int compare(String o1, String o2) {
     return o1.compareTo(o2);
   }
@@ -130,7 +146,8 @@ public class DateFormatPartitioner extends FieldPartitioner<Long, String> {
     return Objects.equal(this.getSourceName(), that.getSourceName()) &&
         Objects.equal(this.getName(), that.getName()) &&
         Objects.equal(this.format, that.format) &&
-        Objects.equal(this.getCardinality(), that.getCardinality());
+        Objects.equal(this.getCardinality(), that.getCardinality()) &&
+        this.isImmutable() == that.isImmutable();
   }
 
   @Override

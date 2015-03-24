@@ -93,6 +93,66 @@ public class TestPartitionExpression {
   }
 
   @Test
+  public void testImmutableSubpartitionStrategy() {
+    String expr = "[year(\"timestamp\", \"year\"), minute(\"timestamp\", \"minute\"), immutable()]";
+    PartitionExpression expression = new PartitionExpression(expr, true);
+
+    PartitionStrategy strategy = expression.evaluate();
+    List<FieldPartitioner> fieldPartitioners =
+        Accessor.getDefault().getFieldPartitioners(strategy);
+    Assert.assertEquals(2, fieldPartitioners.size());
+
+    FieldPartitioner fp0 = fieldPartitioners.get(0);
+    Assert.assertEquals(YearFieldPartitioner.class, fp0.getClass());
+    Assert.assertEquals("timestamp", fp0.getSourceName());
+    Assert.assertEquals("year", fp0.getName());
+    Assert.assertTrue(fp0.isImmutable());
+
+    FieldPartitioner fp1 = fieldPartitioners.get(1);
+    Assert.assertEquals(MinuteFieldPartitioner.class, fp1.getClass());
+    Assert.assertEquals("timestamp", fp1.getSourceName());
+    Assert.assertEquals("minute", fp1.getName());
+    Assert.assertTrue(fp1.isImmutable());
+
+    Assert.assertEquals(expr, PartitionExpression.toExpression(strategy));
+  }
+
+  @Test
+  public void testPartialImmutableSubpartitionStrategy() {
+    String expr = "[year(\"timestamp\", \"year\"), " +
+        "minute(\"timestamp\", \"minute\"), " +
+        "immutable(), " +
+        "hash(\"username\", \"username_part\", 2)]";
+    PartitionExpression expression = new PartitionExpression(expr, true);
+
+    PartitionStrategy strategy = expression.evaluate();
+    List<FieldPartitioner> fieldPartitioners =
+        Accessor.getDefault().getFieldPartitioners(strategy);
+    Assert.assertEquals(3, fieldPartitioners.size());
+
+    FieldPartitioner fp0 = fieldPartitioners.get(0);
+    Assert.assertEquals(YearFieldPartitioner.class, fp0.getClass());
+    Assert.assertEquals("timestamp", fp0.getSourceName());
+    Assert.assertEquals("year", fp0.getName());
+    Assert.assertTrue(fp0.isImmutable());
+
+    FieldPartitioner fp1 = fieldPartitioners.get(1);
+    Assert.assertEquals(MinuteFieldPartitioner.class, fp1.getClass());
+    Assert.assertEquals("timestamp", fp1.getSourceName());
+    Assert.assertEquals("minute", fp1.getName());
+    Assert.assertTrue(fp1.isImmutable());
+
+    FieldPartitioner fp2 = fieldPartitioners.get(2);
+    Assert.assertEquals(HashFieldPartitioner.class, fp2.getClass());
+    Assert.assertEquals("username", fp2.getSourceName());
+    Assert.assertEquals("username_part", fp2.getName());
+    Assert.assertFalse(fp2.isImmutable());
+
+    Assert.assertEquals(expr, PartitionExpression.toExpression(strategy));
+  }
+
+
+  @Test
   public void testRange() {
     PartitionStrategy rangeStrategy = new PartitionStrategy.Builder()
         .range("color", "blue", "green", "orange", "red", "white")

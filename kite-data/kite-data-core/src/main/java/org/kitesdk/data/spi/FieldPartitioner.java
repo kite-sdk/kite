@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
     value="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
     justification="Implement if we intend to use in Serializable objects "
         + " (e.g., TreeMaps) and use java serialization.")
-public abstract class FieldPartitioner<S, T> implements Function<S, T>, Comparator<T> {
+public abstract class FieldPartitioner<S, T>  implements Function<S, T>, Comparator<T> {
   private static final Logger LOG = LoggerFactory.getLogger(FieldPartitioner.class);
 
   public static final int UNKNOWN_CARDINALITY = -1;
@@ -58,6 +58,7 @@ public abstract class FieldPartitioner<S, T> implements Function<S, T>, Comparat
   private final Class<S> sourceType;
   private final Class<T> type;
   private final int cardinality;
+  private final boolean immutable;
 
   protected FieldPartitioner(String sourceName, String name,
                              Class<S> sourceType, Class<T> type) {
@@ -71,6 +72,16 @@ public abstract class FieldPartitioner<S, T> implements Function<S, T>, Comparat
     this.sourceType = sourceType;
     this.type = type;
     this.cardinality = cardinality;
+    this.immutable = false;
+  }
+
+  protected FieldPartitioner(FieldPartitioner previous, boolean immutable) {
+    this.sourceName = previous.sourceName;
+    this.name = previous.name;
+    this.sourceType = previous.sourceType;
+    this.type = previous.type;
+    this.cardinality = previous.cardinality;
+    this.immutable = immutable;
   }
 
   /**
@@ -169,4 +180,24 @@ public abstract class FieldPartitioner<S, T> implements Function<S, T>, Comparat
    * @since 0.12.0
    */
   public abstract Predicate<T> projectStrict(Predicate<S> predicate);
+
+  /**
+   * Creates a field partitioner identical to the current one but
+   * labelled as part of the identifier for an immutable partition.
+   */
+  public abstract FieldPartitioner<S, T> asImmutable();
+
+  /**
+   * Creates a field partitioner identical to the current one but
+   * for a mutable partition.
+   */
+  public abstract FieldPartitioner<S, T> asMutable();
+
+  /**
+   * Returns true if the field being partitioned is to be part
+   * of an immutable partition, false otherwise.
+   */
+  public boolean isImmutable() {
+    return immutable;
+  }
 }

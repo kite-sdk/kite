@@ -58,8 +58,21 @@ class PartitionExpression {
        * FieldPartitioner. Instead, it thinks it's Object[].
        */
       List<FieldPartitioner> partitioners = Lists.newArrayList();
-      for (Object o : ((Object[]) object)) {
-        partitioners.add((FieldPartitioner) o);
+
+      Object[] objects = ((Object[]) object);
+
+      for (int i = 0; i < objects.length; i++) {
+
+        if (PartitionFunctions.IMMUTABLE == objects[i]) {
+
+          // adhere to the marker for immutable partitioners.
+          for (int j = 0; j < partitioners.size(); j++) {
+            partitioners.set(j, partitioners.get(j).asImmutable());
+          }
+
+        } else {
+          partitioners.add((FieldPartitioner) objects[i]);
+        }
       }
       return new PartitionStrategy(partitioners);
     } else {
@@ -75,19 +88,38 @@ class PartitionExpression {
    * passed as an object.
    */
   public static String toExpression(PartitionStrategy partitionStrategy) {
+
+    // if there are immutable partitions, we will need to
+    // write that indicator at the appropriate place in the expression
+    boolean writeImmutableFlag = !partitionStrategy
+        .getImmutablePartitioners().isEmpty();
+
     List<FieldPartitioner> fieldPartitioners = partitionStrategy
         .getFieldPartitioners();
-    if (fieldPartitioners.size() == 1) {
+    if (fieldPartitioners.size() == 1 && !writeImmutableFlag) {
       return PartitionFunctions.toExpression(fieldPartitioners.get(0));
     }
+
     StringBuilder sb = new StringBuilder();
     sb.append("[");
     for (FieldPartitioner fieldPartitioner : fieldPartitioners) {
       if (sb.length() > 1) {
         sb.append(", ");
       }
+
+      if (!fieldPartitioner.isImmutable() && writeImmutableFlag) {
+        sb.append("immutable(), ");
+        writeImmutableFlag = false;
+      }
       sb.append(PartitionFunctions.toExpression(fieldPartitioner));
     }
+
+    // handle writing flag if the last partition in the expression
+    // is immutable
+    if (writeImmutableFlag) {
+      sb.append(", immutable()");
+    }
+
     sb.append("]");
     return sb.toString();
   }

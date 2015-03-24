@@ -37,10 +37,12 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
@@ -55,6 +57,7 @@ import org.kitesdk.data.spi.PartitionedDataset;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.LastModifiedAccessor;
 import org.kitesdk.data.URIBuilder;
+import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 import org.kitesdk.data.user.NewUserRecord;
 
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.USER_SCHEMA;
@@ -192,6 +195,33 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
   }
 
   @Test
+  public void testImmutablePartionTarget() throws IOException {
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
+        "username", 2).asImmutable().build();
+
+    Dataset<Record> inputDataset = repo.create("ns", "in", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
+    Dataset<Record> outputDataset = repo.create("ns", "out", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
+
+    writeTestUsers(inputDataset, 10);
+
+    PartitionKey key = new PartitionKey(0);
+    Dataset<Record> inputPart0 =
+        ((PartitionedDataset<Record>) inputDataset).getPartition(key, false);
+    Dataset<Record> outputPart0 =
+        ((PartitionedDataset<Record>) outputDataset).getPartition(key, true);
+
+    Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
+    PCollection<GenericData.Record> data = pipeline.read(
+        CrunchDatasets.asSource(inputPart0));
+    pipeline.write(data, CrunchDatasets.asTarget(outputPart0), Target.WriteMode.APPEND);
+    pipeline.run();
+
+    Assert.assertEquals(5, datasetSize(outputPart0));
+  }
+
+  @Test
   public void testPartitionedSourceAndTargetWritingToTopLevel() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
         "username", 2).build();
@@ -295,6 +325,84 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
         Assert.assertEquals(1, datasetSize(outputDataset));
     }
+
+  @Test
+  public void testProvidedImmutableTarget() throws IOException {
+
+    // Requires MapReduce committers to work properly, which isn't
+    // the case in Hadoop 1.
+    Assume.assumeTrue(!Hadoop.isHadoop1());
+
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
+        .provided("version")
+        .asImmutable()
+        .build();
+
+    Dataset<Record> inputDataset = repo.create("ns", "in", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
+    Dataset<Record> outputDataset = repo.create("ns", "out", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
+
+    View<Record> inputView = inputDataset.with("version", "test-version-0");
+    View<Record> outputView = outputDataset.with("version", "test-version-0");
+
+    writeTestUsers(inputView, 1);
+
+    Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
+    PCollection<GenericData.Record> data = pipeline.read(
+        CrunchDatasets.asSource(inputView));
+    pipeline.write(data, CrunchDatasets.asTarget(outputView), Target.WriteMode.APPEND);
+    Assert.assertTrue(pipeline.run().succeeded());
+
+    // An empty partition should have been created since we targeted the view
+    // even though there was no input.
+    int partitionCount = 0;
+    for (Object partition: ((FileSystemDataset) outputDataset).getPartitions()) {
+      ++partitionCount;
+    }
+
+    Assert.assertEquals(1, partitionCount);
+  }
+
+  @Test
+  public void testEmptyImmutableViewTarget() throws IOException {
+
+    // Requires MapReduce committers to work properly, which isn't
+    // the case in Hadoop 1.
+    Assume.assumeTrue(!Hadoop.isHadoop1());
+
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
+        .provided("version")
+        .asImmutable()
+        .build();
+
+    Dataset<Record> inputDataset = repo.create("ns", "in", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
+    Dataset<Record> outputDataset = repo.create("ns", "out", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
+
+    View<Record> inputView = inputDataset.with("version", "test-version-0");
+    View<Record> outputView = outputDataset.with("version", "test-version-0");
+
+    // writeTestUsers(inputView, 1);
+    // create an empty partition by opening and closing a writer for the view.
+    inputView.newWriter().close();
+
+    Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
+    PCollection<GenericData.Record> data = pipeline.read(
+        CrunchDatasets.asSource(inputView));
+    pipeline.write(data, CrunchDatasets.asTarget(outputView), Target.WriteMode.APPEND);
+    Assert.assertTrue(pipeline.run().succeeded());
+
+    // An empty partition should have been created since we targeted the view
+    // even though there was no input.
+    int partitionCount = 0;
+    for (Object partition: ((FileSystemDataset) outputDataset).getPartitions()) {
+      ++partitionCount;
+    }
+
+    Assert.assertEquals(1, partitionCount);
+  }
 
   
   @Test
