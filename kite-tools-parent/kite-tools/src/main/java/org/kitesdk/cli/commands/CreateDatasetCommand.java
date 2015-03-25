@@ -18,7 +18,6 @@ package org.kitesdk.cli.commands;
 import com.beust.jcommander.DynamicParameter;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.URI;
@@ -27,9 +26,7 @@ import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.Datasets;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.PartitionStrategy;
@@ -65,8 +62,8 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
   String columnMappingFile;
 
   @Parameter(names = {"-f", "--format"},
-      description = "The file format: avro or parquet.")
-  String format = Formats.AVRO.getName();
+      description = "The file format: avro, parquet, or json.")
+  String format;
 
   @Parameter(names = {"--location"},
       description = "Location where the data is stored")
@@ -150,10 +147,10 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
     Schema schema = existingSchema;
     if (existingSchema != null) {
       if (avroSchemaFile != null) {
-        schema = Schemas.fromAvro(open(avroSchemaFile));
+        schema = Schemas.fromAvsc(open(avroSchemaFile));
         ValidationException.check(
             SchemaValidationUtil.canRead(existingSchema, schema),
-            "Schema from %s cannot read existing data schema: %s",
+            "Schema %s cannot read existing data schema: %s",
             avroSchemaFile, existingSchema.toString(true));
         descriptorBuilder.schemaUri(qualifiedURI(avroSchemaFile));
       } else {
