@@ -124,10 +124,18 @@ public class FileSystemUtil {
   }
 
   public static Schema schema(String name, FileSystem fs, Path location) throws IOException {
+    if (!fs.exists(location)) {
+      return null;
+    }
+
     return visit(new GetSchema(name), fs, location);
   }
 
   public static PartitionStrategy strategy(FileSystem fs, Path location) throws IOException {
+    if (!fs.exists(location)) {
+      return null;
+    }
+
     List<Pair<String, Class<? extends Comparable>>> pairs = visit(
         new GetPartitionInfo(), fs, location);
 
@@ -149,10 +157,11 @@ public class FileSystemUtil {
   }
 
   public static Format format(FileSystem fs, Path location) throws IOException {
-    Format format = visit(new GetFormat(), fs, location);
-    Preconditions.checkArgument(format != null,
-        "Cannot determine format: found no data files in " + location);
-    return format;
+    if (!fs.exists(location)) {
+      return null;
+    }
+
+    return visit(new GetFormat(), fs, location);
   }
 
   private static abstract class PathVisitor<T> {

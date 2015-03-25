@@ -41,7 +41,7 @@ public class TestLog4jConfigurationCommand {
 
   @BeforeClass
   public static void createDatasets() throws Exception {
-    String avsc = "src/test/resources/test-schemas/user.avsc";
+    String avsc = "resource:test-schemas/user.avsc";
 
     TestUtil.run("delete", FILE_DATASET_URI);
     TestUtil.run("-v", "create", FILE_DATASET_URI, "-s", avsc);

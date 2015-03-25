@@ -53,7 +53,6 @@ import org.kitesdk.cli.commands.ShowRecordsCommand;
 import org.kitesdk.cli.commands.TarImportCommand;
 import org.kitesdk.cli.commands.TransformCommand;
 import org.kitesdk.cli.commands.UpdateDatasetCommand;
-import org.kitesdk.cli.commands.WrapDatasetCommand;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.ValidationException;
@@ -103,7 +102,6 @@ public class Main extends Configured implements Tool {
     jc.addCommand("schema", new SchemaCommand(console));
     jc.addCommand("info", new InfoCommand(console));
     jc.addCommand("show", new ShowRecordsCommand(console));
-    jc.addCommand("wrap", new WrapDatasetCommand(console));
     jc.addCommand("obj-schema", new ObjectSchemaCommand(console));
     jc.addCommand("inputformat-import", new InputFormatImportCommand(console));
     jc.addCommand("csv-schema", new CSVSchemaCommand(console));
