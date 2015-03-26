@@ -18,8 +18,10 @@ package org.kitesdk.data.spi.filesystem;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.apache.avro.Schema;
@@ -32,6 +34,7 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
+import org.kitesdk.data.IncompatibleSchemaException;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.spi.Pair;
@@ -253,7 +256,7 @@ public class FileSystemUtil {
     List<Pair<String, Class<? extends Comparable>>> pairs = visit(
         new GetPartitionInfo(), fs, location);
 
-    if (pairs.isEmpty() || pairs.size() <= 1) {
+    if (pairs == null || pairs.isEmpty() || pairs.size() <= 1) {
       return null;
     }
 
@@ -428,13 +431,7 @@ public class FileSystemUtil {
 
     @Override
     Format file(FileSystem fs, Path path) throws IOException {
-      String filename = path.getName();
-      for (Format format : SUPPORTED_FORMATS) {
-        if (filename.endsWith(format.getExtension())) {
-          return format;
-        }
-      }
-      return null;
+      return formatFromExt(path);
     }
   }
 
@@ -466,16 +463,200 @@ public class FileSystemUtil {
       }
       return null;
     }
+  }
 
-    private static Schema merge(@Nullable Schema left, @Nullable Schema right) {
-      if (left == null) {
-        return right;
-      } else if (right == null) {
-        return left;
-      } else {
-        return SchemaUtil.merge(left, right);
+  /**
+   * Finds potential datasets by crawling a directory tree.
+   * <p>
+   * This method looks for any data files and directories appear to form a
+   * dataset. This deliberately ignores information that may be stored in the
+   * Hive metastore or .metadata folders.
+   * <p>
+   * Recognizes only Avro, Parquet, and JSON data files.
+   *
+   * @param fs a FileSystem for the root path
+   * @param path a root Path that will be searched
+   * @return a Collection with a DatasetDescriptor for each potential dataset.
+   * @throws IOException
+   */
+  public static Collection<DatasetDescriptor> findPotentialDatasets(
+      FileSystem fs, Path path) throws IOException {
+    List<DatasetDescriptor> descriptors = Lists.newArrayList();
+
+    Result result = visit(new FindDatasets(), fs, path);
+    if (result instanceof Result.Table) {
+      descriptors.add(descriptor(fs, (Result.Table) result));
+    } else if (result instanceof Result.Group) {
+      for (Result.Table table : ((Result.Group) result).tables) {
+        descriptors.add(descriptor(fs, table));
+      }
+    }
+
+    return descriptors;
+  }
+
+  private static DatasetDescriptor descriptor(FileSystem fs, Result.Table table)
+      throws IOException {
+    // inspect the path to determine the partition strategy
+    PartitionStrategy strategy = strategy(fs, table.location);
+    DatasetDescriptor.Builder builder = new DatasetDescriptor.Builder()
+        .format(table.format)
+        .schema(table.schema)
+        .partitionStrategy(strategy)
+        .location(table.location);
+    if (table.depth < 0) {
+      builder.property("kite.filesystem.mixed-depth", "true");
+    }
+    return builder.build();
+  }
+
+  private interface Result {
+    // An unknown data path
+    class Unknown implements Result {
+    }
+
+    // A table of data
+    class Table implements Result {
+      private static final int UNKNOWN_DEPTH = 0;
+      private static final int MIXED_DEPTH = -1;
+      private final Path location;
+      private final Format format;
+      private final Schema schema;
+      private final int depth;
+
+      public Table(Path location, Format format, Schema schema, int depth) {
+        this.location = location;
+        this.format = format;
+        this.schema = schema;
+        this.depth = depth;
+      }
+    }
+
+    // A group of tables
+    class Group implements Result {
+      private final List<Table> tables;
+      private final boolean containsUnknown;
+
+      public Group(List<Table> tables, boolean containsUnknown) {
+        this.tables = tables;
+        this.containsUnknown = containsUnknown;
       }
     }
   }
 
+  private static class FindDatasets extends PathVisitor<Result> {
+    @Override
+    Result directory(FileSystem fs, Path path, List<Result> children) throws IOException {
+      // there are two possible outcomes for this method:
+      // 1. all child tables are compatible and part of one dataset (Table)
+      // 2. each valid child is a separate dataset (Group)
+      boolean allCompatible = true; // assume compatible to start
+      boolean containsUnknown = false;
+
+      // if all are compatible
+      Schema mergedSchema = null;
+      Format onlyFormat = null;
+      int depth = Result.Table.UNKNOWN_DEPTH;
+
+      // if all are separate datasets
+      List<Result.Table> tables = Lists.newArrayList();
+
+      for (Result child : children) {
+        if (child instanceof Result.Unknown) {
+          // not compatible at this level because a data file is not supported
+          allCompatible = false;
+          containsUnknown = true;
+
+        } else if (child instanceof Result.Group) {
+          // not compatible at a lower level
+          Result.Group group = (Result.Group) child;
+          containsUnknown |= group.containsUnknown;
+          if (containsUnknown || !group.tables.isEmpty()) {
+            // not compatible if there was an unknown or was not empty
+            allCompatible = false;
+          }
+          tables.addAll(group.tables);
+
+        } else {
+          Result.Table table = (Result.Table) child;
+          tables.add(table); // always add table in case not compatible later
+
+          // if all tables are currently compatible, add the latest table
+          if (allCompatible) {
+            try {
+              mergedSchema = merge(mergedSchema, table.schema);
+            } catch (IncompatibleSchemaException e) {
+              allCompatible = false;
+            }
+
+            if (onlyFormat == null) {
+              onlyFormat = table.format;
+            } else if (onlyFormat != table.format) {
+              allCompatible = false;
+            }
+
+            if (depth == Result.Table.UNKNOWN_DEPTH) {
+              depth = table.depth;
+            } else if (depth != table.depth) {
+              depth = Result.Table.MIXED_DEPTH;
+            }
+          }
+        }
+      }
+
+      if (allCompatible && tables.size() > 0) {
+        if (tables.size() == 1) {
+          // only one, use the existing location rather than higher up the path
+          return tables.get(0);
+        } else {
+          // more than one, use the path at this level
+          return new Result.Table(path, onlyFormat, mergedSchema, depth);
+        }
+      } else {
+        return new Result.Group(tables, containsUnknown);
+      }
+    }
+
+    @Override
+    Result file(FileSystem fs, Path path) throws IOException {
+      Format format = formatFromExt(path);
+      Schema schema = null;
+      if (format == Formats.AVRO) {
+        schema = Schemas.fromAvro(fs, path);
+      } else if (format == Formats.PARQUET) {
+        schema = Schemas.fromParquet(fs, path);
+      } else if (format == Formats.JSON) {
+        schema = Schemas.fromJSON("record", fs, path);
+      }
+
+      if (schema == null) {
+        return new Result.Unknown();
+      }
+
+      return new Result.Table(path, format, schema, path.depth());
+    }
+  }
+
+  private static final Splitter DOT = Splitter.on('.');
+
+  private static Format formatFromExt(Path path) {
+    String filename = path.getName();
+    String ext = Iterables.getLast(DOT.split(filename));
+    for (Format format : SUPPORTED_FORMATS) {
+      if (ext.equals(format.getExtension())) {
+        return format;
+      }
+    }
+    return null;
+  }
+
+  private static Schema merge(@Nullable Schema left, @Nullable Schema right) {
+    if (left == null) {
+      return right;
+    } else if (right == null) {
+      return left;
+    } else {
+      return SchemaUtil.merge(left, right);
+    }
+  }
 }
