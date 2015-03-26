@@ -34,6 +34,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.kitesdk.cli.TestUtil;
+import org.kitesdk.data.IncompatibleSchemaException;
 import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.ValidationException;
 import org.slf4j.Logger;
@@ -137,7 +138,9 @@ public class TestSchemaCommandMerge {
         "resource:schema/string.avsc",
         "resource:schema/user.avsc");
 
-    TestHelpers.assertThrows("", ValidationException.class, new Callable() {
+    TestHelpers.assertThrows(
+        "Should reject incompatible schemas, not produce a union schema",
+        IncompatibleSchemaException.class, new Callable() {
       @Override
       public Integer call() throws IOException {
         return command.run();
