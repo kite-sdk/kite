@@ -23,6 +23,7 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetOperationException;
 import org.kitesdk.data.RandomAccessDataset;
+import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.hbase.avro.GenericAvroDao;
 import org.kitesdk.data.hbase.avro.SpecificAvroDao;
 import org.kitesdk.data.hbase.impl.Dao;
@@ -196,16 +197,33 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
   }
 
   public static class Builder {
-
+    private static final int DEFAULT_POOL_SIZE = 10;
     private Configuration configuration;
+    private HTablePool pool;
+    private int poolSize = DEFAULT_POOL_SIZE;
 
     public Builder configuration(Configuration configuration) {
       this.configuration = configuration;
       return this;
     }
 
+    public Builder pool(HTablePool pool) {
+      this.pool = pool;
+      return this;
+    }
+
+    public Builder poolSize(int size) {
+      // This configuration will be ignored if HTablePool is passed in
+      this.poolSize = size;
+      return this;
+    }
+
     public HBaseDatasetRepository build() {
-      HTablePool pool = new HTablePool(configuration, 10);
+      if (pool == null) {
+        ValidationException
+            .check(poolSize > 0, "HTablePool size cannot be 0 or negative");
+        pool = new HTablePool(configuration, poolSize);
+      }
       HBaseAdmin admin;
       try {
         admin = new HBaseAdmin(configuration);
