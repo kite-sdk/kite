@@ -22,7 +22,7 @@ import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Ignore;
 import org.kitesdk.cli.TestUtil;
-import org.kitesdk.shaded.com.google.common.collect.Lists;
+import com.google.common.collect.Lists;
 import static org.mockito.Mockito.mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
