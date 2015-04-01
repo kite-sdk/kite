@@ -67,8 +67,8 @@ public class CopyCommand extends BaseDatasetCommand {
     Preconditions.checkArgument(datasets.size() == 2,
         "Cannot copy multiple datasets");
 
-    View<Record> source = load(datasets.get(0), Record.class);
     View<Record> dest = load(datasets.get(1), Record.class);
+    View<Record> source = load(datasets.get(0), Record.class).asSchema(dest.getSchema());
 
     CopyTask task = new CopyTask<Record>(source, dest);
 

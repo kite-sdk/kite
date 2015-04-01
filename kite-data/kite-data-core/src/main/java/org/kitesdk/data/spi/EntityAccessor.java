@@ -38,9 +38,9 @@ public class EntityAccessor<E> {
   private final GenericData model;
   private final Map<String, List<Schema.Field>> cache = Maps.newHashMap();
 
-  EntityAccessor(Class<E> type, Schema schema) {
-    this.type = DataModelUtil.resolveType(type, schema);
-    this.schema = DataModelUtil.getReaderSchema(this.type, schema);
+  EntityAccessor(Class<E> type, Schema readerSchema) {
+    this.type = DataModelUtil.resolveType(type, readerSchema);
+    this.schema = DataModelUtil.getReaderSchema(this.type, readerSchema);
     this.model = DataModelUtil.getDataModelForType(this.type);
   }
 
