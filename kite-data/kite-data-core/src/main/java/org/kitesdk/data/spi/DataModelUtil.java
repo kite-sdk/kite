@@ -207,4 +207,38 @@ public class DataModelUtil {
     return new EntityAccessor<E>(type, schema);
   }
 
+  public static <E> E deepCopy(E entity, Schema dstSchema) {
+    GenericData dataModel = getDataModelForType(entity.getClass());
+    Schema srcSchema = dataModel.induce(entity);
+    if (dataModel instanceof ReflectData || dataModel instanceof SpecificData) {
+      return dataModel.deepCopy(dstSchema, entity);
+    } else {
+      if (srcSchema.equals(dstSchema)) {
+        return dataModel.deepCopy(dstSchema, entity);
+      }
+      GenericRecord srcRecord = (GenericRecord) entity;
+      return (E) deepCopy(srcRecord, srcSchema, dstSchema, dataModel);
+    }
+  }
+
+  private static GenericRecord deepCopy(GenericRecord srcRecord,
+    Schema srcSchema, Schema dstSchema, GenericData dataModel) {
+    GenericRecord dstRecord = (GenericRecord) dataModel.newRecord(null, dstSchema);
+    for (Schema.Field srcField : srcSchema.getFields()) {
+      Schema.Field dstField = dstSchema.getField(srcField.name());
+      if (dstField != null) {
+        if (srcField.schema().getType() == Schema.Type.RECORD) {
+          dstRecord.put(dstField.pos(),
+            deepCopy((GenericRecord)srcRecord.get(srcField.pos()),
+              srcField.schema(), dstField.schema(), dataModel));
+        } else {
+          dstRecord.put(dstField.pos(), dataModel.deepCopy(dstField.schema(),
+            srcRecord.get(srcField.pos())));
+        }
+      }
+    }
+
+    return dstRecord;
+  }
+
 }

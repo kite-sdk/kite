@@ -16,11 +16,14 @@
 
 package org.kitesdk.tools;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Closeables;
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapreduce.AvroKeyInputFormat;
 import org.apache.crunch.DoFn;
@@ -43,6 +46,7 @@ import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.View;
 import org.kitesdk.data.crunch.CrunchDatasets;
+import org.kitesdk.data.spi.DataModelUtil;
 
 /**
  * @since 0.16.0
@@ -103,6 +107,10 @@ public class TransformTask<S, T> extends Configured {
 
     PType<T> toPType = ptype(to);
     MapFn<T, T> validate = new CheckEntityClass<T>(to.getType());
+    MapFn<T, T> induce = null;
+    if (!getSchema(from).equals(getSchema(to))) {
+      induce = new InduceEntity<T>(getSchema(to));
+    }
 
     if (runInParallel) {
       TaskUtil.configure(getConf())
@@ -112,6 +120,10 @@ public class TransformTask<S, T> extends Configured {
 
       PCollection<T> collection = pipeline.read(CrunchDatasets.asSource(from))
           .parallelDo(transform, toPType).parallelDo(validate, toPType);
+
+      if (induce != null) {
+        collection = collection.parallelDo(induce, toPType);
+      }
 
       if (compact) {
         // the transform must be run before partitioning
@@ -134,6 +146,10 @@ public class TransformTask<S, T> extends Configured {
 
       PCollection<T> collection = pipeline.read(CrunchDatasets.asSource(from))
           .parallelDo(transform, toPType).parallelDo(validate, toPType);
+
+      if (induce != null) {
+        collection = collection.parallelDo(induce, toPType);
+      }
 
       boolean threw = true;
       DatasetWriter<T> writer = null;
@@ -158,6 +174,10 @@ public class TransformTask<S, T> extends Configured {
   private static boolean isLocal(Dataset<?> dataset) {
     URI location = dataset.getDescriptor().getLocation();
     return (location != null) && LOCAL_FS_SCHEME.equals(location.getScheme());
+  }
+
+  private static Schema getSchema(View<?> view) {
+    return view.getDataset().getDescriptor().getSchema();
   }
 
   @SuppressWarnings("unchecked")
@@ -191,5 +211,32 @@ public class TransformTask<S, T> extends Configured {
             ": " + String.valueOf(input));
       }
     }
+  }
+
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+      value="SE_NO_SERIALVERSIONID",
+      justification="Purposely not supported across versions")
+  public static class InduceEntity<E> extends MapFn<E, E> {
+    private final String dstSchemaString;
+    private Optional<Schema> dstSchema;
+
+    public InduceEntity(Schema dstSchema) {
+      this.dstSchemaString = dstSchema.toString();
+      this.dstSchema = Optional.absent();
+    }
+
+    @Override
+    public void initialize() {
+      if (!dstSchema.isPresent()) {
+        Schema schema = new Schema.Parser().parse(dstSchemaString);
+        dstSchema = Optional.of(schema);
+      }
+    }
+
+    @Override
+    public E map(E input) {
+      return DataModelUtil.deepCopy(input, dstSchema.get());
+    }
+
   }
 }

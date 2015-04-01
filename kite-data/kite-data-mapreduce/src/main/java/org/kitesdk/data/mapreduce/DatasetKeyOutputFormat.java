@@ -324,7 +324,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     }
 
     private <E> E copy(E key) {
-      return dataModel.deepCopy(schema, key);
+      return DataModelUtil.deepCopy(key, schema);
     }
 
     @Override
