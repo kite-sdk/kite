@@ -176,8 +176,6 @@
     <vers.jcommander>1.35</vers.jcommander>
     <vers.spark>1.0.0</vers.spark>
     <vers.hadoop-aws>2.6.0</vers.hadoop-aws>
-    <vers.apache-httpcomponents>4.2</vers.apache-httpcomponents>
-    <vers.jets3t>0.9.0</vers.jets3t>
 
     <!-- Plugin versions -->
     <vers.doxia-module-markdown>1.4</vers.doxia-module-markdown>
@@ -871,11 +869,6 @@
         <artifactId>commons-jexl</artifactId>
         <version>${vers.jexl}</version>
       </dependency>
-      <dependency>
-        <groupId>net.java.dev.jets3t</groupId>
-        <artifactId>jets3t</artifactId>
-        <version>${vers.jets3t}</version>
-      </dependency>
 
       <!-- Logging -->
       <dependency>
@@ -977,16 +970,6 @@
         <groupId>commons-lang</groupId>
         <artifactId>commons-lang</artifactId>
         <version>${vers.commons-lang}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.httpcomponents</groupId>
-        <artifactId>httpclient</artifactId>
-        <version>${vers.apache-httpcomponents}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.httpcomponents</groupId>
-        <artifactId>httpcore</artifactId>
-        <version>${vers.apache-httpcomponents}</version>
       </dependency>
 
       <!-- Testing -->
