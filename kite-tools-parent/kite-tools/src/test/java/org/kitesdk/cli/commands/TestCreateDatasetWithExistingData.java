@@ -37,6 +37,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kitesdk.cli.TestUtil;
 import org.kitesdk.data.Dataset;
+import org.kitesdk.data.DatasetExistsException;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.LocalFileSystem;
@@ -63,6 +64,8 @@ public class TestCreateDatasetWithExistingData {
       new Path("target/data/users_partitioned/version=1");
   private static final String existingPartitionedURI =
       "dataset:file:target/data/users_partitioned";
+  private static final String sourceDatasetURI =
+      "dataset:file:target/data/users";
   private static Schema USER_SCHEMA;
   private CreateDatasetCommand command = null;
   private Logger console;
@@ -206,6 +209,21 @@ public class TestCreateDatasetWithExistingData {
         });
 
     Assert.assertTrue(avsc.delete());
+  }
+
+  @Test
+  public void testFailCreateIfDatasetExists() throws Exception {
+    command.datasets = Lists.newArrayList(sourceDatasetURI);
+
+    TestHelpers.assertThrows(
+        "Should fail because the dataset already exists",
+        DatasetExistsException.class, new Callable<Void>() {
+          @Override
+          public Void call() throws IOException {
+            command.run();
+            return null;
+          }
+        });
   }
 
   @Test

@@ -18,22 +18,35 @@ package org.kitesdk.cli.commands;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.ByteStreams;
+import com.google.common.io.Closeables;
 import com.google.common.io.Resources;
+import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.metastore.api.Table;
+import org.apache.hadoop.hive.ql.metadata.HiveUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.kitesdk.cli.example.User;
+import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.Datasets;
 import org.kitesdk.data.MiniDFSTest;
+import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.DefaultConfiguration;
 import org.kitesdk.data.spi.OptionBuilder;
 import org.kitesdk.data.spi.Registration;
 import org.kitesdk.data.spi.URIPattern;
+import org.kitesdk.data.spi.hive.MetaStoreUtil;
 import org.slf4j.Logger;
 
 import static org.mockito.Mockito.contains;
@@ -138,6 +151,66 @@ public class TestCreateDatasetCommandCluster extends MiniDFSTest {
 
     // restore the previous Configuration
     DefaultConfiguration.set(existing);
+  }
+
+  @Test
+  public void testCreateWithExistingDataPartitions() throws IOException {
+    Configuration existing = DefaultConfiguration.get();
+    try {
+      DefaultConfiguration.set(getConfiguration());
+
+      // create a partitioned dataset and add a record
+      DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+          .schema(User.class)
+          .partitionStrategy(new PartitionStrategy.Builder()
+              .hash("username", 4)
+              .build())
+          .build();
+      Dataset<User> users = Datasets.create(
+          "dataset:hdfs:/tmp/datasets/users", descriptor, User.class);
+      DatasetWriter<User> writer = null;
+      try {
+        writer = users.newWriter();
+        writer.write(new User("test", "test@example.com"));
+      } finally {
+        Closeables.closeQuietly(writer);
+      }
+
+      // remove the dataset's metadata
+      getDFS().delete(new Path("/tmp/datasets/users/.metadata"), true);
+
+      // use the create command to create an external table in Hive
+      Logger console = mock(Logger.class);
+      CreateDatasetCommand create = new CreateDatasetCommand(console);
+      create.setConf(getConfiguration());
+      create.datasets = Lists.newArrayList("dataset:hive:users");
+      create.location = "hdfs:/tmp/datasets/users";
+      create.run();
+
+      // validate the dataset
+      Dataset<GenericRecord> loaded = Datasets.load("dataset:hive:users");
+      Assert.assertNotNull("Should successfully create Hive dataset", loaded);
+      Assert.assertTrue("Should be partitioned",
+          loaded.getDescriptor().isPartitioned());
+      PartitionStrategy expectedStrategy = new PartitionStrategy.Builder()
+          .provided("username_hash", "int")
+          .build();
+      Assert.assertEquals("Should have a provided partition strategy",
+          expectedStrategy, loaded.getDescriptor().getPartitionStrategy());
+
+      MetaStoreUtil meta = new MetaStoreUtil(getConfiguration());
+      List<String> partitions = meta.listPartitions("default", "users", (short) 10);
+      Assert.assertEquals("Table should have a partition",
+          1, partitions.size());
+      Assert.assertTrue("Partition should exist",
+          getDFS().exists(new Path(partitions.get(0))));
+      Assert.assertTrue("Partition should be a partition directory",
+          partitions.get(0).contains("/tmp/datasets/users/username_hash="));
+
+    } finally {
+      Datasets.delete("dataset:hive:users");
+      DefaultConfiguration.set(existing);
+    }
   }
 
 }

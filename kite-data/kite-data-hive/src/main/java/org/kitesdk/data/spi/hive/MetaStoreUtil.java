@@ -15,17 +15,21 @@
  */
 package org.kitesdk.data.spi.hive;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.metastore.api.AlreadyExistsException;
 import org.apache.hadoop.hive.metastore.api.Database;
+import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.InvalidObjectException;
 import org.apache.hadoop.hive.metastore.api.InvalidOperationException;
 import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.apache.hadoop.hive.metastore.api.NoSuchObjectException;
+import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.metastore.api.UnknownDBException;
 import org.apache.thrift.TException;
@@ -304,6 +308,34 @@ public class MetaStoreUtil {
     } catch (InvalidObjectException e) {
       throw new DatasetOperationException(
           "Invalid partition for " + dbName + "." + tableName + ": " + path, e);
+    } catch (MetaException e) {
+      throw new DatasetOperationException("Hive MetaStore exception", e);
+    } catch (TException e) {
+      throw new DatasetOperationException(
+          "Exception communicating with the Hive MetaStore", e);
+    }
+  }
+
+  public List<String> listPartitions(final String dbName,
+                                     final String tableName,
+                                     final short max) {
+    ClientAction<List<String>> listPartitions =
+        new ClientAction<List<String>>() {
+          @Override
+          public List<String> call() throws TException {
+            List<Partition> partitions =
+                client.listPartitions(dbName, tableName, max);
+            List<String> paths = Lists.newArrayList();
+            for (Partition partition : partitions) {
+              paths.add(partition.getSd().getLocation());
+            }
+            return paths;
+          }
+        };
+    try {
+      return doWithRetry(listPartitions);
+    } catch (NoSuchObjectException e) {
+      return ImmutableList.of();
     } catch (MetaException e) {
       throw new DatasetOperationException("Hive MetaStore exception", e);
     } catch (TException e) {

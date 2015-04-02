@@ -25,6 +25,7 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.DefaultConfiguration;
 import org.kitesdk.data.spi.MetadataProvider;
+import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 
 /**
  * <p>
@@ -65,10 +66,13 @@ public class HiveManagedDatasetRepository extends HiveAbstractDatasetRepository 
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public <E> Dataset<E> create(String namespace, String name, DatasetDescriptor descriptor) {
     // avoids calling fsRepository.create, which creates the data path
     getMetadataProvider().create(namespace, name, descriptor);
-    return load(namespace, name);
+    FileSystemDataset<E> dataset = (FileSystemDataset<E>) load(namespace, name);
+    dataset.addExistingPartitions();
+    return dataset;
   }
 
   @Override
