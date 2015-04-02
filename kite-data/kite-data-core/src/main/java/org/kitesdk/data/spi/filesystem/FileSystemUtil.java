@@ -27,6 +27,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.kitesdk.compat.DynMethods;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.Format;
@@ -174,11 +175,25 @@ public class FileSystemUtil {
     return visit(visitor, fs, path, Lists.<Path>newArrayList());
   }
 
+  private static final DynMethods.UnboundMethod IS_SYMLINK;
+  static {
+    DynMethods.UnboundMethod isSymlink;
+    try {
+      isSymlink = new DynMethods.Builder("isSymlink")
+          .impl(FileStatus.class)
+          .buildChecked();
+    } catch (NoSuchMethodException e) {
+      isSymlink = null;
+    }
+    IS_SYMLINK = isSymlink;
+  }
+
   private static <T> T visit(PathVisitor<T> visitor, FileSystem fs, Path path,
                       List<Path> followedLinks) throws IOException {
-    if (fs.getFileStatus(path).isFile()) {
+    if (fs.isFile(path)) {
       return visitor.file(fs, path);
-    } else if (fs.getFileStatus(path).isSymlink()) {
+    } else if (IS_SYMLINK != null &&
+        IS_SYMLINK.<Boolean>invoke(fs.getFileStatus(path))) {
       Preconditions.checkArgument(!followedLinks.contains(path),
           "Encountered recursive path structure at link: " + path);
       followedLinks.add(path); // no need to remove
