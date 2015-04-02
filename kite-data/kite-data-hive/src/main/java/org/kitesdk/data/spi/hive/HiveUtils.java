@@ -349,6 +349,10 @@ class HiveUtils {
 
     // keep the custom properties up-to-date
     addPropertiesForDescriptor(table, descriptor);
+
+    // keep the table DDL up to-to-date with the Schema
+    table.getSd().setCols(
+        HiveSchemaConverter.convertSchema(descriptor.getSchema()));
   }
 
   static FileSystem fsForPath(Configuration conf, Path path) {

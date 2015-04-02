@@ -16,9 +16,11 @@
 
 package org.kitesdk.data.spi.hive;
 
+import org.apache.avro.SchemaBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.api.Table;
+import org.junit.Assert;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.kitesdk.data.CompressionType;
@@ -40,6 +42,32 @@ public class TestHiveUtils {
     Configuration conf = new HiveConf();
     DatasetDescriptor result = HiveUtils.descriptorForTable(conf, table);
     assertEquals(original, result);
+  }
+
+  @Test
+  public void testUpdateChangesDDL() throws Exception {
+    DatasetDescriptor original = new DatasetDescriptor.Builder()
+        .schema(SchemaBuilder.record("Test").fields()
+            .requiredLong("id")
+            .requiredString("data")
+            .endRecord())
+        .build();
+    boolean external = false;
+    Table table = HiveUtils.tableForDescriptor("ns", "test", original, external);
+
+    DatasetDescriptor updated = new DatasetDescriptor.Builder()
+        .schema(SchemaBuilder.record("Test").fields()
+            .requiredLong("id")
+            .requiredString("data")
+            .nullableString("data2", "")
+            .endRecord())
+        .build();
+
+    HiveUtils.updateTableSchema(table, updated);
+
+    Assert.assertEquals("Should update the table DDL",
+        table.getSd().getCols(),
+        HiveSchemaConverter.convertSchema(updated.getSchema()));
   }
 
   @Test
