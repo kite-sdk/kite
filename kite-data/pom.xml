@@ -45,6 +45,12 @@
     datasets in Hadoop platforms.
   </description>
 
+  <properties>
+    <!-- change s3-related versions for kite-data only -->
+    <vers.apache-httpcomponents>4.2</vers.apache-httpcomponents>
+    <vers.jets3t>0.9.0</vers.jets3t>
+  </properties>
+
   <build>
     <plugins>
       <plugin>
@@ -72,6 +78,26 @@
       </plugins>
     </pluginManagement>
   </build>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>net.java.dev.jets3t</groupId>
+        <artifactId>jets3t</artifactId>
+        <version>${vers.jets3t}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>${vers.apache-httpcomponents}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpcore</artifactId>
+        <version>${vers.apache-httpcomponents}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <reporting>
     <plugins>
