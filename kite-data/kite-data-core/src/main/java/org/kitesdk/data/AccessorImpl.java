@@ -64,4 +64,18 @@ final class AccessorImpl extends Accessor {
     return partitionStrategy.hasPartitioner(name);
   }
 
+  @Override
+  public List<FieldPartitioner> getImmutablePartitioners(PartitionStrategy partitionStrategy) {
+    return partitionStrategy.getImmutablePartitioners();
+  }
+
+  @Override
+  public int immutablePartitionerCount(PartitionStrategy partitionStrategy) {
+    return partitionStrategy.immutablePartitionerCount();
+  }
+
+  @Override
+  public PartitionStrategy asMutable(PartitionStrategy partitionStrategy) {
+    return partitionStrategy.asMutable();
+  }
 }

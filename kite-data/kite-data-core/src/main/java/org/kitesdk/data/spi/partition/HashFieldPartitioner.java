@@ -46,6 +46,11 @@ public class HashFieldPartitioner extends FieldPartitioner<Object, Integer> {
         "Number of hash buckets is negative: %s", buckets);
   }
 
+  protected HashFieldPartitioner(HashFieldPartitioner partitioner,
+                                 boolean immutable) {
+    super(partitioner, immutable);
+  }
+
   @Override
   public Integer apply(Object value) {
     return (value.hashCode() & Integer.MAX_VALUE) % getCardinality();
@@ -69,6 +74,16 @@ public class HashFieldPartitioner extends FieldPartitioner<Object, Integer> {
   }
 
   @Override
+  public HashFieldPartitioner asImmutable() {
+    return new HashFieldPartitioner(this, true);
+  }
+
+  @Override
+  public HashFieldPartitioner asMutable() {
+    return new HashFieldPartitioner(this, false);
+  }
+
+  @Override
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(
       value="NP_METHOD_PARAMETER_TIGHTENS_ANNOTATION",
       justification="Default annotation is not correct for equals")
@@ -82,7 +97,8 @@ public class HashFieldPartitioner extends FieldPartitioner<Object, Integer> {
     HashFieldPartitioner that = (HashFieldPartitioner) o;
     return Objects.equal(this.getSourceName(), that.getSourceName()) &&
         Objects.equal(this.getName(), that.getName()) &&
-        Objects.equal(this.getCardinality(), that.getCardinality());
+        Objects.equal(this.getCardinality(), that.getCardinality()) &&
+        this.isImmutable() == that.isImmutable();
   }
 
   @Override

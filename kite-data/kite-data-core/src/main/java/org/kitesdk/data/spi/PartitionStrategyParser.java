@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.LongNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -70,6 +71,7 @@ public class PartitionStrategyParser {
   private static final String BUCKETS = "buckets";
   private static final String FORMAT = "format";
   private static final String VALUES = "values";
+  private static final String IMMUTABLE = "immutable";
 
   /**
    * Parses a PartitionStrategy from a JSON string.
@@ -204,6 +206,12 @@ public class PartitionStrategyParser {
       } else {
         throw new ValidationException("Invalid FieldPartitioner: " + type);
       }
+
+      if (fieldPartitioner.has(IMMUTABLE) &&
+          fieldPartitioner.get(IMMUTABLE).asBoolean()) {
+
+        builder.asImmutable();
+      }
     }
     return builder.build();
   }
@@ -248,6 +256,11 @@ public class PartitionStrategyParser {
         throw new ValidationException(
             "Unknown partitioner class: " + fp.getClass());
       }
+
+      if (fp.isImmutable()) {
+        partitioner.set(IMMUTABLE, BooleanNode.valueOf(true));
+      }
+
       strategyJson.add(partitioner);
     }
     return strategyJson;

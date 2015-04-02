@@ -212,6 +212,45 @@ public class TestHiveExternalDatasetRepository extends TestFileSystemDatasetRepo
 
   }
 
+  @SuppressWarnings({"deprecation", "unchecked"})
+  @Test
+  public void testImmutableMerge() throws Exception {
+    final String NAME2 = "test2";
+    final String NAME3 = "test3";
+
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
+        .identity("username")
+        .asImmutable()
+        .build();
+
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schema(testSchema)
+        .partitionStrategy(partitionStrategy)
+        .build();
+
+    Dataset<GenericRecord> dataset = repo.create(NAMESPACE, NAME2, descriptor);
+
+    HiveTestUtils.assertTableExists(client, NAMESPACE, NAME2);
+    HiveTestUtils.assertTableIsExternal(client, NAMESPACE, NAME2);
+    Assert.assertTrue("No partitions yet",
+        client.listPartitionNames(NAMESPACE, NAME2, (short) 10).isEmpty());
+
+    writeRecord(dataset, 0);
+
+    Assert.assertEquals("Should be one partition", 1,
+        client.listPartitionNames(NAMESPACE, NAME2, (short) 10).size());
+
+    Dataset<GenericRecord> dsUpdate = repo.create(NAMESPACE, NAME3, descriptor);
+
+    writeRecord(dsUpdate, 1);
+
+    Assert.assertTrue(dataset instanceof Mergeable);
+    ((Mergeable<Dataset<GenericRecord>>) dataset).merge(dsUpdate);
+
+    Assert.assertEquals("Should be two partitions", 2,
+        client.listPartitionNames(NAMESPACE, NAME2, (short) 10).size());
+  }
+
   private void writeRecord(Dataset<GenericRecord> dataset, int partition) {
     PartitionKey key = new PartitionKey(partition);
     DatasetWriter<GenericRecord> writer =

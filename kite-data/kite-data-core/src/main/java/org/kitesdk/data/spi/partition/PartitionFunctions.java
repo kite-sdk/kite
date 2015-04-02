@@ -30,6 +30,12 @@ import org.slf4j.LoggerFactory;
 public class PartitionFunctions {
   private static final Logger LOG = LoggerFactory.getLogger(PartitionFunctions.class);
 
+  /**
+   * Sentinel value returned by the expression to indicate the
+   * end of the sequence of immutable partitioners.
+   */
+  public static final Object IMMUTABLE = new Object();
+
   public static FieldPartitioner<Object, Integer> hash(String name, int buckets) {
     return new HashFieldPartitioner(name, buckets);
   }
@@ -87,6 +93,10 @@ public class PartitionFunctions {
   public static FieldPartitioner provided(String name, @Nullable String valuesType) {
     return new ProvidedFieldPartitioner(name,
         ProvidedFieldPartitioner.valuesType(valuesType));
+  }
+
+  public static Object immutable() {
+    return IMMUTABLE;
   }
 
   public static String toExpression(FieldPartitioner fieldPartitioner) {

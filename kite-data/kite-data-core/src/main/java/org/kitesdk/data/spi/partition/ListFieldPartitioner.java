@@ -48,6 +48,12 @@ public class ListFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
     this.values = values;
   }
 
+  protected ListFieldPartitioner(ListFieldPartitioner partitioner,
+                                 boolean immutable) {
+    super(partitioner, immutable);
+    this.values = partitioner.values;
+  }
+
   private static <S> int cardinality(List<Set<S>> values) {
     return values.size(); // the number of sets
   }
@@ -124,6 +130,16 @@ public class ListFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
   }
 
   @Override
+  public ListFieldPartitioner asImmutable() {
+    return new ListFieldPartitioner(this, true);
+  }
+
+  @Override
+  public ListFieldPartitioner asMutable() {
+    return new ListFieldPartitioner(this, false);
+  }
+
+  @Override
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(
       value="NP_METHOD_PARAMETER_TIGHTENS_ANNOTATION",
       justification="Default annotation is not correct for equals")
@@ -136,7 +152,8 @@ public class ListFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
     }
     ListFieldPartitioner that = (ListFieldPartitioner) o;
     return Objects.equal(this.getName(), that.getName()) &&
-        Objects.equal(this.values, that.values);
+        Objects.equal(this.values, that.values) &&
+        this.isImmutable() == that.isImmutable();
   }
 
   @Override

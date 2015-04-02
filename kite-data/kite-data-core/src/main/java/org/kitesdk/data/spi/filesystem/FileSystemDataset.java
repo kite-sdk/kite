@@ -15,13 +15,18 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.PartitionExistsException;
 import org.kitesdk.data.spi.Compatibility;
 import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
@@ -303,6 +308,21 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
 
   @Override
   public void merge(FileSystemDataset<E> update) {
+
+    // a simple file move can be used for datasetes without
+    // immutable partitions.
+    if (!getDescriptor().isPartitioned() ||
+        Accessor.getDefault().immutablePartitionerCount(getDescriptor()
+            .getPartitionStrategy()) == 0) {
+
+      fileMoveMerge(update);
+
+    } else {
+      immutablePartitionMerge(update);
+    }
+  }
+
+  private void fileMoveMerge(FileSystemDataset<E> update) {
     DatasetDescriptor updateDescriptor = update.getDescriptor();
 
     // check that the dataset's descriptor can read the update
@@ -342,13 +362,136 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     }
   }
 
+  /**
+   * Returns the paths to immutable partitions in the dataset.
+   * the immutable partitions may or may not be leaf directories,
+   * so we handle them separately from other partition iterators.
+   */
+  private void getImmutablePartitionPaths(Collection<Path> results,
+                                          FileSystem fs,
+                                          Path dir,
+                                          int depth) throws IOException {
+
+    if (depth == 0) {
+      results.add(dir);
+
+    } else {
+
+      for (FileStatus file: fs.listStatus(dir, PathFilters.notHidden())) {
+        getImmutablePartitionPaths(results, fs, file.getPath(), depth - 1);
+      }
+    }
+  }
+
+  /**
+   * Performs a merge that respects immutable partitions.
+   */
+  private void immutablePartitionMerge(FileSystemDataset<E> update) {
+
+    DatasetDescriptor updateDescriptor = update.getDescriptor();
+
+    // check that the dataset's descriptor can read the update
+    Compatibility.checkCompatible(updateDescriptor, descriptor);
+
+    // the number of fields used to define the immutable partition
+    // is how deep we need to recurse to get that partition directory
+    int depth = Accessor.getDefault().immutablePartitionerCount(getDescriptor()
+        .getPartitionStrategy());
+
+    Collection<Path> paths = Lists.newArrayList();
+
+    try {
+      getImmutablePartitionPaths(paths, update.getFileSystem(),
+          update.getDirectory(), depth);
+    } catch (IOException e) {
+      throw new DatasetException("Cannot enumerate immutable partitions.", e);
+    }
+
+    Map<Path,Path> partitionMap = Maps.newHashMap();
+
+    // build a map of old partition locations to new ones
+    for (Path updatePartitionDirectory: paths){
+
+      PartitionKey partitionToMerge = update.keyFromDirectory(updatePartitionDirectory);
+
+      Path relativePath = update.toRelativeDirectory(partitionToMerge);
+
+      Path newPartitionDirectory = new Path(getDirectory(), relativePath);
+
+      partitionMap.put(updatePartitionDirectory, newPartitionDirectory);
+    }
+
+    // check to see if we can rename the partitions before renaming any.
+    // this won't prevent races between writers concurrently updating
+    // partitions, but will avoid partial success scenarios from
+    // if there is a conflict with previous partitions.
+    for (Path path: partitionMap.values()) {
+
+      try {
+        if (fileSystem.exists(path)) {
+
+          throw new PartitionExistsException("Unable to merge because partition at " +
+              path + " already exists.");
+
+        }
+      } catch (IOException e) {
+
+        throw new DatasetIOException("Dataset merge failed", e);
+      }
+    }
+
+    // perform the partition move.
+    for (Map.Entry<Path,Path> entry: partitionMap.entrySet()) {
+
+      Path updatePartitionDirectory = entry.getKey();
+      Path newPartitionDirectory = entry.getValue();
+
+      try {
+
+        // make sure parent directories exist.
+        if (!fileSystem.exists(newPartitionDirectory.getParent())) {
+          fileSystem.mkdirs(newPartitionDirectory.getParent());
+        }
+
+        LOG.debug("Renaming {} to {}", updatePartitionDirectory, newPartitionDirectory);
+
+        boolean renameOk = fileSystem.rename(updatePartitionDirectory, newPartitionDirectory);
+
+        if (!renameOk) {
+
+          if (fileSystem.exists(newPartitionDirectory)) {
+
+            // if the target exists, we assume the rename failed because the
+            // destination was already there.
+            throw new PartitionExistsException("Unable to merge because partition at " +
+                newPartitionDirectory + " already exists.");
+
+          } else {
+            throw new IOException("Dataset merge failed during rename of " + updatePartitionDirectory +
+                " to " + newPartitionDirectory);
+          }
+        }
+      } catch (IOException e) {
+        throw new DatasetIOException("Dataset merge failed", e);
+      }
+
+      // notify the partition listener that the partition has been created.
+      if (descriptor.isPartitioned() && partitionListener != null) {
+
+        URI relativePath = update.getDirectory().toUri().relativize(updatePartitionDirectory.toUri());
+
+        partitionListener.partitionAdded(namespace, name, relativePath.toString());
+      }
+    }
+  }
+
   @Override
   public InputFormat<E, Void> getInputFormat(Configuration conf) {
     return new FileSystemViewKeyInputFormat<E>(this, conf);
   }
 
   @SuppressWarnings("unchecked")
-  private Path toDirectoryName(@Nullable Path dir, PartitionKey key) {
+  Path toDirectoryName(@Nullable Path dir, PartitionKey key) {
     Path result = dir;
     for (int i = 0; i < key.getLength(); i++) {
       final FieldPartitioner fp = Accessor.getDefault().getFieldPartitioners(partitionStrategy).get(i);

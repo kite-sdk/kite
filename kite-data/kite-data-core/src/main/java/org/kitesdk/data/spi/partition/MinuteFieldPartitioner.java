@@ -39,4 +39,20 @@ public class MinuteFieldPartitioner extends CalendarFieldPartitioner {
     format.setMinimumIntegerDigits(2);
     format.setMaximumIntegerDigits(2);
   }
+
+  protected MinuteFieldPartitioner(MinuteFieldPartitioner partitioner,
+                                   boolean immutable) {
+    super(partitioner, immutable);
+    this.format = partitioner.format;
+  }
+
+  @Override
+  public MinuteFieldPartitioner asImmutable() {
+    return new MinuteFieldPartitioner(this, true);
+  }
+
+  @Override
+  public MinuteFieldPartitioner asMutable() {
+    return new MinuteFieldPartitioner(this, false);
+  }
 }

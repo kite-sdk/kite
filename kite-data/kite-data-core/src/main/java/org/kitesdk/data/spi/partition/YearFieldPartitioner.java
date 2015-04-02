@@ -41,6 +41,11 @@ public class YearFieldPartitioner extends CalendarFieldPartitioner {
     super(sourceName, (name == null ? "year" : name), Calendar.YEAR, 5); // arbitrary number of partitions
   }
 
+  private YearFieldPartitioner(YearFieldPartitioner partitioner,
+                               boolean immutable) {
+    super(partitioner, immutable);
+  }
+
   @Override
   public Predicate<Integer> project(Predicate<Long> predicate) {
     // year is the only time field that can be projected
@@ -103,5 +108,15 @@ public class YearFieldPartitioner extends CalendarFieldPartitioner {
     }
     // could not produce a satisfying predicate
     return null;
+  }
+
+  @Override
+  public YearFieldPartitioner asImmutable() {
+    return new YearFieldPartitioner(this, true);
+  }
+
+  @Override
+  public YearFieldPartitioner asMutable() {
+    return new YearFieldPartitioner(this, false);
   }
 }

@@ -40,4 +40,20 @@ public class HourFieldPartitioner extends CalendarFieldPartitioner {
     format.setMinimumIntegerDigits(2);
     format.setMaximumIntegerDigits(2);
   }
+
+  protected HourFieldPartitioner(HourFieldPartitioner partitioner,
+                                 boolean immutable) {
+    super(partitioner, immutable);
+    this.format = partitioner.format;
+  }
+
+  @Override
+  public HourFieldPartitioner asImmutable() {
+    return new HourFieldPartitioner(this, true);
+  }
+
+  @Override
+  public HourFieldPartitioner asMutable() {
+    return new HourFieldPartitioner(this, false);
+  }
 }

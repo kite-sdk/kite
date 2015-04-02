@@ -233,6 +233,26 @@ public class TestPartitionStrategyParser {
   }
 
   @Test
+  public void testImmutable() {
+    checkParser(new PartitionStrategy.Builder()
+            .year("time")
+            .month("time")
+            .day("time")
+            .hour("time")
+            .asImmutable()
+            .identity("username", "u")
+            .build(),
+        "[ " +
+            "{\"type\": \"year\", \"source\": \"time\", \"immutable\": true}," +
+            "{\"type\": \"month\", \"source\": \"time\", \"immutable\": true}," +
+            "{\"type\": \"day\", \"source\": \"time\", \"immutable\": true}," +
+            "{\"type\": \"hour\", \"source\": \"time\", \"immutable\": true}," +
+            "{\"type\": \"identity\"," +
+                "\"source\": \"username\", \"name\": \"u\"}" +
+            " ]");
+  }
+
+  @Test
   public void testNumericInsteadOfString() {
     // coerced to a string
     checkParser(new PartitionStrategy.Builder().year("34").build(),

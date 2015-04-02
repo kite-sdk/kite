@@ -55,6 +55,13 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
     this.domain = new RangeDomain();
   }
 
+  protected RangeFieldPartitioner(RangeFieldPartitioner partitioner,
+                                  boolean immutable) {
+    super(partitioner, immutable);
+    this.upperBounds = partitioner.upperBounds;
+    this.domain = partitioner.domain;
+  }
+
   @Override
   public String apply(String value) {
     // always return the same String object so identity comparison can be used
@@ -104,6 +111,16 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
   }
 
   @Override
+  public RangeFieldPartitioner asImmutable() {
+    return new RangeFieldPartitioner(this, true);
+  }
+
+  @Override
+  public RangeFieldPartitioner asMutable() {
+    return new RangeFieldPartitioner(this, false);
+  }
+
+  @Override
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(
       value="NP_METHOD_PARAMETER_TIGHTENS_ANNOTATION",
       justification="Default annotation is not correct for equals")
@@ -116,7 +133,8 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
     }
     RangeFieldPartitioner that = (RangeFieldPartitioner) o;
     return Objects.equal(this.getName(), that.getName()) &&
-        Objects.equal(this.upperBounds, that.upperBounds);
+        Objects.equal(this.upperBounds, that.upperBounds) &&
+        this.isImmutable() == that.isImmutable();
   }
 
   @Override

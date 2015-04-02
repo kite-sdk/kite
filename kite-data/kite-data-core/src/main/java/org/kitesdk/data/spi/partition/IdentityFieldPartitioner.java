@@ -47,6 +47,11 @@ public class IdentityFieldPartitioner<S extends Comparable> extends FieldPartiti
         type, type, buckets);
   }
 
+  protected IdentityFieldPartitioner(IdentityFieldPartitioner partitioner,
+                                     boolean immutable) {
+    super(partitioner, immutable);
+  }
+
   @Override
   public S apply(S value) {
     return value;
@@ -68,6 +73,15 @@ public class IdentityFieldPartitioner<S extends Comparable> extends FieldPartiti
   }
 
   @Override
+  public IdentityFieldPartitioner<S> asImmutable() {
+    return new IdentityFieldPartitioner<S>(this, true);
+  }
+
+  @Override
+  public IdentityFieldPartitioner<S> asMutable() {
+    return new IdentityFieldPartitioner<S>(this, false);
+  }
+  @Override
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(
       value="NP_METHOD_PARAMETER_TIGHTENS_ANNOTATION",
       justification="Default annotation is not correct for equals")
@@ -82,7 +96,8 @@ public class IdentityFieldPartitioner<S extends Comparable> extends FieldPartiti
     return Objects.equal(this.getSourceName(), that.getSourceName()) &&
         Objects.equal(this.getName(), that.getName()) &&
         Objects.equal(this.getType(), that.getType()) &&
-        Objects.equal(this.getCardinality(), that.getCardinality());
+        Objects.equal(this.getCardinality(), that.getCardinality()) &&
+        this.isImmutable() == that.isImmutable();
   }
 
   @Override

@@ -72,5 +72,10 @@ public abstract class Accessor {
 
   public abstract boolean hasPartitioner(PartitionStrategy partitionStrategy,
       String name);
+  
+  public abstract List<FieldPartitioner> getImmutablePartitioners(PartitionStrategy partitionStrategy);
 
+  public abstract int immutablePartitionerCount(PartitionStrategy partitionStrategy);
+
+  public abstract PartitionStrategy asMutable(PartitionStrategy partitionStrategy);
 }

@@ -37,6 +37,11 @@ public class ProvidedFieldPartitioner<T extends Comparable> extends FieldPartiti
     super(null, name, typeClass, typeClass, UNKNOWN_CARDINALITY);
   }
 
+  protected ProvidedFieldPartitioner(ProvidedFieldPartitioner partitioner,
+                                     boolean immutable) {
+    super (partitioner, immutable);
+  }
+
   @Override
   public T apply(T value) {
     return value;
@@ -55,6 +60,16 @@ public class ProvidedFieldPartitioner<T extends Comparable> extends FieldPartiti
   }
 
   @Override
+  public ProvidedFieldPartitioner asImmutable() {
+    return new ProvidedFieldPartitioner(this, true);
+  }
+
+  @Override
+  public ProvidedFieldPartitioner asMutable() {
+    return new ProvidedFieldPartitioner(this, false);
+  }
+
+  @Override
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(
       value="NP_METHOD_PARAMETER_TIGHTENS_ANNOTATION",
       justification="Default annotation is not correct for equals")
@@ -67,7 +82,8 @@ public class ProvidedFieldPartitioner<T extends Comparable> extends FieldPartiti
     }
     ProvidedFieldPartitioner that = (ProvidedFieldPartitioner) o;
     return (Objects.equal(this.getName(), that.getName()) &&
-            Objects.equal(this.getType(), that.getType()));
+            Objects.equal(this.getType(), that.getType())) &&
+            this.isImmutable() == that.isImmutable();
   }
 
   public String getTypeAsString() {

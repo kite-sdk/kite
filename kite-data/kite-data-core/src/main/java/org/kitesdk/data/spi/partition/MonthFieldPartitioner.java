@@ -47,4 +47,20 @@ public class MonthFieldPartitioner extends CalendarFieldPartitioner {
     cal.setTimeInMillis(timestamp);
     return cal.get(calendarField) + 1; // Calendar month is 0-based
   }
+
+  protected MonthFieldPartitioner(MonthFieldPartitioner partitioner,
+                                  boolean immutable) {
+    super(partitioner, immutable);
+    this.format = partitioner.format;
+  }
+
+  @Override
+  public MonthFieldPartitioner asImmutable() {
+    return new MonthFieldPartitioner(this, true);
+  }
+
+  @Override
+  public MonthFieldPartitioner asMutable() {
+    return new MonthFieldPartitioner(this, false);
+  }
 }
