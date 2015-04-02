@@ -96,6 +96,52 @@ public class CrunchDatasets {
   }
 
   /**
+   * Expose the given {@link View} as a Crunch {@link ReadableSource}.
+   *
+   * @param view the view to read from
+   * @param readerSchema the schema used to read from the view
+   * @param <E>     the type of entity produced by the source
+   * @return a {@link ReadableSource} for the view
+   *
+   * @since 1.1.0
+   */
+  public static <E> ReadableSource<E> asSource(View<E> view, Schema readerSchema) {
+    return new DatasetSourceTarget<E>(view, readerSchema);
+  }
+
+  /**
+   * Expose the {@link View} or {@link Dataset} represented by the URI
+   * as a Crunch {@link ReadableSource}.
+   *
+   * @param uri the URI of the view or dataset to read from
+   * @param type    the Java type of the entities in the dataset
+   * @param readerSchema the schema used to read from the view
+   * @param <E>     the type of entity produced by the source
+   * @return a {@link ReadableSource} for the view
+   *
+   * @since 1.1.0
+   */
+  public static <E> ReadableSource<E> asSource(URI uri, Class<E> type, Schema readerSchema) {
+    return new DatasetSourceTarget<E>(uri, type, readerSchema);
+  }
+
+  /**
+   * Expose the {@link View} or {@link Dataset} represented by the URI
+   * as a Crunch {@link ReadableSource}.
+   *
+   * @param uri the URI of the view or dataset to read from
+   * @param type    the Java type of the entities in the dataset
+   * @param readerSchema the schema used to read from the view
+   * @param <E>     the type of entity produced by the source
+   * @return a {@link ReadableSource} for the view
+   *
+   * @since 1.1.0
+   */
+  public static <E> ReadableSource<E> asSource(String uri, Class<E> type, Schema readerSchema) {
+    return asSource(URI.create(uri), type, readerSchema);
+  }
+
+  /**
    * Expose the given {@link View} as a Crunch {@link Target}.
    *
    * @param view the view to write to

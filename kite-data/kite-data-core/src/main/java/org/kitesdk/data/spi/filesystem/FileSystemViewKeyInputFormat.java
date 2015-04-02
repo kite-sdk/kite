@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import org.apache.avro.Schema;
 import org.apache.avro.hadoop.io.AvroSerialization;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapreduce.AvroJob;
@@ -76,24 +77,27 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
     Format format = dataset.getDescriptor().getFormat();
 
     boolean isSpecific = SpecificRecord.class.isAssignableFrom(dataset.getType());
+    String readerSchema = conf.get("kite.readerSchema");
+    if (isSpecific && readerSchema == null) {
+      readerSchema = SpecificData.get().getSchema(dataset.getType()).toString();
+    }
 
     if (Formats.AVRO.equals(format)) {
       setModel.invoke(conf,
           DataModelUtil.getDataModelForType(dataset.getType()).getClass());
 
       // Use the reader's schema type if provided.
-      if (isSpecific) {
+      if (readerSchema != null) {
 
-        conf.set(AVRO_SCHEMA_INPUT_KEY,
-            SpecificData.get().getSchema(dataset.getType()).toString());
+        conf.set(AVRO_SCHEMA_INPUT_KEY, readerSchema);
       }
     } else if (Formats.PARQUET.equals(format)) {
 
       // Use the reader's schema type if provided.
-      if (isSpecific) {
+      if (readerSchema != null) {
 
         AvroReadSupport.setAvroReadSchema(conf,
-            SpecificData.get().getSchema(dataset.getType()));
+          new Schema.Parser().parse(readerSchema));
       }
     }
   }

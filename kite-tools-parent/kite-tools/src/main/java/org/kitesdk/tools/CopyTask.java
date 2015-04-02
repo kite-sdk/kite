@@ -26,6 +26,7 @@ public class CopyTask<E> extends TransformTask<E, E> {
    */
   public CopyTask(View<E> from, View<E> to) {
     super(from, to, IdentityFn.<E>getInstance());
+    setReaderSchema(to.getDataset().getDescriptor().getSchema());
   }
 
 }

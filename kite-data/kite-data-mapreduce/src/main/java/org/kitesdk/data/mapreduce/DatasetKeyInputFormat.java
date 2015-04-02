@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
@@ -60,6 +61,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
   public static final String KITE_INPUT_URI = "kite.inputUri";
   public static final String KITE_PARTITION_DIR = "kite.inputPartitionDir";
   public static final String KITE_TYPE = "kite.inputEntityType";
+  public static final String KITE_READER_SCHEMA = "kite.readerSchema";
 
   private Configuration conf;
   private InputFormat<E, Void> delegate;
@@ -137,6 +139,12 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
       conf.setClass(KITE_TYPE, type, type);
       return this;
     }
+
+    public ConfigBuilder withSchema(Schema readerSchema) {
+      conf.set(KITE_READER_SCHEMA, readerSchema.toString());
+      return this;
+    }
+
   }
 
   /**
