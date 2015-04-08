@@ -23,6 +23,8 @@ import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.RefinableView;
 import javax.annotation.concurrent.Immutable;
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
+import org.kitesdk.data.View;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,9 +41,11 @@ public abstract class AbstractDataset<E> implements Dataset<E>, RefinableView<E>
 
   protected abstract RefinableView<E> asRefinableView();
   protected final Class<E> type;
+  protected final Schema schema;
 
   public AbstractDataset(Class<E> type, Schema schema) {
     this.type = DataModelUtil.resolveType(type, schema);
+    this.schema = DataModelUtil.getReaderSchema(this.type, schema);
   }
 
   @Override
@@ -76,6 +80,11 @@ public abstract class AbstractDataset<E> implements Dataset<E>, RefinableView<E>
   }
 
   @Override
+  public Schema getSchema() {
+    return schema;
+  }
+
+  @Override
   public RefinableView<E> with(String name, Object... values) {
     return asRefinableView().with(name, values);
   }
@@ -98,6 +107,11 @@ public abstract class AbstractDataset<E> implements Dataset<E>, RefinableView<E>
   @Override
   public RefinableView<E> toBefore(String name, Comparable value) {
     return asRefinableView().toBefore(name, value);
+  }
+
+  @Override
+  public <T extends GenericRecord> View<T> asSchema(Schema schema) {
+    return asRefinableView().asSchema(schema);
   }
 
   @Override

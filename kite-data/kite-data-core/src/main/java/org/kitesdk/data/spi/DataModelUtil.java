@@ -101,6 +101,25 @@ public class DataModelUtil {
   }
 
   /**
+   * Returns true if the type implements GenericRecord but not SpecificRecord
+   *
+   * @param <E> The entity type
+   * @param type The Java class of the entity type
+   * @return true if the type implements GenericRecord but not SpecificRecord
+   */
+  public static <E> boolean isGeneric(Class<E> type) {
+    // Need to check if SpecificRecord first because specific records also
+    // implement GenericRecord
+    if (SpecificRecord.class.isAssignableFrom(type)) {
+      return false;
+    } else if (IndexedRecord.class.isAssignableFrom(type)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
    * Get the DatumReader for the given type.
    *
    * @param <E> The entity type
@@ -160,11 +179,11 @@ public class DataModelUtil {
    *
    * @param <E> The entity type
    * @param type The Java class of the entity type
-   * @param writerSchema The writer {@link Schema} for the entity
+   * @param schema The {@link Schema} for the entity
    * @return The reader schema based on the given type and writer schema
    */
-  public static <E> Schema getReaderSchema(Class<E> type, Schema writerSchema) {
-    Schema readerSchema = writerSchema;
+  public static <E> Schema getReaderSchema(Class<E> type, Schema schema) {
+    Schema readerSchema = schema;
     GenericData dataModel = getDataModelForType(type);
 
     if (dataModel instanceof SpecificData) {
@@ -207,38 +226,8 @@ public class DataModelUtil {
     return new EntityAccessor<E>(type, schema);
   }
 
-  public static <E> E deepCopy(E entity, Schema dstSchema) {
-    GenericData dataModel = getDataModelForType(entity.getClass());
-    Schema srcSchema = dataModel.induce(entity);
-    if (dataModel instanceof ReflectData || dataModel instanceof SpecificData) {
-      return dataModel.deepCopy(dstSchema, entity);
-    } else {
-      if (srcSchema.equals(dstSchema)) {
-        return dataModel.deepCopy(dstSchema, entity);
-      }
-      GenericRecord srcRecord = (GenericRecord) entity;
-      return (E) deepCopy(srcRecord, srcSchema, dstSchema, dataModel);
-    }
+  public static <E> EntityAccessor<E> accessor(Schema schema) {
+    Class<E> type = resolveType(null, schema);
+    return new EntityAccessor<E>(type, schema);
   }
-
-  private static GenericRecord deepCopy(GenericRecord srcRecord,
-    Schema srcSchema, Schema dstSchema, GenericData dataModel) {
-    GenericRecord dstRecord = (GenericRecord) dataModel.newRecord(null, dstSchema);
-    for (Schema.Field srcField : srcSchema.getFields()) {
-      Schema.Field dstField = dstSchema.getField(srcField.name());
-      if (dstField != null) {
-        if (srcField.schema().getType() == Schema.Type.RECORD) {
-          dstRecord.put(dstField.pos(),
-            deepCopy((GenericRecord)srcRecord.get(srcField.pos()),
-              srcField.schema(), dstField.schema(), dataModel));
-        } else {
-          dstRecord.put(dstField.pos(), dataModel.deepCopy(dstField.schema(),
-            srcRecord.get(srcField.pos())));
-        }
-      }
-    }
-
-    return dstRecord;
-  }
-
 }

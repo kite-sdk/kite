@@ -42,7 +42,10 @@ import org.apache.hadoop.fs.Path;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.io.IOException;
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
+import org.kitesdk.data.RefinableView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,9 +80,21 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
     this.listener = view.listener;
   }
 
+  private FileSystemView(FileSystemView<?> view, Schema schema) {
+    super(view, schema);
+    this.fs = view.fs;
+    this.root = view.root;
+    this.listener = view.listener;
+  }
+
   @Override
   protected FileSystemView<E> filter(Constraints c) {
     return new FileSystemView<E>(this, c);
+  }
+
+  @Override
+  public <T extends GenericRecord> RefinableView<T> asSchema(Schema schema) {
+    return new FileSystemView<T>(this, schema);
   }
 
   @Override

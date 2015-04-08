@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.io.IOException;
@@ -58,6 +59,7 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
   // Constant from AvroJob copied here so we can set it on the Configuration
   // given to this class.
   private static final String AVRO_SCHEMA_INPUT_KEY = "avro.schema.input.key";
+  private static final String KITE_READER_SCHEMA = "kite.readerSchema";
 
   // this is required for 1.7.4 because setDataModelClass is not available
   private static final DynMethods.StaticMethod setModel =
@@ -77,8 +79,13 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
     Format format = dataset.getDescriptor().getFormat();
 
     boolean isSpecific = SpecificRecord.class.isAssignableFrom(dataset.getType());
-    String readerSchema = conf.get("kite.readerSchema");
-    if (isSpecific && readerSchema == null) {
+    String readerSchema = conf.get(KITE_READER_SCHEMA);
+
+    Preconditions.checkState(!isSpecific || readerSchema == null,
+      "Illegal configuration: {} must not be set if dataset uses a specific type {}",
+      KITE_READER_SCHEMA, dataset.getType());
+
+    if (isSpecific) {
       readerSchema = SpecificData.get().getSchema(dataset.getType()).toString();
     }
 

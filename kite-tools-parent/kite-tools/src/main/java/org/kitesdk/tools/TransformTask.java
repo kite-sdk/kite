@@ -21,7 +21,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.io.Closeables;
 import java.io.IOException;
 import java.net.URI;
-import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.crunch.DoFn;
 import org.apache.crunch.MapFn;
@@ -65,7 +64,6 @@ public class TransformTask<S, T> extends Configured {
   private final DoFn<S, T> transform;
   private boolean compact = true;
   private int numWriters = -1;
-  private Schema readerSchema = null;
 
   private long count = 0;
 
@@ -73,7 +71,6 @@ public class TransformTask<S, T> extends Configured {
     this.from = from;
     this.to = to;
     this.transform = transform;
-    this.readerSchema = from.getDataset().getDescriptor().getSchema();
   }
 
   public long getCount() {
@@ -97,18 +94,6 @@ public class TransformTask<S, T> extends Configured {
     return this;
   }
 
-  /**
-   * Set the reader schema for reading the source dataset.
-   *
-   * @param readerSchema
-   * @return this
-   * @since 1.1.0
-   */
-  public TransformTask setReaderSchema(Schema readerSchema) {
-    this.readerSchema = readerSchema;
-    return this;
-  }
-
   public PipelineResult run() throws IOException {
     boolean runInParallel = true;
     if (isLocal(from.getDataset()) || isLocal(to.getDataset())) {
@@ -124,7 +109,7 @@ public class TransformTask<S, T> extends Configured {
 
       Pipeline pipeline = new MRPipeline(getClass(), getConf());
 
-      PCollection<T> collection = pipeline.read(CrunchDatasets.asSource(from, readerSchema))
+      PCollection<T> collection = pipeline.read(CrunchDatasets.asSource(from))
           .parallelDo(transform, toPType).parallelDo(validate, toPType);
 
       if (compact) {
@@ -146,7 +131,7 @@ public class TransformTask<S, T> extends Configured {
     } else {
       Pipeline pipeline = MemPipeline.getInstance();
 
-      PCollection<T> collection = pipeline.read(CrunchDatasets.asSource(from, readerSchema))
+      PCollection<T> collection = pipeline.read(CrunchDatasets.asSource(from))
           .parallelDo(transform, toPType).parallelDo(validate, toPType);
 
       boolean threw = true;

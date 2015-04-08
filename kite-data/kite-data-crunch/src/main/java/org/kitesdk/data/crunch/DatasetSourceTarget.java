@@ -20,8 +20,6 @@ import java.net.URI;
 import java.util.Map;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
-import edu.umd.cs.findbugs.annotations.Nullable;
-import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.crunch.ReadableData;
 import org.apache.crunch.Source;
@@ -64,44 +62,23 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
     this(view, view.getType());
   }
 
-  public DatasetSourceTarget(View<E> view, Schema readerSchema) {
-    this(view, view.getType(), readerSchema);
-  }
-
   @SuppressWarnings("unchecked")
   public DatasetSourceTarget(View<E> view, Class<E> type) {
-    this(view, toAvroType(view, type, null));
-  }
-
-  @SuppressWarnings("unchecked")
-  public DatasetSourceTarget(View<E> view, Class<E> type, Schema readerSchema) {
-    this(view, toAvroType(view, type, readerSchema), readerSchema);
+    this(view, toAvroType(view, type));
   }
 
   public DatasetSourceTarget(URI uri, Class<E> type) {
     this(Datasets.load(uri, type));
   }
 
-  public DatasetSourceTarget(URI uri, Class<E> type, Schema readerSchema) {
-    this(Datasets.load(uri, type), readerSchema);
-  }
-
   public DatasetSourceTarget(View<E> view, AvroType<E> avroType) {
-      this(view, avroType, null);
-  }
-
-  public DatasetSourceTarget(View<E> view, AvroType<E> avroType,
-    @Nullable Schema readerSchema) {
     super(view);
 
     this.view = view;
     this.avroType = avroType;
 
     Configuration temp = new Configuration(false /* use an empty conf */ );
-    DatasetKeyInputFormat.ConfigBuilder confBuilder = DatasetKeyInputFormat.configure(temp).readFrom(view);
-    if (readerSchema != null) {
-      confBuilder.withSchema(readerSchema);
-    }
+    DatasetKeyInputFormat.configure(temp).readFrom(view);
     this.formatBundle = inputBundle(temp);
 
     Dataset<E> dataset = view.getDataset();
@@ -118,13 +95,10 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
   }
 
   @SuppressWarnings("unchecked")
-  private static <E> AvroType<E> toAvroType(View<E> view, Class<E> type,
-    Schema readerSchema) {
-    if (readerSchema == null) {
-      readerSchema = view.getDataset().getDescriptor().getSchema();
-    }
+  private static <E> AvroType<E> toAvroType(View<E> view, Class<E> type) {
     if (type.isAssignableFrom(GenericData.Record.class)) {
-      return (AvroType<E>) Avros.generics(readerSchema);
+      return (AvroType<E>) Avros.generics(
+        view.getDataset().getDescriptor().getSchema());
     } else {
       return Avros.records(type);
     }
