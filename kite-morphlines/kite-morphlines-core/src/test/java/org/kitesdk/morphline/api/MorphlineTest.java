@@ -1870,10 +1870,12 @@ public class MorphlineTest extends AbstractMorphlineTest {
     record.put(Fields.TIMESTAMP, "2011-09-06T14:14:34.789Z");
     record.put(Fields.TIMESTAMP, "2012-09-06T14:14:34"); 
     record.put(Fields.TIMESTAMP, "2013-09-06");
+    record.put(Fields.TIMESTAMP, "Wednesday, 31-Dec-14 08:00:00 +0600");    
     Record expected = new Record();
     expected.put(Fields.TIMESTAMP, "2011-09-06T14:14:34.789Z");
     expected.put(Fields.TIMESTAMP, "2012-09-06T14:14:34.000Z");
     expected.put(Fields.TIMESTAMP, "2013-09-06T00:00:00.000Z");
+    expected.put(Fields.TIMESTAMP, "2014-12-31T02:00:00.000Z");
     processAndVerifySuccess(record, expected);
   }
   
