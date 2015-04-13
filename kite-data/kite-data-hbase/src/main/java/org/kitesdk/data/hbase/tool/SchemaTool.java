@@ -15,6 +15,11 @@
  */
 package org.kitesdk.data.hbase.tool;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.hbase.avro.AvroEntitySchema;
@@ -63,6 +68,8 @@ import org.slf4j.LoggerFactory;
  * Utility class for managing Managed Schemas in HBase Common.
  */
 public class SchemaTool {
+  // Wait for 600 seconds (10 minutes) for all the tables to be available
+  private static final int MAX_SECOND_WAIT_FOR_TABLE_CREATION = 600;
 
   private static final Logger LOG = LoggerFactory.getLogger(SchemaTool.class);
 
@@ -98,7 +105,7 @@ public class SchemaTool {
    *          exist, and will create families if they don't exist.
    */
   public void createOrMigrateSchemaDirectory(String schemaDirectory,
-      boolean createTableAndFamilies) {
+      boolean createTableAndFamilies) throws InterruptedException {
     List<String> schemaStrings;
     if (schemaDirectory.startsWith(CLASSPATH_PREFIX)) {
       URL dirURL = getClass().getClassLoader().getResource(
@@ -138,18 +145,35 @@ public class SchemaTool {
 
     }
 
+    // Validate if for every key schema there is atleast one entity schemas
     for (Entry<String, List<String>> entry : tableEntitySchemaMap.entrySet()) {
       String table = entry.getKey();
       List<String> entitySchemas = entry.getValue();
       if (entitySchemas.size() == 0) {
-        String msg = "Table requested, but no entity schemas for Table: "
-            + table;
+        String msg =
+            "Table requested, but no entity schemas for Table: " + table;
         LOG.error(msg);
         throw new ValidationException(msg);
       }
-      for (String entitySchema : entry.getValue()) {
-        createOrMigrateSchema(table, entitySchema, createTableAndFamilies);
+    }
+
+    // Migrate the schemas in a batch, collect all the table descriptors
+    // that require a schema migration
+    Collection<HTableDescriptor> tableDescriptors = Lists.newArrayList();
+    for (Entry<String, List<String>> entry : tableEntitySchemaMap.entrySet()) {
+      String table = entry.getKey();
+      for (String entitySchemaString : entry.getValue()) {
+        boolean migrationRequired = prepareManagedSchema(table, entitySchemaString);
+        // Optimization: If no migration is req, then no change in the table
+        if (migrationRequired) {
+          tableDescriptors.add(
+              prepareTableDescriptor(table, entitySchemaString));
+        }
       }
+    }
+
+    if (createTableAndFamilies) {
+      createTables(tableDescriptors);
     }
   }
 
@@ -159,8 +183,6 @@ public class SchemaTool {
    * 
    * @param tableName
    *          The name of the table we'll be creating or migrating a schema for.
-   * @param keySchemaFilePath
-   *          The absolute file path to the key schema file.
    * @param entitySchemaFilePath
    *          The absolute file path to the entity schema file.
    * @param createTableAndFamilies
@@ -168,7 +190,8 @@ public class SchemaTool {
    *          exist, and will create families if they don't exist.
    */
   public void createOrMigrateSchemaFile(String tableName,
-      String entitySchemaFilePath, boolean createTableAndFamilies) {
+      String entitySchemaFilePath, boolean createTableAndFamilies)
+      throws InterruptedException {
     createOrMigrateSchemaFile(tableName, new File(entitySchemaFilePath),
         createTableAndFamilies);
   }
@@ -179,8 +202,6 @@ public class SchemaTool {
    * 
    * @param tableName
    *          The name of the table we'll be creating or migrating a schema for.
-   * @param keySchemaFile
-   *          The key schema file.
    * @param entitySchemaFile
    *          The entity schema file.
    * @param createTableAndFamilies
@@ -188,7 +209,8 @@ public class SchemaTool {
    *          exist, and will create families if they don't exist.
    */
   public void createOrMigrateSchemaFile(String tableName,
-      File entitySchemaFile, boolean createTableAndFamilies) {
+      File entitySchemaFile, boolean createTableAndFamilies)
+      throws InterruptedException {
     createOrMigrateSchema(tableName, getSchemaStringFromFile(entitySchemaFile),
         createTableAndFamilies);
   }
@@ -199,38 +221,59 @@ public class SchemaTool {
    * 
    * @param tableName
    *          The name of the table we'll be creating or migrating a schema for.
-   * @param keySchemaString
-   *          The key schema
    * @param entitySchemaString
    *          The entity schema
    * @param createTableAndFamilies
    *          If true, will create the table for this schema if it doesn't
    *          exist, and will create families if they don't exist.
    */
-  public void createOrMigrateSchema(String tableName,
-      String entitySchemaString, boolean createTableAndFamilies) {
+  public void createOrMigrateSchema(String tableName, String entitySchemaString,
+      boolean createTableAndFamilies) throws InterruptedException {
+    boolean migrationRequired = prepareManagedSchema(tableName,
+        entitySchemaString);
+    if (migrationRequired && createTableAndFamilies) {
+      try {
+        HTableDescriptor descriptor = prepareTableDescriptor(tableName,
+            entitySchemaString);
+        if (hbaseAdmin.isTableAvailable(tableName)) {
+          modifyTable(tableName, descriptor);
+        } else {
+          createTable(descriptor);
+        }
+      } catch (IOException e) {
+        throw new DatasetException(e);
+      }
+    }
+  }
+
+  /**
+   * Prepare managed schema for this entitySchema
+   */
+  private boolean prepareManagedSchema(String tableName,
+      String entitySchemaString) {
     String entityName = getEntityNameFromSchemaString(entitySchemaString);
     AvroEntitySchema entitySchema = parser
         .parseEntitySchema(entitySchemaString);
     AvroKeySchema keySchema = parser.parseKeySchema(entitySchemaString);
+    // Verify there are no ambiguities with the managed schemas
     if (schemaManager.hasManagedSchema(tableName, entityName)) {
-      KeySchema currentKeySchema = schemaManager.getKeySchema(tableName,
-          entityName);
+      KeySchema currentKeySchema = schemaManager
+          .getKeySchema(tableName, entityName);
       if (!keySchema.equals(currentKeySchema)) {
-        String msg = "Migrating schema with different keys. Current: "
-            + currentKeySchema.getRawSchema() + " New: "
-            + keySchema.getRawSchema();
+        String msg =
+            "Migrating schema with different keys. Current: " + currentKeySchema
+                .getRawSchema() + " New: " + keySchema.getRawSchema();
         LOG.error(msg);
         throw new ValidationException(msg);
       }
-      if (!schemaManager.hasSchemaVersion(tableName, entityName, entitySchema)) {
+      if (!schemaManager
+          .hasSchemaVersion(tableName, entityName, entitySchema)) {
         LOG.info("Migrating Schema: (" + tableName + ", " + entityName + ")");
         schemaManager.migrateSchema(tableName, entityName, entitySchemaString);
       } else {
-        // don't set createTableAndFamilies to false, becasue we may still need
-        // to update the table to support what exists in the meta store.
         LOG.info("Schema hasn't changed, not migrating: (" + tableName + ", "
             + entityName + ")");
+        return false;
       }
     } else {
       LOG.info("Creating Schema: (" + tableName + ", " + entityName + ")");
@@ -241,47 +284,108 @@ public class SchemaTool {
           "org.kitesdk.data.hbase.avro.AvroKeySerDe",
           "org.kitesdk.data.hbase.avro.AvroEntitySerDe");
     }
+    return true;
+  }
 
-    if (createTableAndFamilies) {
-      try {
-        if (!hbaseAdmin.tableExists(tableName)) {
-          HTableDescriptor desc = new HTableDescriptor(tableName);
-          Set<String> familiesToAdd = entitySchema.getColumnMappingDescriptor()
-              .getRequiredColumnFamilies();
-          familiesToAdd.add(new String(Constants.SYS_COL_FAMILY));
-          familiesToAdd.add(new String(Constants.OBSERVABLE_COL_FAMILY));
-          for (String columnFamily : familiesToAdd) {
-            desc.addFamily(new HColumnDescriptor(columnFamily));
-          }
-          hbaseAdmin.createTable(desc);
-        } else {
-          Set<String> familiesToAdd = entitySchema.getColumnMappingDescriptor()
-              .getRequiredColumnFamilies();
-          familiesToAdd.add(new String(Constants.SYS_COL_FAMILY));
-          familiesToAdd.add(new String(Constants.OBSERVABLE_COL_FAMILY));
-          HTableDescriptor desc = hbaseAdmin.getTableDescriptor(tableName
-              .getBytes());
-          for (HColumnDescriptor columnDesc : desc.getColumnFamilies()) {
-            String familyName = columnDesc.getNameAsString();
-            if (familiesToAdd.contains(familyName)) {
-              familiesToAdd.remove(familyName);
-            }
-          }
-          if (familiesToAdd.size() > 0) {
-            hbaseAdmin.disableTable(tableName);
-            try {
-              for (String family : familiesToAdd) {
-                hbaseAdmin.addColumn(tableName, new HColumnDescriptor(family));
-              }
-            } finally {
-              hbaseAdmin.enableTable(tableName);
-            }
-          }
-        }
-      } catch (IOException e) {
-        throw new DatasetException(e);
+  /**
+   * Prepare the Table descriptor for the given entity Schema
+   */
+  private HTableDescriptor prepareTableDescriptor(String tableName,
+      String entitySchemaString) {
+    HTableDescriptor descriptor = new HTableDescriptor(
+        Bytes.toBytes(tableName));
+    AvroEntitySchema entitySchema = parser
+        .parseEntitySchema(entitySchemaString);
+    Set<String> familiesToAdd = entitySchema.getColumnMappingDescriptor()
+        .getRequiredColumnFamilies();
+    familiesToAdd.add(new String(Constants.SYS_COL_FAMILY));
+    familiesToAdd.add(new String(Constants.OBSERVABLE_COL_FAMILY));
+    for (String familyToAdd : familiesToAdd) {
+      if (!descriptor.hasFamily(familyToAdd.getBytes())) {
+        descriptor.addFamily(new HColumnDescriptor(familyToAdd));
       }
     }
+    return descriptor;
+  }
+
+  /**
+   * Create the tables asynchronously with the HBase
+   */
+  private void createTables(Collection<HTableDescriptor> tableDescriptors)
+      throws InterruptedException {
+    try {
+      Map<String, HTableDescriptor> localCopy = Maps.newHashMap();
+      for (HTableDescriptor tableDescriptor : tableDescriptors) {
+        String tableName = Bytes.toString(tableDescriptor.getName());
+        if (hbaseAdmin.isTableAvailable(tableName)) {
+          // Just add the required columns to be added
+          modifyTable(tableName, tableDescriptor);
+          localCopy.remove(tableName);
+        } else {
+          LOG.info("Creating table " + tableName);
+          hbaseAdmin.createTableAsync(tableDescriptor, new byte[][] {});
+          localCopy.put(tableName, tableDescriptor);
+        }
+      }
+
+      // Wait for the tables to be online
+      for (int waitCount = 0;
+           waitCount < MAX_SECOND_WAIT_FOR_TABLE_CREATION; waitCount++) {
+        Set<String> tables = Sets.newHashSet(localCopy.keySet());
+        for (String table : tables) {
+          if (hbaseAdmin.isTableAvailable(table)) {
+            localCopy.remove(table);
+          }
+        }
+        // If all tables are available, then break
+        if (localCopy.isEmpty()) {
+          break;
+        }
+        // Sleep for a second before checking again
+        Thread.sleep(1000);
+      }
+    } catch (IOException e) {
+      throw new DatasetException(e);
+    }
+  }
+
+  /**
+   * add the column families which are not already present to the given table
+   */
+  private void modifyTable(String tableName, HTableDescriptor newDescriptor) {
+    LOG.info("Modifying table " + tableName);
+    HColumnDescriptor[] newFamilies = newDescriptor.getColumnFamilies();
+    try {
+      List<HColumnDescriptor> columnsToAdd = Lists.newArrayList();
+      HTableDescriptor currentFamilies = hbaseAdmin
+          .getTableDescriptor(Bytes.toBytes(tableName));
+      for (HColumnDescriptor newFamily : newFamilies) {
+        if (!currentFamilies.hasFamily(newFamily.getName())) {
+          columnsToAdd.add(new HColumnDescriptor(newFamily.getName()));
+        }
+      }
+      // Add all the necessary column families
+      if (!columnsToAdd.isEmpty()) {
+        hbaseAdmin.disableTable(tableName);
+        try {
+          for (HColumnDescriptor columnToAdd : columnsToAdd) {
+            hbaseAdmin.addColumn(tableName, columnToAdd);
+          }
+        } finally {
+          hbaseAdmin.enableTable(tableName);
+        }
+      }
+    } catch (IOException e) {
+      throw new DatasetException(e);
+    }
+  }
+
+  /**
+   * Create a single column asynchronously
+   */
+  private void createTable(HTableDescriptor tableDescriptor)
+      throws InterruptedException {
+    createTables(ImmutableList.of(tableDescriptor));
   }
 
   /**
