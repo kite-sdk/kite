@@ -516,16 +516,17 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       properties.setProperty(property, descriptor.getProperty(property));
     }
 
+    final Path tempDescriptorPath = new Path(metadataLocation, DESCRIPTOR_FILE_NAME+"_tmp");
     final Path descriptorPath = new Path(metadataLocation, DESCRIPTOR_FILE_NAME);
     threw = true;
     try {
-      outputStream = fs.create(descriptorPath, true /* overwrite */ );
+      outputStream = fs.create(tempDescriptorPath, true /* overwrite */ );
       properties.store(outputStream, "Dataset descriptor for " + name);
       outputStream.flush();
       threw = false;
     } catch (IOException e) {
       throw new DatasetIOException(
-          "Unable to save descriptor file: " + descriptorPath +
+          "Unable to save descriptor file: " + tempDescriptorPath +
           " for dataset: " + name, e);
     } finally {
       try {
@@ -534,6 +535,16 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
         throw new DatasetIOException("Cannot close", e);
       }
     }
+
+    //rename the file into its final location so that changes appear atomic
+      try {
+          fs.rename(tempDescriptorPath, descriptorPath);
+      } catch (IOException e) {
+          throw new DatasetIOException(
+                  "Unable to finalize descriptor file update to: " + descriptorPath +
+                          " for dataset: " + name, e);
+      }
+
   }
 
   /**
