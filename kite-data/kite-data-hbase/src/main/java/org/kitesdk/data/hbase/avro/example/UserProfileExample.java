@@ -68,7 +68,7 @@ public class UserProfileExample {
    * The constructor will start by registering the schemas with the meta store
    * table in HBase, and create the required tables to run.
    */
-  public UserProfileExample() {
+  public UserProfileExample() throws InterruptedException {
     Configuration conf = HBaseConfiguration.create();
     HTablePool pool = new HTablePool(conf, 10);
     SchemaManager schemaManager = new DefaultSchemaManager(pool);
@@ -272,7 +272,8 @@ public class UserProfileExample {
    * @param schemaManager
    *          The schema manager SchemaTool needs to create the schemas.
    */
-  private void registerSchemas(Configuration conf, SchemaManager schemaManager) {
+  private void registerSchemas(Configuration conf, SchemaManager schemaManager)
+      throws InterruptedException {
     HBaseAdmin admin;
     try {
       // Construct an HBaseAdmin object (required by schema tool), and delete it
@@ -297,7 +298,7 @@ public class UserProfileExample {
    * 
    * @param args
    */
-  public static void main(String[] args) {
+  public static void main(String[] args) throws InterruptedException {
     UserProfileExample example = new UserProfileExample();
 
     // Let's create some user profiles
