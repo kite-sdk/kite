@@ -80,6 +80,119 @@ public class FileSystemUtil {
     }
   }
 
+  static List<Pair<Path, Path>> stageMove(FileSystem fs, Path src,
+                                          Path dest, String ext) {
+    List<Pair<Path, Path>> staged;
+
+    try {
+      // make sure the destination exists
+      if (!fs.exists(dest)) {
+        fs.mkdirs(dest);
+      }
+
+      FileStatus[] stats = fs.listStatus(src);
+      staged = Lists.newArrayList();
+
+      for (FileStatus stat : stats) {
+        if (stat.isDir()) {
+          continue;
+        }
+
+        Path srcFile = stat.getPath();
+        Path dotFile = new Path(dest, "." + srcFile.getName() + "." + ext);
+        Path destFile = new Path(dest, srcFile.getName());
+
+        if (fs.rename(srcFile, dotFile)) {
+          staged.add(Pair.of(dotFile, destFile));
+        } else {
+          throw new IOException(
+              "Failed to rename " + srcFile + " to " + dotFile);
+        }
+      }
+
+    } catch (IOException e) {
+      throw new DatasetIOException(
+          "Could not move contents of " + src + " to " + dest, e);
+    }
+
+    return staged;
+  }
+
+  static void finishMove(FileSystem fs, List<Pair<Path, Path>> staged) {
+    try {
+      for (Pair<Path, Path> pair : staged) {
+        if (!fs.rename(pair.first(), pair.second())) {
+          throw new IOException(
+              "Failed to rename " + pair.first() + " to " + pair.second());
+        }
+      }
+    } catch (IOException e) {
+      throw new DatasetIOException("Could not finish replacement", e);
+    }
+  }
+
+  /**
+   * Replace {@code destination} with {@code replacement}.
+   * <p>
+   * If this method fails in any step, recover using these steps:
+   * <ol>
+   * <li>If {@code .name.replacement} exists, but {@code name} does not, move
+   * it to {@code name}</li>
+   * <li>If {@code .name.replacement} and {@code name} exist, run this method
+   * again with the same list of additional removals</li>
+   * </ol>
+   *
+   * @param fs the FileSystem
+   * @param destination a Path
+   * @param replacement a Path that replaces the destination
+   * @param removals a List of paths that should also be removed
+   */
+  static void replace(FileSystem fs, Path root, Path destination,
+                      Path replacement, List<Path> removals) {
+    try {
+      // Ensure the destination exists because it acts as a recovery signal. If
+      // the directory exists, then recovery must go through the entire
+      // replacement process again. If it does not, then the dir can be moved.
+      if (!fs.exists(destination)) {
+        fs.mkdirs(destination);
+      }
+
+      Path staged = new Path(destination.getParent(),
+          "." + destination.getName() + ".replacement");
+
+      // First move into the destination folder to ensure moves work. It is
+      // okay to run this method on the staged path
+      if (!staged.equals(replacement) && !fs.rename(replacement, staged)) {
+        throw new IOException(
+            "Failed to rename " + replacement + " to " + staged);
+      }
+
+      // Remove any additional directories included in the replacement. This
+      // handles the case where there are multiple directories for the same
+      // logical partition. For example, dataset/a=2/ and dataset/2/
+      for (Path toRemove : removals) {
+        if (toRemove.equals(destination)) {
+          // destination is deleted last
+          continue;
+        }
+        FileSystemUtil.cleanlyDelete(fs, root, toRemove);
+      }
+
+      // remove the directory that will be replaced with a move
+      fs.delete(destination, true /* recursively */ );
+
+      // move the replacement to the final location
+      if (!fs.rename(staged, destination)) {
+        throw new IOException(
+            "Failed to rename " + staged + " to " + destination);
+      }
+
+    } catch (IOException e) {
+      throw new DatasetIOException(
+          "Could not replace " + destination + " with " + replacement, e);
+    }
+  }
+
   static boolean cleanlyDelete(FileSystem fs, Path root, Path path) {
     Preconditions.checkNotNull(fs, "File system cannot be null");
     Preconditions.checkNotNull(root, "Root path cannot be null");

@@ -15,11 +15,7 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Sets;
-
 import java.util.Iterator;
-import java.util.Set;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetIOException;
@@ -27,6 +23,7 @@ import org.kitesdk.data.Signalable;
 import org.kitesdk.data.PartitionView;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.Compatibility;
+import org.kitesdk.data.spi.Pair;
 import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.RefinableView;
@@ -352,43 +349,76 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     // check that the dataset's descriptor can read the update
     Compatibility.checkCompatible(updateDescriptor, descriptor);
 
-    Set<String> addedPartitions = Sets.newHashSet();
-    for (Path path : update.pathIterator()) {
-      URI relativePath = update.getDirectory().toUri().relativize(path.toUri());
-      Path newPath;
-      if (relativePath.toString().isEmpty()) {
-        newPath = directory;
+    for (PartitionView<E> src : update.getCoveringPartitions()) {
+      if (src instanceof FileSystemPartitionView) {
+        URI relative = ((FileSystemPartitionView<E>) src).getRelativeLocation();
+        PartitionView<E> dest = relative != null ?
+            getPartitionView(relative) : unbounded;
+
+        // We call this listener before we attempt to create any partition
+        // directories. This lets the listener decide how to create the
+        // directory, if desired. Hive managed datasets let the Hive
+        // metastore create them while external datasets create it
+        // locally
+        if (descriptor.isPartitioned() && partitionListener != null &&
+            relative != null) {
+          partitionListener.partitionAdded(namespace, name, relative.toString());
+        }
+
+        List<Pair<Path, Path>> staged = FileSystemUtil.stageMove(fileSystem,
+            new Path(src.getLocation()), new Path(dest.getLocation()),
+            "tmp" /* data should be added to recover from a failure */ );
+        FileSystemUtil.finishMove(fileSystem, staged);
+
       } else {
-        newPath = new Path(directory, new Path(relativePath));
+        throw new IllegalArgumentException(
+            "Incompatible PartitionView: " + src.getClass().getName());
       }
+    }
+  }
 
-      Path newPartitionDirectory = newPath.getParent();
+  public void replace(FileSystemView<E> update) {
+    DatasetDescriptor updateDescriptor = update.getDataset().getDescriptor();
 
-      // We call this listener before we attempt to create any partition
-      // directories. This lets the listener decide how to create the
-      // directory, if desired. Hive managed datasets let the Hive
-      // metastore create them while external datasets create it
-      // locally
-      if (descriptor.isPartitioned() && partitionListener != null) {
-        String partition = newPartitionDirectory.toString();
-        if (!addedPartitions.contains(partition)) {
-          partitionListener.partitionAdded(namespace, name, partition);
-          addedPartitions.add(partition);
-        }
-      }
+    // check that the dataset's descriptor can read the update
+    Compatibility.checkCompatible(updateDescriptor, descriptor);
 
-      try {
-        if (!fileSystem.exists(newPartitionDirectory)) {
-          fileSystem.mkdirs(newPartitionDirectory);
+    // replace leaf partitions one at a time
+    for (PartitionView<E> src : update.getCoveringPartitions()) {
+      if (src instanceof FileSystemPartitionView) {
+        FileSystemPartitionView<E> dest = getPartitionView(
+            ((FileSystemPartitionView<E>) src).getRelativeLocation());
+
+        // The destination partition view may not exist, if the source data was
+        // stored in directories with non-standard names. To account for this,
+        // find all of the directories that should be removed: those that match
+        // the partition constraints.
+        List<Path> removals = Lists.newArrayList();
+        Iterable<PartitionView<E>> existingPartitions = dest
+            .toConstraintsView()
+            .getCoveringPartitions();
+        for (PartitionView<E> toRemove : existingPartitions) {
+          Path path = new Path(toRemove.getUri());
+          removals.add(path);
+          if (partitionListener != null) {
+            partitionListener.partitionDeleted(
+                namespace, name, path.toString());
+          }
         }
-        LOG.debug("Renaming {} to {}", path, newPath);
-        boolean renameOk = fileSystem.rename(path, newPath);
-        if (!renameOk) {
-          throw new IOException("Dataset merge failed during rename of " + path +
-              " to " + newPath);
+
+        // replace the directory all at once
+        FileSystemUtil.replace(fileSystem, directory,
+            new Path(dest.getLocation()), new Path(src.getLocation()),
+            removals);
+
+        if (partitionListener != null) {
+          partitionListener.partitionAdded(
+              namespace, name, dest.getLocation().toString());
         }
-      } catch (IOException e) {
-        throw new DatasetIOException("Dataset merge failed", e);
+
+      } else {
+        throw new IllegalArgumentException(
+            "Incompatible PartitionView: " + src.getClass().getName());
       }
     }
   }
