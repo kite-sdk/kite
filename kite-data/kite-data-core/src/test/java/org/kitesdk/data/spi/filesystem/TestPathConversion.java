@@ -46,35 +46,35 @@ public class TestPathConversion {
   @Test
   public void testDirnameMinWidth() {
     Assert.assertEquals("min=01",
-        convert.dirnameForValue(
+        PathConversion.dirnameForValue(
             new MinuteFieldPartitioner("timestamp", "min"), 1));
     Assert.assertEquals("hour=01",
-        convert.dirnameForValue(
+        PathConversion.dirnameForValue(
             new HourFieldPartitioner("timestamp", "hour"), 1));
     Assert.assertEquals("day=01",
-        convert.dirnameForValue(
+        PathConversion.dirnameForValue(
             new DayOfMonthFieldPartitioner("timestamp", "day"), 1));
     Assert.assertEquals("month=01",
-        convert.dirnameForValue(
+        PathConversion.dirnameForValue(
             new MonthFieldPartitioner("timestamp", "month"), 1));
     Assert.assertEquals("year=2013",
-        convert.dirnameForValue(
+        PathConversion.dirnameForValue(
             new YearFieldPartitioner("timestamp", "year"), 2013));
   }
 
   @Test
   public void testUsesFieldName() {
     Assert.assertEquals("day_of_month_field",
-        Iterables.getFirst(EQ.split(convert.dirnameForValue(
+        Iterables.getFirst(EQ.split(PathConversion.dirnameForValue(
             new DayOfMonthFieldPartitioner("day", "day_of_month_field"), 10)),
             null));
   }
 
   @Test
   public void testIgnoresPartitionName() {
-    Assert.assertEquals("10", convert.dirnameToValueString("10"));
-    Assert.assertEquals("10", convert.dirnameToValueString("=10"));
-    Assert.assertEquals("10", convert.dirnameToValueString("anything=10"));
+    Assert.assertEquals("10", PathConversion.dirnameToValueString("10"));
+    Assert.assertEquals("10", PathConversion.dirnameToValueString("=10"));
+    Assert.assertEquals("10", PathConversion.dirnameToValueString("anything=10"));
     Assert.assertEquals(10, (int) convert.valueForDirname(
         new MonthFieldPartitioner("timestamp", "month"), "10"));
     Assert.assertEquals(10, (int) convert.valueForDirname(

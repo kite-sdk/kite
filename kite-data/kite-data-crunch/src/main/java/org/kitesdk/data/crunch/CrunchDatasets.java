@@ -290,11 +290,10 @@ public class CrunchDatasets {
       this.key = new StorageKey(strategy);
     }
 
-    @SuppressWarnings({"unchecked", "deprecation"})
     public <E> AvroStorageKey reuseFor(E entity,
                                        @Nullable Map<String, Object> provided,
                                        EntityAccessor<E> accessor) {
-      accessor.keyFor(entity, provided, key);
+      key.reuseFor(entity, provided, accessor);
       return this;
     }
 

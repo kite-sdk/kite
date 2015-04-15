@@ -16,9 +16,7 @@
 
 package org.kitesdk.data.spi.filesystem;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import javax.annotation.Nullable;
+import com.google.common.base.Predicate;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.joda.time.DateTime;
@@ -26,7 +24,6 @@ import org.joda.time.DateTimeZone;
 import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.MiniDFSTest;
 import org.kitesdk.data.PartitionStrategy;
-import org.kitesdk.data.spi.Pair;
 import org.kitesdk.data.spi.StorageKey;
 import org.kitesdk.data.spi.MarkerComparator;
 import com.google.common.collect.Lists;
@@ -157,8 +154,8 @@ public class TestFileSystemPartitionIteratorTolerance extends MiniDFSTest {
 
   @Test
   public void testUnbounded() throws Exception {
-    Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
-        fileSystem, testDirectory, strategy, schema, emptyConstraints));
+    Iterable<StorageKey> partitions = new FileSystemPartitionIterator(
+        fileSystem, testDirectory, strategy, schema, emptyConstraints.toKeyPredicate());
 
     assertIterableEquals(keys, partitions);
   }
@@ -170,67 +167,64 @@ public class TestFileSystemPartitionIteratorTolerance extends MiniDFSTest {
 
   @Test
   public void testFrom() throws Exception {
-    Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
+    Iterable<StorageKey> partitions = new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, schema,
-        emptyConstraints.from("timestamp", oct_24_2013)));
+        emptyConstraints.from("timestamp", oct_24_2013).toKeyPredicate());
     assertIterableEquals(keys.subList(16, 24), partitions);
   }
 
   @Test
   public void testAfter() throws Exception {
-    Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
+    Iterable<StorageKey> partitions = new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, schema,
-        emptyConstraints.fromAfter("timestamp", oct_24_2013_end)));
+        emptyConstraints.fromAfter("timestamp", oct_24_2013_end).toKeyPredicate());
     assertIterableEquals(keys.subList(17, 24), partitions);
   }
 
   @Test
   public void testTo() throws Exception {
-    Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
+    Iterable<StorageKey> partitions = new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, schema,
-        emptyConstraints.to("timestamp", oct_25_2012)));
+        emptyConstraints.to("timestamp", oct_25_2012).toKeyPredicate());
     assertIterableEquals(keys.subList(0, 6), partitions);
   }
 
   @Test
   public void testBefore() throws Exception {
-    Iterable <StorageKey> partitions = firsts(new FileSystemPartitionIterator(
+    Iterable <StorageKey> partitions = new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, schema,
-        emptyConstraints.toBefore("timestamp", oct_25_2012)));
+        emptyConstraints.toBefore("timestamp", oct_25_2012).toKeyPredicate());
     assertIterableEquals(keys.subList(0, 5), partitions);
   }
 
   @Test
   public void testWith() throws Exception {
-    Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
+    Iterable<StorageKey> partitions = new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, schema,
-        emptyConstraints.with("timestamp", oct_24_2013)));
+        emptyConstraints.with("timestamp", oct_24_2013).toKeyPredicate());
     assertIterableEquals(keys.subList(16, 17), partitions);
   }
 
   @Test
   public void testDayRange() throws Exception {
-    Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
-        fileSystem, testDirectory, strategy, schema,
-        emptyConstraints.from("timestamp", oct_24_2013).to("timestamp", oct_24_2013_end)));
+    Predicate<StorageKey> predicate = emptyConstraints
+        .from("timestamp", oct_24_2013)
+        .to("timestamp", oct_24_2013_end)
+        .toKeyPredicate();
+    Iterable<StorageKey> partitions = new FileSystemPartitionIterator(
+        fileSystem, testDirectory, strategy, schema, predicate);
     assertIterableEquals(keys.subList(16, 17), partitions);
   }
 
   @Test
   public void testLargerRange() throws Exception {
-    Iterable <StorageKey> partitions = firsts(new FileSystemPartitionIterator(
-        fileSystem, testDirectory, strategy, schema,
-        emptyConstraints.from("timestamp", oct_25_2012).to("timestamp", oct_24_2013)));
+    Predicate<StorageKey> predicate = emptyConstraints
+        .from("timestamp", oct_25_2012)
+        .to("timestamp", oct_24_2013)
+        .toKeyPredicate();
+    Iterable <StorageKey> partitions = new FileSystemPartitionIterator(
+        fileSystem, testDirectory, strategy, schema, predicate);
     assertIterableEquals(keys.subList(5, 17), partitions);
-  }
-
-  public static <T> Iterable<T> firsts(Iterable<Pair<T, Path>> pairs) {
-    return Iterables.transform(pairs, new Function<Pair<T, Path>, T>() {
-      @Override
-      public T apply(@Nullable Pair<T, Path> pair) {
-        return pair.first();
-      }
-    });
   }
 
   public static <T> void assertIterableEquals(

@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.spi.filesystem;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import java.util.Iterator;
@@ -26,13 +27,13 @@ import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Signalable;
+import org.kitesdk.data.PartitionView;
 import org.kitesdk.data.spi.AbstractDatasetReader;
 import org.kitesdk.data.spi.AbstractDatasetWriter;
 import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.InputFormatAccessor;
 import org.kitesdk.data.spi.LastModifiedAccessor;
-import org.kitesdk.data.spi.Pair;
 import org.kitesdk.data.spi.PartitionListener;
 import org.kitesdk.data.spi.SizeAccessor;
 import org.kitesdk.data.spi.StorageKey;
@@ -59,8 +60,8 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
 
   private static final Logger LOG = LoggerFactory.getLogger(FileSystemView.class);
 
-  private final FileSystem fs;
-  private final Path root;
+  final FileSystem fs;
+  final Path root;
 
   private final PartitionListener listener;
 
@@ -74,7 +75,7 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
     this.signalManager = signalManager;
   }
 
-  private FileSystemView(FileSystemView<E> view, Constraints c) {
+  FileSystemView(FileSystemView<E> view, Constraints c) {
     super(view, c);
     this.fs = view.fs;
     this.root = view.root;
@@ -108,6 +109,37 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
   }
 
   @Override
+  public Iterable<PartitionView<E>> getCoveringPartitions() {
+    final FileSystemDataset<E> fsDataset = (FileSystemDataset<E>) dataset;
+    if (dataset.getDescriptor().isPartitioned()) {
+      return new Iterable<PartitionView<E>>() {
+        @Override
+        public Iterator<PartitionView<E>> iterator() {
+          return Iterators.transform(partitionIterator(),
+              new Function<StorageKey, PartitionView<E>>() {
+                @Override
+                @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+                    value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+                    justification="False positive, initialized above as non-null.")
+                public PartitionView<E> apply(@Nullable StorageKey key) {
+                  return FileSystemPartitionView.getPartition(
+                      fsDataset.unbounded, key.getPath());
+                }
+              });
+        }
+      };
+
+    } else {
+      return new Iterable<PartitionView<E>>() {
+        @Override
+        public Iterator<PartitionView<E>> iterator() {
+          return Iterators.singletonIterator((PartitionView<E>) fsDataset.unbounded);
+        }
+      };
+    }
+  }
+
+  @Override
   public boolean deleteAll() {
     if (!constraints.alignedWithBoundaries()) {
       throw new UnsupportedOperationException(
@@ -122,14 +154,11 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
   }
 
   PathIterator pathIterator() {
-    Iterator<Pair<StorageKey, Path>> directories;
     if (dataset.getDescriptor().isPartitioned()) {
-      directories = partitionIterator();
+      return new PathIterator(fs, root, partitionIterator());
     } else {
-      directories = Iterators.singletonIterator(
-          Pair.of((StorageKey) null, root));
+      return new PathIterator(fs, root, null);
     }
-    return new PathIterator(fs, root, directories);
   }
 
   /**
@@ -139,13 +168,13 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
    */
   Iterator<Path> dirIterator() {
     if (dataset.getDescriptor().isPartitioned()) {
-      return Iterators.transform(partitionIterator(), new Function<Pair<StorageKey, Path>, Path>() {
+      return Iterators.transform(partitionIterator(), new Function<StorageKey, Path>() {
         @Override
         @edu.umd.cs.findbugs.annotations.SuppressWarnings(
             value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
             justification="False positive, initialized above as non-null.")
-        public Path apply(@Nullable Pair<StorageKey, Path> input) {
-          return new Path(root, input.second());
+        public Path apply(@Nullable StorageKey key) {
+          return new Path(root, key.getPath());
         }
       });
     } else {
@@ -158,7 +187,7 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
     try {
       return new FileSystemPartitionIterator(
           fs, root, descriptor.getPartitionStrategy(), descriptor.getSchema(),
-          constraints);
+          getKeyPredicate());
     } catch (IOException ex) {
       throw new DatasetException("Cannot list partitions in view:" + this, ex);
     }
@@ -167,15 +196,15 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
   boolean deleteAllUnsafe() {
     boolean deleted = false;
     if (dataset.getDescriptor().isPartitioned()) {
-      for (Pair<StorageKey, Path> partition : partitionIterator()) {
-        deleted = FileSystemUtil.cleanlyDelete(fs, root, partition.second()) || deleted;
+      for (StorageKey key : partitionIterator()) {
+        deleted = FileSystemUtil.cleanlyDelete(fs, root, key.getPath()) || deleted;
 
         if (listener != null) {
 
           // the relative path is the partition name, so we can simply delete it
           // in Hive
           listener.partitionDeleted(dataset.getNamespace(),
-              dataset.getName(), partition.second().toString());
+              dataset.getName(), key.getPath().toString());
         }
 
       }

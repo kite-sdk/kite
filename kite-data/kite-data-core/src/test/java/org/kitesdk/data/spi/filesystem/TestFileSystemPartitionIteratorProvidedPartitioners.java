@@ -16,8 +16,6 @@
 
 package org.kitesdk.data.spi.filesystem;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
@@ -25,7 +23,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nullable;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.hadoop.fs.FileSystem;
@@ -39,7 +36,6 @@ import org.kitesdk.data.LocalFileSystem;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.spi.Constraints;
-import org.kitesdk.data.spi.Pair;
 import org.kitesdk.data.spi.StorageKey;
 
 public class TestFileSystemPartitionIteratorProvidedPartitioners {
@@ -100,17 +96,17 @@ public class TestFileSystemPartitionIteratorProvidedPartitioners {
 
   @Test
   public void testUnbounded() throws Exception {
-    Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
-        fileSystem, testDirectory, strategy, schema, emptyConstraints));
+    Iterable<StorageKey> partitions = new FileSystemPartitionIterator(
+        fileSystem, testDirectory, strategy, schema, emptyConstraints.toKeyPredicate());
 
     assertIterableEquals(keys, partitions);
   }
 
   @Test
   public void testStringConstraint() throws IOException {
-    Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
+    Iterable<StorageKey> partitions = new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, schema,
-        emptyConstraints.with("year", "2012")));
+        emptyConstraints.with("year", "2012").toKeyPredicate());
     assertIterableEquals(keys.subList(0, 12), partitions);
 
     TestHelpers.assertThrows("Should reject constraint with integer type",
@@ -131,9 +127,9 @@ public class TestFileSystemPartitionIteratorProvidedPartitioners {
 
   @Test
   public void testIntConstraint() throws IOException {
-    Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
+    Iterable<StorageKey> partitions = new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, schema,
-        emptyConstraints.with("month", 9)));
+        emptyConstraints.with("month", 9).toKeyPredicate());
     List<StorageKey> expected = Lists.newArrayList();
     expected.addAll(keys.subList(0, 3));
     expected.addAll(keys.subList(12, 15));
@@ -157,9 +153,9 @@ public class TestFileSystemPartitionIteratorProvidedPartitioners {
 
   @Test
   public void testLongConstraint() throws IOException {
-    Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
+    Iterable<StorageKey> partitions = new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, schema,
-        emptyConstraints.with("day", 22L)));
+        emptyConstraints.with("day", 22L).toKeyPredicate());
     List<StorageKey> expected = Lists.newArrayList(
         keys.get(0), keys.get(3), keys.get(6), keys.get(9),
         keys.get(12), keys.get(15), keys.get(18), keys.get(21));
@@ -179,15 +175,6 @@ public class TestFileSystemPartitionIteratorProvidedPartitioners {
             emptyConstraints.with("day", 25);
           }
         });
-  }
-
-  public static <T> Iterable<T> firsts(Iterable<Pair<T, Path>> pairs) {
-    return Iterables.transform(pairs, new Function<Pair<T, Path>, T>() {
-      @Override
-      public T apply(@Nullable Pair<T, Path> pair) {
-        return pair.first();
-      }
-    });
   }
 
   public static <T> void assertIterableEquals(

@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 
 import java.util.Iterator;
@@ -23,6 +24,8 @@ import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.Signalable;
+import org.kitesdk.data.PartitionView;
+import org.kitesdk.data.View;
 import org.kitesdk.data.spi.Compatibility;
 import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
@@ -75,7 +78,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   private final PartitionStrategy partitionStrategy;
   private final PartitionListener partitionListener;
 
-  private final FileSystemView<E> unbounded;
+  final FileSystemPartitionView<E> unbounded;
 
   // reusable path converter, has no relevant state
   private final PathConversion convert;
@@ -107,7 +110,8 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     Path signalsPath = new Path(directory, SIGNALS_DIRECTORY_NAME);
     SignalManager signalManager = new SignalManager(fileSystem, signalsPath);
 
-    this.unbounded = new FileSystemView<E>(this, partitionListener, signalManager, type);
+    this.unbounded = new FileSystemPartitionView<E>(this, partitionListener, signalManager, type);
+
     // remove this.partitionKey for 0.14.0
     this.partitionKey = null;
   }
@@ -140,6 +144,29 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   @Override
   public DatasetDescriptor getDescriptor() {
     return descriptor;
+  }
+
+  // needed to preserve the behavior of FileSystemDatasets
+  View<E> viewForUri(URI location) {
+    Preconditions.checkNotNull(location, "Partition location cannot be null");
+    PartitionView<E> view = getPartitionView(location);
+    if (view == unbounded) {
+      return this;
+    }
+    return view;
+  }
+
+  FileSystemPartitionView<E> getPartitionView(URI location) {
+    return FileSystemPartitionView.getPartition(unbounded, location);
+  }
+
+  FileSystemPartitionView<E> getPartitionView(Path location) {
+    return FileSystemPartitionView.getPartition(unbounded, location);
+  }
+
+  @Override
+  public Iterable<PartitionView<E>> getCoveringPartitions() {
+    return unbounded.getCoveringPartitions();
   }
 
   PartitionKey getPartitionKey() {

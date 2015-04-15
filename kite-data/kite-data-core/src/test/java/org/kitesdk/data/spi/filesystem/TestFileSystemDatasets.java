@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data;
+package org.kitesdk.data.spi.filesystem;
 
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.hadoop.fs.Path;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.kitesdk.data.spi.filesystem.FileSystemDatasets;
+import org.kitesdk.data.Dataset;
+import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.Datasets;
+import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.TestHelpers;
+import org.kitesdk.data.View;
+import org.kitesdk.data.spi.AbstractRefinableView;
+import org.kitesdk.data.spi.Constraints;
 
 public class TestFileSystemDatasets {
 
@@ -38,7 +46,7 @@ public class TestFileSystemDatasets {
       .day("timestamp", "d")
       .build();
 
-  private Dataset<GenericRecord> dataset;
+  private FileSystemDataset<GenericRecord> dataset;
 
   @Before
   public void createFileSystemDataset() {
@@ -53,59 +61,113 @@ public class TestFileSystemDatasets {
 
   @Test
   public void testViewForUri() {
+    Path path = new Path("/tmp/datasets/ns/test/y=2014/m=03/d=14");
+
     View<GenericRecord> view = FileSystemDatasets.viewForUri(
-        dataset, "file:/tmp/datasets/ns/test/y=2014/m=03/d=14");
+        dataset, "file:" + path);
     Assert.assertEquals("Should create correct view",
-        view, dataset.with("y", 2014).with("m", 3).with("d", 14));
+        view, dataset.getPartitionView(path));
 
     view = FileSystemDatasets.viewForUri(
-        dataset, "/tmp/datasets/ns/test/y=2014/m=03/d=14");
+        dataset, path.toString());
     Assert.assertEquals("Should create correct view",
-        view, dataset.with("y", 2014).with("m", 3).with("d", 14));
+        view, dataset.getPartitionView(path));
+
+    Constraints expected = ((AbstractRefinableView<GenericRecord>)
+        dataset.with("y", 2014).with("m", 3).with("d", 14)).getConstraints();
+    Constraints actual = ((AbstractRefinableView<GenericRecord>) view)
+        .getConstraints();
+    Assert.assertEquals("Constraints should match expected",
+        expected, actual);
   }
 
   @Test
   public void testViewForIncompleteUri() {
+    Path path = new Path("/tmp/datasets/ns/test/y=2014/m=03");
+
     View<GenericRecord> view = FileSystemDatasets.viewForUri(
-        dataset, "/tmp/datasets/ns/test/y=2014/m=03");
+        dataset, path.toString());
     Assert.assertEquals("Should create correct view",
-        view, dataset.with("y", 2014).with("m", 3));
+        view, dataset.getPartitionView(path));
+
+    Constraints expected = ((AbstractRefinableView<GenericRecord>)
+        dataset.with("y", 2014).with("m", 3)).getConstraints();
+    Constraints actual = ((AbstractRefinableView<GenericRecord>) view)
+        .getConstraints();
+    Assert.assertEquals("Constraints should match expected",
+        expected, actual);
   }
 
   @Test
   public void testIgnoresAuthority() {
+    Path path = new Path("/tmp/datasets/ns/test/y=2014/m=03/d=14");
+
     View<GenericRecord> view = FileSystemDatasets.viewForUri(
         dataset, "file://127.0.0.1/tmp/datasets/ns/test/y=2014/m=03/d=14");
     Assert.assertEquals("Should create correct view",
-        view, dataset.with("y", 2014).with("m", 3).with("d", 14));
+        view, dataset.getPartitionView(path));
+
+    Constraints expected = ((AbstractRefinableView<GenericRecord>)
+        dataset.with("y", 2014).with("m", 3).with("d", 14)).getConstraints();
+    Constraints actual = ((AbstractRefinableView<GenericRecord>) view)
+        .getConstraints();
+    Assert.assertEquals("Constraints should match expected",
+        expected, actual);
   }
 
   @Test
   public void testViewForRelativeUri() {
+    Path path = new Path("/tmp/datasets/ns/test/y=2014/m=03/d=14");
+
     View<GenericRecord> view = FileSystemDatasets.viewForUri(
         dataset, "y=2014/m=03/d=14");
     Assert.assertEquals("Should create correct view",
-        view, dataset.with("y", 2014).with("m", 3).with("d", 14));
+        view, dataset.getPartitionView(path));
+
+    Constraints expected = ((AbstractRefinableView<GenericRecord>)
+        dataset.with("y", 2014).with("m", 3).with("d", 14)).getConstraints();
+    Constraints actual = ((AbstractRefinableView<GenericRecord>) view)
+        .getConstraints();
+    Assert.assertEquals("Constraints should match expected",
+        expected, actual);
   }
 
   @Test
   public void testViewForMissingPartitionNames() {
+    Path path = new Path("2014/3/14");
+
     // like PathConversion, this uses names from the partition strategy
     // and will accept partitions that don't have a "name=" component
     View<GenericRecord> view = FileSystemDatasets.viewForUri(
-        dataset, "2014/3/14");
+        dataset, path.toString());
     Assert.assertEquals("Should create correct view",
-        view, dataset.with("y", 2014).with("m", 3).with("d", 14));
+        view, dataset.getPartitionView(path));
+
+    Constraints expected = ((AbstractRefinableView<GenericRecord>)
+        dataset.with("y", 2014).with("m", 3).with("d", 14)).getConstraints();
+    Constraints actual = ((AbstractRefinableView<GenericRecord>) view)
+        .getConstraints();
+    Assert.assertEquals("Constraints should match expected",
+        expected, actual);
   }
 
   @Test
   public void testViewForDifferentPartitionNames() {
+    Path path = new Path("year=2014/month=3/day=14");
+
     // like PathConversion, this uses names from the partition strategy
     // and will accept partitions that have a different "name=" component
     View<GenericRecord> view = FileSystemDatasets.viewForUri(
-        dataset, "year=2014/month=3/day=14");
+        dataset, path.toString());
     Assert.assertEquals("Should create correct view",
-        view, dataset.with("y", 2014).with("m", 3).with("d", 14));
+        view, dataset.getPartitionView(path));
+
+    Constraints expected = ((AbstractRefinableView<GenericRecord>)
+        dataset.with("y", 2014).with("m", 3).with("d", 14)).getConstraints();
+    Constraints actual = ((AbstractRefinableView<GenericRecord>) view)
+        .getConstraints();
+    Assert.assertEquals("Constraints should match expected",
+        expected, actual);
   }
 
   @Test

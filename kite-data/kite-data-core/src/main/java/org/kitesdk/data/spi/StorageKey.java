@@ -17,6 +17,9 @@
 package org.kitesdk.data.spi;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
+import javax.annotation.Nullable;
+import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.PartitionStrategy;
@@ -32,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import org.kitesdk.data.impl.Accessor;
+import org.kitesdk.data.spi.filesystem.PathConversion;
 
 /**
  * A StorageKey is a complete set of values for a PartitionStrategy.
@@ -39,6 +43,8 @@ import org.kitesdk.data.impl.Accessor;
  * @since 0.9.0
  */
 public class StorageKey extends Marker implements Comparable<StorageKey> {
+
+  private static final Joiner PATH_JOINER = Joiner.on('/');
 
   // Cache the field to index mappings for each PartitionStrategy
   private static final LoadingCache<PartitionStrategy, Map<String, Integer>>
@@ -60,6 +66,7 @@ public class StorageKey extends Marker implements Comparable<StorageKey> {
   private final PartitionStrategy strategy;
   private final Map<String, Integer> fields;
   private List<Object> values;
+  private Path path;
 
   public StorageKey(PartitionStrategy strategy) {
     this(strategy, Arrays.asList(
@@ -76,10 +83,15 @@ public class StorageKey extends Marker implements Comparable<StorageKey> {
         "Not enough values for a complete StorageKey");
     this.strategy = strategy;
     this.values = values;
+    this.path = null;
   }
 
   public PartitionStrategy getPartitionStrategy() {
     return strategy;
+  }
+
+  public Path getPath() {
+    return path;
   }
 
   @Override
@@ -110,6 +122,7 @@ public class StorageKey extends Marker implements Comparable<StorageKey> {
    */
   public void replace(int index, Object value) {
     values.set(index, value);
+    this.path = null; // path is no longer valid if values are replaced
   }
 
   /**
@@ -138,14 +151,37 @@ public class StorageKey extends Marker implements Comparable<StorageKey> {
    */
   @SuppressWarnings("unchecked")
   public <E> StorageKey reuseFor(E entity, EntityAccessor<E> accessor) {
-    List<FieldPartitioner> partitioners =
-        Accessor.getDefault().getFieldPartitioners(strategy);
+    accessor.keyFor(entity, null, this);
+    return this;
+  }
 
-    for (int i = 0; i < partitioners.size(); i++) {
-      FieldPartitioner fp = partitioners.get(i);
-      replace(i, fp.apply(accessor.get(entity, fp.getSourceName())));
-    }
+  /**
+   * Replaces all of the values in this {@link StorageKey} with values from the given
+   * {@code entity}.
+   *
+   * @param entity an entity to reuse this {@code StorageKey} for
+   * @return this updated {@code StorageKey}
+   * @throws IllegalStateException
+   *      If the {@code entity} cannot be used to produce a value for each
+   *      field in the {@code PartitionStrategy}
+   *
+   * @since 0.9.0
+   */
+  @SuppressWarnings("unchecked")
+  public <E> StorageKey reuseFor(E entity,
+                                 @Nullable Map<String, Object> provided,
+                                 EntityAccessor<E> accessor) {
+    accessor.keyFor(entity, provided, this);
+    return this;
+  }
 
+  public StorageKey reuseFor(List<String> dirs, PathConversion conversion) {
+    return reuseFor(new Path(PATH_JOINER.join(dirs)), conversion);
+  }
+
+  public StorageKey reuseFor(Path path, PathConversion conversion) {
+    conversion.toKey(path, this);
+    this.path = path;
     return this;
   }
 
