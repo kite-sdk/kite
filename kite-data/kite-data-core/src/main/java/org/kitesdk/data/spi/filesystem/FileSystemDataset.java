@@ -197,11 +197,14 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     try {
       if (!fileSystem.exists(partitionDirectory)) {
         if (allowCreate) {
-          fileSystem.mkdirs(partitionDirectory);
           if (partitionListener != null) {
             partitionListener.partitionAdded(namespace, name,
                 toRelativeDirectory(key).toString());
           }
+
+          // ensure that the directory exists, it may or may not have been
+          // created by the partitionListener
+          fileSystem.mkdirs(partitionDirectory);
         } else {
           return null;
         }
@@ -327,6 +330,20 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
       }
 
       Path newPartitionDirectory = newPath.getParent();
+
+      // We call this listener before we attempt to create any partition
+      // directories. This lets the listener decide how to create the
+      // directory, if desired. Hive managed datasets let the Hive
+      // metastore create them while external datasets create it
+      // locally
+      if (descriptor.isPartitioned() && partitionListener != null) {
+        String partition = newPartitionDirectory.toString();
+        if (!addedPartitions.contains(partition)) {
+          partitionListener.partitionAdded(namespace, name, partition);
+          addedPartitions.add(partition);
+        }
+      }
+
       try {
         if (!fileSystem.exists(newPartitionDirectory)) {
           fileSystem.mkdirs(newPartitionDirectory);
@@ -339,13 +356,6 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
         }
       } catch (IOException e) {
         throw new DatasetIOException("Dataset merge failed", e);
-      }
-      if (descriptor.isPartitioned() && partitionListener != null) {
-        String partition = newPartitionDirectory.toString();
-        if (!addedPartitions.contains(partition)) {
-          partitionListener.partitionAdded(namespace, name, partition);
-          addedPartitions.add(partition);
-        }
       }
     }
   }

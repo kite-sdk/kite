@@ -126,4 +126,17 @@ class HiveExternalMetadataProvider extends HiveAbstractMetadataProvider {
     return rootFileSystem.makeQualified(
         HiveUtils.pathForDataset(rootDirectory, namespace, name));
   }
+
+  @Override
+  public void partitionAdded(String namespace, String name, String path) {
+    Path partitionPath = new Path(pathForDataset(namespace, name), path);
+    try {
+      rootFileSystem.mkdirs(partitionPath);
+    } catch (IOException ex) {
+      throw new DatasetIOException(
+        "Unable to create partition directory  " + partitionPath, ex);
+    }
+    super.partitionAdded(namespace, name, path);
+  }
+
 }

@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.Map;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetWriter;
@@ -186,7 +187,8 @@ abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>> extend
         .toString();
   }
 
-  private static class DatasetWriterCacheLoader<E> extends
+  @VisibleForTesting
+  static class DatasetWriterCacheLoader<E> extends
     CacheLoader<StorageKey, FileSystemWriter<E>> {
 
     private final FileSystemView<E> view;
@@ -216,6 +218,9 @@ abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>> extend
             dataset.getNamespace(), dataset.getName(), partition.toString());
       }
 
+      // initialize the writer after calling the listener
+      // this lets the listener decide if and how to create the
+      // partition directory
       writer.initialize();
 
       return writer;
@@ -223,7 +228,8 @@ abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>> extend
 
   }
 
-  private static class IncrementalDatasetWriterCacheLoader<E> extends
+  @VisibleForTesting
+  static class IncrementalDatasetWriterCacheLoader<E> extends
       CacheLoader<StorageKey, FileSystemWriter.IncrementalWriter<E>> {
 
     private final FileSystemView<E> view;
@@ -256,6 +262,9 @@ abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>> extend
             dataset.getNamespace(), dataset.getName(), partition.toString());
       }
 
+      // initialize the writer after calling the listener
+      // this lets the listener decide if and how to create the
+      // partition directory
       writer.initialize();
 
       return (FileSystemWriter.IncrementalWriter<E>) writer;
