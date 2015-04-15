@@ -173,21 +173,6 @@ public class TestDescriptorValidation {
             .build();
       }
     });
-    // Null is not allowed when partitioning
-    TestHelpers.assertThrows("Should reject optional int for int partitioner",
-        ValidationException.class, new Runnable() {
-      @Override
-      public void run() {
-        new DatasetDescriptor.Builder()
-            .schema(SchemaBuilder.record("Record").fields()
-                .optionalInt("number")
-                .endRecord())
-            .partitionStrategy(new PartitionStrategy.Builder()
-                .range("number", 5, 10, 15)
-                .build())
-            .build();
-      }
-    });
     // Cannot assign to a Long from an Integer
     TestHelpers.assertThrows("Should reject int for long partitioner",
         ValidationException.class, new Runnable() {

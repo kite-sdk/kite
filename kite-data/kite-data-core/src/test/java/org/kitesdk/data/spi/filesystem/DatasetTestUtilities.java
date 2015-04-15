@@ -41,6 +41,8 @@ public class DatasetTestUtilities {
 
   public final static Schema STRING_SCHEMA = loadSchema("schema/string.avsc");
   public final static Schema USER_SCHEMA = loadSchema("schema/user.avsc");
+  public final static Schema USER_NULLABLE_SCHEMA =
+      loadSchema("schema/user_nullable.avsc");
   public final static Schema OLD_VALUE_SCHEMA = loadSchema("schema/old_value.avsc");
   public final static URI USER_SCHEMA_URL = findSchemaURI("schema/user.avsc");
 
