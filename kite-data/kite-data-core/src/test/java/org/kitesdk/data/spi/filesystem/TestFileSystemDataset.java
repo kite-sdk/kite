@@ -175,6 +175,54 @@ public class TestFileSystemDataset extends MiniDFSTest {
 
   @Test
   @SuppressWarnings("deprecation")
+  public void testPartitionedWriterSingleNullableField() throws IOException {
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
+        "username", 2).build();
+
+    FileSystemDataset<Record> ds = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
+        .name("partitioned-users")
+        .configuration(getConfiguration())
+        .descriptor(new DatasetDescriptor.Builder()
+            .schema(USER_NULLABLE_SCHEMA)
+            .format(format)
+            .compressionType(compressionType)
+            .location(testDirectory)
+            .partitionStrategy(partitionStrategy)
+            .build())
+        .type(Record.class)
+        .build();
+
+    Assert.assertTrue("Dataset is partitioned", ds.getDescriptor()
+        .isPartitioned());
+    Assert.assertEquals(partitionStrategy, ds.getDescriptor()
+        .getPartitionStrategy());
+
+    writeTestUsers(ds, 10);
+    Assert.assertTrue("Partitioned directory 0 exists",
+        fileSystem.exists(new Path(testDirectory, "username_hash=0")));
+    Assert.assertTrue("Partitioned directory 1 exists",
+        fileSystem.exists(new Path(testDirectory, "username_hash=1")));
+    checkTestUsers(ds, 10);
+    PartitionKey key0 = new PartitionKey(0);
+    PartitionKey key1 = new PartitionKey(1);
+    int total = readTestUsersInPartition(ds, key0, null)
+        + readTestUsersInPartition(ds, key1, null);
+    Assert.assertEquals(10, total);
+
+    testPartitionKeysAreEqual(ds, key0, key1);
+
+    Set<Record> records = Sets.newHashSet();
+    for (Dataset dataset : ds.getPartitions()) {
+      Assert.assertFalse("Partitions should not have further partitions",
+          dataset.getDescriptor().isPartitioned());
+      records.addAll(materialize(ds));
+    }
+    checkTestUsers(records, 10);
+  }
+
+  @Test
+  @SuppressWarnings("deprecation")
   public void testPartitionedWriterDouble() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
       .hash("username", 2).hash("email", 3).build();

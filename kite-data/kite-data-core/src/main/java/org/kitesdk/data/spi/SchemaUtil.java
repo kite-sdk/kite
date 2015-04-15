@@ -80,8 +80,7 @@ public class SchemaUtil {
 
   @SuppressWarnings("unchecked")
   public static <S> Class<? extends S> getSourceType(FieldPartitioner<S, ?> fp, Schema schema) {
-    return (Class<S>) getClassForType(
-        schema.getField(fp.getSourceName()).schema().getType());
+    return (Class<S>) getClassForType(fieldSchema(schema, fp.getSourceName()).getType());
   }
 
   @SuppressWarnings("unchecked")
@@ -91,7 +90,7 @@ public class SchemaUtil {
       return fp.getType();
     }
     Class<? extends S> inputType = (Class<S>) getClassForType(
-        schema.getField(fp.getSourceName()).schema().getType());
+        fieldSchema(schema, fp.getSourceName()).getType());
     return fp.getType(inputType);
   }
 
@@ -166,7 +165,7 @@ public class SchemaUtil {
   public static Schema partitionFieldSchema(FieldPartitioner<?, ?> fp, Schema schema) {
     if (fp instanceof IdentityFieldPartitioner) {
       // copy the schema directly from the entity to preserve annotations
-      return schema.getField(fp.getSourceName()).schema();
+      return fieldSchema(schema, fp.getSourceName());
     } else {
       Class<?> fieldType = getPartitionType(fp, schema);
       if (fieldType == Integer.class) {
@@ -231,7 +230,7 @@ public class SchemaUtil {
    * @return the nested Schema for the field
    */
   public static Schema fieldSchema(Schema schema, String name) {
-    Schema nested = schema;
+    Schema nested = unwrapNullable(schema);
     List<String> levels = Lists.newArrayList();
     for (String level : NAME_SPLITTER.split(name)) {
       levels.add(level);
@@ -242,9 +241,21 @@ public class SchemaUtil {
       ValidationException.check(field != null,
           "Cannot get schema for %s: %s is not a field",
           name, NAME_JOINER.join(levels));
-      nested = field.schema();
+      nested = unwrapNullable(field.schema());
     }
     return nested;
+  }
+
+  private static Schema unwrapNullable(Schema schema) {
+    if (schema.getType() == Schema.Type.UNION && schema.getTypes().size() == 2) {
+      List<Schema> types = schema.getTypes();
+      if (types.get(0).getType() == Schema.Type.NULL) {
+        return types.get(1);
+      } else if (types.get(1).getType() == Schema.Type.NULL) {
+        return types.get(0);
+      }
+    }
+    return schema;
   }
 
   /**
