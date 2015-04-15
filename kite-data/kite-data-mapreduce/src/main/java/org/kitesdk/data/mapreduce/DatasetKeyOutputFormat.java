@@ -41,6 +41,7 @@ import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.TypeNotFoundException;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.AbstractDataset;
+import org.kitesdk.data.spi.Compatibility;
 import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.DataModelUtil;
 import org.kitesdk.data.spi.DatasetRepositories;
@@ -355,7 +356,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   static class MergeOutputCommitter<E> extends OutputCommitter {
     @Override
     public void setupJob(JobContext jobContext) {
-      createJobDataset(jobContext);
+      loadOrCreateJobDataset(jobContext);
     }
 
     @Override
@@ -494,7 +495,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   }
 
   private static String getJobDatasetName(JobContext jobContext) {
-    return jobContext.getJobID().toString();
+    return Hadoop.JobContext.getJobID.invoke(jobContext).toString();
   }
 
   private static String getTaskAttemptDatasetName(TaskAttemptContext taskContext) {
@@ -529,11 +530,26 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     return type;
   }
 
+  /**
+   * The job dataset may already exist if the ApplicationMaster was restarted
+   */
   @SuppressWarnings("unchecked")
-  private static <E> Dataset<E> createJobDataset(JobContext jobContext) {
+  private static <E> Dataset<E> loadOrCreateJobDataset(JobContext jobContext) {
     Dataset<Object> dataset = load(jobContext).getDataset();
     String jobDatasetName = getJobDatasetName(jobContext);
     DatasetRepository repo = getDatasetRepository(jobContext);
+    if (repo.exists(TEMP_NAMESPACE, jobDatasetName)) {
+      Dataset<E> tempDataset = repo.load(TEMP_NAMESPACE, jobDatasetName,
+        DatasetKeyOutputFormat.<E>getType(jobContext));
+      try {
+        Compatibility.checkCompatible(dataset.getDescriptor(),
+          tempDataset.getDescriptor());
+        return tempDataset;
+      } catch (RuntimeException ex) {
+        // swallow
+      }
+    }
+
     return repo.create(TEMP_NAMESPACE, jobDatasetName,
         copy(dataset.getDescriptor()),
         DatasetKeyOutputFormat.<E>getType(jobContext));
