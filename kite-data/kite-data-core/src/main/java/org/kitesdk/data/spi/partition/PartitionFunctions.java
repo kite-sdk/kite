@@ -60,6 +60,10 @@ public class PartitionFunctions {
     return new RangeFieldPartitioner(sourceName, name, upperBounds);
   }
 
+  public static FieldPartitioner<Long, Long> fixedRange(String sourceName, @Nullable String name, long range) {
+    return new FixedLongRangeFieldPartitioner(sourceName, name, range);
+  }
+
   public static FieldPartitioner<Long, Integer> year(String sourceName, @Nullable String name) {
     return new YearFieldPartitioner(sourceName, name);
   }
@@ -128,6 +132,10 @@ public class PartitionFunctions {
       return String.format("range(\"%s\", \"%s\", %s)",
           fieldPartitioner.getSourceName(), fieldPartitioner.getName(),
           builder.toString());
+    } else if (fieldPartitioner instanceof FixedLongRangeFieldPartitioner) {
+      return String.format("fixedRange(\"%s\", \"%s\", %s)",
+          fieldPartitioner.getSourceName(), fieldPartitioner.getName(),
+          ((FixedLongRangeFieldPartitioner) fieldPartitioner).getRange());
     } else if (fieldPartitioner instanceof DateFormatPartitioner) {
       return String.format("dateFormat(\"%s\", \"%s\", \"%s\")",
           fieldPartitioner.getSourceName(),

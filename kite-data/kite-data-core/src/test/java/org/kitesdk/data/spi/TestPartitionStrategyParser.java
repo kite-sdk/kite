@@ -89,6 +89,40 @@ public class TestPartitionStrategyParser {
   }
 
   @Test
+  public void testFixedRange() {
+    checkParser(new PartitionStrategy.Builder().fixedRange("id", 64).build(),
+        "[ {\"type\": \"range\", \"source\": \"id\", \"range\": 64} ]");
+    checkParser(new PartitionStrategy.Builder().fixedRange("id", "rng", 64).build(),
+        "[ {\"type\": \"range\", " +
+            "\"source\": \"id\", " +
+            "\"name\": \"rng\", " +
+            "\"range\": 64} ]"
+    );
+
+    TestHelpers.assertThrows("Should reject missing range",
+        ValidationException.class, new Runnable() {
+          @Override
+          public void run() {
+            PartitionStrategyParser.parse("[ {\"type\": \"range\", " +
+                "\"source\": \"id\", " +
+                "\"name\": \"rng\"} ]");
+          }
+        }
+    );
+    TestHelpers.assertThrows("Should reject invalid range",
+        ValidationException.class, new Runnable() {
+          @Override
+          public void run() {
+            PartitionStrategyParser.parse("[ {\"type\": \"range\", " +
+                "\"source\": \"id\", " +
+                "\"name\": \"rng\", " +
+                "\"buckets\": \"green\"} ]");
+          }
+        }
+    );
+  }
+
+  @Test
   public void testDateFormat() {
     checkParser(new PartitionStrategy.Builder()
             .dateFormat("time", "date", "yyyyMMdd")

@@ -36,6 +36,7 @@ import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.partition.DateFormatPartitioner;
 import org.kitesdk.data.spi.partition.DayOfMonthFieldPartitioner;
+import org.kitesdk.data.spi.partition.FixedLongRangeFieldPartitioner;
 import org.kitesdk.data.spi.partition.HashFieldPartitioner;
 import org.kitesdk.data.spi.partition.HourFieldPartitioner;
 import org.kitesdk.data.spi.partition.IdentityFieldPartitioner;
@@ -70,6 +71,7 @@ public class PartitionStrategyParser {
   private static final String BUCKETS = "buckets";
   private static final String FORMAT = "format";
   private static final String VALUES = "values";
+  private static final String RANGE = "range";
 
   /**
    * Parses a PartitionStrategy from a JSON string.
@@ -175,6 +177,16 @@ public class PartitionStrategyParser {
             name == null ? source : name,
             fieldPartitioner.get(BUCKETS).asText());
         builder.hash(source, name, buckets);
+      } else if (type.equals("range")) {
+        ValidationException.check(fieldPartitioner.has(RANGE),
+            "Range partitioner %s must have attribute %s",
+            name == null ? source : name, RANGE);
+        int range = fieldPartitioner.get(RANGE).asInt();
+        ValidationException.check(range > 0,
+            "Invalid number of buckets for range partitioner %s: %s",
+            name == null ? source : name,
+            fieldPartitioner.get(RANGE).asText());
+        builder.fixedRange(source, name, range);
       } else if (type.equals("year")) {
         builder.year(source, name);
       } else if (type.equals("month")) {
@@ -220,6 +232,11 @@ public class PartitionStrategyParser {
         partitioner.set(SOURCE, TextNode.valueOf(fp.getSourceName()));
         partitioner.set(TYPE, TextNode.valueOf("hash"));
         partitioner.set(BUCKETS, LongNode.valueOf(fp.getCardinality()));
+      } else if (fp instanceof FixedLongRangeFieldPartitioner) {
+        partitioner.set(SOURCE, TextNode.valueOf(fp.getSourceName()));
+        partitioner.set(TYPE, TextNode.valueOf("range"));
+        partitioner.set(RANGE,
+            LongNode.valueOf(((FixedLongRangeFieldPartitioner) fp).getRange()));
       } else if (fp instanceof YearFieldPartitioner) {
         partitioner.set(SOURCE, TextNode.valueOf(fp.getSourceName()));
         partitioner.set(TYPE, TextNode.valueOf("year"));
