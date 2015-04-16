@@ -207,9 +207,9 @@
     <github.global.server>github</github.global.server>
 
     <!-- Until we add a mock, use S3 credentials from the environment -->
-    <s3.id>${env.S3_ID}</s3.id>
-    <s3.key>${env.S3_KEY}</s3.key>
-    <s3.bucket>${env.S3_BUCKET}</s3.bucket>
+    <test.aws.access.key>${env.AWS_ACCESS_KEY_ID}</test.aws.access.key>
+    <test.aws.s3.secret.key>${env.AWS_SECRET_ACCESS_KEY}</test.aws.s3.secret.key>
+    <test.aws.s3.bucket>${env.S3_BUCKET}</test.aws.s3.bucket>
   </properties>
 
   <repositories>
@@ -773,6 +773,7 @@
         <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-aws</artifactId>
         <version>${vers.hadoop-aws}</version>
+        <scope>provided</scope>
       </dependency>
 
       <!-- HBase dependencies -->
@@ -1225,7 +1226,7 @@
         <vers.flume>1.4.0</vers.flume>
         <vers.hive>0.10.0</vers.hive>
         <vers.commons-lang>2.4</vers.commons-lang>
-        <s3.id></s3.id> <!-- don't test S3 -->
+        <test.aws.access.key></test.aws.access.key> <!-- don't test S3 -->
       </properties>
     </profile>
 
@@ -1248,7 +1249,7 @@
         <vers.flume>1.4.0-cdh${cdh4.version}</vers.flume>
         <vers.hive>0.10.0-cdh${cdh4.version}</vers.hive>
         <vers.oozie>3.3.2-cdh${cdh4.version}</vers.oozie>
-        <s3.id></s3.id> <!-- don't test S3 -->
+        <test.aws.access.key></test.aws.access.key> <!-- don't test S3 -->
       </properties>
     </profile>
 
