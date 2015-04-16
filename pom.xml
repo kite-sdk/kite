@@ -1077,6 +1077,16 @@
         <artifactId>jackson-databind</artifactId>
         <version>${vers.jackson}</version>
       </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${vers.jackson}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>${vers.jackson}</version>
+      </dependency>
 
       <!-- Maven plugin -->
       <dependency>
