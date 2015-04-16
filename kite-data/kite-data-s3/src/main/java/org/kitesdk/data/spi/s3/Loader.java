@@ -86,8 +86,8 @@ public class Loader implements Loadable {
 
     // username and secret are the same; host is the bucket
     Registration.register(
-        new URIPattern("s3n:/"),
-        new URIPattern("s3n:/:namespace/:dataset"),
+        new URIPattern("s3n:/*path"),
+        new URIPattern("s3n:/*path/:namespace/:dataset"),
         builder);
     Registration.register(
         new URIPattern("s3a:/"),

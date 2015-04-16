@@ -33,9 +33,9 @@ import org.kitesdk.data.Datasets;
 import org.kitesdk.data.spi.DefaultConfiguration;
 
 public class TestS3Dataset {
-  private static final String ID = System.getProperty("aws.s3.id");
-  private static final String KEY = System.getProperty("aws.s3.key");
-  private static final String BUCKET = System.getProperty("aws.s3.bucket");
+  private static final String ID = System.getProperty("test.aws.access.key");
+  private static final String KEY = System.getProperty("test.aws.s3.secret.key");
+  private static final String BUCKET = System.getProperty("test.aws.s3.bucket");
 
   private static Configuration original = null;
 
