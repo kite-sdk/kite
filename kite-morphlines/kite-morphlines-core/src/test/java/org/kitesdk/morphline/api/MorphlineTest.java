@@ -164,6 +164,15 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
+  public void testParseIncludeConstants() throws Exception {
+    morphline = createMorphline("test-morphlines/parseIncludeConstants");  
+    Record input = new Record();
+    Record expected = new Record();
+    expected.put("myField",  "foo");
+    processAndVerifySuccess(input, expected);
+  }
+  
+  @Test
   public void testParseVariables() throws Exception {
     System.setProperty("ENV_ZK_HOST", "zk.foo.com:2181/solr");
     System.setProperty("ENV_SOLR_URL", "http://foo.com:8983/solr/myCollection");
