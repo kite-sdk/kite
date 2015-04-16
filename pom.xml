@@ -141,7 +141,7 @@
     <vers.flume>1.4.0</vers.flume>
     <vers.guava>11.0.2</vers.guava>
     <vers.hadoop1>1.2.1</vers.hadoop1>
-    <vers.hadoop2>2.3.0</vers.hadoop2>
+    <vers.hadoop2>2.6.0</vers.hadoop2>
     <vers.hadoop-cdh4>2.0.0-cdh${cdh4.version}</vers.hadoop-cdh4>
     <vers.hadoop-mr1-cdh4>2.0.0-mr1-cdh${cdh4.version}</vers.hadoop-mr1-cdh4>
     <vers.hadoop-cdh5>2.3.0-cdh${cdh5.version}</vers.hadoop-cdh5>
@@ -175,6 +175,7 @@
     <vers.jodatime>2.3</vers.jodatime>
     <vers.jcommander>1.35</vers.jcommander>
     <vers.spark>1.0.0</vers.spark>
+    <vers.hadoop-aws>2.6.0</vers.hadoop-aws>
 
     <!-- Plugin versions -->
     <vers.doxia-module-markdown>1.4</vers.doxia-module-markdown>
@@ -204,6 +205,11 @@
     <url.jira>http://issues.cloudera.com/browse/CDK</url.jira>
 
     <github.global.server>github</github.global.server>
+
+    <!-- Until we add a mock, use S3 credentials from the environment -->
+    <s3.id>${env.S3_ID}</s3.id>
+    <s3.key>${env.S3_KEY}</s3.key>
+    <s3.bucket>${env.S3_BUCKET}</s3.bucket>
   </properties>
 
   <repositories>
@@ -763,6 +769,11 @@
         <artifactId>kite-hadoop-compatibility</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-aws</artifactId>
+        <version>${vers.hadoop-aws}</version>
+      </dependency>
 
       <!-- HBase dependencies -->
       <dependency>
@@ -1065,6 +1076,11 @@
         <artifactId>jackson-databind</artifactId>
         <version>${vers.jackson}</version>
       </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${vers.jackson}</version>
+      </dependency>
 
       <!-- Maven plugin -->
       <dependency>
@@ -1214,6 +1230,7 @@
         <vers.flume>1.4.0</vers.flume>
         <vers.hive>0.10.0</vers.hive>
         <vers.commons-lang>2.4</vers.commons-lang>
+        <s3.id></s3.id> <!-- don't test S3 -->
       </properties>
     </profile>
 
@@ -1236,6 +1253,7 @@
         <vers.flume>1.4.0-cdh${cdh4.version}</vers.flume>
         <vers.hive>0.10.0-cdh${cdh4.version}</vers.hive>
         <vers.oozie>3.3.2-cdh${cdh4.version}</vers.oozie>
+        <s3.id></s3.id> <!-- don't test S3 -->
       </properties>
     </profile>
 
@@ -1261,6 +1279,7 @@
         <vers.oozie>4.0.0-cdh${cdh5.version}</vers.oozie>
         <vers.solr>${vers.solr-cdh5}</vers.solr>
         <solr.expected.version>${vers.solr-cdh5}</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->
+        <vers.hadoop-aws>2.5.0-cdh5.3.0</vers.hadoop-aws>
       </properties>
     </profile>
 
