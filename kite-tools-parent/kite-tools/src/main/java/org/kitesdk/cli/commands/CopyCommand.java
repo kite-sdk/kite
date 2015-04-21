@@ -23,6 +23,7 @@ import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
 import org.apache.crunch.PipelineResult;
+import org.apache.crunch.Target;
 import org.kitesdk.data.View;
 import org.kitesdk.tools.CopyTask;
 import org.slf4j.Logger;
@@ -47,6 +48,11 @@ public class CopyCommand extends BaseDatasetCommand {
       description="The number of writer processes to use")
   int numWriters = -1;
 
+  @Parameter(
+      names={"--overwrite"},
+      description="Remove any data already in the target view or dataset")
+  boolean overwrite = false;
+
   @Override
   public int run() throws IOException {
     Preconditions.checkArgument(datasets != null && datasets.size() > 1,
@@ -67,6 +73,10 @@ public class CopyCommand extends BaseDatasetCommand {
 
     if (numWriters >= 0) {
       task.setNumWriters(numWriters);
+    }
+
+    if (overwrite) {
+      task.setWriteMode(Target.WriteMode.OVERWRITE);
     }
 
     PipelineResult result = task.run();

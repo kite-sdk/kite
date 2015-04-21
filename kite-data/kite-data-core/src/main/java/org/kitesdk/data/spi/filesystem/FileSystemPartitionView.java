@@ -156,7 +156,7 @@ class FileSystemPartitionView<E> extends FileSystemView<E>
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(
       value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
       justification="Null value checked by precondition")
-  private static URI relativize(@Nullable URI root, URI location) {
+  private static URI relativize(@Nullable URI root, @Nullable URI location) {
     Preconditions.checkNotNull(root, "Cannot find location relative to null");
 
     if (location == null) {

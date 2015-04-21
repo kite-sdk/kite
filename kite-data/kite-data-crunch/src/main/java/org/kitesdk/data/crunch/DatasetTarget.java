@@ -76,6 +76,9 @@ class DatasetTarget<E> implements MapReduceTarget {
   @SuppressWarnings("unchecked")
   public boolean handleExisting(WriteMode writeMode, long lastModForSource,
       Configuration entries) {
+    outputConf(
+        DatasetKeyOutputFormat.KITE_WRITE_MODE,
+        kiteWriteMode(writeMode).toString());
 
     if (view == null) {
       try {
@@ -98,11 +101,10 @@ class DatasetTarget<E> implements MapReduceTarget {
           LOG.error("Dataset/view " + view + " already exists!");
           throw new CrunchRuntimeException("Dataset/view already exists: " + view);
         case OVERWRITE:
-          LOG.info("Deleting all data from: " + view);
-          delete(view);
+          LOG.info("Overwriting existing dataset/view: " + view);
           break;
         case APPEND:
-          LOG.info("Writing to existing dataset/view: " + view);
+          LOG.info("Appending to existing dataset/view: " + view);
           break;
         case CHECKPOINT:
           long lastModForTarget = -1;
@@ -131,6 +133,20 @@ class DatasetTarget<E> implements MapReduceTarget {
       LOG.info("Writing to empty dataset/view: " + view);
     }
     return exists;
+  }
+
+  private DatasetKeyOutputFormat.WriteMode kiteWriteMode(WriteMode mode) {
+    switch (mode) {
+      case DEFAULT:
+        return DatasetKeyOutputFormat.WriteMode.DEFAULT;
+      case APPEND:
+        return DatasetKeyOutputFormat.WriteMode.APPEND;
+      case OVERWRITE:
+        return DatasetKeyOutputFormat.WriteMode.OVERWRITE;
+      default:
+        // use APPEND and enforce in handleExisting
+        return DatasetKeyOutputFormat.WriteMode.APPEND;
+    }
   }
 
   private void delete(View view) {

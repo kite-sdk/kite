@@ -43,6 +43,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.spi.PartitionedDataset;
+import org.kitesdk.data.spi.Replaceable;
 import org.kitesdk.data.spi.SizeAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,7 @@ import org.kitesdk.data.Formats;
 @SuppressWarnings("deprecation")
 public class FileSystemDataset<E> extends AbstractDataset<E> implements
     Mergeable<FileSystemDataset<E>>, InputFormatAccessor<E>, LastModifiedAccessor,
-    PartitionedDataset<E>, SizeAccessor, Signalable<E> {
+    PartitionedDataset<E>, SizeAccessor, Signalable<E>, Replaceable<View<E>> {
 
   private static final Logger LOG = LoggerFactory
     .getLogger(FileSystemDataset.class);
@@ -218,8 +219,8 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
       "Attempt to get a partition on a non-partitioned dataset (name:%s)",
       name);
 
-    LOG.debug("Loading partition for key {}, allowCreate:{}", new Object[] {
-      key, allowCreate });
+    LOG.debug("Loading partition for key {}, allowCreate:{}", new Object[]{
+        key, allowCreate});
 
     Path partitionDirectory = fileSystem.makeQualified(
         toDirectoryName(directory, key));
@@ -327,7 +328,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   }
 
   public void addExistingPartitions() {
-    if (partitionListener != null) {
+    if (partitionListener != null && descriptor.isPartitioned()) {
       for (Path partition : pathIterator()) {
         partitionListener.partitionAdded(namespace, name, partition.toString());
       }
@@ -377,7 +378,19 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     }
   }
 
-  public void replace(FileSystemView<E> update) {
+  @Override
+  public boolean canReplace(View<E> part) {
+    if (part instanceof FileSystemView) {
+      return equals(part.getDataset()) &&
+          ((FileSystemView) part).getConstraints().alignedWithBoundaries();
+    } else if (part instanceof FileSystemDataset) {
+      return equals(part);
+    }
+    return false;
+  }
+
+  @Override
+  public void replace(View<E> update) {
     DatasetDescriptor updateDescriptor = update.getDataset().getDescriptor();
 
     // check that the dataset's descriptor can read the update
@@ -397,12 +410,14 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
         Iterable<PartitionView<E>> existingPartitions = dest
             .toConstraintsView()
             .getCoveringPartitions();
-        for (PartitionView<E> toRemove : existingPartitions) {
-          Path path = new Path(toRemove.getUri());
+        for (PartitionView<E> partition : existingPartitions) {
+          FileSystemPartitionView<E> toRemove =
+              (FileSystemPartitionView<E>) partition;
+          Path path = new Path(toRemove.getLocation());
           removals.add(path);
-          if (partitionListener != null) {
+          if (partitionListener != null && descriptor.isPartitioned()) {
             partitionListener.partitionDeleted(
-                namespace, name, path.toString());
+                namespace, name, toRemove.getRelativeLocation().toString());
           }
         }
 
@@ -411,9 +426,9 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
             new Path(dest.getLocation()), new Path(src.getLocation()),
             removals);
 
-        if (partitionListener != null) {
+        if (partitionListener != null && descriptor.isPartitioned()) {
           partitionListener.partitionAdded(
-              namespace, name, dest.getLocation().toString());
+              namespace, name, dest.getRelativeLocation().toString());
         }
 
       } else {
