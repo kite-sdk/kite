@@ -23,7 +23,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -36,14 +35,16 @@ import org.junit.Test;
 import org.kitesdk.cli.TestUtil;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetNotFoundException;
-import org.kitesdk.data.DatasetRecordException;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.URIBuilder;
 import org.kitesdk.data.spi.filesystem.DatasetTestUtilities;
 import org.slf4j.Logger;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.contains;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 public class TestCSVImportCommand {
 

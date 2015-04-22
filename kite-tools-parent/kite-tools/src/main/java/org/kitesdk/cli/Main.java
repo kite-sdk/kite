@@ -26,6 +26,7 @@ import com.google.common.io.Closeables;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.Set;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -255,6 +256,10 @@ public class Main extends Configured implements Tool {
     PropertyConfigurator.configure(
         Main.class.getResource("/kite-cli-logging.properties"));
     Logger console = LoggerFactory.getLogger(Main.class);
+    // use Log4j for any libraries using commons-logging
+    LogFactory.getFactory().setAttribute(
+        "org.apache.commons.logging.Log",
+        "org.apache.commons.logging.impl.Log4JLogger");
     int rc = ToolRunner.run(new Configuration(), new Main(console), args);
     System.exit(rc);
   }

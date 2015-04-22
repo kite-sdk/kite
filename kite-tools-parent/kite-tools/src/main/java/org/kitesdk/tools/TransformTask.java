@@ -18,11 +18,9 @@ package org.kitesdk.tools;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
-import com.google.common.io.Closeables;
 import java.io.IOException;
 import java.net.URI;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.mapreduce.AvroKeyInputFormat;
 import org.apache.crunch.DoFn;
 import org.apache.crunch.MapFn;
 import org.apache.crunch.PCollection;
@@ -30,7 +28,6 @@ import org.apache.crunch.Pipeline;
 import org.apache.crunch.PipelineResult;
 import org.apache.crunch.PipelineResult.StageResult;
 import org.apache.crunch.Target;
-import org.apache.crunch.impl.mem.MemPipeline;
 import org.apache.crunch.impl.mr.MRPipeline;
 import org.apache.crunch.types.PType;
 import org.apache.crunch.types.avro.AvroType;
@@ -40,7 +37,6 @@ import org.apache.hadoop.hive.conf.HiveConf;
 import org.kitesdk.compat.DynMethods;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.View;
 import org.kitesdk.data.crunch.CrunchDatasets;
 
@@ -96,6 +92,10 @@ public class TransformTask<S, T> extends Configured {
   }
 
   public PipelineResult run() throws IOException {
+    if (isLocal(from.getDataset()) || isLocal(to.getDataset())) {
+      getConf().set("mapreduce.framework.name", "local");
+    }
+
     PType<T> toPType = ptype(to);
     MapFn<T, T> validate = new CheckEntityClass<T>(to.getType());
 
