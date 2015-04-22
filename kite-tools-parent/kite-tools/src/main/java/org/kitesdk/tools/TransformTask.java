@@ -32,7 +32,9 @@ import org.apache.crunch.impl.mr.MRPipeline;
 import org.apache.crunch.types.PType;
 import org.apache.crunch.types.avro.AvroType;
 import org.apache.crunch.types.avro.Avros;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.kitesdk.compat.DynMethods;
 import org.kitesdk.data.Dataset;
@@ -93,7 +95,14 @@ public class TransformTask<S, T> extends Configured {
 
   public PipelineResult run() throws IOException {
     if (isLocal(from.getDataset()) || isLocal(to.getDataset())) {
-      getConf().set("mapreduce.framework.name", "local");
+      // copy to avoid making changes to the caller's configuration
+      Configuration conf = new Configuration(getConf());
+      conf.set("mapreduce.framework.name", "local");
+      // replace the default FS for Crunch to avoid distributed cache errors.
+      // this doesn't affect the source or target, they are fully-qualified.
+      conf.set("fs.defaultFS", "file:/");
+      conf.set("fs.default.name", "file:/");
+      setConf(conf);
     }
 
     PType<T> toPType = ptype(to);
