@@ -36,6 +36,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.PropertyConfigurator;
 import org.kitesdk.cli.commands.CSVImportCommand;
 import org.kitesdk.cli.commands.CSVSchemaCommand;
+import org.kitesdk.cli.commands.CompactCommand;
 import org.kitesdk.cli.commands.CopyCommand;
 import org.kitesdk.cli.commands.CreateColumnMappingCommand;
 import org.kitesdk.cli.commands.CreateDatasetCommand;
@@ -98,6 +99,7 @@ public class Main extends Configured implements Tool {
     jc.addCommand("create", new CreateDatasetCommand(console));
     jc.addCommand("copy", new CopyCommand(console));
     jc.addCommand("transform", new TransformCommand(console));
+    jc.addCommand("compact", new CompactCommand(console));
     jc.addCommand("update", new UpdateDatasetCommand(console));
     jc.addCommand("delete", new DeleteCommand(console));
     jc.addCommand("schema", new SchemaCommand(console));
