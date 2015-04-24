@@ -16,7 +16,6 @@
 
 package org.kitesdk.compat;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.JobID;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
 
@@ -29,8 +28,8 @@ public class Hadoop {
   public static class Job {
     public static final DynMethods.StaticMethod newInstance =
         new DynMethods.Builder("getInstance")
-            .impl(org.apache.hadoop.mapreduce.Job.class, Configuration.class)
-            .ctorImpl(org.apache.hadoop.mapreduce.Job.class, Configuration.class)
+            .impl(org.apache.hadoop.mapreduce.Job.class, org.apache.hadoop.conf.Configuration.class)
+            .ctorImpl(org.apache.hadoop.mapreduce.Job.class, org.apache.hadoop.conf.Configuration.class)
             .buildStatic();
   }
 
@@ -40,10 +39,10 @@ public class Hadoop {
         new DynConstructors.Builder(org.apache.hadoop.mapreduce.TaskAttemptContext.class)
             .hiddenImpl(
                 "org.apache.hadoop.mapreduce.task.JobContextImpl",
-                Configuration.class, JobID.class)
+                org.apache.hadoop.conf.Configuration.class, JobID.class)
             .hiddenImpl(
                 "org.apache.hadoop.mapreduce.JobContext",
-                Configuration.class, JobID.class)
+                org.apache.hadoop.conf.Configuration.class, JobID.class)
             .build();
 
     public static final DynMethods.UnboundMethod getConfiguration =
@@ -63,10 +62,10 @@ public class Hadoop {
         new DynConstructors.Builder(org.apache.hadoop.mapreduce.TaskAttemptContext.class)
             .hiddenImpl(
                 "org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl",
-                Configuration.class, TaskAttemptID.class)
+                org.apache.hadoop.conf.Configuration.class, TaskAttemptID.class)
             .hiddenImpl(
                 "org.apache.hadoop.mapreduce.TaskAttemptContext",
-                Configuration.class, TaskAttemptID.class)
+                org.apache.hadoop.conf.Configuration.class, TaskAttemptID.class)
             .build();
 
     public static final DynMethods.UnboundMethod getConfiguration =
@@ -74,7 +73,6 @@ public class Hadoop {
             .impl(org.apache.hadoop.mapreduce.TaskAttemptContext.class)
             .build();
   }
-
   public static class FSDataOutputStream {
     public static final DynMethods.UnboundMethod hflush =
         new DynMethods.Builder("hflush")
@@ -96,7 +94,15 @@ public class Hadoop {
             .impl(org.apache.hadoop.io.compress.SnappyCodec.class,
                 "isNativeCodeLoaded")
             .impl(org.apache.hadoop.io.compress.SnappyCodec.class,
-                "isNativeSnappyLoaded", Configuration.class)
+                "isNativeSnappyLoaded", org.apache.hadoop.conf.Configuration.class)
             .buildStatic();
+  }
+
+  public static class Configuration {
+    public static final DynMethods.UnboundMethod addResource =
+      new DynMethods.Builder("addResource")
+          .impl(org.apache.hadoop.conf.Configuration.class, org.apache.hadoop.conf.Configuration.class)
+          .defaultNoop()
+          .build();
   }
 }
