@@ -111,8 +111,8 @@ class FileSystemPartitionView<E> extends FileSystemView<E>
         new Predicate<PartitionView<E>>() {
           @Override
           public boolean apply(@Nullable PartitionView<E> input) {
-            return input != null && input.getLocation().getPath()
-                .startsWith(location.toUri().getPath());
+            return input != null &&
+                contains(location.toUri(), root, input.getLocation());
           }
         });
   }
@@ -151,6 +151,11 @@ class FileSystemPartitionView<E> extends FileSystemView<E>
   @Override
   public int hashCode() {
     return Objects.hashCode(super.hashCode(), location);
+  }
+
+  private static boolean contains(URI location, Path root, URI relative) {
+    URI full = new Path(root, relative.getPath()).toUri();
+    return !location.relativize(full).isAbsolute();
   }
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(
@@ -249,12 +254,10 @@ class FileSystemPartitionView<E> extends FileSystemView<E>
 
     @Override
     public boolean apply(@Nullable StorageKey key) {
-      return (key != null && key.getPath() != null && contains(key.getPath()));
+      return (key != null &&
+          key.getPath() != null &&
+          contains(location, root, key.getPath().toUri()));
     }
 
-    private boolean contains(Path relative) {
-      URI full = new Path(root, relative.toUri().getPath()).toUri();
-      return !location.relativize(full).isAbsolute();
-    }
   }
 }

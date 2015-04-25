@@ -380,7 +380,10 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
 
   @Override
   public boolean canReplace(View<E> part) {
-    if (part instanceof FileSystemView) {
+    if (!descriptor.isPartitioned()) {
+      // don't attempt to replace the root directory
+      return false;
+    } else if (part instanceof FileSystemView) {
       return equals(part.getDataset()) &&
           ((FileSystemView) part).getConstraints().alignedWithBoundaries();
     } else if (part instanceof FileSystemDataset) {
