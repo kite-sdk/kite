@@ -1467,6 +1467,21 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
+  public void testGrokWithMultipleGroupsWithSameName() throws Exception {
+    morphline = createMorphline("test-morphlines/grokWithMultipleGroupsWithSameName");
+    Record record = new Record();
+    record.put(Fields.MESSAGE, "123 456");
+    assertTrue(morphline.process(record));
+    
+    Record expected = new Record();
+    expected.put(Fields.MESSAGE, "123 456");
+    expected.put("syslog_pri", "123");
+    expected.put("syslog_pri", "456");
+    assertEquals(expected, collector.getFirstRecord());
+    assertNotSame(record, collector.getFirstRecord());      
+  }
+  
+  @Test
   public void testConvertTimestamp() throws Exception {
     morphline = createMorphline("test-morphlines/convertTimestamp");    
     Record record = new Record();
