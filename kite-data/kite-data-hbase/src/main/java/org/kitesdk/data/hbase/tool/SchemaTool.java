@@ -15,10 +15,13 @@
  */
 package org.kitesdk.data.hbase.tool;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import org.apache.commons.collections.MultiHashMap;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.ValidationException;
@@ -314,31 +317,42 @@ public class SchemaTool {
   private void createTables(Collection<HTableDescriptor> tableDescriptors)
       throws InterruptedException {
     try {
-      Map<String, HTableDescriptor> localCopy = Maps.newHashMap();
+      Set<String> tablesCreated = Sets.newHashSet();
+      Multimap<String, HTableDescriptor> pendingTableUpdates = ArrayListMultimap
+          .create();
       for (HTableDescriptor tableDescriptor : tableDescriptors) {
         String tableName = Bytes.toString(tableDescriptor.getName());
-        if (hbaseAdmin.isTableAvailable(tableName)) {
+        if (tablesCreated.contains(tableName)) {
+          // We have to wait for the table async creation to modify
           // Just add the required columns to be added
-          modifyTable(tableName, tableDescriptor);
-          localCopy.remove(tableName);
+          pendingTableUpdates.put(tableName, tableDescriptor);
         } else {
           LOG.info("Creating table " + tableName);
           hbaseAdmin.createTableAsync(tableDescriptor, new byte[][] {});
-          localCopy.put(tableName, tableDescriptor);
+          tablesCreated.add(tableName);
         }
       }
 
       // Wait for the tables to be online
       for (int waitCount = 0;
            waitCount < MAX_SECOND_WAIT_FOR_TABLE_CREATION; waitCount++) {
-        Set<String> tables = Sets.newHashSet(localCopy.keySet());
-        for (String table : tables) {
+        Iterator<String> iterator = tablesCreated.iterator();
+        while (iterator.hasNext()) {
+          String table = iterator.next();
           if (hbaseAdmin.isTableAvailable(table)) {
-            localCopy.remove(table);
+            // Perform any updates scheduled on the table
+            if (pendingTableUpdates.containsKey(table)) {
+              for (HTableDescriptor tableDescriptor : pendingTableUpdates
+                  .get(table)) {
+                // Add the new columns - synchronous calls
+                modifyTable(table, tableDescriptor);
+              }
+            }
+            iterator.remove();
           }
         }
         // If all tables are available, then break
-        if (localCopy.isEmpty()) {
+        if (tablesCreated.isEmpty()) {
           break;
         }
         // Sleep for a second before checking again
