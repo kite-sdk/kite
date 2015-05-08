@@ -28,6 +28,7 @@ import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.hive.ql.io.RCFile;
 import org.apache.hadoop.hive.serde2.columnar.BytesRefArrayWritable;
 import org.apache.hadoop.hive.serde2.columnar.BytesRefWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
@@ -101,8 +102,8 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
     startSession();
     assertEquals(1, collector.getNumStartEvents());
     assertTrue(morphline.process(input));
-    assertTrue(areFieldsEqual(expected, collector.getRecords(), NUM_COLUMNS,
-        true));
+    assertTrue(
+        areFieldsEqual(expected, collector.getRecords(), NUM_COLUMNS, true));
   }
 
   @Test
@@ -122,8 +123,25 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
         false));
   }
 
+  @Test
+  public void testRCFileWithNull() throws Exception {
+    morphline = createMorphline("test-morphlines/rcFileMorphlineRow");
+    String rcFileName = "testRCFileRowWise.rc";
+    List<Record> expected = setupRCFile(rcFileName, NUM_RECORDS,
+        NUM_COLUMNS, true, true);
+    Path inputFile = dfs.makeQualified(new Path(testDirectory, rcFileName));
+    Record input = new Record();
+    input.put(Fields.ATTACHMENT_NAME, inputFile.toString());
+    input.put(Fields.ATTACHMENT_BODY, readPath(inputFile));
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(input));
+    assertTrue(
+        areFieldsEqual(expected, collector.getRecords(), NUM_COLUMNS, true));
+  }
+
   private void createRCFile(final String fileName, final int numRecords,
-                            final int maxColumns) throws IOException {
+      final int maxColumns, boolean addNullValue) throws IOException {
     // Write the sequence file
     SequenceFile.Metadata metadata = getMetadataForRCFile();
     Configuration conf = new Configuration();
@@ -135,7 +153,12 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
       BytesRefArrayWritable dataWrite = new BytesRefArrayWritable(maxColumns);
       dataWrite.resetValid(maxColumns);
       for (int column = 0; column < maxColumns; column++) {
-        Text sampleText = new Text("ROW-NUM:" + row + ", COLUMN-NUM:" + column);
+        Writable sampleText = new Text(
+            "ROW-NUM:" + row + ", COLUMN-NUM:" + column);
+        // Set the last column of the last row as null
+        if (addNullValue && column == maxColumns - 1 && row == numRecords - 1) {
+          sampleText = NullWritable.get();
+        }
         ByteArrayDataOutput dataOutput = ByteStreams.newDataOutput();
         sampleText.write(dataOutput);
         dataWrite.set(column, new BytesRefWritable(dataOutput.toByteArray()));
@@ -151,17 +174,27 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
   }
 
   private List<Record> setupRCFile(final String fileName, final int numRecords,
-                                   final int maxColumns, final boolean rowWise)
+      final int maxColumns, final boolean rowWise) throws IOException {
+    return setupRCFile(fileName, numRecords, maxColumns, rowWise, false);
+  }
+
+  private List<Record> setupRCFile(final String fileName, final int numRecords,
+      final int maxColumns, final boolean rowWise, final boolean addNullValue)
       throws IOException {
-    createRCFile(fileName, numRecords, maxColumns);
+    createRCFile(fileName, numRecords, maxColumns, addNullValue);
     List<Record> expected = Lists.newArrayList();
     if (rowWise) {
       // Row wise expected records
       for (int row = 0; row < numRecords; row++) {
         Record record = new Record();
         for (int column = 0; column < maxColumns; column++) {
-          Text sampleText = new Text("ROW-NUM:" + row + ", COLUMN-NUM:"
-              + column);
+          Writable sampleText = new Text(
+              "ROW-NUM:" + row + ", COLUMN-NUM:" + column);
+          // Expect the last column of the last row as null
+          if (addNullValue && column == maxColumns - 1
+              && row == numRecords - 1) {
+            sampleText = NullWritable.get();
+          }
           record.put("field" + (column + 1), sampleText);
         }
         expected.add(record);
@@ -172,8 +205,13 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
         Record record = new Record();
         List<Writable> outputs = new ArrayList<Writable>();
         for (int row = 0; row < numRecords; row++) {
-          Text sampleText = new Text("ROW-NUM:" + row + ", COLUMN-NUM:"
-              + column);
+          Writable sampleText = new Text(
+              "ROW-NUM:" + row + ", COLUMN-NUM:" + column);
+          // Expect the last column of the last row as null
+          if (addNullValue && column == maxColumns - 1
+              && row == numRecords - 1) {
+            sampleText = NullWritable.get();
+          }
           outputs.add(sampleText);
         }
         record.put("field" + (column + 1), outputs);
