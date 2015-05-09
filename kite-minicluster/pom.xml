@@ -21,8 +21,8 @@
 
   <properties>
     <!-- TODO move to parent POM when building for multiple profiles -->
-    <vers.hive-cdh5>0.12.0-cdh${cdh5.version}</vers.hive-cdh5>
-    <vers.flume-cdh5>1.4.0-cdh${cdh5.version}</vers.flume-cdh5>
+    <vers.hive-cdh5>0.13.1-cdh${cdh5.version}</vers.hive-cdh5>
+    <vers.flume-cdh5>1.5.0-cdh${cdh5.version}</vers.flume-cdh5>
   </properties>
 
   <build>
