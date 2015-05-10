@@ -15,6 +15,8 @@
  */
 package org.kitesdk.morphline.api;
 
+import java.io.IOException;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +40,7 @@ public class ScriptEvaluatorTest extends Assert {
   
 	@Test
 	public void testBasic() throws Exception {
-		ScriptEvaluator script = new ScriptEvaluator(javaImports, "return x * 2; ", Integer.class, new String[] { "x" }, new Class[] { Integer.class }, "myQuery");
+		ScriptEvaluator script = new ScriptEvaluator(javaImports, "return x * 2; ", Integer.class, new String[] { "x" }, new Class[] { Integer.class }, new Class[] {RuntimeException.class, IOException.class}, "myQuery");
 		Object result = script.evaluate(new Object[] { new Integer(1) });
 		assertEquals(result, new Integer(2));
 	}

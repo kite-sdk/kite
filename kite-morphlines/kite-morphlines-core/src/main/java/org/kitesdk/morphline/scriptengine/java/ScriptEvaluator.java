@@ -59,6 +59,12 @@ public class ScriptEvaluator<T> {
   public ScriptEvaluator(String javaImports, String javaCodeBlock, Class<T> returnType,
       String[] parameterNames, Class[] parameterTypes,
       String parseLocation) throws ScriptException {
+    this(javaImports, javaCodeBlock, returnType, parameterNames, parameterTypes, new Class[0], parseLocation);
+  }
+  
+  public ScriptEvaluator(String javaImports, String javaCodeBlock, Class<T> returnType, 
+      String[] parameterNames, Class[] parameterTypes, Class[] throwTypes,
+      String parseLocation) throws ScriptException {
     
     if (parameterNames.length != parameterTypes.length) { 
       throw new IllegalArgumentException(
@@ -88,7 +94,20 @@ public class ScriptEvaluator<T> {
       }
       script += parameterTypes[i].getCanonicalName() + " " + parameterNames[i];
     }
-    script += ") { " + javaCodeBlock + " }";     
+    script += ") ";
+    
+    if (throwTypes.length > 0) {
+      script += "throws ";
+      for (int i = 0; i < throwTypes.length; i++) {
+        if (i > 0) {
+          script += ", ";
+        }
+        script += throwTypes[i].getCanonicalName();
+      }
+      script += " ";
+    }
+    
+    script += "{ " + javaCodeBlock + " }";     
     script += "\n }";
     LOG.trace("Compiling script: \n{}", script);    
     

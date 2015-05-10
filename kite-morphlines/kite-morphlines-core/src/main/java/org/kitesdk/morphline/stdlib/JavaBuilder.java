@@ -86,6 +86,7 @@ public final class JavaBuilder implements CommandBuilder {
           Boolean.class,
           new String[] {"record", "config", "parent", "child", "context", "logger"}, 
           new Class[] {Record.class, Config.class, Command.class, Command.class, MorphlineContext.class, Logger.class}, 
+          new Class[] {Exception.class},
           javaCodeBlock
           );
     }
