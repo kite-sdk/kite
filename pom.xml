@@ -1346,7 +1346,7 @@
         <artifact.hbase-test-deps>kite-hbase-cdh5-test-dependencies</artifact.hbase-test-deps>
         <cdh.version>${cdh5.version}</cdh.version>
         <vers.crunch>${vers.crunch-cdh5}</vers.crunch>
-        <vers.flume>1.4.0-cdh${cdh5.version}</vers.flume>
+        <vers.flume>1.5.0-cdh${cdh5.version}</vers.flume>
         <vers.hive>${vers.hive-cdh5}</vers.hive>
         <vers.oozie>4.0.0-cdh${cdh5.version}</vers.oozie>
         <vers.solr>${vers.solr-cdh5}</vers.solr>
