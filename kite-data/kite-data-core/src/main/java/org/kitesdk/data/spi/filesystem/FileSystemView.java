@@ -25,6 +25,7 @@ import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.Signalable;
 import org.kitesdk.data.spi.AbstractDatasetReader;
 import org.kitesdk.data.spi.AbstractDatasetWriter;
 import org.kitesdk.data.spi.AbstractRefinableView;
@@ -54,7 +55,7 @@ import org.slf4j.LoggerFactory;
  */
 @Immutable
 class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatAccessor<E>,
-    LastModifiedAccessor, SizeAccessor {
+    LastModifiedAccessor, SizeAccessor, Signalable<E> {
 
   private static final Logger LOG = LoggerFactory.getLogger(FileSystemView.class);
 
@@ -63,11 +64,14 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
 
   private final PartitionListener listener;
 
-  FileSystemView(FileSystemDataset<E> dataset, @Nullable PartitionListener listener, Class<E> type) {
+  private final SignalManager signalManager;
+
+  FileSystemView(FileSystemDataset<E> dataset, @Nullable PartitionListener listener, @Nullable SignalManager signalManager, Class<E> type) {
     super(dataset, type);
     this.fs = dataset.getFileSystem();
     this.root = dataset.getDirectory();
     this.listener = listener;
+    this.signalManager = signalManager;
   }
 
   private FileSystemView(FileSystemView<E> view, Constraints c) {
@@ -75,6 +79,7 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
     this.fs = view.fs;
     this.root = view.root;
     this.listener = view.listener;
+    this.signalManager = view.signalManager;
   }
 
   @Override
@@ -214,6 +219,31 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
         throw new DatasetIOException("Cannot find last modified time of of " + dir, e);
       }
     }
+
+    // if view was marked ready more recently count it as the modified time
+    if (signalManager != null) {
+      long readyTimestamp = signalManager.getReadyTimestamp(getConstraints());
+      if (lastMod < readyTimestamp) {
+        lastMod = readyTimestamp;
+      }
+    }
+
     return lastMod;
+  }
+
+  @Override
+  public void signalReady() {
+    if (signalManager != null) {
+      signalManager.signalReady(getConstraints());
+    }
+  }
+
+  @Override
+  public boolean isReady() {
+    if (signalManager != null) {
+      long readyTimestamp = signalManager.getReadyTimestamp(getConstraints());
+      return readyTimestamp != -1;
+    }
+    return false;
   }
 }

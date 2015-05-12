@@ -120,6 +120,17 @@ public class In<T> extends RegisteredPredicate<T> {
         Iterables.transform(set, new ToString<T>(schema)));
   }
 
+  @Override
+  public String toNormalizedString(Schema schema) {
+    // we want the string this returns to be consistent
+    // ensure the set is sorted before joining it.
+    // ToString first allows us to consistently sort even when
+    // the value may not be comparable
+
+    Iterable<String> strings = Iterables.transform(set, new ToString<T>(schema));
+    return Joiner.on(',').join(Sets.newTreeSet(strings));
+  }
+
   private static class ToString<T> implements Function<T, String> {
     private final Schema schema;
 

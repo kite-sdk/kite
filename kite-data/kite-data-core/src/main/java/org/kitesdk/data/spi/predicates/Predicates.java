@@ -70,6 +70,26 @@ public abstract class Predicates {
     }
   }
 
+  public static <T> String toNormalizedString(Predicate<T> predicate, Schema schema) {
+    if (predicate instanceof Exists) {
+      return "";
+    } else if (predicate instanceof Range) {
+      return ((Range) predicate).toString(schema);
+    } else if (predicate instanceof In) {
+      String values = ((In) predicate).toNormalizedString(schema);
+      if (values.length() != 0) {
+        return values;
+      }
+      // "" is a special case that conflicts with exists, use the named version
+      return "in()";
+    } else if (predicate instanceof RegisteredPredicate) {
+      return RegisteredPredicate.toNormalizedString(
+          (RegisteredPredicate) predicate, schema);
+    } else {
+      throw new DatasetException("Unknown predicate: " + predicate);
+    }
+  }
+
   public static <T> Predicate<T> fromString(String pString, Schema schema) {
     if (pString.length() == 0) {
       return exists();

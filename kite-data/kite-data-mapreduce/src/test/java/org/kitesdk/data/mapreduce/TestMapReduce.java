@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.util.Utf8;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -26,16 +27,20 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.Signalable;
+import org.kitesdk.data.View;
 
 @RunWith(Parameterized.class)
 public class TestMapReduce extends FileSystemTestBase {
@@ -116,6 +121,17 @@ public class TestMapReduce extends FileSystemTestBase {
     job.waitForCompletion(true);
   }
 
+  @Test(expected = DatasetException.class)
+  public void testJobFailsWithEmptyButReadyOutput() throws Exception {
+    Assume.assumeTrue(!Hadoop.isHadoop1());
+    populateInputDataset();
+    // don't populate the output, but signal it as ready
+    ((Signalable)outputDataset).signalReady();
+
+    Job job = createJob();
+    job.waitForCompletion(true);
+  }
+
   @Test
   @SuppressWarnings("deprecation")
   public void testJobOverwrite() throws Exception {
@@ -156,6 +172,56 @@ public class TestMapReduce extends FileSystemTestBase {
 
     Assert.assertTrue(job.waitForCompletion(true));
     checkOutput(true);
+  }
+
+  @Test
+  @SuppressWarnings("deprecation")
+  public void testJobOutputDatasetSignaledReady() throws Exception {
+    Assume.assumeTrue(!Hadoop.isHadoop1());
+    populateInputDataset();
+    populateOutputDataset(); // existing output will be overwritten
+
+    Job job = new Job();
+    DatasetKeyInputFormat.configure(job).readFrom(inputDataset).withType(GenericData.Record.class);
+
+    job.setMapperClass(LineCountMapper.class);
+    job.setMapOutputKeyClass(Text.class);
+    job.setMapOutputValueClass(IntWritable.class);
+
+    job.setReducerClass(GenericStatsReducer.class);
+
+    DatasetKeyOutputFormat.configure(job).overwrite(outputDataset).withType(GenericData.Record.class);
+
+    Assert.assertTrue(job.waitForCompletion(true));
+    Assert.assertTrue("Output dataset should be signaled ready",
+        ((Signalable)outputDataset).isReady());
+  }
+
+  @Test
+  @SuppressWarnings("deprecation")
+  public void testSignalReadyOutputView() throws Exception {
+    Assume.assumeTrue(!Hadoop.isHadoop1());
+    populateInputDataset();
+    populateOutputDataset(); // existing output will be overwritten
+
+    Job job = new Job();
+    DatasetKeyInputFormat.configure(job).readFrom(inputDataset).withType(GenericData.Record.class);
+
+    job.setMapperClass(LineCountMapper.class);
+    job.setMapOutputKeyClass(Text.class);
+    job.setMapOutputValueClass(IntWritable.class);
+
+    job.setReducerClass(GenericStatsReducer.class);
+
+    View<Record> outputView = outputDataset.with("name", "apple", "banana", "carrot");
+    DatasetKeyOutputFormat.configure(job).overwrite(outputView).withType(GenericData.Record.class);
+
+    Assert.assertTrue(job.waitForCompletion(true));
+
+    Assert.assertFalse("Output dataset should not be signaled ready",
+        ((Signalable)outputDataset).isReady());
+    Assert.assertTrue("Output view should be signaled ready",
+        ((Signalable)outputView).isReady());
   }
 
   private void populateInputDataset() {

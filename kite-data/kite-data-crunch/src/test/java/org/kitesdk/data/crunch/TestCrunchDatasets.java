@@ -37,10 +37,12 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
@@ -48,6 +50,7 @@ import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.MiniDFSTest;
+import org.kitesdk.data.Signalable;
 import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.DatasetRepository;
@@ -399,6 +402,12 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     Thread.sleep(1000); // ensure output is newer than input on local filesystems with 1s granularity
     runCheckpointPipeline(inputDataset, outputDataset);
 
+    // under hadoop1 the issues with LocalJobRunner (MAPREDUCE-2350) require that we
+    // manually ready the output dataset
+    if (Hadoop.isHadoop1()) {
+      ((Signalable)outputDataset).signalReady();
+    }
+
     checkTestUsers(outputDataset, 1);
 
     long lastModified = ((LastModifiedAccessor) outputDataset).getLastModified();
@@ -419,6 +428,50 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     checkTestUsers(outputDataset, 1);
     Assert.assertTrue(((LastModifiedAccessor) outputDataset).getLastModified() > lastModified);
   }
+
+  @Test
+  public void testWriteModeCheckpointToNotReadyOutput() throws Exception {
+    //identity partition so we can overwrite the output
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().
+      identity("username").build();
+
+    Dataset<Record> inputDataset = repo.create("ns", "in", new DatasetDescriptor.
+        Builder().schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
+    Dataset<Record> outputDataset = repo.create("ns", "out", new DatasetDescriptor.
+        Builder().schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
+
+    writeTestUsers(inputDataset, 1, 0);
+
+    // ensure output is newer than input on local filesystems with 1s granularity
+    Thread.sleep(1000);
+
+    runCheckpointPipeline(inputDataset, outputDataset);
+
+    checkTestUsers(outputDataset, 1);
+
+    // under hadoop1 the issues with LocalJobRunner (MAPREDUCE-2350) require that we
+    // manually ready the output dataset
+    if (Hadoop.isHadoop1()) {
+      ((Signalable)outputDataset).signalReady();
+    } else {
+      //under hadoop2 the output will have been marked ready
+      Assert.assertTrue("output dataset should be ready after mapreduce", ((Signalable)outputDataset).isReady());
+    }
+
+    long lastModified = ((LastModifiedAccessor) outputDataset).getLastModified();
+
+    // ensure output is newer than input on local filesystems with 1s granularity
+    Thread.sleep(1000);
+
+    // now output to a view, this ensures that the view isn't ready
+    View<Record> outputView = outputDataset.with("username", "test-0");
+
+    // re-run without changing input and output should change since the view is not ready
+    runCheckpointPipeline(inputDataset, outputView);
+    checkTestUsers(outputDataset, 1);
+    Assert.assertTrue(((LastModifiedAccessor) outputView).getLastModified() > lastModified);
+  }
+
   // Statically typed identify function to ensure the expected record is used.
   static class UserRecordIdentityFn extends MapFn<NewUserRecord, NewUserRecord> {
 
@@ -539,13 +592,41 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     }
   }
 
+  @Test
+  public void testSignalReadyOutputView() {
+    Assume.assumeTrue(!Hadoop.isHadoop1());
+    Dataset<Record> inputDataset = repo.create("ns", "in", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).build());
 
-  private void runCheckpointPipeline(Dataset<Record> inputDataset,
-      Dataset<Record> outputDataset) {
+    Dataset<Record> outputDataset = repo.create("ns", "out", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).build());
+
+    writeTestUsers(inputDataset, 10);
+
+    View<Record> inputView = inputDataset.with("username", "test-8", "test-9");
+    View<Record> outputView = outputDataset.with("username", "test-8", "test-9");
+    Assert.assertEquals(2, datasetSize(inputView));
+
     Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
     PCollection<GenericData.Record> data = pipeline.read(
-        CrunchDatasets.asSource(inputDataset));
-    pipeline.write(data, CrunchDatasets.asTarget((View<Record>) outputDataset),
+        CrunchDatasets.asSource(inputView));
+    pipeline.write(data, CrunchDatasets.asTarget(outputView), Target.WriteMode.APPEND);
+    pipeline.run();
+
+    Assert.assertEquals(2, datasetSize(outputView));
+
+    Assert.assertFalse("Output dataset should not be signaled ready",
+        ((Signalable)outputDataset).isReady());
+    Assert.assertTrue("Output view should be signaled ready",
+        ((Signalable)outputView).isReady());
+  }
+
+  private void runCheckpointPipeline(View<Record> inputView,
+      View<Record> outputView) {
+    Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
+    PCollection<GenericData.Record> data = pipeline.read(
+        CrunchDatasets.asSource(inputView));
+    pipeline.write(data, CrunchDatasets.asTarget(outputView),
         Target.WriteMode.CHECKPOINT);
     pipeline.done();
   }

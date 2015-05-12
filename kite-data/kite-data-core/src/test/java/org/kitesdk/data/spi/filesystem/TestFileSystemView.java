@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.spi.filesystem;
 
+import org.kitesdk.data.Signalable;
 import com.google.common.io.Closeables;
 import java.util.Iterator;
 import org.joda.time.DateTime;
@@ -25,6 +26,7 @@ import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.DatasetRepository;
+import org.kitesdk.data.spi.LastModifiedAccessor;
 import org.kitesdk.data.spi.TestRefinableViews;
 import org.kitesdk.data.event.StandardEvent;
 import org.apache.hadoop.fs.FileSystem;
@@ -270,6 +272,35 @@ public class TestFileSystemView extends TestRefinableViews {
         unbounded.deleteAll());
     assertDirectoriesDoNotExist(fs, y2013, sep12, sep, oct12, oct, nov11, nov);
     assertDirectoriesExist(fs, root);
+  }
+
+  @Test
+  @SuppressWarnings("rawtypes")
+  public void testSignalUpdatesLastModified() {
+    long lastModified = ((LastModifiedAccessor)unbounded).getLastModified();
+
+    long signaledTime = -1;
+    long spinStart = System.currentTimeMillis();
+    while(lastModified >= signaledTime && (System.currentTimeMillis() - spinStart) <= 2000) {
+      ((Signalable)unbounded).signalReady();
+      signaledTime = ((LastModifiedAccessor)unbounded).getLastModified();
+    }
+    Assert.assertTrue("Signaling should update last modified time", signaledTime > lastModified);
+  }
+
+  @Test
+  public void testNullSignalManager() {
+    FileSystemDataset<StandardEvent> ds =
+        (FileSystemDataset<StandardEvent>) unbounded.getDataset();
+    FileSystemView<StandardEvent> view =
+        new FileSystemView<StandardEvent>(ds, null, null, StandardEvent.class);
+
+    // getlast modified
+    Assert.assertTrue("Last modified does not require access to signal manager",
+        view.getLastModified() >= -1);
+
+    view.signalReady();
+    Assert.assertFalse("View should not be signaled without manager", view.isReady());
   }
 
   @SuppressWarnings("deprecation")

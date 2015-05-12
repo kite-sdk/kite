@@ -48,6 +48,13 @@ public abstract class RegisteredPredicate<T> implements Predicate<T> {
     return predicate.getName() + "(" + predicate.toString(schema) + ")";
   }
 
+  public static String toNormalizedString(RegisteredPredicate<?> predicate, Schema schema) {
+    // ensure fromString will be successful
+    Preconditions.checkArgument(REGISTRY.containsKey(predicate.getName()),
+        "Predicate is not registered: " + predicate.getName());
+    return predicate.getName() + "(" + predicate.toNormalizedString(schema) + ")";
+  }
+
   public static <T> RegisteredPredicate<T> fromString(String predicate, Schema schema) {
     Matcher match = FUNCTION.matcher(predicate);
     if (match.matches()) {
@@ -59,4 +66,13 @@ public abstract class RegisteredPredicate<T> implements Predicate<T> {
 
   public abstract String getName();
   public abstract String toString(Schema schema);
+
+  /**
+   * Return a normalized form of the predicate such that any logically equivalent
+   * predicate returns the same string. Some predicates may need to override
+   * this method to ensure they are normalized correctly.
+   */
+  public String toNormalizedString(Schema schema) {
+    return toString(schema);
+  }
 }
