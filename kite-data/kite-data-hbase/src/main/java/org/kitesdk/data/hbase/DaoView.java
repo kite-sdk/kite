@@ -38,7 +38,10 @@ import org.kitesdk.data.spi.StorageKey;
 import org.kitesdk.data.spi.Marker;
 import org.kitesdk.data.spi.MarkerRange;
 import java.util.List;
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
+import org.kitesdk.data.RefinableView;
 
 class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor<E> {
 
@@ -54,9 +57,19 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
     this.dataset = view.dataset;
   }
 
+  private DaoView(DaoView<?> view, Schema schema) {
+    super(view, schema);
+    this.dataset = (DaoDataset<E>) view.dataset;
+  }
+
   @Override
   protected DaoView<E> filter(Constraints constraints) {
     return new DaoView<E>(this, constraints);
+  }
+
+  @Override
+  public <T extends GenericRecord> RefinableView<T> asSchema(Schema schema) {
+    return new DaoView<T>(this, schema);
   }
 
   EntityScanner<E> newEntityScanner() {

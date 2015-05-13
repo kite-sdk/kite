@@ -21,6 +21,7 @@ import com.google.common.base.Predicate;
 import java.net.URI;
 import java.util.Map;
 import javax.annotation.concurrent.Immutable;
+import org.apache.avro.Schema;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
@@ -74,6 +75,17 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
     this.entityTest = constraints.toEntityPredicate(accessor);
   }
 
+  protected AbstractRefinableView(AbstractRefinableView<?> view, Schema schema) {
+    this.dataset = (Dataset<E>) view.dataset;
+    this.comparator = view.comparator;
+    this.constraints = view.constraints;
+    // thread-safe, so okay to reuse when views share a partition strategy
+    this.keys = view.keys;
+    // Resolve our type according to the given schema
+    this.accessor = DataModelUtil.accessor(schema);
+    this.entityTest = constraints.toEntityPredicate(accessor);
+  }
+
   protected AbstractRefinableView(AbstractRefinableView<E> view, Constraints constraints) {
     this.dataset = view.dataset;
     this.comparator = view.comparator;
@@ -106,6 +118,11 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
   @Override
   public Class<E> getType() {
     return accessor.getType();
+  }
+
+  @Override
+  public Schema getSchema() {
+    return accessor.getEntitySchema();
   }
 
   public EntityAccessor<E> getAccessor() {
