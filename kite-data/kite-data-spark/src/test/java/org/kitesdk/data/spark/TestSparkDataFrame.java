@@ -21,8 +21,6 @@ import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
@@ -45,10 +43,10 @@ public class TestSparkDataFrame {
             fileSystem.delete(dir, true);
     }
 
-    private static Dataset generateDataset(Format format, CompressionType compressionType) throws Exception {
+    private static Dataset<GenericRecord> generateDataset(Format format, CompressionType compressionType) throws Exception {
         DatasetDescriptor descriptor = new DatasetDescriptor.Builder().schemaUri("resource:product.avsc").compressionType(compressionType).format(format).build(); //Snappy compression is the default
-        Dataset products = Datasets.create("dataset:file://" + System.getProperty("user.dir") + "/tmp/test/products", descriptor, GenericRecord.class);
-        DatasetWriter writer = products.newWriter();
+        Dataset<GenericRecord> products = Datasets.create("dataset:file://" + System.getProperty("user.dir") + "/tmp/test/products", descriptor, GenericRecord.class);
+        DatasetWriter<GenericRecord> writer = products.newWriter();
         GenericRecordBuilder builder = new GenericRecordBuilder(descriptor.getSchema());
         for (long i = 1; i <= 100; ++i) {
             GenericData.Record record = builder.set("name", "product-" + i).set("id", i).build();
@@ -69,14 +67,7 @@ public class TestSparkDataFrame {
 
         cleanup();
 
-        SparkConf conf = new SparkConf().
-                setAppName("spark-kite-spec-test").
-                set("spark.serializer", "org.apache.spark.serializer.KryoSerializer").
-                setMaster("local[16]");
-
-        JavaSparkContext sparkContext = new JavaSparkContext(conf);
-
-        SQLContext sqlContext = new org.apache.spark.sql.SQLContext(sparkContext);
+        SQLContext sqlContext = new org.apache.spark.sql.SQLContext(SparkTestHelper.getSparkContext());
 
         Dataset<GenericRecord> products = generateDataset(format, CompressionType.Snappy);
 
@@ -95,8 +86,6 @@ public class TestSparkDataFrame {
         }
 
         Assert.assertArrayEquals(tuples.toArray(), expected.toArray());
-
-        sparkContext.stop();
 
         cleanup();
 
