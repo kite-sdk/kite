@@ -34,6 +34,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.Datasets;
+import org.kitesdk.data.Signalable;
 import org.kitesdk.data.View;
 import org.kitesdk.data.mapreduce.DatasetKeyOutputFormat;
 import org.kitesdk.data.spi.LastModifiedAccessor;
@@ -85,7 +86,12 @@ class DatasetTarget<E> implements MapReduceTarget {
       }
     }
 
-    boolean exists = !view.isEmpty();
+    boolean ready = false;
+    if (view instanceof Signalable) {
+      ready = ((Signalable)view).isReady();
+    }
+    // a view exists if it isn't empty, or if it has been marked ready
+    boolean exists = ready || !view.isEmpty();
     if (exists) {
       switch (writeMode) {
         case DEFAULT:
@@ -99,12 +105,12 @@ class DatasetTarget<E> implements MapReduceTarget {
           LOG.info("Writing to existing dataset/view: " + view);
           break;
         case CHECKPOINT:
-          boolean ready = true; // dataset.isReady(); // TODO: add when CDK-451 is ready
           long lastModForTarget = -1;
           if (view instanceof LastModifiedAccessor) {
             lastModForTarget = ((LastModifiedAccessor) view).getLastModified();
           }
-          if (ready && lastModForTarget > lastModForSource) {
+
+          if (ready && (lastModForTarget > lastModForSource)) {
             LOG.info("Re-starting pipeline from checkpoint dataset/view: " + view);
             break;
           } else {

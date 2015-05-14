@@ -448,12 +448,30 @@ public class Constraints {
 
   public Map<String, String> toQueryMap() {
     Map<String, String> query = Maps.newLinkedHashMap();
+    return toQueryMap(query, false);
+  }
+
+  /**
+   * Get a normalized query map for the constraints. A normalized query map will
+   * be equal in value and iteration order for any logically equivalent set of
+   * constraints.
+   */
+  public Map<String, String> toNormalizedQueryMap() {
+    Map<String, String> query = Maps.newTreeMap();
+    return toQueryMap(query, true);
+  }
+
+  private Map<String, String> toQueryMap(Map<String, String> queryMap, boolean normalized) {
     for (Map.Entry<String, Predicate> entry : constraints.entrySet()) {
       String name = entry.getKey();
       Schema fieldSchema = SchemaUtil.fieldSchema(schema, strategy, name);
-      query.put(name, Predicates.toString(entry.getValue(), fieldSchema));
+      if(normalized) {
+        queryMap.put(name, Predicates.toNormalizedString(entry.getValue(), fieldSchema));
+      } else {
+        queryMap.put(name, Predicates.toString(entry.getValue(), fieldSchema));
+      }
     }
-    return query;
+    return queryMap;
   }
 
   public static Constraints fromQueryMap(Schema schema,

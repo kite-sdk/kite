@@ -38,6 +38,7 @@ import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.Signalable;
 import org.kitesdk.data.TypeNotFoundException;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.AbstractDataset;
@@ -334,9 +335,18 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     }
   }
 
-  static class NullOutputCommitter extends OutputCommitter {
+  static class NullOutputCommitter<E> extends OutputCommitter {
     @Override
     public void setupJob(JobContext jobContext) { }
+
+    @Override
+    public void commitJob(JobContext jobContext) throws IOException {
+      View<E> targetView = load(jobContext);
+
+      if (targetView instanceof Signalable) {
+        ((Signalable)targetView).signalReady();
+      }
+    }
 
     @Override
     public void setupTask(TaskAttemptContext taskContext) { }
@@ -369,6 +379,10 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
       View<E> targetView = load(jobContext);
       Dataset<E> jobDataset = repo.load(TEMP_NAMESPACE, jobDatasetName);
       ((Mergeable<Dataset<E>>) targetView.getDataset()).merge(jobDataset);
+
+      if (targetView instanceof Signalable) {
+        ((Signalable)targetView).signalReady();
+      }
 
       if (isTemp) {
         ((TemporaryDatasetRepository) repo).delete();
@@ -462,8 +476,13 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
         break;
       default:
       case DEFAULT:
-        if (!target.isEmpty()) {
-          throw new DatasetException("View is not empty: " + target);
+        boolean isReady = false;
+        if (target instanceof Signalable) {
+          isReady = ((Signalable)target).isReady();
+        }
+        if (isReady || !target.isEmpty()) {
+          throw new DatasetException(
+              "View is not empty or has been signaled as ready: " + target);
         }
         break;
     }

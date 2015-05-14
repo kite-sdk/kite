@@ -17,6 +17,7 @@
 package org.kitesdk.data.spi;
 
 import com.google.common.io.Closeables;
+
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import org.joda.time.DateTime;
@@ -30,6 +31,7 @@ import java.util.Set;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -819,4 +821,132 @@ public abstract class TestRefinableViews extends MiniDFSTest {
     Assert.assertNotNull("with should succeed",
         notPartitioned.with("timestamp", now));
   }
+
+  @Test
+  @SuppressWarnings("rawtypes")
+  public void testReadySignalWithConstraint() {
+    Assume.assumeTrue(unbounded instanceof Signalable);
+    final long instant = new DateTime(2013, 10, 1, 0, 0, DateTimeZone.UTC).getMillis();
+    final Signalable withSpecificTimestamp =
+        (Signalable) unbounded.with("timestamp", instant);
+
+    Assert.assertFalse("Should not be ready initially", withSpecificTimestamp.isReady());
+    withSpecificTimestamp.signalReady();
+    Assert.assertTrue("Should be ready after signal", withSpecificTimestamp.isReady());
+
+    Signalable multipleWithView = (Signalable)unbounded.with("timestamp", instant+1, instant+2);
+
+    Assert.assertFalse("Should not be ready initially", multipleWithView.isReady());
+    multipleWithView.signalReady();
+    Assert.assertTrue("Should be ready after signal", multipleWithView.isReady());
+  }
+
+  @Test
+  @SuppressWarnings("rawtypes")
+  public void testReadySignalFromConstraint() {
+    Assume.assumeTrue(unbounded instanceof Signalable);
+    final long instant = new DateTime(2013, 10, 1, 0, 0, DateTimeZone.UTC).getMillis();
+    final Signalable fromSpecificTimestamp =
+        (Signalable) unbounded.from("timestamp", instant);
+
+    Assert.assertFalse("Should not be ready initially", fromSpecificTimestamp.isReady());
+    fromSpecificTimestamp.signalReady();
+    Assert.assertTrue("Should be ready after signal", fromSpecificTimestamp.isReady());
+  }
+
+  @Test
+  @SuppressWarnings("rawtypes")
+  public void testReadySignalFromAfterConstraint() {
+    Assume.assumeTrue(unbounded instanceof Signalable);
+    final long instant = new DateTime(2013, 10, 1, 0, 0, DateTimeZone.UTC).getMillis();
+    final Signalable fromAfterSpecificTimestamp =
+        (Signalable) unbounded.from("timestamp", instant);
+
+    Assert.assertFalse("Should not be ready initially", fromAfterSpecificTimestamp.isReady());
+    fromAfterSpecificTimestamp.signalReady();
+    Assert.assertTrue("Should be ready after signal", fromAfterSpecificTimestamp.isReady());
+  }
+
+  @Test
+  @SuppressWarnings("rawtypes")
+  public void testReadySignalToConstraint() {
+    Assume.assumeTrue(unbounded instanceof Signalable);
+    final long instant = new DateTime(2013, 10, 1, 0, 0, DateTimeZone.UTC).getMillis();
+    final Signalable toSpecificTimestamp =
+        (Signalable) unbounded.to("timestamp", instant);
+
+    Assert.assertFalse("Should not be ready initially", toSpecificTimestamp.isReady());
+    toSpecificTimestamp.signalReady();
+    Assert.assertTrue("Should be ready after signal", toSpecificTimestamp.isReady());
+  }
+
+  @Test
+  @SuppressWarnings("rawtypes")
+  public void testReadySignalToBeforeConstraint() {
+    Assume.assumeTrue(unbounded instanceof Signalable);
+    final long instant = new DateTime(2013, 10, 1, 0, 0, DateTimeZone.UTC).getMillis();
+    final Signalable toBeforeSpecificTimestamp =
+        (Signalable) unbounded.toBefore("timestamp", instant);
+
+    Assert.assertFalse("Should not be ready initially", toBeforeSpecificTimestamp.isReady());
+    toBeforeSpecificTimestamp.signalReady();
+    Assert.assertTrue("Should be ready after signal", toBeforeSpecificTimestamp.isReady());
+  }
+
+  @Test
+  @SuppressWarnings("rawtypes")
+  public void testReadySignalMultipleConstraints() {
+    Assume.assumeTrue(unbounded instanceof Signalable);
+    final long instant = new DateTime(2013, 10, 1, 0, 0, DateTimeZone.UTC).getMillis();
+    final Signalable withTwoConstrainedFields =
+        (Signalable) unbounded.with("timestamp", instant).with("user_id", 0L);
+
+    Assert.assertFalse("Should not be ready initially", withTwoConstrainedFields.isReady());
+    withTwoConstrainedFields.signalReady();
+    Assert.assertTrue("Should be ready after signal", withTwoConstrainedFields.isReady());
+  }
+
+  @Test
+  @SuppressWarnings("rawtypes")
+  public void testReadySignalsAroundComparableBoundaries() {
+    Assume.assumeTrue(unbounded instanceof Signalable);
+    final long instant = new DateTime(2013, 10, 1, 0, 0, DateTimeZone.UTC).getMillis();
+    final Signalable withSpecificTimestamp =
+        (Signalable) unbounded.with("timestamp", instant);
+
+    Assert.assertFalse("Base view should not be ready initially",
+        ((Signalable)unbounded).isReady());
+
+    Assert.assertFalse("Should not be ready initially",
+        withSpecificTimestamp.isReady());
+    withSpecificTimestamp.signalReady();
+    Assert.assertTrue("Should be ready after signal",
+        withSpecificTimestamp.isReady());
+
+    final Signalable beforeSpecificTimestamp =
+        (Signalable) unbounded.toBefore("timestamp", instant);
+    Assert.assertFalse("To before the instant should not be ready",
+        beforeSpecificTimestamp.isReady());
+
+    final Signalable afterSpecificTimestamp =
+        (Signalable) unbounded.fromAfter("timestamp", instant);
+    Assert.assertFalse("To after the instant should not be ready",
+        afterSpecificTimestamp.isReady());
+
+    final Signalable immediatelyAfterSpecificTimestamp =
+        (Signalable) unbounded.with("timestamp", instant+1);
+    Assert.assertFalse("After the instant should not be ready",
+        immediatelyAfterSpecificTimestamp.isReady());
+
+    final Signalable immediatelyBeforeSpecificTimestamp =
+        (Signalable) unbounded.with("timestamp", instant-1);
+    Assert.assertFalse("Before the instant should not be ready",
+        immediatelyBeforeSpecificTimestamp.isReady());
+
+    final Signalable includingSpecificTimestamp =
+        (Signalable) unbounded.from("timestamp", instant-1).to("timestamp", instant+1);
+    Assert.assertFalse("Including the instant should not be ready",
+        includingSpecificTimestamp.isReady());
+  }
+
 }

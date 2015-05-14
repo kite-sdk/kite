@@ -16,15 +16,19 @@
 
 package org.kitesdk.data.spi.filesystem;
 
+import org.kitesdk.data.Signalable;
+import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import java.util.Iterator;
+import java.util.Map;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.junit.Ignore;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.PartitionView;
 import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.DatasetRepository;
+import org.kitesdk.data.spi.LastModifiedAccessor;
 import org.kitesdk.data.spi.TestRefinableViews;
 import org.kitesdk.data.event.StandardEvent;
 import org.apache.hadoop.fs.FileSystem;
@@ -59,7 +63,6 @@ public class TestFileSystemView extends TestRefinableViews {
   }
 
   @Test
-  @Ignore("getCoveringPartitions is not yet implemented")
   @SuppressWarnings("unchecked")
   public void testCoveringPartitions() throws IOException {
     // NOTE: this is an un-restricted write so all should succeed
@@ -73,28 +76,32 @@ public class TestFileSystemView extends TestRefinableViews {
       Closeables.close(writer, false);
     }
 
-    Iterator<View<StandardEvent>> coveringPartitions =
-        ((FileSystemView) unbounded).getCoveringPartitions().iterator();
+    // get the covering partitions with a reliable order
+    Map<String, PartitionView<StandardEvent>> partitions = Maps.newTreeMap();
+    for (PartitionView<StandardEvent> view : unbounded.getCoveringPartitions()) {
+      partitions.put(view.getLocation().toString(), view);
+    }
+    Iterator<PartitionView<StandardEvent>> iter = partitions.values().iterator();
 
-    assertTrue(coveringPartitions.hasNext());
-    View v1 = coveringPartitions.next();
+    assertTrue(iter.hasNext());
+    View v1 = iter.next();
     assertTrue(v1.includes(standardEvent(sepEvent.getTimestamp())));
     assertFalse(v1.includes(standardEvent(octEvent.getTimestamp())));
     assertFalse(v1.includes(standardEvent(novEvent.getTimestamp())));
 
-    assertTrue(coveringPartitions.hasNext());
-    View v2 = coveringPartitions.next();
+    assertTrue(iter.hasNext());
+    View v2 = iter.next();
     assertFalse(v2.includes(standardEvent(sepEvent.getTimestamp())));
     assertTrue(v2.includes(standardEvent(octEvent.getTimestamp())));
     assertFalse(v2.includes(standardEvent(novEvent.getTimestamp())));
 
-    assertTrue(coveringPartitions.hasNext());
-    View v3 = coveringPartitions.next();
+    assertTrue(iter.hasNext());
+    View v3 = iter.next();
     assertFalse(v3.includes(standardEvent(sepEvent.getTimestamp())));
     assertFalse(v3.includes(standardEvent(octEvent.getTimestamp())));
     assertTrue(v3.includes(standardEvent(novEvent.getTimestamp())));
 
-    assertFalse(coveringPartitions.hasNext());
+    assertFalse(iter.hasNext());
   }
 
   private StandardEvent standardEvent(long timestamp) {
@@ -270,6 +277,35 @@ public class TestFileSystemView extends TestRefinableViews {
         unbounded.deleteAll());
     assertDirectoriesDoNotExist(fs, y2013, sep12, sep, oct12, oct, nov11, nov);
     assertDirectoriesExist(fs, root);
+  }
+
+  @Test
+  @SuppressWarnings("rawtypes")
+  public void testSignalUpdatesLastModified() {
+    long lastModified = ((LastModifiedAccessor)unbounded).getLastModified();
+
+    long signaledTime = -1;
+    long spinStart = System.currentTimeMillis();
+    while(lastModified >= signaledTime && (System.currentTimeMillis() - spinStart) <= 2000) {
+      ((Signalable)unbounded).signalReady();
+      signaledTime = ((LastModifiedAccessor)unbounded).getLastModified();
+    }
+    Assert.assertTrue("Signaling should update last modified time", signaledTime > lastModified);
+  }
+
+  @Test
+  public void testNullSignalManager() {
+    FileSystemDataset<StandardEvent> ds =
+        (FileSystemDataset<StandardEvent>) unbounded.getDataset();
+    FileSystemView<StandardEvent> view =
+        new FileSystemView<StandardEvent>(ds, null, null, StandardEvent.class);
+
+    // getlast modified
+    Assert.assertTrue("Last modified does not require access to signal manager",
+        view.getLastModified() >= -1);
+
+    view.signalReady();
+    Assert.assertFalse("View should not be signaled without manager", view.isReady());
   }
 
   @SuppressWarnings("deprecation")

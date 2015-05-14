@@ -20,6 +20,7 @@ import com.google.common.base.Objects;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.PartitionView;
 import org.kitesdk.data.RefinableView;
 import javax.annotation.concurrent.Immutable;
 import org.apache.avro.Schema;
@@ -63,6 +64,12 @@ public abstract class AbstractDataset<E> implements Dataset<E>, RefinableView<E>
     LOG.debug("Getting reader for dataset:{}", this);
 
     return asRefinableView().newReader();
+  }
+
+  @Override
+  public Iterable<PartitionView<E>> getCoveringPartitions() {
+    throw new UnsupportedOperationException("This Dataset does not support " +
+        "getCoveringPartitions.");
   }
 
   @Override

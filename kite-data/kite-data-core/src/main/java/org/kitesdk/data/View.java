@@ -128,4 +128,28 @@ public interface View<E> {
    * @since 0.16.0
    */
   public URI getUri();
+
+  /**
+   * Returns an {@code Iterable} of non-overlapping {@link View} objects that
+   * partition the underlying {@link Dataset} and cover this {@code View}.
+   *
+   * The returned {@code View} objects are implementation-specific, but should
+   * represent reasonable partitions of the underlying {@code Dataset} based on
+   * its layout.
+   *
+   * The data contained by the union of each {@code View} in the
+   * {@code Iterable} must be a super-set of this {@code View}.
+   *
+   * Note that partitions are actual partitions under which data is stored.
+   * Implementations should omit any {@code View} that is empty.
+   *
+   * @return
+   *      An Iterable of the {@code View} that cover this {@code View}.
+   * @throws IllegalStateException
+   *      If the underlying {@code Dataset} is not partitioned.
+   * @throws UnsupportedOperationException
+   *      If the implementation does not support covering partitions.
+   * @since 1.1.0
+   */
+  public Iterable<PartitionView<E>> getCoveringPartitions();
 }

@@ -31,6 +31,7 @@ import org.apache.hadoop.hive.ql.io.RCFile;
 import org.apache.hadoop.hive.serde2.columnar.BytesRefArrayWritable;
 import org.apache.hadoop.hive.serde2.columnar.BytesRefWritable;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ReflectionUtils;
@@ -225,6 +226,10 @@ public final class ReadRCFileBuilder implements CommandBuilder {
     }
 
     private Writable updateColumnValue(RCFileColumn column, BytesRefWritable bytesRef) throws IOException {
+      if(bytesRef.getLength() == 0) {
+        // This is a null field.
+        return NullWritable.get();
+      }
       Writable newColumnValue = column.newWritable();
       // Small optimization to bypass DataInput read if the column writable is
       // BytesRefWritable

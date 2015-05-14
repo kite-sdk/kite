@@ -55,7 +55,7 @@ public class TestDatasetWriterCacheLoader {
       .schema(USER_SCHEMA)
       .partitionStrategy(partitionStrategy)
       .build());
-    view = new FileSystemView<Object>(users, null, Object.class);
+    view = new FileSystemView<Object>(users, null, null, Object.class);
   }
 
   @After

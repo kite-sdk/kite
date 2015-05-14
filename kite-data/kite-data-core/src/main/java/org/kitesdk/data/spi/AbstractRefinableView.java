@@ -24,9 +24,9 @@ import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
+import org.kitesdk.data.PartitionView;
 import org.kitesdk.data.RefinableView;
 import org.kitesdk.data.URIBuilder;
-import org.kitesdk.data.View;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,29 +116,8 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
     return constraints.getProvidedValues();
   }
 
-  /**
-   * Returns an Iterable of non-overlapping {@link View} objects that partition
-   * the underlying {@link org.kitesdk.data.Dataset} and cover this {@code View}.
-   *
-   * The returned {@code View} objects are implementation-specific, but should
-   * represent reasonable partitions of the underlying {@code Dataset} based on
-   * its layout.
-   *
-   * The data contained by the union of each {@code View} in the Iterable must
-   * be a super-set of this {@code View}.
-   *
-   * Note that partitions are actual partitions under which data is stored.
-   * Implementations are encouraged to omit any {@code View} that is empty.
-   *
-   * This method is intended to be used by classes like InputFormat, which need
-   * to enumerate the underlying partitions to create InputSplits.
-   *
-   * @return
-   *      An Iterable of the {@code View} that cover this {@code View}.
-   * @throws IllegalStateException
-   *      If the underlying {@code Dataset} is not partitioned.
-   */
-  public Iterable<View<E>> getCoveringPartitions() {
+  @Override
+  public Iterable<PartitionView<E>> getCoveringPartitions() {
     throw new UnsupportedOperationException("This Dataset does not support " +
         "getCoveringPartitions.");
   }
@@ -222,5 +201,9 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
       builder.with(entry.getKey(), entry.getValue());
     }
     return builder.build();
+  }
+
+  protected Predicate<StorageKey> getKeyPredicate() {
+    return constraints.toKeyPredicate();
   }
 }

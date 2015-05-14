@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import org.kitesdk.data.Signalable;
 import com.google.common.collect.Lists;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
@@ -23,6 +24,7 @@ import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.MiniDFSTest;
+import org.kitesdk.data.URIBuilder;
 import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.PartitionKey;
@@ -30,6 +32,7 @@ import org.kitesdk.data.PartitionStrategy;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -49,7 +52,6 @@ import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.spi.PartitionedDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.*;
 import org.kitesdk.data.spi.FieldPartitioner;
 
@@ -607,6 +609,56 @@ public class TestFileSystemDataset extends MiniDFSTest {
     Assert.assertTrue(ds.deleteAll());
     
     checkReaderBehavior(ds.newReader(), 0, (RecordValidator<Record>) null);
+  }
+
+  @Test
+  public void signalReadyOnUnboundedDataset() {
+    final FileSystemDataset<Record> ds = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
+        .name("users")
+        .configuration(getConfiguration())
+        .descriptor(
+            new DatasetDescriptor.Builder().schema(USER_SCHEMA).format(format)
+                .location(testDirectory).build())
+        .type(Record.class)
+        .uri(URIBuilder.build(URI.create("repo:" + testDirectory.toUri()), "ns", "name"))
+        .build();
+    Assert.assertFalse("Unbounded dataset has not been signaled", ds.isReady());
+    ds.signalReady();
+    Assert.assertTrue("Unbounded dataset has been signaled and should be ready", ds.isReady());
+  }
+
+  @Test
+  public void testReadySignalUpdatesModifiedTime() {
+    final FileSystemDataset<Record> ds = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
+        .name("users")
+        .configuration(getConfiguration())
+        .descriptor(
+            new DatasetDescriptor.Builder().schema(USER_SCHEMA).format(format)
+                .location(testDirectory).build())
+        .type(Record.class)
+        .uri(URIBuilder.build(URI.create("repo:" + testDirectory.toUri()), "ns", "name"))
+        .build();
+
+     Assert.assertFalse("Dataset should not be ready before being signaled",
+        ds.isReady());
+
+    // the modified time depends on the filesystem, and may only be granular to the second
+    // signal and check until the modified time is after the current time, or until
+    // enough time has past that the signal should have been distinguishable
+    long signaledTime = 0;
+    long currentTime = System.currentTimeMillis();
+    while(currentTime >= signaledTime && (System.currentTimeMillis() - currentTime) <= 2000) {
+      ds.signalReady();
+      signaledTime = ds.getLastModified();
+    }
+
+    Assert.assertTrue("Dataset should have been signaled as ready", ds.isReady());
+    Assert.assertTrue("Signal should update the modified time",
+        signaledTime > currentTime);
+    Assert.assertFalse("Only the dataset should have been signaled",
+        ((Signalable)ds.with("username", "bob")).isReady());
   }
 
   @SuppressWarnings("deprecation")

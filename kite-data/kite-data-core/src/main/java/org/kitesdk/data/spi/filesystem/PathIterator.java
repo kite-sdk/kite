@@ -16,34 +16,30 @@
 
 package org.kitesdk.data.spi.filesystem;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import javax.annotation.Nullable;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.DatasetIOException;
-import org.kitesdk.data.spi.Pair;
 import org.kitesdk.data.spi.StorageKey;
 
 public class PathIterator implements Iterator<Path>, Iterable<Path> {
   private final FileSystem fs;
   private final Path root;
-  private final Iterator<Pair<StorageKey, Path>> directories;
+  private final Iterator<StorageKey> partitions;
   private StorageKey key = null;
   private Iterator<Path> files = null;
 
   public PathIterator(FileSystem fs, Path root,
-                      Iterator<Pair<StorageKey, Path>> directories) {
-    Preconditions.checkArgument(directories != null,
-        "Directories cannot be null");
-
+                      @Nullable Iterator<StorageKey> partitions) {
     this.fs = fs;
     this.root = root;
-    this.directories = directories;
+    this.partitions = partitions;
   }
 
   @Override
@@ -83,28 +79,44 @@ public class PathIterator implements Iterator<Path>, Iterable<Path> {
   @SuppressWarnings("deprecation")
   private boolean advance() {
     while (true) {
-      if (directories.hasNext()) {
-        Pair<StorageKey, Path> pair = directories.next();
-        try {
-          FileStatus[] stats = fs.listStatus(
-              new Path(root, pair.second()), PathFilters.notHidden());
-          this.key = pair.first();
-          List<Path> nextFileSet = Lists.newArrayListWithCapacity(stats.length);
-          for (FileStatus stat : stats) {
-            if (!stat.isDir()) {
-              nextFileSet.add(stat.getPath());
-            }
-          }
-          if (nextFileSet.size() > 0) {
-            this.files = nextFileSet.iterator();
-            return true;
-          }
-        } catch (IOException ex) {
-          throw new DatasetIOException("Cannot list files in " + pair.second(), ex);
+      FileStatus[] stats;
+      if (partitions == null) {
+        if (files != null) {
+          // already read the root directory
+          return false;
         }
+        try {
+          stats = fs.listStatus(root, PathFilters.notHidden());
+        } catch (IOException ex) {
+          throw new DatasetIOException("Cannot list files in " + root, ex);
+        }
+        this.key = null;
+
+      } else if (partitions.hasNext()) {
+        StorageKey key = partitions.next();
+        try {
+          stats = fs.listStatus(
+              new Path(root, key.getPath()), PathFilters.notHidden());
+        } catch (IOException ex) {
+          throw new DatasetIOException("Cannot list files in " + key.getPath(), ex);
+        }
+        this.key = key;
+
       } else {
         return false;
       }
+
+      List<Path> nextFileSet = Lists.newArrayListWithCapacity(stats.length);
+      for (FileStatus stat : stats) {
+        if (!stat.isDir()) {
+          nextFileSet.add(stat.getPath());
+        }
+      }
+      if (nextFileSet.size() > 0) {
+        this.files = nextFileSet.iterator();
+        return true;
+      }
+      return false;
     }
   }
 

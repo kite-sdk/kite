@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 
 import java.util.Iterator;
@@ -22,6 +23,9 @@ import java.util.Set;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.Signalable;
+import org.kitesdk.data.PartitionView;
+import org.kitesdk.data.View;
 import org.kitesdk.data.spi.Compatibility;
 import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
@@ -56,7 +60,7 @@ import org.kitesdk.data.Formats;
 @SuppressWarnings("deprecation")
 public class FileSystemDataset<E> extends AbstractDataset<E> implements
     Mergeable<FileSystemDataset<E>>, InputFormatAccessor<E>, LastModifiedAccessor,
-    PartitionedDataset<E>, SizeAccessor {
+    PartitionedDataset<E>, SizeAccessor, Signalable<E> {
 
   private static final Logger LOG = LoggerFactory
     .getLogger(FileSystemDataset.class);
@@ -69,10 +73,12 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   private PartitionKey partitionKey;
   private final URI uri;
 
+  private static final String SIGNALS_DIRECTORY_NAME = ".signals";
+
   private final PartitionStrategy partitionStrategy;
   private final PartitionListener partitionListener;
 
-  private final FileSystemView<E> unbounded;
+  final FileSystemPartitionView<E> unbounded;
 
   // reusable path converter, has no relevant state
   private final PathConversion convert;
@@ -101,7 +107,11 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     this.convert = new PathConversion(descriptor.getSchema());
     this.uri = uri;
 
-    this.unbounded = new FileSystemView<E>(this, partitionListener, type);
+    Path signalsPath = new Path(directory, SIGNALS_DIRECTORY_NAME);
+    SignalManager signalManager = new SignalManager(fileSystem, signalsPath);
+
+    this.unbounded = new FileSystemPartitionView<E>(this, partitionListener, signalManager, type);
+
     // remove this.partitionKey for 0.14.0
     this.partitionKey = null;
   }
@@ -134,6 +144,29 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   @Override
   public DatasetDescriptor getDescriptor() {
     return descriptor;
+  }
+
+  // needed to preserve the behavior of FileSystemDatasets
+  View<E> viewForUri(URI location) {
+    Preconditions.checkNotNull(location, "Partition location cannot be null");
+    PartitionView<E> view = getPartitionView(location);
+    if (view == unbounded) {
+      return this;
+    }
+    return view;
+  }
+
+  FileSystemPartitionView<E> getPartitionView(URI location) {
+    return FileSystemPartitionView.getPartition(unbounded, location);
+  }
+
+  FileSystemPartitionView<E> getPartitionView(Path location) {
+    return FileSystemPartitionView.getPartition(unbounded, location);
+  }
+
+  @Override
+  public Iterable<PartitionView<E>> getCoveringPartitions() {
+    return unbounded.getCoveringPartitions();
   }
 
   PartitionKey getPartitionKey() {
@@ -450,25 +483,22 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
 
   @Override
   public long getLastModified() {
-    long lastMod = -1;
-    for (Iterator<Path> i = dirIterator(); i.hasNext(); ) {
-      Path dir = i.next();
-      try {
-        for (FileStatus st : fileSystem.listStatus(dir)) {
-          if (lastMod < st.getModificationTime()) {
-            lastMod = st.getModificationTime();
-          }
-        }
-      } catch (IOException e) {
-        throw new DatasetIOException("Cannot find last modified time of of " + dir, e);
-      }
-    }
-    return lastMod;
+    return unbounded.getLastModified();
   }
 
   @Override
   public boolean isEmpty() {
     return unbounded.isEmpty();
+  }
+
+  @Override
+  public void signalReady() {
+    unbounded.signalReady();
+  }
+
+  @Override
+  public boolean isReady() {
+    return unbounded.isReady();
   }
 
   public static class Builder<E> {

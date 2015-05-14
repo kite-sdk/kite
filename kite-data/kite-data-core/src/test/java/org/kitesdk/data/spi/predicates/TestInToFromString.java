@@ -85,6 +85,16 @@ public class TestInToFromString {
   }
 
   @Test
+  public void testMultipleStringValuesNormalized() {
+    Assert.assertEquals("In<Utf8>#toNormalizedString(STRING)",
+        "ab,al,m,z",
+        Predicates.in(new Utf8("z"), new Utf8("al"), new Utf8("ab"), new Utf8("m"))
+        .toNormalizedString(STRING));
+    Assert.assertEquals("In#toNormalizedString(STRING)",
+        "ab,al,m,z", Predicates.in("z", "al", "ab", "m").toNormalizedString(STRING));
+  }
+
+  @Test
   public void testSingleBooleanValue() {
     Assert.assertEquals("In#toString(BOOL)",
         "false", Predicates.in(false, false).toString(BOOL));
@@ -114,6 +124,16 @@ public class TestInToFromString {
         "3,4,5", Predicates.in(3,4,5).toString(INT));
     Assert.assertEquals("In.fromString(String, INT)",
         Predicates.in(3,4,5), In.<Integer>fromString("3,4,5", INT));
+  }
+
+  @Test
+  public void testMultipleIntegerValuesNormalized() {
+    // normalized predicate normalizes the string values,
+    // so they won't be sorted numerically.
+    // ensures that cases where the type may not be comparable directly
+    // that they will be consistently sorted
+    Assert.assertEquals("In#toString(INT)",
+        "123,45", Predicates.in(45,123).toNormalizedString(INT));
   }
 
   @Test
