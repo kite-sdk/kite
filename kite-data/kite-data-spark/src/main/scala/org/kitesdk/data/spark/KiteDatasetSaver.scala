@@ -31,7 +31,7 @@ object KiteDatasetSaver extends SchemaSupport {
     rows.map(x => (converter(x).asInstanceOf[Record], null))
   }
 
-  def saveAsKiteDataset(dataFrame: DataFrame, uri: URI, format: Format = Formats.AVRO, compressionType: CompressionType = CompressionType.Snappy, partitionStrategy: Option[PartitionStrategy] = None): Dataset[Record] = {
+  def saveAsKiteDataset(dataFrame: DataFrame, uri: URI, format: Format, compressionType: CompressionType, partitionStrategy: Option[PartitionStrategy]): Dataset[Record] = {
     assert(URIBuilder.DATASET_SCHEME == uri.getScheme, s"Not a dataset or view URI: $uri" + "")
     val job = Job.getInstance()
 
@@ -45,4 +45,9 @@ object KiteDatasetSaver extends SchemaSupport {
     dataFrame.mapPartitions(rowsToAvro(_, schema)).saveAsNewAPIHadoopDataset(job.getConfiguration)
     dataset
   }
+
+  def saveAsKiteDataset(dataFrame: DataFrame, uri: URI, format: Format, compressionType: CompressionType): Dataset[Record] = {
+    saveAsKiteDataset(dataFrame, uri, format, compressionType, None)
+  }
+
 }

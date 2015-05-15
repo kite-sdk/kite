@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.kitesdk.data.*;
 import scala.Tuple2;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -100,4 +101,53 @@ public class TestSparkDataFrame {
     public void testKiteAvroToDataframe() throws Exception {
         testReadToDataFrame(Formats.AVRO);
     }
+
+    private void testWriteToKite(Format format) throws Exception {
+
+        cleanup();
+
+        SQLContext sqlContext = new org.apache.spark.sql.SQLContext(SparkTestHelper.getSparkContext());
+
+        URI datasetURI = URIBuilder.build("repo:file:////" + System.getProperty("user.dir") + "/tmp", "test", "persons");
+
+        List<Person> peopleList = new ArrayList<Person>();
+        peopleList.add(new Person("David", 50));
+        peopleList.add(new Person("Ruben", 14));
+        peopleList.add(new Person("Giuditta", 12));
+        peopleList.add(new Person("Vita", 19));
+
+        DataFrame people = sqlContext.createDataFrame(SparkTestHelper.getSparkContext().parallelize(peopleList), Person.class);
+        people.registerTempTable("people");
+
+        DataFrame teenagers = sqlContext.sql("SELECT * FROM people WHERE age >= 13 AND age <= 19");
+
+        Dataset<GenericData.Record> dataset = KiteDatasetSaver.saveAsKiteDataset(teenagers, datasetURI, format, CompressionType.Snappy);
+
+        DatasetReader<GenericData.Record> reader = dataset.newReader();
+
+        List<String> res = new ArrayList<String>();
+        for (GenericData.Record record : reader) {
+            res.add(record.toString());
+            System.out.println(record.toString());
+        }
+        reader.close();
+
+        Assert.assertEquals(res.size(), 2);
+        Assert.assertTrue(res.contains("{\"age\": 14, \"name\": \"Ruben\"}"));
+        Assert.assertTrue(res.contains("{\"age\": 19, \"name\": \"Vita\"}"));
+
+        cleanup();
+
+    }
+
+    @Test
+    public void testWriteToParquetKite() throws Exception {
+        testWriteToKite(Formats.PARQUET);
+    }
+
+    @Test
+    public void testWriteToAvroKite() throws Exception {
+        testWriteToKite(Formats.AVRO);
+    }
+
 }

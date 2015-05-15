@@ -25,9 +25,10 @@ import org.kitesdk.data._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
 
+import scala.beans.BeanProperty
 import scala.util.Random
 
-case class Person(name: String, age: Int)
+case class Person(@BeanProperty name: String, @BeanProperty age: Int)
 
 case class User(name: String, creationDate: Long, favoriteColor: String)
 
@@ -164,7 +165,7 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
 
       val teenagers = sqlContext.sql("SELECT * FROM people WHERE age >= 13 AND age <= 19")
 
-      val dataset = KiteDatasetSaver.saveAsKiteDataset(teenagers, datasetURI, Formats.AVRO)
+      val dataset = KiteDatasetSaver.saveAsKiteDataset(teenagers, datasetURI, Formats.AVRO, CompressionType.Snappy)
       val reader = dataset.newReader()
 
       import collection.JavaConversions._
@@ -287,7 +288,7 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
       users.registerTempTable("user")
 
       val partitionStrategy = new PartitionStrategy.Builder().identity("favoriteColor", "favorite_color").build()
-      val dataset = KiteDatasetSaver.saveAsKiteDataset(users, datasetURI, format = Formats.AVRO, partitionStrategy = Some(partitionStrategy))
+      val dataset = KiteDatasetSaver.saveAsKiteDataset(users, datasetURI, Formats.AVRO, CompressionType.Snappy, Some(partitionStrategy))
 
       val reader = dataset.newReader()
       import collection.JavaConversions._
