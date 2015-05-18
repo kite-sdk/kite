@@ -153,4 +153,31 @@ abstract class BaseDatasetCommand extends BaseCommand {
     return new URIBuilder(buildRepoURI(), namespace, uriOrName).build().toString();
   }
 
+  /**
+   * Verify that a view matches the URI that loaded it without extra options.
+   * <p>
+   * This is used to prevent mis-interpreted URIs from succeeding. For example,
+   * the URI: view:file:./table?year=2014&month=3&dy=14 resolves a view for
+   * all of March 2014 because "dy" wasn't recognized as "day" and was ignored.
+   * This works by verifying that all of the options are accounted for in the
+   * final view and would fail the above because "dy" is not in the view's
+   * options.
+   *
+   * @param view a View's URI
+   * @param requested the requested View URI
+   * @return true if the view's URI and the requested URI match exactly
+   */
+  @VisibleForTesting
+  static boolean viewMatches(URI view, String requested) {
+    // test that the requested options are a subset of the final options
+    Map<String, String> requestedOptions = optionsForUri(URI.create(requested));
+    Map<String, String> finalOptions = optionsForUri(view);
+    for (Map.Entry<String, String> entry : requestedOptions.entrySet()) {
+      if (!finalOptions.containsKey(entry.getKey()) ||
+          !finalOptions.get(entry.getKey()).equals(entry.getValue())) {
+        return false;
+      }
+    }
+    return true;
+  }
 }

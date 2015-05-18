@@ -50,6 +50,7 @@ import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.Mergeable;
 import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.spi.Registration;
+import org.kitesdk.data.spi.Replaceable;
 import org.kitesdk.data.spi.TemporaryDatasetRepository;
 import org.kitesdk.data.spi.TemporaryDatasetRepositoryAccessor;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
@@ -68,13 +69,13 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   public static final String KITE_OUTPUT_URI = "kite.outputUri";
   public static final String KITE_PARTITION_DIR = "kite.outputPartitionDir";
   public static final String KITE_TYPE = "kite.outputEntityType";
+  public static final String KITE_WRITE_MODE = "kite.outputMode";
 
-  private static final String KITE_WRITE_MODE = "kite.outputMode";
-  private static final String TEMP_NAMESPACE = "mr";
-
-  private static enum WriteMode {
+  public static enum WriteMode {
     DEFAULT, APPEND, OVERWRITE
   }
+
+  private static final String TEMP_NAMESPACE = "mr";
 
   public static class ConfigBuilder {
     private final Configuration conf;
@@ -372,13 +373,20 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     @Override
     @SuppressWarnings("unchecked")
     public void commitJob(JobContext jobContext) throws IOException {
+      Configuration conf = Hadoop.JobContext
+          .getConfiguration.invoke(jobContext);
       DatasetRepository repo = getDatasetRepository(jobContext);
       boolean isTemp = repo instanceof TemporaryDatasetRepository;
 
       String jobDatasetName = getJobDatasetName(jobContext);
       View<E> targetView = load(jobContext);
       Dataset<E> jobDataset = repo.load(TEMP_NAMESPACE, jobDatasetName);
-      ((Mergeable<Dataset<E>>) targetView.getDataset()).merge(jobDataset);
+      WriteMode mode = conf.getEnum(KITE_WRITE_MODE, WriteMode.DEFAULT);
+      if (mode == WriteMode.OVERWRITE && canReplace(targetView)) {
+        ((Replaceable<Dataset<E>>) targetView.getDataset()).replace(jobDataset);
+      } else {
+        ((Mergeable<Dataset<E>>) targetView.getDataset()).merge(jobDataset);
+      }
 
       if (targetView instanceof Signalable) {
         ((Signalable)targetView).signalReady();
@@ -470,7 +478,8 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
       case APPEND:
         break;
       case OVERWRITE:
-        if (!target.isEmpty()) {
+        // if the merge won't use replace, then delete the existing data
+        if (!canReplace(target)) {
           target.deleteAll();
         }
         break;
@@ -634,4 +643,14 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
         .build();
   }
 
+  @SuppressWarnings("unchecked")
+  private static boolean canReplace(View<?> view) {
+    if (Hadoop.isHadoop1()) {
+      // can't use replace because it is called in the OutputCommitter.
+      return false;
+    }
+    Dataset<?> dataset = view.getDataset();
+    return (dataset instanceof Replaceable &&
+        ((Replaceable<View<?>>) dataset).canReplace(view));
+  }
 }

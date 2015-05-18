@@ -34,7 +34,6 @@ import org.apache.crunch.types.avro.AvroType;
 import org.apache.crunch.types.avro.Avros;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.kitesdk.compat.DynMethods;
 import org.kitesdk.data.Dataset;
@@ -63,6 +62,7 @@ public class TransformTask<S, T> extends Configured {
   private final DoFn<S, T> transform;
   private boolean compact = true;
   private int numWriters = -1;
+  private Target.WriteMode mode = Target.WriteMode.APPEND;
 
   private long count = 0;
 
@@ -90,6 +90,13 @@ public class TransformTask<S, T> extends Configured {
     } else {
       this.numWriters = numWriters;
     }
+    return this;
+  }
+
+  public TransformTask setWriteMode(Target.WriteMode mode) {
+    Preconditions.checkArgument(mode != Target.WriteMode.CHECKPOINT,
+        "Checkpoint is not an allowed write mode");
+    this.mode = mode;
     return this;
   }
 
@@ -121,7 +128,7 @@ public class TransformTask<S, T> extends Configured {
       collection = CrunchDatasets.partition(collection, to, numWriters);
     }
 
-    pipeline.write(collection, CrunchDatasets.asTarget(to), Target.WriteMode.APPEND);
+    pipeline.write(collection, CrunchDatasets.asTarget(to), mode);
 
     PipelineResult result = pipeline.done();
 

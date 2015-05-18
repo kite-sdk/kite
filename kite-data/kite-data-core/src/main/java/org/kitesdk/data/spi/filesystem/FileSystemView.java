@@ -16,7 +16,6 @@
 
 package org.kitesdk.data.spi.filesystem;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import java.util.Iterator;

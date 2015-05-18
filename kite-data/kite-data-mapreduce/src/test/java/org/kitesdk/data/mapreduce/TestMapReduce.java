@@ -214,7 +214,7 @@ public class TestMapReduce extends FileSystemTestBase {
     job.setReducerClass(GenericStatsReducer.class);
 
     View<Record> outputView = outputDataset.with("name", "apple", "banana", "carrot");
-    DatasetKeyOutputFormat.configure(job).overwrite(outputView).withType(GenericData.Record.class);
+    DatasetKeyOutputFormat.configure(job).appendTo(outputView).withType(GenericData.Record.class);
 
     Assert.assertTrue(job.waitForCompletion(true));
 

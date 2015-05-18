@@ -23,67 +23,52 @@ import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
 import org.apache.crunch.PipelineResult;
-import org.apache.crunch.Target;
 import org.kitesdk.data.View;
-import org.kitesdk.tools.CopyTask;
+import org.kitesdk.tools.CompactionTask;
 import org.slf4j.Logger;
 
 import static org.apache.avro.generic.GenericData.Record;
 
-@Parameters(commandDescription="Copy records from one Dataset to another")
-public class CopyCommand extends BaseDatasetCommand {
+@Parameters(commandDescription="Compact all or part of a dataset")
+public class CompactCommand extends BaseDatasetCommand {
 
-  public CopyCommand(Logger console) {
+  public CompactCommand(Logger console) {
     super(console);
   }
 
-  @Parameter(description="<source dataset> <destination dataset>")
+  @Parameter(description="<dataset-or-view>")
   List<String> datasets;
-
-  @Parameter(names={"--no-compaction"},
-      description="Copy to output directly, without compacting the data")
-  boolean noCompaction = false;
 
   @Parameter(names={"--num-writers"},
       description="The number of writer processes to use")
   int numWriters = -1;
 
-  @Parameter(
-      names={"--overwrite"},
-      description="Remove any data already in the target view or dataset")
-  boolean overwrite = false;
-
   @Override
   public int run() throws IOException {
-    Preconditions.checkArgument(datasets != null && datasets.size() > 1,
-        "Source and target datasets are required");
-    Preconditions.checkArgument(datasets.size() == 2,
-        "Cannot copy multiple datasets");
+    Preconditions.checkArgument(datasets.size() == 1,
+        "Cannot compact multiple datasets");
 
-    View<Record> source = load(datasets.get(0), Record.class);
-    View<Record> dest = load(datasets.get(1), Record.class);
+    String uriOrName = datasets.get(0);
+    View<Record> view = load(uriOrName, Record.class);
 
-    CopyTask task = new CopyTask<Record>(source, dest);
+    if (isDatasetOrViewUri(uriOrName)) {
+      Preconditions.checkArgument(viewMatches(view.getUri(), uriOrName),
+          "Resolved view does not match requested view: " + view.getUri());
+    }
+
+    CompactionTask task = new CompactionTask<Record>(view);
 
     task.setConf(getConf());
-
-    if (noCompaction) {
-      task.noCompaction();
-    }
 
     if (numWriters >= 0) {
       task.setNumWriters(numWriters);
     }
 
-    if (overwrite) {
-      task.setWriteMode(Target.WriteMode.OVERWRITE);
-    }
-
     PipelineResult result = task.run();
 
     if (result.succeeded()) {
-      console.info("Added {} records to \"{}\"",
-          task.getCount(), datasets.get(1));
+      console.info("Compacted {} records in \"{}\"",
+          task.getCount(), uriOrName);
       return 0;
     } else {
       return 1;
@@ -93,10 +78,8 @@ public class CopyCommand extends BaseDatasetCommand {
   @Override
   public List<String> getExamples() {
     return Lists.newArrayList(
-        "# Copy the contents of movies_avro to movies_parquet",
-        "movies_avro movies_parquet",
-        "# Copy the movies dataset into HBase in a map-only job",
-        "movies dataset:hbase:zk-host/movies --no-compaction"
+        "# Compact the contents of movies",
+        "movies"
     );
   }
 }
