@@ -79,6 +79,7 @@ public abstract class AbstractSolrMorphlineZkTest extends AbstractFullDistribZkT
     System.setProperty("numShards", Integer.toString(sliceCount));
     uploadConfFiles();
     collector = new Collector();
+    System.setProperty("solr.tests.cloud.cm.enabled", "false"); // disable Solr ChaosMonkey
   }
   
   @Override
