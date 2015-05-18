@@ -30,11 +30,30 @@ import org.junit.Test;
 import org.kitesdk.data.*;
 import scala.Tuple2;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TestSparkDataFrame {
+
+    public static class Person implements Serializable {
+        final String name;
+        final int age;
+
+        public  Person(String name, int age) {
+            this.name = name;
+            this.age = age;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+    }
 
     private static void cleanup() throws Exception {
         Configuration conf = new Configuration();
