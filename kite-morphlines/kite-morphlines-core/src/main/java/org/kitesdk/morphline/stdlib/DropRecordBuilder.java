@@ -83,40 +83,12 @@ public final class DropRecordBuilder implements CommandBuilder {
   private static final class DropRecord extends AbstractCommand {
     
     public DropRecord(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
-      super(builder, ConfigFactory.empty(), parent, new DummyCommand(), context);
-    }
-
-    @Override
-    protected void doNotify(Record notification) {
+      super(builder, ConfigFactory.empty(), parent, child, context);
     }
 
     @Override
     protected boolean doProcess(Record record) {
       return true;
-    }
-
-  }
-
-
-  ///////////////////////////////////////////////////////////////////////////////
-  // Nested classes:
-  ///////////////////////////////////////////////////////////////////////////////
-  /** Hack because passing child=null to AbstractCommand ctor is illegal */
-  private static final class DummyCommand implements Command {
-    
-    @Override
-    public Command getParent() {
-      throw new UnsupportedOperationException();
-    }
-    
-    @Override
-    public void notify(Record notification) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean process(Record record) {
-      throw new UnsupportedOperationException();
     }
 
   }
