@@ -65,13 +65,13 @@
       <organization>Cloudera</organization>
     </developer>
   </developers>
-  
-  <contributors> 
-    <contributor> 
-      <name>Prasanna Rajaperumal</name> 
+
+  <contributors>
+    <contributor>
+      <name>Prasanna Rajaperumal</name>
       <organization>Cloudera</organization>
-    </contributor> 
-  </contributors> 
+    </contributor>
+  </contributors>
 
   <scm>
     <connection>scm:git:git://github.com/kite-sdk/kite.git</connection>
@@ -115,11 +115,16 @@
     <targetJavaVersion>1.6</targetJavaVersion>
     <Xdoclint /> <!-- set by the java8 profile to turn off doclint -->
 
+    <!-- Scala versions -->
+    <scala.base.version>2.10</scala.base.version>
+    <scala.version>2.10.5</scala.version>
+    <scalatest.version>2.2.4</scalatest.version>
+
     <!-- used by jdiff, semver rule -->
     <previous.project.version>1.0.0</previous.project.version>
 
     <cdh4.version>4.4.0</cdh4.version>
-    <cdh5.version>5.0.0</cdh5.version>
+    <cdh5.version>5.2.0</cdh5.version>
     <cdh.version>${cdh4.version}</cdh.version>
 
     <!-- artifacts that depend on profiles -->
@@ -129,32 +134,33 @@
     <artifact.hbase-test-deps>kite-hbase-test-dependencies</artifact.hbase-test-deps>
 
     <!-- Library versions -->
-    <vers.avro>1.7.5</vers.avro>
+    <vers.avro>1.7.6</vers.avro>
     <vers.commons-codec>1.4</vers.commons-codec>
     <vers.commons-io>2.1</vers.commons-io>
     <vers.commons-logging>1.1.1</vers.commons-logging>
     <vers.commons-lang>2.5</vers.commons-lang>
-    <vers.crunch-base>0.10.0</vers.crunch-base>
+    <vers.crunch-base>0.11.0</vers.crunch-base>
     <vers.crunch>${vers.crunch-base}-hadoop2</vers.crunch>
-    <vers.crunch-cdh5>0.9.0-cdh${cdh5.version}</vers.crunch-cdh5>
+    <vers.crunch-cdh5>0.11.0-cdh${cdh5.version}</vers.crunch-cdh5>
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305> <!-- don't update to 3.0.0 since that is JDK 1.7 or later -->
-    <vers.flume>1.4.0</vers.flume>
+    <vers.flume>1.5.0</vers.flume>
     <vers.guava>11.0.2</vers.guava>
     <vers.hadoop1>1.2.1</vers.hadoop1>
     <vers.hadoop2>2.6.0</vers.hadoop2>
     <vers.hadoop-cdh4>2.0.0-cdh${cdh4.version}</vers.hadoop-cdh4>
     <vers.hadoop-mr1-cdh4>2.0.0-mr1-cdh${cdh4.version}</vers.hadoop-mr1-cdh4>
-    <vers.hadoop-cdh5>2.3.0-cdh${cdh5.version}</vers.hadoop-cdh5>
+    <vers.hadoop-cdh5>2.5.0-cdh${cdh5.version}</vers.hadoop-cdh5>
     <vers.hbase1>0.94.6</vers.hbase1>
     <vers.hbase2>0.98.3-hadoop2</vers.hbase2>
     <vers.hbase-cdh4>0.94.6-cdh${cdh4.version}</vers.hbase-cdh4>
-    <vers.hbase-cdh5>0.96.1.1-cdh${cdh5.version}</vers.hbase-cdh5>
-    <vers.hive>0.13.0</vers.hive>
-    <vers.hive-cdh5>0.12.0-cdh${cdh5.version}</vers.hive-cdh5>
+    <vers.hbase-cdh5>0.98.6-cdh${cdh5.version}</vers.hbase-cdh5>
+    <vers.hive>0.13.1</vers.hive>
+    <vers.hive-cdh5>0.13.1-cdh${cdh5.version}</vers.hive-cdh5>
     <vers.jetty>8.1.14.v20131031</vers.jetty>
     <vers.jexl>2.1.1</vers.jexl>
     <vers.compress>1.4.1</vers.compress>
     <vers.junit>4.10</vers.junit>
+    <vers.scalatest>2.2.4</vers.scalatest>
     <vers.log4j>1.2.16</vers.log4j>
     <vers.maven>2.0.6</vers.maven>
     <vers.mockito>1.9.5</vers.mockito>
@@ -165,7 +171,7 @@
     <vers.rat>0.9</vers.rat>
     <vers.slf4j>1.6.1</vers.slf4j>
     <vers.codahale.metrics>3.0.2</vers.codahale.metrics>
-    <vers.typesafe.config>1.0.2</vers.typesafe.config>
+    <vers.typesafe.config>1.2.1</vers.typesafe.config>
     <vers.solr>4.10.3</vers.solr>
     <solr.expected.version>4.10.3</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->
     <vers.solr-cdh5>4.10.3</vers.solr-cdh5>
@@ -174,7 +180,8 @@
     <vers.opencsv>2.3</vers.opencsv>
     <vers.jodatime>2.3</vers.jodatime>
     <vers.jcommander>1.35</vers.jcommander>
-    <vers.spark>1.0.0</vers.spark>
+    <vers.spark>1.3.0</vers.spark>
+    <vers.spark-avro>1.0.0</vers.spark-avro>
     <vers.hadoop-aws>2.6.0</vers.hadoop-aws>
 
     <!-- Plugin versions -->
@@ -184,6 +191,7 @@
     <vers.findbugs-maven-plugin>3.0.0</vers.findbugs-maven-plugin>
     <vers.github-site-maven-plugin>0.10</vers.github-site-maven-plugin>
     <vers.maven-compiler-plugin>3.1</vers.maven-compiler-plugin>
+    <vers.scala-maven-plugin>3.1.6</vers.scala-maven-plugin>
     <vers.maven-enforcer-plugin>1.3.1</vers.maven-enforcer-plugin>
     <vers.semver-enforcer>0.9.18</vers.semver-enforcer>
     <vers.maven-javadoc-plugin>2.9.1</vers.maven-javadoc-plugin>
@@ -431,6 +439,11 @@
             <showDeprecation>true</showDeprecation>
             <showWarnings>true</showWarnings>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>net.alchim31.maven</groupId>
+          <artifactId>scala-maven-plugin</artifactId>
+          <version>${vers.scala-maven-plugin}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -750,6 +763,23 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- Scala dependencies -->
+      <dependency>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-compiler</artifactId>
+        <version>${scala.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-library</artifactId>
+        <version>${scala.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-reflect</artifactId>
+        <version>${scala.version}</version>
+      </dependency>
+
       <!-- Hadoop dependencies -->
       <dependency>
         <groupId>org.kitesdk</groupId>
@@ -850,8 +880,38 @@
       <!-- Spark -->
       <dependency>
         <groupId>org.apache.spark</groupId>
-        <artifactId>spark-core_2.10</artifactId>
+        <artifactId>spark-core_${scala.base.version}</artifactId>
         <version>${vers.spark}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.spark</groupId>
+        <artifactId>spark-sql_${scala.base.version}</artifactId>
+        <version>${vers.spark}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.twitter</groupId>
+            <artifactId>parquet-column</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>com.twitter</groupId>
+            <artifactId>parquet-hadoop</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>com.databricks</groupId>
+        <artifactId>spark-avro_${scala.base.version}</artifactId>
+        <version>${vers.spark-avro}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro-mapred</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <!-- Misc -->
@@ -986,6 +1046,12 @@
         <version>${vers.mockito}</version>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupId>org.scalatest</groupId>
+        <artifactId>scalatest_${scala.base.version}</artifactId>
+        <version>${vers.scalatest}</version>
+        <scope>test</scope>
+      </dependency>
 
       <!-- Morphlines deps -->
       <dependency>
@@ -1007,7 +1073,7 @@
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-servlet</artifactId>
         <version>${vers.jetty}</version>
-      </dependency>      
+      </dependency>
       <dependency>
         <groupId>com.typesafe</groupId>
         <artifactId>config</artifactId>
@@ -1280,7 +1346,7 @@
         <artifact.hbase-test-deps>kite-hbase-cdh5-test-dependencies</artifact.hbase-test-deps>
         <cdh.version>${cdh5.version}</cdh.version>
         <vers.crunch>${vers.crunch-cdh5}</vers.crunch>
-        <vers.flume>1.4.0-cdh${cdh5.version}</vers.flume>
+        <vers.flume>1.5.0-cdh${cdh5.version}</vers.flume>
         <vers.hive>${vers.hive-cdh5}</vers.hive>
         <vers.oozie>4.0.0-cdh${cdh5.version}</vers.oozie>
         <vers.solr>${vers.solr-cdh5}</vers.solr>
@@ -1304,7 +1370,7 @@
       <activation>
         <jdk>[1.8,)</jdk>
       </activation>
-      <properties>                  
+      <properties>
         <!-- see http://stackoverflow.com/questions/15886209/maven-is-not-working-in-java-8-when-javadoc-tags-are-incomplete -->
         <Xdoclint>-Xdoclint:none</Xdoclint>
       </properties>
