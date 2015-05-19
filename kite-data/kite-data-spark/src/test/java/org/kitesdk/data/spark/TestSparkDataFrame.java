@@ -91,7 +91,7 @@ public class TestSparkDataFrame {
 
         Dataset<GenericRecord> products = generateDataset(format, CompressionType.Snappy);
 
-        DataFrame data = KiteDatasetReader.readAsDataFrame(sqlContext, products, 0);
+        DataFrame data = KiteDatasetReader.readAsDataFrame(sqlContext, products);
 
         data.registerTempTable("product");
 

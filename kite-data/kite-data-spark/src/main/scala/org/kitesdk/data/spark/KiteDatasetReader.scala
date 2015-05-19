@@ -15,13 +15,19 @@
  */
 package org.kitesdk.data.spark
 
+import org.apache.hadoop.mapreduce.Job
 import org.apache.spark.sql.{DataFrame, SQLContext}
 import org.kitesdk.data.Dataset
 
 object KiteDatasetReader {
 
   def readAsDataFrame(sqlContext: SQLContext,
+                      dataSet: Dataset[_]): DataFrame =
+    sqlContext.kiteDatasetFile(dataSet, None)
+
+  def readAsDataFrame(sqlContext: SQLContext,
                       dataSet: Dataset[_],
-                      minPartitions: Int = 0): DataFrame = sqlContext.kiteDatasetFile(dataSet, minPartitions)
+                      job: Job): DataFrame =
+    sqlContext.kiteDatasetFile(dataSet, Some(job))
 
 }

@@ -288,7 +288,7 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
       users.registerTempTable("user")
 
       val partitionStrategy = new PartitionStrategy.Builder().identity("favoriteColor", "favorite_color").build()
-      val dataset = KiteDatasetSaver.saveAsKiteDataset(users, datasetURI, Formats.AVRO, CompressionType.Snappy, Some(partitionStrategy))
+      val dataset = KiteDatasetSaver.saveAsKiteDataset(users, datasetURI, Formats.AVRO, CompressionType.Snappy, partitionStrategy)
 
       val reader = dataset.newReader()
       import collection.JavaConversions._

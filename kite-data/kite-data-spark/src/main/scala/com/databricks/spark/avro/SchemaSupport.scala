@@ -19,6 +19,10 @@ import org.apache.avro.{Schema, SchemaBuilder}
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.types.{DataType, StructType}
 
+/*
+This trait reuses everything is already available on the spark-avro libraries, however part of the AVRO schema support is either private or
+package private. This is why I had to use the reflection for calling a private method and to put this trait in this specific package.
+ */
 trait SchemaSupport {
 
   private def invokePrivate(x: AnyRef, methodName: String, _args: Any*): Any = {
