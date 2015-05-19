@@ -135,7 +135,7 @@ public class PartitionFunctions {
     } else if (fieldPartitioner instanceof FixedLongRangeFieldPartitioner) {
       return String.format("fixedRange(\"%s\", \"%s\", %s)",
           fieldPartitioner.getSourceName(), fieldPartitioner.getName(),
-          ((FixedLongRangeFieldPartitioner) fieldPartitioner).getRange());
+          ((FixedLongRangeFieldPartitioner) fieldPartitioner).getSize());
     } else if (fieldPartitioner instanceof DateFormatPartitioner) {
       return String.format("dateFormat(\"%s\", \"%s\", \"%s\")",
           fieldPartitioner.getSourceName(),

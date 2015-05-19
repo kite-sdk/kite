@@ -91,15 +91,15 @@ public class TestPartitionStrategyParser {
   @Test
   public void testFixedRange() {
     checkParser(new PartitionStrategy.Builder().fixedRange("id", 64).build(),
-        "[ {\"type\": \"range\", \"source\": \"id\", \"range\": 64} ]");
+        "[ {\"type\": \"range\", \"source\": \"id\", \"size\": 64} ]");
     checkParser(new PartitionStrategy.Builder().fixedRange("id", "rng", 64).build(),
         "[ {\"type\": \"range\", " +
             "\"source\": \"id\", " +
             "\"name\": \"rng\", " +
-            "\"range\": 64} ]"
+            "\"size\": 64} ]"
     );
 
-    TestHelpers.assertThrows("Should reject missing range",
+    TestHelpers.assertThrows("Should reject missing size",
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
@@ -109,14 +109,14 @@ public class TestPartitionStrategyParser {
           }
         }
     );
-    TestHelpers.assertThrows("Should reject invalid range",
+    TestHelpers.assertThrows("Should reject invalid size",
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
             PartitionStrategyParser.parse("[ {\"type\": \"range\", " +
                 "\"source\": \"id\", " +
                 "\"name\": \"rng\", " +
-                "\"buckets\": \"green\"} ]");
+                "\"size\": \"green\"} ]");
           }
         }
     );

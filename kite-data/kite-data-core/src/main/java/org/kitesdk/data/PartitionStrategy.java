@@ -370,7 +370,7 @@ public class PartitionStrategy {
 
     /**
      * Configure a range partitioner with fixed-size ranges. A value <code>v</code>
-     * is placed in the partition <code>floor(v/range)</code>.
+     * is placed in the partition <code>floor(v/size)*size</code>.
      *
      * The partition name will be the source field name with a "_range" suffix.
      * For example, fixedRange("number", 10) creates "number_range"
@@ -379,19 +379,19 @@ public class PartitionStrategy {
      * @param sourceName
      *          The entity field name from which to get values to be
      *          partitioned.
-     * @param range
+     * @param size
      *          The size of the range.
      * @return An instance of the builder for method chaining.
      * @see IntRangeFieldPartitioner
      */
-    public Builder fixedRange(String sourceName, int range) {
-      add(new FixedLongRangeFieldPartitioner(sourceName, range));
+    public Builder fixedRange(String sourceName, long size) {
+      add(new FixedLongRangeFieldPartitioner(sourceName, size));
       return this;
     }
 
     /**
      * Configure a range partitioner with fixed-size ranges. A value <code>v</code>
-     * is placed in the partition <code>floor(v/range)</code>.
+     * is placed in the partition <code>floor(v/size)*size</code>.
      *
      * If name is null, the partition name will be the source field name with a "_range" suffix.
      * For example, fixedRange("number", 10) creates "number_range"
@@ -402,13 +402,13 @@ public class PartitionStrategy {
      *          partitioned.
      * @param name
      *          The entity field name of the partition.
-     * @param range
+     * @param size
      *          The size of the range.
      * @return An instance of the builder for method chaining.
      * @see IntRangeFieldPartitioner
      */
-    public Builder fixedRange(String sourceName, @Nullable String name, int range) {
-      add(new FixedLongRangeFieldPartitioner(sourceName, name, range));
+    public Builder fixedRange(String sourceName, @Nullable String name, long size) {
+      add(new FixedLongRangeFieldPartitioner(sourceName, name, size));
       return this;
     }
 

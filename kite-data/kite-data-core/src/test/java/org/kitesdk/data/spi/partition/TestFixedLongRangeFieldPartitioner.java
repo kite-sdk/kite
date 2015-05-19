@@ -32,12 +32,12 @@ public class TestFixedLongRangeFieldPartitioner {
 
     Assert.assertEquals(0, partitioner.apply(0L).longValue());
     Assert.assertEquals(0, partitioner.apply(9L).longValue());
-    Assert.assertEquals(1, partitioner.apply(10L).longValue());
-    Assert.assertEquals(1, partitioner.apply(11L).longValue());
-    Assert.assertEquals(-1, partitioner.apply(-1L).longValue());
-    Assert.assertEquals(-1, partitioner.apply(-9L).longValue());
-    Assert.assertEquals(-1, partitioner.apply(-10L).longValue());
-    Assert.assertEquals(-2, partitioner.apply(-11L).longValue());
+    Assert.assertEquals(10, partitioner.apply(10L).longValue());
+    Assert.assertEquals(10, partitioner.apply(11L).longValue());
+    Assert.assertEquals(-10, partitioner.apply(-1L).longValue());
+    Assert.assertEquals(-10, partitioner.apply(-9L).longValue());
+    Assert.assertEquals(-10, partitioner.apply(-10L).longValue());
+    Assert.assertEquals(-20, partitioner.apply(-11L).longValue());
   }
 
 }

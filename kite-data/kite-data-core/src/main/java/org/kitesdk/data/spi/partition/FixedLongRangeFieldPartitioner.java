@@ -35,24 +35,24 @@ import org.kitesdk.data.spi.predicates.Ranges;
 @Immutable
 public class FixedLongRangeFieldPartitioner extends FieldPartitioner<Long, Long> {
 
-  private final long range;
+  private final long size;
 
-  public FixedLongRangeFieldPartitioner(String sourceName, long range) {
-    this(sourceName, null, range);
+  public FixedLongRangeFieldPartitioner(String sourceName, long size) {
+    this(sourceName, null, size);
   }
 
   public FixedLongRangeFieldPartitioner(String sourceName, @Nullable String name,
-      long range) {
+      long size) {
     super(sourceName, (name == null ? sourceName + "_range" : name),
         Long.class, Long.class);
-    this.range = range;
-    Preconditions.checkArgument(range > 0,
-        "Size of range buckets is not positive: %s", range);
+    this.size = size;
+    Preconditions.checkArgument(size > 0,
+        "Size of range buckets is not positive: %s", size);
   }
 
   @Override
   public Long apply(Long value) {
-    return Math.round(Math.floor(value/((double) range)));
+    return Math.round(Math.floor(value / ((double) size))) * size;
   }
 
   @Override
@@ -82,8 +82,8 @@ public class FixedLongRangeFieldPartitioner extends FieldPartitioner<Long, Long>
     return null;
   }
 
-  public long getRange() {
-    return range;
+  public long getSize() {
+    return size;
   }
 
   @Override
@@ -99,7 +99,7 @@ public class FixedLongRangeFieldPartitioner extends FieldPartitioner<Long, Long>
     }
     FixedLongRangeFieldPartitioner that = (FixedLongRangeFieldPartitioner) o;
     return Objects.equal(this.getName(), that.getName()) &&
-        Objects.equal(this.range, that.range);
+        Objects.equal(this.size, that.size);
   }
 
   @Override
@@ -109,12 +109,12 @@ public class FixedLongRangeFieldPartitioner extends FieldPartitioner<Long, Long>
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(getName(), range);
+    return Objects.hashCode(getName(), size);
   }
 
   @Override
   public String toString() {
     return Objects.toStringHelper(this).add("name", getName())
-      .add("range", range).toString();
+      .add("size", size).toString();
   }
 }

@@ -71,7 +71,7 @@ public class PartitionStrategyParser {
   private static final String BUCKETS = "buckets";
   private static final String FORMAT = "format";
   private static final String VALUES = "values";
-  private static final String RANGE = "range";
+  private static final String SIZE = "size";
 
   /**
    * Parses a PartitionStrategy from a JSON string.
@@ -178,15 +178,15 @@ public class PartitionStrategyParser {
             fieldPartitioner.get(BUCKETS).asText());
         builder.hash(source, name, buckets);
       } else if (type.equals("range")) {
-        ValidationException.check(fieldPartitioner.has(RANGE),
+        ValidationException.check(fieldPartitioner.has(SIZE),
             "Range partitioner %s must have attribute %s",
-            name == null ? source : name, RANGE);
-        int range = fieldPartitioner.get(RANGE).asInt();
-        ValidationException.check(range > 0,
-            "Invalid number of buckets for range partitioner %s: %s",
+            name == null ? source : name, SIZE);
+        long size = fieldPartitioner.get(SIZE).asLong();
+        ValidationException.check(size > 0,
+            "Invalid size for range partitioner %s: %s",
             name == null ? source : name,
-            fieldPartitioner.get(RANGE).asText());
-        builder.fixedRange(source, name, range);
+            fieldPartitioner.get(SIZE).asText());
+        builder.fixedRange(source, name, size);
       } else if (type.equals("year")) {
         builder.year(source, name);
       } else if (type.equals("month")) {
@@ -235,8 +235,8 @@ public class PartitionStrategyParser {
       } else if (fp instanceof FixedLongRangeFieldPartitioner) {
         partitioner.set(SOURCE, TextNode.valueOf(fp.getSourceName()));
         partitioner.set(TYPE, TextNode.valueOf("range"));
-        partitioner.set(RANGE,
-            LongNode.valueOf(((FixedLongRangeFieldPartitioner) fp).getRange()));
+        partitioner.set(SIZE,
+            LongNode.valueOf(((FixedLongRangeFieldPartitioner) fp).getSize()));
       } else if (fp instanceof YearFieldPartitioner) {
         partitioner.set(SOURCE, TextNode.valueOf(fp.getSourceName()));
         partitioner.set(TYPE, TextNode.valueOf("year"));
