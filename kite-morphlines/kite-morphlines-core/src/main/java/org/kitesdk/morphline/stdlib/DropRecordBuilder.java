@@ -25,7 +25,6 @@ import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.AbstractCommand;
 
 import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 
 /**
  * Command that silently consumes records without ever emitting any record - think /dev/null.
@@ -83,7 +82,7 @@ public final class DropRecordBuilder implements CommandBuilder {
   private static final class DropRecord extends AbstractCommand {
     
     public DropRecord(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
-      super(builder, ConfigFactory.empty(), parent, child, context);
+      super(builder, config, parent, child, context);
     }
 
     @Override
