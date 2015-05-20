@@ -24,7 +24,7 @@ import org.kitesdk.data._
 trait TestSupport {
   protected def cleanup(): Unit = {
     val conf = new Configuration()
-    val dir = new Path(s"${System.getProperty("user.dir")}/tmp/")
+    val dir = new Path(s"${System.getProperty("user.dir")}/target/tmp/")
     val fileSystem = dir.getFileSystem(conf)
     if (fileSystem.exists(dir))
       fileSystem.delete(dir, true)
@@ -33,7 +33,7 @@ trait TestSupport {
 
   protected def generateDataset(format: Format, compressionType: CompressionType) = {
     val descriptor = new DatasetDescriptor.Builder().schemaUri("resource:product.avsc").compressionType(compressionType).format(format).build() //Snappy compression is the default
-    val products = Datasets.create[GenericRecord, Dataset[GenericRecord]](s"dataset:file://${System.getProperty("user.dir")}/tmp/test/products", descriptor, classOf[GenericRecord])
+    val products = Datasets.create[GenericRecord, Dataset[GenericRecord]](s"dataset:file://${System.getProperty("user.dir")}/target/tmp/test/products", descriptor, classOf[GenericRecord])
     val writer = products.newWriter()
     val builder = new GenericRecordBuilder(descriptor.getSchema)
     for (i <- 1 to 100) {
