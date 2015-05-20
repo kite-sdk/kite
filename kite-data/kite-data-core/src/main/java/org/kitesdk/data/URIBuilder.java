@@ -103,7 +103,8 @@ public class URIBuilder {
   public URIBuilder(URI repoUri, String namespace, String dataset) {
     Preconditions.checkNotNull(repoUri, "Repository URI cannot be null");
     Preconditions.checkNotNull(dataset, "Dataset name cannot be null");
-    Preconditions.checkArgument(REPO_SCHEME.equals(repoUri.getScheme()));
+    Preconditions.checkArgument(REPO_SCHEME.equals(repoUri.getScheme()),
+        "Repository URI must start with \"repo:\" but was:" + repoUri);
 
     Pair<URIPattern, Map<String, String>> pair = Registration
         .lookupPatternByRepoUri(URI.create(repoUri.getRawSchemeSpecificPart()));
