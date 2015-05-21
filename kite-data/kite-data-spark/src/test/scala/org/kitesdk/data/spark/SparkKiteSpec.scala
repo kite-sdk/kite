@@ -116,7 +116,9 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
 
     val teenagers = sqlContext.sql("SELECT * FROM people WHERE age >= 13 AND age <= 19")
 
-    val dataset = KiteDatasetSaver.saveAsKiteDataset(teenagers, datasetURI, format, CompressionType.Snappy)
+    val descriptor = new SparkDatasetDescriptor.Builder().dataFrame(teenagers).format(format).compressionType(CompressionType.Snappy).build()
+
+    val dataset = KiteDatasetSaver.saveAsKiteDataset(descriptor, datasetURI)
     val reader = dataset.newReader()
 
     import collection.JavaConversions._
@@ -139,6 +141,76 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
     "be able to create a kite avro dataset from a SchemaRDD/Dataframe" in {
 
       testCreateKiteDataset(Formats.AVRO)
+
+    }
+  }
+
+  "Spark" must {
+    "be able to append a SchemaRDD/Dataframe to an existing dataset" in {
+      cleanup()
+
+      val sqlContext = new SQLContext(sparkContext)
+      import sqlContext.implicits._
+
+      val datasetURI = URIBuilder.build(s"repo:file:////${System.getProperty("user.dir")}/target/tmp", "test", "persons")
+
+      val peopleList1 = List(Person("David", 50), Person("Ruben", 14))
+      val people1 = sparkContext.parallelize[Person](peopleList1).toDF()
+
+      val peopleList2 = List(Person("Giuditta", 12), Person("Vita", 19))
+      val people2 = sparkContext.parallelize[Person](peopleList2).toDF()
+
+      val descriptor = new SparkDatasetDescriptor.Builder().dataFrame(people1).format(Formats.AVRO).compressionType(CompressionType.Snappy).build()
+      val dataset1 = KiteDatasetSaver.saveAsKiteDataset(descriptor, datasetURI)
+
+      val dataset2 = KiteDatasetSaver.saveAsKiteDataset(people2, dataset1, WriteMode.APPEND)
+
+      val reader = dataset2.newReader()
+
+      import collection.JavaConversions._
+
+      reader.
+        iterator().
+        toList.map(row => Person(row.get(0).toString, row.get(1).asInstanceOf[Int])) must be(peopleList1 ++ peopleList2)
+
+      reader.close()
+
+      cleanup()
+
+    }
+  }
+
+  "Spark" must {
+    "be able to overwrite with SchemaRDD/Dataframe an existing dataset" in {
+      cleanup()
+
+      val sqlContext = new SQLContext(sparkContext)
+      import sqlContext.implicits._
+
+      val datasetURI = URIBuilder.build(s"repo:file:////${System.getProperty("user.dir")}/target/tmp", "test", "persons")
+
+      val peopleList1 = List(Person("David", 50), Person("Ruben", 14))
+      val people1 = sparkContext.parallelize[Person](peopleList1).toDF()
+
+      val peopleList2 = List(Person("Giuditta", 12), Person("Vita", 19))
+      val people2 = sparkContext.parallelize[Person](peopleList2).toDF()
+
+      val descriptor = new SparkDatasetDescriptor.Builder().dataFrame(people1).format(Formats.AVRO).compressionType(CompressionType.Snappy).build()
+      val dataset1 = KiteDatasetSaver.saveAsKiteDataset(descriptor, datasetURI)
+
+      val dataset2 = KiteDatasetSaver.saveAsKiteDataset(people2, dataset1, WriteMode.OVERWRITE)
+
+      val reader = dataset2.newReader()
+
+      import collection.JavaConversions._
+
+      reader.
+        iterator().
+        toList.map(row => Person(row.get(0).toString, row.get(1).asInstanceOf[Int])) must be(peopleList2)
+
+      reader.close()
+
+      cleanup()
 
     }
   }
@@ -227,12 +299,19 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
       users.registerTempTable("user")
 
       val partitionStrategy = new PartitionStrategy.Builder().identity("favoriteColor", "favorite_color").build()
-      val dataset = KiteDatasetSaver.saveAsKiteDataset(users, datasetURI, Formats.AVRO, CompressionType.Snappy, partitionStrategy)
+      val descriptor = new SparkDatasetDescriptor.Builder().dataFrame(users).format(Formats.AVRO).compressionType(CompressionType.Snappy).partitionStrategy(partitionStrategy).build()
+      val dataset = KiteDatasetSaver.saveAsKiteDataset(descriptor, datasetURI)
 
       val reader = dataset.newReader()
       import collection.JavaConversions._
       reader.iterator().toList.sortBy(_.get(0).toString().split("-")(1).toInt).map(record => User(record.get(0).toString, record.get(1).asInstanceOf[Long], record.get(2).toString)) must be(usersList)
       reader.close()
+
+      val ds2 = KiteDatasetSaver.saveAsKiteDataset(users, dataset, WriteMode.OVERWRITE)
+      val reader2 = ds2.newReader()
+      import collection.JavaConversions._
+      reader2.iterator().toList.map(record => User(record.get(0).toString, record.get(1).asInstanceOf[Long], record.get(2).toString)).foreach(println)
+      reader2.close()
 
       cleanup()
 

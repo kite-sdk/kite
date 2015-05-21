@@ -15,7 +15,7 @@
  */
 package org.kitesdk.data.spark
 
-import java.net.URI
+import java.net.{URI, URL}
 
 import com.databricks.spark.avro.SchemaSupport
 import org.apache.avro.generic.GenericData.Record
@@ -24,6 +24,7 @@ import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{DataFrame, Row}
 import org.kitesdk.data._
 import org.kitesdk.data.mapreduce.DatasetKeyOutputFormat
+import org.kitesdk.data.spark.WriteMode.WriteMode
 
 object KiteDatasetSaver extends SchemaSupport {
 
@@ -33,13 +34,9 @@ object KiteDatasetSaver extends SchemaSupport {
     rows.map(x => (converter(x).asInstanceOf[Record], null))
   }
 
-  private def saveAsKiteDataset(dataFrame: DataFrame,
-                                uri: URI,
-                                format: Format,
-                                compressionType: CompressionType,
-                                partitionStrategy: Option[PartitionStrategy],
-                                columnMapping: Option[ColumnMapping],
-                                job: Option[Job] = None): Dataset[Record] = {
+  def saveAsKiteDataset(sparkDatasetDescriptor: SparkDatasetDescriptor,
+                        uri: URI,
+                        job: Option[Job]): Dataset[Record] = {
     assert(URIBuilder.DATASET_SCHEME == uri.getScheme,
       s"Not a dataset or view URI: $uri" + "")
     val j = job.getOrElse(Job.getInstance())
@@ -50,32 +47,39 @@ object KiteDatasetSaver extends SchemaSupport {
     breaking the partition strategy, so in case the partition strategy is defined
     I change nullable to false, it seems working.
     */
-    val schema = partitionStrategy.fold(dataFrame.schema)(_ =>
-      StructType(dataFrame.schema.iterator.map(field =>
-        if (field.nullable) field.copy(nullable = false) else field).toArray))
+    val schema = if (sparkDatasetDescriptor.isPartitioned)
+      StructType(sparkDatasetDescriptor.dataFrame.schema.iterator.map(field =>
+        if (field.nullable) field.copy(nullable = false) else field).toArray)
+    else
+      sparkDatasetDescriptor.dataFrame.schema
 
     val avroSchema = getSchema(schema)
 
-    val descriptor = partitionStrategy.
-      fold(
-        new DatasetDescriptor.
-        Builder().
-          schema(avroSchema).
-          format(format).
-          compressionType(compressionType).
-          columnMapping(columnMapping.getOrElse(null)).
-          build()
-      )(
-        p =>
-          new DatasetDescriptor.
-          Builder().
-            schema(avroSchema).
-            format(format).
-            compressionType(compressionType).
-            columnMapping(columnMapping.getOrElse(null)).
-            partitionStrategy(p).
-            build()
-      )
+    def toURI(url: URL): URI = if (url == null)
+      null
+    else
+      URI.create(url.toExternalForm)
+
+    import collection.JavaConversions._
+    val properties = sparkDatasetDescriptor.listProperties().
+      map(prop => (prop, sparkDatasetDescriptor.getProperty(prop))).toMap
+
+    val descriptor = new DatasetDescriptor(
+      avroSchema,
+      toURI(sparkDatasetDescriptor.getSchemaUrl),
+      sparkDatasetDescriptor.getFormat,
+      sparkDatasetDescriptor.getLocation,
+      properties,
+      if (sparkDatasetDescriptor.isPartitioned)
+        sparkDatasetDescriptor.getPartitionStrategy
+      else
+        null,
+      if (sparkDatasetDescriptor.isColumnMapped)
+        sparkDatasetDescriptor.getColumnMapping
+      else
+        null,
+      sparkDatasetDescriptor.getCompressionType
+    )
 
     val dataset = Datasets.create[Record, Dataset[Record]](
       uri,
@@ -85,6 +89,40 @@ object KiteDatasetSaver extends SchemaSupport {
 
     DatasetKeyOutputFormat.configure(j).writeTo(dataset)
 
+    sparkDatasetDescriptor.dataFrame.
+      mapPartitions(rowsToAvro(_, schema)).
+      saveAsNewAPIHadoopDataset(j.getConfiguration)
+    dataset
+
+  }
+
+  def saveAsKiteDataset(sparkDatasetDescriptor: SparkDatasetDescriptor,
+                        uri: URI): Dataset[Record] =
+    saveAsKiteDataset(sparkDatasetDescriptor, uri, None)
+
+  def saveAsKiteDataset(dataFrame: DataFrame,
+                        dataset: View[Record],
+                        writeMode: WriteMode,
+                        job: Option[Job]): View[Record] = {
+    val j = job.getOrElse(Job.getInstance())
+
+    val schema = if (dataset.getDataset.getDescriptor.isPartitioned)
+      StructType(dataFrame.schema.iterator.map(field =>
+        if (field.nullable) field.copy(nullable = false) else field).toArray)
+    else
+      dataFrame.schema
+
+    val avroSchema = getSchema(schema)
+
+    writeMode match {
+      case WriteMode.DEFAULT =>
+        throw new RuntimeException(s"Dataset/view already exists: ${dataset.toString}")
+      case WriteMode.APPEND =>
+        DatasetKeyOutputFormat.configure(j).writeTo(dataset).appendTo(dataset)
+      case WriteMode.OVERWRITE =>
+        DatasetKeyOutputFormat.configure(j).writeTo(dataset).overwrite(dataset)
+    }
+
     dataFrame.
       mapPartitions(rowsToAvro(_, schema)).
       saveAsNewAPIHadoopDataset(j.getConfiguration)
@@ -92,75 +130,8 @@ object KiteDatasetSaver extends SchemaSupport {
   }
 
   def saveAsKiteDataset(dataFrame: DataFrame,
-                        uri: URI,
-                        format: Format,
-                        compressionType: CompressionType): Dataset[Record] =
-    saveAsKiteDataset(
-      dataFrame,
-      uri,
-      format,
-      compressionType,
-      None,
-      None,
-      None
-    )
-
-  def saveAsKiteDataset(dataFrame: DataFrame,
-                        uri: URI,
-                        format: Format,
-                        compressionType: CompressionType,
-                        partitionStrategy: PartitionStrategy): Dataset[Record] =
-    saveAsKiteDataset(
-      dataFrame,
-      uri,
-      format,
-      compressionType,
-      Some(partitionStrategy),
-      None,
-      None
-    )
-
-  def saveAsKiteDataset(dataFrame: DataFrame,
-                        uri: URI,
-                        format: Format,
-                        compressionType: CompressionType,
-                        partitionStrategy: PartitionStrategy,
-                        columnMapping: ColumnMapping): Dataset[Record] =
-    saveAsKiteDataset(
-      dataFrame,
-      uri,
-      format,
-      compressionType,
-      Some(partitionStrategy),
-      Some(columnMapping),
-      None
-    )
-
-  def saveAsKiteDataset(dataFrame: DataFrame,
-                        uri: URI,
-                        datasetDescriptor: DatasetDescriptor): Dataset[Record] =
-    saveAsKiteDataset(
-      dataFrame,
-      uri,
-      datasetDescriptor.getFormat,
-      datasetDescriptor.getCompressionType,
-      Option(datasetDescriptor.getPartitionStrategy),
-      Option(datasetDescriptor.getColumnMapping),
-      None
-    )
-
-  def saveAsKiteDataset(dataFrame: DataFrame,
-                        uri: URI,
-                        datasetDescriptor: DatasetDescriptor,
-                        job: Job): Dataset[Record] =
-    saveAsKiteDataset(
-      dataFrame,
-      uri,
-      datasetDescriptor.getFormat,
-      datasetDescriptor.getCompressionType,
-      Option(datasetDescriptor.getPartitionStrategy),
-      Option(datasetDescriptor.getColumnMapping),
-      Some(job)
-    )
+                        dataset: Dataset[Record],
+                        writeMode: WriteMode): View[Record] =
+    saveAsKiteDataset(dataFrame, dataset, writeMode, None)
 
 }

@@ -41,7 +41,7 @@ public class TestSparkDataFrame {
         final String name;
         final int age;
 
-        public  Person(String name, int age) {
+        public Person(String name, int age) {
             this.name = name;
             this.age = age;
         }
@@ -140,7 +140,9 @@ public class TestSparkDataFrame {
 
         DataFrame teenagers = sqlContext.sql("SELECT * FROM people WHERE age >= 13 AND age <= 19");
 
-        Dataset<GenericData.Record> dataset = KiteDatasetSaver.saveAsKiteDataset(teenagers, datasetURI, format, CompressionType.Snappy);
+        SparkDatasetDescriptor descriptor = new SparkDatasetDescriptor.Builder().dataFrame(teenagers).format(format).compressionType(CompressionType.Snappy).build();
+
+        Dataset<GenericData.Record> dataset = KiteDatasetSaver.saveAsKiteDataset(descriptor, datasetURI);
 
         DatasetReader<GenericData.Record> reader = dataset.newReader();
 
