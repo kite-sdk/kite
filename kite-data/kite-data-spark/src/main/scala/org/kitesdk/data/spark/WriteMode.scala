@@ -15,27 +15,6 @@
  */
 package org.kitesdk.data.spark
 
-/*
- /**
-  * Check to see if the output target already exists before running
-  * the pipeline, and if it does, print an error and throw an exception.
-  */
- DEFAULT,
-
- /**
-  * Check to see if the output target already exists, and if it does,
-  * delete it and overwrite it with the new output (if any).
-  */
- OVERWRITE,
-
- /**
-  * If the output target does not exist, create it. If it does exist,
-  * add the output of this pipeline to the target. This was the
-  * behavior in Crunch up to version 0.4.0.
-  */
- APPEND,
-*/
-
 object WriteMode extends Enumeration {
 
   type WriteMode = Value

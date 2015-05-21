@@ -152,7 +152,7 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
       val sqlContext = new SQLContext(sparkContext)
       import sqlContext.implicits._
 
-      val datasetURI = URIBuilder.build(s"repo:file:////${System.getProperty("user.dir")}/target/tmp", "test", "persons")
+      val datasetURI = URIBuilder.build(s"repo:file:////${System.getProperty("user.dir")}/target/tmp", "test", "persons1")
 
       val peopleList1 = List(Person("David", 50), Person("Ruben", 14))
       val people1 = sparkContext.parallelize[Person](peopleList1).toDF()
@@ -171,7 +171,7 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
 
       reader.
         iterator().
-        toList.map(row => Person(row.get(0).toString, row.get(1).asInstanceOf[Int])) must be(peopleList1 ++ peopleList2)
+        toList.map(row => Person(row.get(0).toString, row.get(1).asInstanceOf[Int])).sortBy(_.name) must be((peopleList1 ++ peopleList2).sortBy(_.name))
 
       reader.close()
 
@@ -187,7 +187,7 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
       val sqlContext = new SQLContext(sparkContext)
       import sqlContext.implicits._
 
-      val datasetURI = URIBuilder.build(s"repo:file:////${System.getProperty("user.dir")}/target/tmp", "test", "persons")
+      val datasetURI = URIBuilder.build(s"repo:file:////${System.getProperty("user.dir")}/target/tmp", "test", "persons2")
 
       val peopleList1 = List(Person("David", 50), Person("Ruben", 14))
       val people1 = sparkContext.parallelize[Person](peopleList1).toDF()
@@ -206,7 +206,7 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
 
       reader.
         iterator().
-        toList.map(row => Person(row.get(0).toString, row.get(1).asInstanceOf[Int])) must be(peopleList2)
+        toList.map(row => Person(row.get(0).toString, row.get(1).asInstanceOf[Int])).sortBy(_.name) must be(peopleList2.sortBy(_.name))
 
       reader.close()
 
@@ -222,7 +222,7 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
 
       val sqlContext = new SQLContext(sparkContext)
 
-      val datasetURI = URIBuilder.build(s"repo:file:////${System.getProperty("user.dir")}/target/tmp", "test", "persons")
+      val datasetURI = URIBuilder.build(s"repo:file:////${System.getProperty("user.dir")}/target/tmp", "test", "persons3")
 
       val descriptor = new DatasetDescriptor.Builder().schema(classOf[Person]).format(Formats.AVRO).build()
 
@@ -252,7 +252,7 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
 
       val partitionStrategy = new PartitionStrategy.Builder().identity("favoriteColor", "favorite_color").build()
 
-      val datasetURI = URIBuilder.build(s"repo:file:////${System.getProperty("user.dir")}/target/tmp", "test", "users")
+      val datasetURI = URIBuilder.build(s"repo:file:////${System.getProperty("user.dir")}/target/tmp", "test", "users1")
 
       val descriptor = new DatasetDescriptor.Builder().schemaUri("resource:user.avsc").partitionStrategy(partitionStrategy).format(Formats.AVRO).build()
 
@@ -260,7 +260,7 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
 
       val colors = Array[String]("green", "blue", "pink", "brown", "yellow")
       val rand = new Random()
-      val builder = new GenericRecordBuilder(descriptor.getSchema())
+      val builder = new GenericRecordBuilder(descriptor.getSchema)
       val users = for {
         i <- 0 until 100
         fields = ("user-" + i, System.currentTimeMillis(), colors(rand.nextInt(colors.length)))
@@ -290,7 +290,7 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
       val sqlContext = new SQLContext(sparkContext)
       import sqlContext.implicits._
 
-      val datasetURI = URIBuilder.build(s"repo:file:////${System.getProperty("user.dir")}/target/tmp", "test", "users")
+      val datasetURI = URIBuilder.build(s"repo:file:////${System.getProperty("user.dir")}/target/tmp", "test", "users2")
 
       val colors = Array[String]("green", "blue", "pink", "brown", "yellow")
       val rand = new Random()
@@ -304,7 +304,7 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
 
       val reader = dataset.newReader()
       import collection.JavaConversions._
-      reader.iterator().toList.sortBy(_.get(0).toString().split("-")(1).toInt).map(record => User(record.get(0).toString, record.get(1).asInstanceOf[Long], record.get(2).toString)) must be(usersList)
+      reader.iterator().toList.sortBy(_.get(0).toString.split("-")(1).toInt).map(record => User(record.get(0).toString, record.get(1).asInstanceOf[Long], record.get(2).toString)) must be(usersList)
       reader.close()
 
       val ds2 = KiteDatasetSaver.saveAsKiteDataset(users, dataset, WriteMode.OVERWRITE)
