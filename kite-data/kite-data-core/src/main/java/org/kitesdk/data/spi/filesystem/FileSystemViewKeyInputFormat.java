@@ -15,19 +15,15 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-import org.apache.avro.Schema;
 import org.apache.avro.hadoop.io.AvroSerialization;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapreduce.AvroJob;
 import org.apache.avro.mapreduce.AvroKeyInputFormat;
-import org.apache.avro.specific.SpecificData;
-import org.apache.avro.specific.SpecificRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
@@ -59,7 +55,6 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
   // Constant from AvroJob copied here so we can set it on the Configuration
   // given to this class.
   private static final String AVRO_SCHEMA_INPUT_KEY = "avro.schema.input.key";
-  private static final String KITE_READER_SCHEMA = "kite.readerSchema";
 
   // this is required for 1.7.4 because setDataModelClass is not available
   private static final DynMethods.StaticMethod setModel =
@@ -74,45 +69,38 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
   public FileSystemViewKeyInputFormat(FileSystemDataset<E> dataset,
       Configuration conf) {
     this.dataset = dataset;
+    this.view = null;
     LOG.debug("Dataset: {}", dataset);
 
     Format format = dataset.getDescriptor().getFormat();
 
-    boolean isSpecific = SpecificRecord.class.isAssignableFrom(dataset.getType());
-    String readerSchema = conf.get(KITE_READER_SCHEMA);
-
-    Preconditions.checkState(!isSpecific || readerSchema == null,
-      "Illegal configuration: {} must not be set if dataset uses a specific type {}",
-      KITE_READER_SCHEMA, dataset.getType());
-
-    if (isSpecific) {
-      readerSchema = SpecificData.get().getSchema(dataset.getType()).toString();
-    }
-
-    if (Formats.AVRO.equals(format)) {
-      setModel.invoke(conf,
-          DataModelUtil.getDataModelForType(dataset.getType()).getClass());
-
-      // Use the reader's schema type if provided.
-      if (readerSchema != null) {
-
-        conf.set(AVRO_SCHEMA_INPUT_KEY, readerSchema);
-      }
-    } else if (Formats.PARQUET.equals(format)) {
-
-      // Use the reader's schema type if provided.
-      if (readerSchema != null) {
-
-        AvroReadSupport.setAvroReadSchema(conf,
-          new Schema.Parser().parse(readerSchema));
+    if (!DataModelUtil.isGeneric(dataset.getType())) {
+      if (Formats.AVRO.equals(format)) {
+        setModel.invoke(conf,
+            DataModelUtil.getDataModelForType(dataset.getType()).getClass());
+        conf.set(AVRO_SCHEMA_INPUT_KEY, dataset.getSchema().toString());
+      } else if (Formats.PARQUET.equals(format)) {
+        // TODO: when available, use AvroReadSupport.setDataModelSupplier
+        AvroReadSupport.setAvroReadSchema(conf, dataset.getSchema());
       }
     }
   }
 
   public FileSystemViewKeyInputFormat(FileSystemView<E> view, Configuration conf) {
-    this((FileSystemDataset<E>) view.getDataset(), conf);
+    this.dataset = (FileSystemDataset<E>) view.getDataset();
     this.view = view;
     LOG.debug("View: {}", view);
+
+    Format format = dataset.getDescriptor().getFormat();
+
+    if (Formats.AVRO.equals(format)) {
+      setModel.invoke(conf,
+          DataModelUtil.getDataModelForType(view.getType()).getClass());
+      conf.set(AVRO_SCHEMA_INPUT_KEY, view.getSchema().toString());
+    } else if (Formats.PARQUET.equals(format)) {
+      // TODO: when available, use AvroReadSupport.setDataModelSupplier
+      AvroReadSupport.setAvroReadSchema(conf, view.getSchema());
+    }
   }
 
   @Override
@@ -128,8 +116,6 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
         AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
         return delegate.getSplits(jobContext);
       } else if (Formats.PARQUET.equals(format)) {
-        // TODO: use later version of parquet (with https://github.com/Parquet/parquet-mr/pull/282) so we can set the schema correctly
-        // AvroParquetInputFormat.setReadSchema(job, view.getDescriptor().getSchema());
         AvroParquetInputFormat delegate = new AvroParquetInputFormat();
         return delegate.getSplits(jobContext);
       } else if (Formats.JSON.equals(format)) {

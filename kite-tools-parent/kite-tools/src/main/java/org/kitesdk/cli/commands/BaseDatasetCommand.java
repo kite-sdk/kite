@@ -23,6 +23,7 @@ import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import org.apache.avro.generic.GenericRecord;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.URIBuilder;
 import org.kitesdk.data.View;
@@ -106,6 +107,14 @@ abstract class BaseDatasetCommand extends BaseCommand {
   protected <E> View<E> load(String uriOrName, Class<E> type) {
     if (isDatasetOrViewUri(uriOrName)) {
       return Datasets.<E, View<E>>load(uriOrName, type);
+    } else {
+      return getDatasetRepository().load(namespace, uriOrName, type);
+    }
+  }
+
+  protected View<GenericRecord> load(String uriOrName) {
+    if (isDatasetOrViewUri(uriOrName)) {
+      return Datasets.load(uriOrName);
     } else {
       return getDatasetRepository().load(namespace, uriOrName);
     }

@@ -33,7 +33,6 @@ import org.apache.avro.reflect.ReflectDatumReader;
 import org.apache.avro.specific.SpecificData;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificRecord;
-import org.kitesdk.data.IncompatibleSchemaException;
 
 /**
  * Utilities for determining the appropriate data model at runtime.
@@ -101,22 +100,20 @@ public class DataModelUtil {
   }
 
   /**
-   * Returns true if the type implements GenericRecord but not SpecificRecord
+   * Test whether the class is a generic {@link GenericRecord} and not a
+   * {@link SpecificRecord}. This is necessary instead of testing if
+   * {@code GenericRecord} is assignable from the class because
+   * {@link org.apache.avro.specific.SpecificRecordBase} implements
+   * {@code GenericRecord}.
    *
-   * @param <E> The entity type
-   * @param type The Java class of the entity type
-   * @return true if the type implements GenericRecord but not SpecificRecord
+   * @param type a Java class
+   * @return true if the class is an Avro generic and not specific
    */
-  public static <E> boolean isGeneric(Class<E> type) {
-    // Need to check if SpecificRecord first because specific records also
-    // implement GenericRecord
-    if (SpecificRecord.class.isAssignableFrom(type)) {
-      return false;
-    } else if (IndexedRecord.class.isAssignableFrom(type)) {
-      return true;
-    } else {
-      return false;
-    }
+  public static boolean isGeneric(Class<?> type) {
+    return (
+        !SpecificRecord.class.isAssignableFrom(type) &&
+            GenericRecord.class.isAssignableFrom(type)
+    );
   }
 
   /**
@@ -151,8 +148,6 @@ public class DataModelUtil {
    * @param type The Java class of the entity type
    * @param schema The {@link Schema} for the entity
    * @return The resolved Java class object
-   * @throws IncompatibleSchemaException The schema for the resolved type is not
-   * compatible with the schema that was given.
    */
   @SuppressWarnings("unchecked")
   public static <E> Class<E> resolveType(Class<E> type, Schema schema) {
@@ -162,13 +157,6 @@ public class DataModelUtil {
 
     if (type == null) {
       type = (Class<E>) GenericData.Record.class;
-    }
-
-    Schema readerSchema = getReaderSchema(type, schema);
-    if (false == SchemaValidationUtil.canRead(schema, readerSchema)) {
-      throw new IncompatibleSchemaException(
-          String.format("The reader schema derived from %s is not compatible "
-          + "with the dataset's given writer schema.", type.toString()));
     }
 
     return type;
@@ -194,6 +182,29 @@ public class DataModelUtil {
   }
 
   /**
+   * Get the writer schema based on the given type and dataset schema.
+   *
+   * @param <E> The entity type
+   * @param type The Java class of the entity type
+   * @param schema The {@link Schema} for the entity
+   * @return The reader schema based on the given type and writer schema
+   */
+  public static <E> Schema getWriterSchema(Class<E> type, Schema schema) {
+    Schema writerSchema = schema;
+    GenericData dataModel = getDataModelForType(type);
+    if (dataModel instanceof AllowNulls) {
+      // assume fields are non-null by default to avoid schema conflicts
+      dataModel = ReflectData.get();
+    }
+
+    if (dataModel instanceof SpecificData) {
+      writerSchema = ((SpecificData)dataModel).getSchema(type);
+    }
+
+    return writerSchema;
+  }
+
+  /**
    * If E implements GenericRecord, but does not implement SpecificRecord, then
    * create a new instance of E using reflection so that GenericDataumReader
    * will use the expected type.
@@ -210,9 +221,7 @@ public class DataModelUtil {
   @SuppressWarnings("unchecked")
   public static <E> E createRecord(Class<E> type, Schema schema) {
     // Don't instantiate SpecificRecords or interfaces.
-    if (!SpecificRecord.class.isAssignableFrom(type) &&
-        GenericRecord.class.isAssignableFrom(type) &&
-        !type.isInterface()) {
+    if (isGeneric(type) && !type.isInterface()) {
       if (GenericData.Record.class.equals(type)) {
         return (E) GenericData.get().newRecord(null, schema);
       }
@@ -223,11 +232,6 @@ public class DataModelUtil {
   }
 
   public static <E> EntityAccessor<E> accessor(Class<E> type, Schema schema) {
-    return new EntityAccessor<E>(type, schema);
-  }
-
-  public static <E> EntityAccessor<E> accessor(Schema schema) {
-    Class<E> type = resolveType(null, schema);
     return new EntityAccessor<E>(type, schema);
   }
 }

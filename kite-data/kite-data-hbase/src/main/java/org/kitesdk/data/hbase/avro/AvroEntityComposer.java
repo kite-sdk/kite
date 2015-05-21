@@ -116,8 +116,8 @@ public class AvroEntityComposer<E extends IndexedRecord> implements
   public Object extractField(E entity, String fieldName) {
     // make sure the field is a direct child of the schema
     ValidationException.check(
-        accessor.getEntitySchema().getField(fieldName) != null,
-        "No field named %s in schema %s", fieldName, accessor.getEntitySchema());
+        accessor.getReadSchema().getField(fieldName) != null,
+        "No field named %s in schema %s", fieldName, accessor.getReadSchema());
     return accessor.get(entity, fieldName);
   }
 

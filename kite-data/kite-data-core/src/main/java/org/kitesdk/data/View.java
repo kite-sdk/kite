@@ -170,11 +170,24 @@ public interface View<E> {
    * <p>
    * This method always returns a {@code View} with type {@link GenericRecord}.
    *
-   * @param <T> the type of {@code GenericRecord} to use
    * @param schema an Avro schema to project entities to
    * @return a copy of this view that projects entities to the given schema
-   * @throws IncompatibleSchemaException the given {@code schema} is incompatible
-   * with the underlying dataset.
+   * @throws IncompatibleSchemaException
+   *          If the given {@code schema} is incompatible with the underlying
+   *          dataset.
    */
-  <T extends GenericRecord> View<T> asSchema(Schema schema);
+  View<GenericRecord> asSchema(Schema schema);
+
+  /**
+   * Creates a copy of this {@code View} that reads and writes entities of the
+   * given type class.
+   *
+   * @param <T> the type of entities that will be read or written by this view
+   * @param type an entity class to use
+   * @return a copy of this view that projects entities to the given type
+   * @throws IncompatibleSchemaException
+   *          If the given {@code type} is incompatible with the underlying
+   *          dataset.
+   */
+  <T> View<T> asType(Class<T> type);
 }

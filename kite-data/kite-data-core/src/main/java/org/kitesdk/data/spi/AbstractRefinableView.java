@@ -22,12 +22,16 @@ import java.net.URI;
 import java.util.Map;
 import javax.annotation.concurrent.Immutable;
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
+import org.kitesdk.data.Datasets;
+import org.kitesdk.data.IncompatibleSchemaException;
 import org.kitesdk.data.PartitionView;
 import org.kitesdk.data.RefinableView;
 import org.kitesdk.data.URIBuilder;
+import org.kitesdk.data.View;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +53,8 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
   protected final Constraints constraints;
   protected final EntityAccessor<E> accessor;
   protected final Predicate<E> entityTest;
+  protected final boolean canRead;
+  protected final boolean canWrite;
 
   // This class is Immutable and must be thread-safe
   protected final ThreadLocal<StorageKey> keys;
@@ -59,6 +65,7 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
     if (descriptor.isPartitioned()) {
       this.constraints = new Constraints(
           descriptor.getSchema(), descriptor.getPartitionStrategy());
+      // TODO: is comparator used anywhere?
       this.comparator = new MarkerComparator(descriptor.getPartitionStrategy());
       this.keys = new ThreadLocal<StorageKey>() {
         @Override
@@ -73,17 +80,43 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
     }
     this.accessor = DataModelUtil.accessor(type, descriptor.getSchema());
     this.entityTest = constraints.toEntityPredicate(accessor);
+
+    Schema datasetSchema = descriptor.getSchema();
+    this.canRead = SchemaValidationUtil.canRead(
+        datasetSchema, accessor.getReadSchema());
+    this.canWrite = SchemaValidationUtil.canRead(
+        accessor.getWriteSchema(), datasetSchema);
+
+    IncompatibleSchemaException.check(canRead || canWrite,
+        "The type cannot be used to read from or write to the dataset:\n" +
+        "Type schema: %s\nDataset schema: %s",
+        getSchema(), descriptor.getSchema());
   }
 
-  protected AbstractRefinableView(AbstractRefinableView<?> view, Schema schema) {
-    this.dataset = (Dataset<E>) view.dataset;
+  protected AbstractRefinableView(AbstractRefinableView<?> view, Schema schema, Class<E> type) {
+    if (view.dataset instanceof AbstractDataset) {
+      this.dataset = ((AbstractDataset<?>) view.dataset).asType(type);
+    } else {
+      this.dataset = Datasets.load(view.dataset.getUri(), type);
+    }
     this.comparator = view.comparator;
     this.constraints = view.constraints;
     // thread-safe, so okay to reuse when views share a partition strategy
     this.keys = view.keys;
     // Resolve our type according to the given schema
-    this.accessor = DataModelUtil.accessor(schema);
+    this.accessor = DataModelUtil.accessor(type, schema);
     this.entityTest = constraints.toEntityPredicate(accessor);
+
+    Schema datasetSchema = dataset.getDescriptor().getSchema();
+    this.canRead = SchemaValidationUtil.canRead(
+        datasetSchema, accessor.getReadSchema());
+    this.canWrite = SchemaValidationUtil.canRead(
+        accessor.getWriteSchema(), datasetSchema);
+
+    IncompatibleSchemaException.check(canRead || canWrite,
+        "The type cannot be used to read from or write to the dataset:\n" +
+        "Type schema: %s\nDataset schema: %s",
+        getSchema(), datasetSchema);
   }
 
   protected AbstractRefinableView(AbstractRefinableView<E> view, Constraints constraints) {
@@ -96,6 +129,8 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
     // view
     this.accessor = view.accessor;
     this.entityTest = constraints.toEntityPredicate(accessor);
+    this.canRead = view.canRead;
+    this.canWrite = view.canWrite;
   }
 
   public Constraints getConstraints() {
@@ -103,6 +138,8 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
   }
 
   protected abstract AbstractRefinableView<E> filter(Constraints c);
+
+  protected abstract <T> AbstractRefinableView<T> project(Schema schema, Class<T> type);
 
   @Override
   public Dataset<E> getDataset() {
@@ -122,7 +159,7 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
 
   @Override
   public Schema getSchema() {
-    return accessor.getEntitySchema();
+    return accessor.getReadSchema();
   }
 
   public EntityAccessor<E> getAccessor() {
@@ -167,6 +204,22 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
   @Override
   public AbstractRefinableView<E> toBefore(String name, Comparable value) {
     return filter(constraints.toBefore(name, value));
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public AbstractRefinableView<GenericRecord> asSchema(Schema schema) {
+    return project(schema, GenericRecord.class);
+  }
+
+  @Override
+  public <T> View<T> asType(Class<T> type) {
+    if (DataModelUtil.isGeneric(type)) {
+      // if the type is generic, don't reset the schema
+      return project(getSchema(), type);
+    }
+    // otherwise, the type determines the schema
+    return project(getDataset().getDescriptor().getSchema(), type);
   }
 
   @Override
@@ -222,5 +275,20 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
 
   protected Predicate<StorageKey> getKeyPredicate() {
     return constraints.toKeyPredicate();
+  }
+
+  protected void checkSchemaForWrite() {
+    IncompatibleSchemaException.check(canWrite,
+        "Cannot write data with this view's schema, " +
+        "it cannot be read with the dataset's schema:\n" +
+        "Current schema: %s\nDataset schema: %s",
+        getSchema(), dataset.getDescriptor().getSchema());
+  }
+
+  protected void checkSchemaForRead() {
+    IncompatibleSchemaException.check(canRead,
+        "Cannot read data with this view's schema:\n" +
+        "Current schema: %s\nDataset schema: %s",
+        dataset.getDescriptor().getSchema(), getSchema());
   }
 }

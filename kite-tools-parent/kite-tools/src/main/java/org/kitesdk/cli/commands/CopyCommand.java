@@ -22,13 +22,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.crunch.PipelineResult;
 import org.apache.crunch.Target;
 import org.kitesdk.data.View;
 import org.kitesdk.tools.CopyTask;
 import org.slf4j.Logger;
 
-import static org.apache.avro.generic.GenericData.Record;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.thrift.DelegationTokenIdentifier;
@@ -67,10 +67,11 @@ public class CopyCommand extends BaseDatasetCommand {
     Preconditions.checkArgument(datasets.size() == 2,
         "Cannot copy multiple datasets");
 
-    View<Record> dest = load(datasets.get(1), Record.class);
-    View<Record> source = load(datasets.get(0), Record.class).asSchema(dest.getSchema());
+    View<GenericRecord> dest = load(datasets.get(1));
+    View<GenericRecord> source = load(datasets.get(0))
+        .asSchema(dest.getSchema());
 
-    CopyTask task = new CopyTask<Record>(source, dest);
+    CopyTask task = new CopyTask<GenericRecord>(source, dest);
 
     JobConf conf = new JobConf(getConf());
 
@@ -123,7 +124,7 @@ public class CopyCommand extends BaseDatasetCommand {
     );
   }
 
-  private boolean isHiveView(View<Record> view) {
+  private boolean isHiveView(View<?> view) {
     return view.getDataset().getUri().toString().startsWith("dataset:hive:");
   }
 }

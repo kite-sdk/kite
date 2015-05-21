@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
-import org.apache.avro.specific.SpecificRecord;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -111,7 +111,11 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
       }
 
       if (DataModelUtil.isGeneric(view.getType())) {
-        withSchema(view.getSchema());
+        Schema datasetSchema = view.getDataset().getDescriptor().getSchema();
+        // only set the read schema if the view is a projection
+        if (!datasetSchema.equals(view.getSchema())) {
+          withSchema(view.getSchema());
+        }
       } else {
         withType(view.getType());
       }
@@ -147,16 +151,21 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
      */
     public <E> ConfigBuilder withType(Class<E> type) {
       String readerSchema = conf.get(KITE_READER_SCHEMA);
-      Preconditions.checkArgument(DataModelUtil.isGeneric(type) || readerSchema == null,
-        "Can't configure a type when a reader schema is already set: {}", readerSchema);
+      Preconditions.checkArgument(
+          DataModelUtil.isGeneric(type) || readerSchema == null,
+          "Can't configure a type when a reader schema is already set: {}",
+          readerSchema);
+
       conf.setClass(KITE_TYPE, type, type);
       return this;
     }
 
     public ConfigBuilder withSchema(Schema readerSchema) {
       Class<?> type = conf.getClass(KITE_TYPE, null);
-      Preconditions.checkArgument(type == null,
-        "Can't configure a reader schema when a type is already set: {}", type);
+      Preconditions.checkArgument(
+          type == null || DataModelUtil.isGeneric(type),
+          "Can't configure a reader schema when a type is already set: {}",
+          type);
 
       conf.set(KITE_READER_SCHEMA, readerSchema.toString());
       return this;
@@ -267,8 +276,19 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
         throw e;
       }
     }
+
+    String schemaStr = conf.get(KITE_READER_SCHEMA);
+    Schema projection = null;
+    if (schemaStr != null) {
+      projection = new Schema.Parser().parse(schemaStr);
+    }
+
     String inputUri = conf.get(KITE_INPUT_URI);
-    return Datasets.<E, View<E>>load(inputUri, type);
+    if (projection != null) {
+      return Datasets.load(inputUri).asSchema(projection).asType(type);
+    } else {
+      return Datasets.load(inputUri, type);
+    }
   }
 
   @Override

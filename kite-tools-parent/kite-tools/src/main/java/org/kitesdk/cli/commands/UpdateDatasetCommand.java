@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.Datasets;
@@ -61,7 +62,7 @@ public class UpdateDatasetCommand extends BaseDatasetCommand {
     }
 
     String dataset = datasets.remove(0);
-    Dataset<GenericData.Record> currentDataset = load(dataset, GenericData.Record.class).getDataset();
+    Dataset<GenericRecord> currentDataset = load(dataset).getDataset();
 
     DatasetDescriptor.Builder descriptorBuilder = new DatasetDescriptor
         .Builder(currentDataset.getDescriptor());
