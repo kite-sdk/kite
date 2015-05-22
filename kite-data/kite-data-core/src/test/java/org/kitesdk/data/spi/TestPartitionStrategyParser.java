@@ -89,10 +89,10 @@ public class TestPartitionStrategyParser {
   }
 
   @Test
-  public void testFixedRange() {
-    checkParser(new PartitionStrategy.Builder().fixedRange("id", 64).build(),
+  public void testFixedSizedRange() {
+    checkParser(new PartitionStrategy.Builder().fixedSizeRange("id", 64).build(),
         "[ {\"type\": \"range\", \"source\": \"id\", \"size\": 64} ]");
-    checkParser(new PartitionStrategy.Builder().fixedRange("id", "rng", 64).build(),
+    checkParser(new PartitionStrategy.Builder().fixedSizeRange("id", "rng", 64).build(),
         "[ {\"type\": \"range\", " +
             "\"source\": \"id\", " +
             "\"name\": \"rng\", " +

@@ -36,7 +36,7 @@ import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.partition.DateFormatPartitioner;
 import org.kitesdk.data.spi.partition.DayOfMonthFieldPartitioner;
-import org.kitesdk.data.spi.partition.FixedLongRangeFieldPartitioner;
+import org.kitesdk.data.spi.partition.LongFixedSizeRangeFieldPartitioner;
 import org.kitesdk.data.spi.partition.HashFieldPartitioner;
 import org.kitesdk.data.spi.partition.HourFieldPartitioner;
 import org.kitesdk.data.spi.partition.IdentityFieldPartitioner;
@@ -186,7 +186,7 @@ public class PartitionStrategyParser {
             "Invalid size for range partitioner %s: %s",
             name == null ? source : name,
             fieldPartitioner.get(SIZE).asText());
-        builder.fixedRange(source, name, size);
+        builder.fixedSizeRange(source, name, size);
       } else if (type.equals("year")) {
         builder.year(source, name);
       } else if (type.equals("month")) {
@@ -232,11 +232,11 @@ public class PartitionStrategyParser {
         partitioner.set(SOURCE, TextNode.valueOf(fp.getSourceName()));
         partitioner.set(TYPE, TextNode.valueOf("hash"));
         partitioner.set(BUCKETS, LongNode.valueOf(fp.getCardinality()));
-      } else if (fp instanceof FixedLongRangeFieldPartitioner) {
+      } else if (fp instanceof LongFixedSizeRangeFieldPartitioner) {
         partitioner.set(SOURCE, TextNode.valueOf(fp.getSourceName()));
         partitioner.set(TYPE, TextNode.valueOf("range"));
         partitioner.set(SIZE,
-            LongNode.valueOf(((FixedLongRangeFieldPartitioner) fp).getSize()));
+            LongNode.valueOf(((LongFixedSizeRangeFieldPartitioner) fp).getSize()));
       } else if (fp instanceof YearFieldPartitioner) {
         partitioner.set(SOURCE, TextNode.valueOf(fp.getSourceName()));
         partitioner.set(TYPE, TextNode.valueOf("year"));

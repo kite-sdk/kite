@@ -19,6 +19,9 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.DiscreteDomains;
+import com.google.common.collect.Sets;
+import java.util.Set;
+import java.util.TreeSet;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.FieldPartitioner;
@@ -33,15 +36,15 @@ import org.kitesdk.data.spi.predicates.Ranges;
     "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE"},
     justification="False positive due to generics.")
 @Immutable
-public class FixedLongRangeFieldPartitioner extends FieldPartitioner<Long, Long> {
+public class LongFixedSizeRangeFieldPartitioner extends FieldPartitioner<Long, Long> {
 
   private final long size;
 
-  public FixedLongRangeFieldPartitioner(String sourceName, long size) {
+  public LongFixedSizeRangeFieldPartitioner(String sourceName, long size) {
     this(sourceName, null, size);
   }
 
-  public FixedLongRangeFieldPartitioner(String sourceName, @Nullable String name,
+  public LongFixedSizeRangeFieldPartitioner(String sourceName, @Nullable String name,
       long size) {
     super(sourceName, (name == null ? sourceName + "_range" : name),
         Long.class, Long.class);
@@ -62,8 +65,6 @@ public class FixedLongRangeFieldPartitioner extends FieldPartitioner<Long, Long>
     } else if (predicate instanceof In) {
       return ((In<Long>) predicate).transform(this);
     } else if (predicate instanceof Range) {
-      // must use a closed range:
-      //   if this( 5 ) => 10 then this( 6 ) => 10, so 10 must be included
       return Ranges.transformClosed(
           Ranges.adjustClosed((Range<Long>) predicate,
               DiscreteDomains.longs()), this);
@@ -77,7 +78,47 @@ public class FixedLongRangeFieldPartitioner extends FieldPartitioner<Long, Long>
     if (predicate instanceof Exists) {
       return Predicates.exists();
     } else if (predicate instanceof In) {
-      return ((In<Long>) predicate).transform(this);
+      Set<Long> possibleValues = Sets.newHashSet();
+      In<Long> in = ((In<Long>) predicate).transform(this);
+      for (Long val : in.getSet()) {
+        boolean matchedAll = true;
+        for (long i = 0; i < size; i++) {
+          matchedAll = matchedAll && predicate.apply(val + i);
+        }
+        if (matchedAll) {
+          possibleValues.add(val);
+        }
+      }
+      if (!possibleValues.isEmpty()) {
+        return Predicates.in(possibleValues);
+      }
+    } else if (predicate instanceof Range) {
+      Range<Long> closed = Ranges.adjustClosed(
+          (Range<Long>) predicate, DiscreteDomains.longs());
+      Long start = null;
+      if (closed.hasLowerBound()) {
+        if ((closed.lowerEndpoint() % size) == 0) {
+          // the entire set of values is included
+          start = closed.lowerEndpoint();
+        } else {
+          // start the predicate at the next value
+          start = apply(closed.lowerEndpoint() + size);
+        }
+      }
+      Long end = null;
+      if (closed.hasUpperBound()) {
+        if (((closed.upperEndpoint() + 1) % size) == 0) {
+          // all values are included
+          end = apply(closed.upperEndpoint());
+        } else {
+          // end the predicate at the previous value
+          end = apply(closed.upperEndpoint() - size);
+        }
+      }
+      if (start != null && end != null && start > end) {
+        return null;
+      }
+      return Ranges.closed(start, end); // null start or end => unbound
     }
     return null;
   }
@@ -97,7 +138,7 @@ public class FixedLongRangeFieldPartitioner extends FieldPartitioner<Long, Long>
     if (o == null || !getClass().equals(o.getClass())) {
       return false;
     }
-    FixedLongRangeFieldPartitioner that = (FixedLongRangeFieldPartitioner) o;
+    LongFixedSizeRangeFieldPartitioner that = (LongFixedSizeRangeFieldPartitioner) o;
     return Objects.equal(this.getName(), that.getName()) &&
         Objects.equal(this.size, that.size);
   }

@@ -18,17 +18,22 @@ package org.kitesdk.data.spi.partition;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class TestFixedLongRangeFieldPartitioner {
+public class TestLongFixedSizeRangeFieldPartitioner {
 
   @Test(expected = IllegalArgumentException.class)
-  public void testRangeNotPositive() {
-    new FixedLongRangeFieldPartitioner("position", 0);
+  public void testZeroRange() {
+    new LongFixedSizeRangeFieldPartitioner("position", 0);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testNegativeRange() {
+    new LongFixedSizeRangeFieldPartitioner("position", -1);
   }
 
   @Test
   public void test() {
-    FixedLongRangeFieldPartitioner partitioner =
-        new FixedLongRangeFieldPartitioner("position", 10);
+    LongFixedSizeRangeFieldPartitioner partitioner =
+        new LongFixedSizeRangeFieldPartitioner("position", 10);
 
     Assert.assertEquals(0, partitioner.apply(0L).longValue());
     Assert.assertEquals(0, partitioner.apply(9L).longValue());
