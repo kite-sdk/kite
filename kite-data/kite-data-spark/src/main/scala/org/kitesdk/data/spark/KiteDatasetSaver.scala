@@ -18,28 +18,28 @@ package org.kitesdk.data.spark
 import java.net.{URI, URL}
 
 import com.databricks.spark.avro.SchemaSupport
-import org.apache.avro.generic.GenericData.Record
+import org.apache.avro.generic.GenericRecord
 import org.apache.hadoop.mapreduce.Job
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{DataFrame, Row}
 import org.kitesdk.data._
 import org.kitesdk.data.mapreduce.DatasetKeyOutputFormat
 import org.kitesdk.data.spark.WriteMode.WriteMode
+import org.kitesdk.data.spi.DefaultConfiguration
 
 object KiteDatasetSaver extends SchemaSupport {
 
   private def rowsToAvro(rows: Iterator[Row],
-                         schema: StructType): Iterator[(Record, Null)] = {
-    val converter = createConverter(schema, "topLevelRecord")
-    rows.map(x => (converter(x).asInstanceOf[Record], null))
+                         schema: StructType): Iterator[(GenericRecord, Null)] = {
+    val converter = createConverter(schema, "topLevelGenericRecord")
+    rows.map(x => (converter(x).asInstanceOf[GenericRecord], null))
   }
 
   def saveAsKiteDataset(sparkDatasetDescriptor: SparkDatasetDescriptor,
-                        uri: URI,
-                        job: Option[Job]): Dataset[Record] = {
+                        uri: URI): Dataset[GenericRecord] = {
     assert(URIBuilder.DATASET_SCHEME == uri.getScheme,
       s"Not a dataset or view URI: $uri" + "")
-    val j = job.getOrElse(Job.getInstance())
+    val job = Job.getInstance(DefaultConfiguration.get())
     /*
     TODO this is an hack, the partitioning strategy only works with primitive
     type not nullable, if the schema has been built using reflection from a
@@ -81,30 +81,25 @@ object KiteDatasetSaver extends SchemaSupport {
       sparkDatasetDescriptor.getCompressionType
     )
 
-    val dataset = Datasets.create[Record, Dataset[Record]](
+    val dataset = Datasets.create[GenericRecord, Dataset[GenericRecord]](
       uri,
       descriptor,
-      classOf[Record]
+      classOf[GenericRecord]
     )
 
-    DatasetKeyOutputFormat.configure(j).writeTo(dataset)
+    DatasetKeyOutputFormat.configure(job).writeTo(dataset)
 
     sparkDatasetDescriptor.dataFrame.
       mapPartitions(rowsToAvro(_, schema)).
-      saveAsNewAPIHadoopDataset(j.getConfiguration)
+      saveAsNewAPIHadoopDataset(job.getConfiguration)
     dataset
 
   }
 
-  def saveAsKiteDataset(sparkDatasetDescriptor: SparkDatasetDescriptor,
-                        uri: URI): Dataset[Record] =
-    saveAsKiteDataset(sparkDatasetDescriptor, uri, None)
-
   def saveAsKiteDataset(dataFrame: DataFrame,
-                        dataset: View[Record],
-                        writeMode: WriteMode,
-                        job: Option[Job]): View[Record] = {
-    val j = job.getOrElse(Job.getInstance())
+                        dataset: Dataset[GenericRecord],
+                        writeMode: WriteMode): Dataset[GenericRecord] = {
+    val job = Job.getInstance(DefaultConfiguration.get())
 
     val schema = if (dataset.getDataset.getDescriptor.isPartitioned)
       StructType(dataFrame.schema.iterator.map(field =>
@@ -118,20 +113,15 @@ object KiteDatasetSaver extends SchemaSupport {
       case WriteMode.DEFAULT =>
         throw new RuntimeException(s"Dataset/view already exists: ${dataset.toString}")
       case WriteMode.APPEND =>
-        DatasetKeyOutputFormat.configure(j).writeTo(dataset).appendTo(dataset)
+        DatasetKeyOutputFormat.configure(job).writeTo(dataset).appendTo(dataset)
       case WriteMode.OVERWRITE =>
-        DatasetKeyOutputFormat.configure(j).writeTo(dataset).overwrite(dataset)
+        DatasetKeyOutputFormat.configure(job).writeTo(dataset).overwrite(dataset)
     }
 
     dataFrame.
       mapPartitions(rowsToAvro(_, schema)).
-      saveAsNewAPIHadoopDataset(j.getConfiguration)
+      saveAsNewAPIHadoopDataset(job.getConfiguration)
     dataset
   }
-
-  def saveAsKiteDataset(dataFrame: DataFrame,
-                        dataset: Dataset[Record],
-                        writeMode: WriteMode): View[Record] =
-    saveAsKiteDataset(dataFrame, dataset, writeMode, None)
 
 }

@@ -40,6 +40,7 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
   override def beforeAll(): Unit = {
     val conf = new SparkConf().
       setAppName("spark-kite-spec-test").
+      set("spark.driver.allowMultipleContexts", "true").
       set("spark.serializer", "org.apache.spark.serializer.KryoSerializer").
       setMaster("local")
     sparkContext = new SparkContext(conf)

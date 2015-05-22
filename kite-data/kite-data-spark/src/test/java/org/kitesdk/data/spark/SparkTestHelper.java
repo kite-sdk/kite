@@ -25,22 +25,23 @@ import org.apache.spark.api.java.JavaSparkContext;
  */
 public class SparkTestHelper {
 
-  private static JavaSparkContext sc = null;
-  private static SparkConf sparkConf = null;
+    private static JavaSparkContext sc = null;
+    private static SparkConf sparkConf = null;
 
-  public synchronized static JavaSparkContext getSparkContext() {
-    if (sc == null) {
-      sc = new JavaSparkContext(getSparkConf());
+    public synchronized static JavaSparkContext getSparkContext() {
+        if (sc == null) {
+            sc = new JavaSparkContext(getSparkConf());
+        }
+        return sc;
     }
-    return sc;
-  }
 
-  public synchronized static SparkConf getSparkConf() {
-    if (sparkConf == null) {
-      sparkConf = new SparkConf()
-          .setAppName("test")
-          .setMaster("local");
+    public synchronized static SparkConf getSparkConf() {
+        if (sparkConf == null) {
+            sparkConf = new SparkConf()
+                    .setAppName("test")
+                    .set("spark.driver.allowMultipleContexts", "true")
+                    .setMaster("local");
+        }
+        return sparkConf;
     }
-    return sparkConf;
-  }
 }

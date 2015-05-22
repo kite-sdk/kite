@@ -142,12 +142,12 @@ public class TestSparkDataFrame {
 
         SparkDatasetDescriptor descriptor = new SparkDatasetDescriptor.Builder().dataFrame(teenagers).format(format).compressionType(CompressionType.Snappy).build();
 
-        Dataset<GenericData.Record> dataset = KiteDatasetSaver.saveAsKiteDataset(descriptor, datasetURI);
+        Dataset<GenericRecord> dataset = KiteDatasetSaver.saveAsKiteDataset(descriptor, datasetURI);
 
-        DatasetReader<GenericData.Record> reader = dataset.newReader();
+        DatasetReader<GenericRecord> reader = dataset.newReader();
 
         List<String> res = new ArrayList<String>();
-        for (GenericData.Record record : reader) {
+        for (GenericRecord record : reader) {
             res.add(record.toString());
             System.out.println(record.toString());
         }
