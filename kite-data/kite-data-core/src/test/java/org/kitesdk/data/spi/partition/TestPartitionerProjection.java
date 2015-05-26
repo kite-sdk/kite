@@ -270,6 +270,54 @@ public class TestPartitionerProjection {
   }
 
   @Test
+  public void testLongFixedSizeRangeFieldPartitionerRangePredicate() {
+    final FieldPartitioner<Long, Long> fp =
+        new LongFixedSizeRangeFieldPartitioner("num", 5);
+    Assert.assertEquals(Ranges.closed(-5L, 10L),
+        fp.project(Ranges.open(-2L, 15L)));
+    Assert.assertEquals(Ranges.closed(5L, 10L),
+        fp.project(Ranges.open(5L, 15L)));
+    Assert.assertEquals(Ranges.closed(5L, 10L),
+        fp.project(Ranges.open(4L, 15L)));
+    Assert.assertEquals(Ranges.closed(0L, 15L),
+        fp.project(Ranges.closed(4L, 15L)));
+    Assert.assertEquals(Ranges.closed(5L, 20L),
+        fp.project(Ranges.openClosed(5L, 21L)));
+    Assert.assertEquals(Ranges.atMost(15L),
+        fp.project(Ranges.atMost(15L)));
+    Assert.assertEquals(Ranges.atMost(20L),
+        fp.project(Ranges.lessThan(21L)));
+    Assert.assertEquals(Ranges.atLeast(10L),
+        fp.project(Ranges.atLeast(14L)));
+
+    Assert.assertEquals(Ranges.singleton(10L),
+        fp.projectStrict(Ranges.open(5L, 15L)));
+    Assert.assertNull(fp.projectStrict(Ranges.open(5L, 14L)));
+    Assert.assertEquals(Ranges.atMost(10L),
+        fp.projectStrict(Ranges.atMost(15L)));
+    Assert.assertEquals(Ranges.atMost(15L),
+        fp.projectStrict(Ranges.lessThan(21L)));
+    Assert.assertEquals(Ranges.atLeast(15L),
+        fp.projectStrict(Ranges.atLeast(14L)));
+  }
+
+  @Test
+  public void testLongFixedSizeRangeFieldPartitionerSetPredicate() {
+    final FieldPartitioner<Long, Long> fp =
+        new LongFixedSizeRangeFieldPartitioner("num", 5);
+    Assert.assertEquals(Predicates.in(5L, 15L),
+        fp.project(Predicates.in(5L, 6L, 15L, 16L)));
+
+    // null if no full range is included
+    Assert.assertNull(fp.projectStrict(Predicates.in(5L, 6L, 15L, 16L)));
+    Assert.assertEquals(Predicates.in(5L),
+        fp.projectStrict(Predicates.in(5L, 6L, 7L, 8L, 9L, 15L, 16L)));
+    Assert.assertEquals(Predicates.in(5L, 15L),
+        fp.projectStrict(Predicates.in(
+            4L, 5L, 6L, 7L, 8L, 9L, 10L, 15L, 16L, 17L, 18L, 19L, 20L)));
+  }
+
+  @Test
   public void testRangeFieldPartitionerRangePredicate() {
     final FieldPartitioner<String, String> fp =
         new RangeFieldPartitioner("str", "str_bound", new String[]{"a", "b", "c"});
