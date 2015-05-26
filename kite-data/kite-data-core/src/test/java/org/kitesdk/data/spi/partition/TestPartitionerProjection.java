@@ -283,6 +283,12 @@ public class TestPartitionerProjection {
         fp.project(Ranges.closed(4L, 15L)));
     Assert.assertEquals(Ranges.closed(5L, 20L),
         fp.project(Ranges.openClosed(5L, 21L)));
+    Assert.assertEquals(Ranges.atMost(15L),
+        fp.project(Ranges.atMost(15L)));
+    Assert.assertEquals(Ranges.atMost(20L),
+        fp.project(Ranges.lessThan(21L)));
+    Assert.assertEquals(Ranges.atLeast(10L),
+        fp.project(Ranges.atLeast(14L)));
 
     Assert.assertEquals(Ranges.singleton(10L),
         fp.projectStrict(Ranges.open(5L, 15L)));

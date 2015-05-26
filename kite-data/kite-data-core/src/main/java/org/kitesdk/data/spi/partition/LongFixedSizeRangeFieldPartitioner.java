@@ -80,7 +80,7 @@ public class LongFixedSizeRangeFieldPartitioner extends FieldPartitioner<Long, L
     } else if (predicate instanceof In) {
       Set<Long> possibleValues = Sets.newHashSet();
       In<Long> in = ((In<Long>) predicate).transform(this);
-      for (Long val : in.getSet()) {
+      for (Long val : Predicates.asSet(in)) {
         boolean matchedAll = true;
         for (long i = 0; i < size; i++) {
           matchedAll = matchedAll && predicate.apply(val + i);

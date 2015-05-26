@@ -89,7 +89,7 @@ public class In<T> extends RegisteredPredicate<T> {
     return new In<V>(Iterables.transform(set, function));
   }
 
-  public Set<T> getSet() {
+  Set<T> getSet() {
     return set;
   }
 
