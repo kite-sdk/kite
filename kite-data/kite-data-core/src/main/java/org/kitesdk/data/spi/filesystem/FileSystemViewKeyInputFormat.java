@@ -20,6 +20,8 @@ import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
 import org.apache.avro.hadoop.io.AvroSerialization;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapreduce.AvroJob;
@@ -74,16 +76,7 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
 
     Format format = dataset.getDescriptor().getFormat();
 
-    if (!DataModelUtil.isGeneric(dataset.getType())) {
-      if (Formats.AVRO.equals(format)) {
-        setModel.invoke(conf,
-            DataModelUtil.getDataModelForType(dataset.getType()).getClass());
-        conf.set(AVRO_SCHEMA_INPUT_KEY, dataset.getSchema().toString());
-      } else if (Formats.PARQUET.equals(format)) {
-        // TODO: when available, use AvroReadSupport.setDataModelSupplier
-        AvroReadSupport.setAvroReadSchema(conf, dataset.getSchema());
-      }
-    }
+    setConfigProperties(conf, format, dataset.getSchema(), dataset.getType());
   }
 
   public FileSystemViewKeyInputFormat(FileSystemView<E> view, Configuration conf) {
@@ -93,13 +86,21 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
 
     Format format = dataset.getDescriptor().getFormat();
 
+    setConfigProperties(conf, format, view.getSchema(), view.getType());
+  }
+
+  private static void setConfigProperties(Configuration conf, Format format,
+                                          Schema schema, Class<?> type) {
+    GenericData model = DataModelUtil.getDataModelForType(type);
     if (Formats.AVRO.equals(format)) {
-      setModel.invoke(conf,
-          DataModelUtil.getDataModelForType(view.getType()).getClass());
-      conf.set(AVRO_SCHEMA_INPUT_KEY, view.getSchema().toString());
+      setModel.invoke(conf, model.getClass());
+      conf.set(AVRO_SCHEMA_INPUT_KEY, schema.toString());
+
     } else if (Formats.PARQUET.equals(format)) {
-      // TODO: when available, use AvroReadSupport.setDataModelSupplier
-      AvroReadSupport.setAvroReadSchema(conf, view.getSchema());
+      // TODO: update to a version of Parquet with setAvroDataSupplier
+      //AvroReadSupport.setAvroDataSupplier(conf,
+      //    DataModelUtil.supplierClassFor(model));
+      AvroReadSupport.setAvroReadSchema(conf, schema);
     }
   }
 
@@ -172,20 +173,23 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
     Format format = dataset.getDescriptor().getFormat();
     if (Formats.AVRO.equals(format)) {
       return new AvroKeyReaderWrapper(new AvroKeyInputFormat<E>());
+
     } else if (Formats.PARQUET.equals(format)) {
       return new ValueReaderWrapper(new AvroParquetInputFormat());
+
     } else if (Formats.JSON.equals(format)) {
       JSONInputFormat<E> delegate = new JSONInputFormat<E>();
-      delegate.setDescriptor(dataset.getDescriptor());
-      delegate.setType(dataset.getType());
+      delegate.setView(view != null ? view : dataset);
       return delegate.createRecordReader(inputSplit, taskAttemptContext);
+
     } else if (Formats.CSV.equals(format)) {
       CSVInputFormat<E> delegate = new CSVInputFormat<E>();
-      delegate.setDescriptor(dataset.getDescriptor());
-      delegate.setType(dataset.getType());
+      delegate.setView(view != null ? view : dataset);
       return delegate.createRecordReader(inputSplit, taskAttemptContext);
+
     } else if (Formats.INPUTFORMAT.equals(format)) {
       return InputFormatUtil.newRecordReader(dataset.getDescriptor());
+
     } else {
       throw new UnsupportedOperationException(
           "Not a supported format: " + format);
