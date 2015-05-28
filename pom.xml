@@ -1218,29 +1218,6 @@
     </profile>
 
     <profile>
-      <id>hadoop-1</id>
-      <activation>
-        <property>
-          <name>hadoop.profile</name>
-          <value>1</value>
-        </property>
-      </activation>
-      <properties>
-        <!-- test hadoop-1 with the same jars that were produced for default profile -->
-        <maven.main.skip>true</maven.main.skip>
-        <artifact.hadoop-deps>kite-hadoop1-dependencies</artifact.hadoop-deps>
-        <artifact.hadoop-test-deps>kite-hadoop1-test-dependencies</artifact.hadoop-test-deps>
-        <artifact.hbase-deps>kite-hbase1-dependencies</artifact.hbase-deps>
-        <artifact.hbase-test-deps>kite-hbase1-test-dependencies</artifact.hbase-test-deps>
-        <vers.crunch>${vers.crunch-base}</vers.crunch>
-        <vers.flume>1.4.0</vers.flume>
-        <vers.hive>0.10.0</vers.hive>
-        <vers.commons-lang>2.4</vers.commons-lang>
-        <test.aws.access.key></test.aws.access.key> <!-- don't test S3 -->
-      </properties>
-    </profile>
-
-    <profile>
       <id>cdh4</id>
       <activation>
         <property>

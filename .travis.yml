@@ -4,7 +4,6 @@ jdk:
 
 env:
   - HADOOP_PROFILE=default
-  - HADOOP_PROFILE=hadoop-1
   - HADOOP_PROFILE=cdh4
   - HADOOP_PROFILE=cdh5
 cache:
