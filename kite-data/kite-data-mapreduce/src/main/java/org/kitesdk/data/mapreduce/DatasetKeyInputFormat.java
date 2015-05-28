@@ -260,7 +260,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
       justification="Delegate set by setConf")
   public RecordReader<E, Void> createRecordReader(InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
     Configuration conf = Hadoop.TaskAttemptContext.getConfiguration.invoke(taskAttemptContext);
-    DefaultConfiguration.set(conf);
+    DefaultConfiguration.init(conf);
     return delegate.createRecordReader(inputSplit, taskAttemptContext);
   }
 

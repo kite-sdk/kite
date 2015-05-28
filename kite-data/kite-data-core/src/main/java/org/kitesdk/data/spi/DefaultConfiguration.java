@@ -34,6 +34,7 @@ import org.apache.hadoop.fs.Path;
 public class DefaultConfiguration {
 
   // initialize the default configuration from the environment
+  private static boolean initDone = false;
   private static Configuration conf;
 
   static{
@@ -57,14 +58,25 @@ public class DefaultConfiguration {
    * @return A {@code Configuration} based on the environment or set by
    *          {@link #set(Configuration)}
    */
-  public static Configuration get() {
+  public static synchronized Configuration get() {
     return new Configuration(conf);
   }
 
   /**
    * Set the default Hadoop {@link Configuration}.
    */
-  public static void set(Configuration conf) {
+  public static synchronized void set(Configuration conf) {
     DefaultConfiguration.conf = conf;
+    DefaultConfiguration.initDone = true;
+  }
+
+  /**
+   * Initialize the default Hadoop {@link Configuration} if it has not been set.
+   */
+  public static synchronized void init(Configuration conf) {
+    if (!initDone) {
+      DefaultConfiguration.conf = conf;
+      DefaultConfiguration.initDone = true;
+    }
   }
 }

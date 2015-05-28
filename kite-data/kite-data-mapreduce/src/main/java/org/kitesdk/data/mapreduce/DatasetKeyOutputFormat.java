@@ -501,7 +501,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   @Override
   public OutputCommitter getOutputCommitter(TaskAttemptContext taskAttemptContext) {
     Configuration conf = Hadoop.TaskAttemptContext.getConfiguration.invoke(taskAttemptContext);
-    DefaultConfiguration.set(conf);
+    DefaultConfiguration.init(conf);
     View<E> view = load(taskAttemptContext);
     return usePerTaskAttemptDatasets(view) ?
         new MergeOutputCommitter<E>() : new NullOutputCommitter();
