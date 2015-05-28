@@ -20,6 +20,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Iterator;
 import java.util.Set;
 import org.apache.hadoop.fs.FileSystem;
@@ -86,14 +87,72 @@ public class TestPartitionReplacement {
 
   @Test
   public void testUnpartitionedReplace() {
-    Assert.assertFalse("Should not allow replacing an unpartitioned dataset",
+    // recreate temporary without a partition strategy
+    Datasets.delete("dataset:file:/tmp/datasets/temporary");
+    DatasetDescriptor descriptor = new DatasetDescriptor
+        .Builder(unpartitioned.getDescriptor())
+        .location((URI) null) // clear the location
+        .build();
+    temporary = Datasets.create("dataset:file:/tmp/datasets/temporary",
+        descriptor, TestRecord.class);
+
+    Assert.assertTrue("Should allow replacing an unpartitioned dataset",
         unpartitioned.canReplace(unpartitioned));
+
+    // make sure there are multiple files
+    writeTestRecords(unpartitioned);
+    writeTestRecords(unpartitioned);
+    writeTestRecords(temporary);
+    writeTestRecords(temporary);
+
+    Set<String> originalFiles = Sets.newHashSet(
+        Iterators.transform(unpartitioned.pathIterator(), new GetFilename()));
+    Set<String> replacementFiles = Sets.newHashSet(
+        Iterators.transform(temporary.pathIterator(), new GetFilename()));
+
+    Iterators.transform(temporary.pathIterator(), new GetFilename());
+    Assert.assertFalse("Sanity check", originalFiles.equals(replacementFiles));
+
+    unpartitioned.replace(temporary);
+
+    Set<String> replacedFiles = Sets.newHashSet(
+        Iterators.transform(unpartitioned.pathIterator(), new GetFilename()));
+    Assert.assertEquals("Should contain the replacement files",
+        replacementFiles, replacedFiles);
+  }
+
+  @Test
+  public void testUnpartitionedReplaceDifferentStrategy() {
+    final FileSystemPartitionView<TestRecord> partition0 = partitioned
+        .getPartitionView(new Path("id_hash=0"));
+
+    Assert.assertFalse("Should not allow replacement with a different strategy",
+        unpartitioned.canReplace(partitioned));
+    Assert.assertFalse("Should not allow replacement with a different strategy",
+        unpartitioned.canReplace(partition0));
+
+    TestHelpers.assertThrows(
+        "Should not allow replacement with a different partition strategy",
+        ValidationException.class, new Runnable() {
+          @Override
+          public void run() {
+            unpartitioned.replace(partitioned);
+          }
+        });
+    TestHelpers.assertThrows(
+        "Should not allow replacement with a different partition strategy",
+        ValidationException.class, new Runnable() {
+          @Override
+          public void run() {
+            unpartitioned.replace(partition0);
+          }
+        });
   }
 
   @Test
   public void testReplaceWithDifferentStrategy() {
-    Assert.assertTrue("Should allow replacing a whole dataset",
-        partitioned.canReplace(partitioned));
+    Assert.assertFalse("Should not allow replacement with a different strategy",
+        partitioned.canReplace(unpartitioned));
 
     TestHelpers.assertThrows(
         "Should not allow replacement with a different partition strategy",

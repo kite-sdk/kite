@@ -16,7 +16,9 @@
 package org.kitesdk.data.spi.filesystem;
 
 import java.util.Iterator;
+import com.google.common.collect.Iterables;
 import org.apache.hadoop.mapreduce.InputFormat;
+import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.Signalable;
@@ -380,10 +382,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
 
   @Override
   public boolean canReplace(View<E> part) {
-    if (!descriptor.isPartitioned()) {
-      // don't attempt to replace the root directory
-      return false;
-    } else if (part instanceof FileSystemView) {
+    if (part instanceof FileSystemView) {
       return equals(part.getDataset()) &&
           ((FileSystemView) part).getConstraints().alignedWithBoundaries();
     } else if (part instanceof FileSystemDataset) {
@@ -399,45 +398,56 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     // check that the dataset's descriptor can read the update
     Compatibility.checkCompatible(updateDescriptor, descriptor);
 
-    // replace leaf partitions one at a time
-    for (PartitionView<E> src : update.getCoveringPartitions()) {
-      if (src instanceof FileSystemPartitionView) {
-        FileSystemPartitionView<E> dest = getPartitionView(
-            ((FileSystemPartitionView<E>) src).getRelativeLocation());
+    if (descriptor.isPartitioned()) {
+      // replace leaf partitions one at a time
+      for (PartitionView<E> src : update.getCoveringPartitions()) {
+        if (src instanceof FileSystemPartitionView) {
+          FileSystemPartitionView<E> dest = getPartitionView(
+              ((FileSystemPartitionView<E>) src).getRelativeLocation());
 
-        // The destination partition view may not exist, if the source data was
-        // stored in directories with non-standard names. To account for this,
-        // find all of the directories that should be removed: those that match
-        // the partition constraints.
-        List<Path> removals = Lists.newArrayList();
-        Iterable<PartitionView<E>> existingPartitions = dest
-            .toConstraintsView()
-            .getCoveringPartitions();
-        for (PartitionView<E> partition : existingPartitions) {
-          FileSystemPartitionView<E> toRemove =
-              (FileSystemPartitionView<E>) partition;
-          Path path = new Path(toRemove.getLocation());
-          removals.add(path);
-          if (partitionListener != null && descriptor.isPartitioned()) {
-            partitionListener.partitionDeleted(
-                namespace, name, toRemove.getRelativeLocation().toString());
+          // The destination partition view may not exist, if the source data was
+          // stored in directories with non-standard names. To account for this,
+          // find all of the directories that should be removed: those that match
+          // the partition constraints.
+          List<Path> removals = Lists.newArrayList();
+          Iterable<PartitionView<E>> existingPartitions = dest
+              .toConstraintsView()
+              .getCoveringPartitions();
+          for (PartitionView<E> partition : existingPartitions) {
+            FileSystemPartitionView<E> toRemove =
+                (FileSystemPartitionView<E>) partition;
+            Path path = new Path(toRemove.getLocation());
+            removals.add(path);
+            if (partitionListener != null && descriptor.isPartitioned()) {
+              partitionListener.partitionDeleted(
+                  namespace, name, toRemove.getRelativeLocation().toString());
+            }
           }
+
+          // replace the directory all at once
+          FileSystemUtil.replace(fileSystem, directory,
+              new Path(dest.getLocation()), new Path(src.getLocation()),
+              removals);
+
+          if (partitionListener != null && descriptor.isPartitioned()) {
+            partitionListener.partitionAdded(
+                namespace, name, dest.getRelativeLocation().toString());
+          }
+
+        } else {
+          throw new IllegalArgumentException(
+              "Incompatible PartitionView: " + src.getClass().getName());
         }
-
-        // replace the directory all at once
-        FileSystemUtil.replace(fileSystem, directory,
-            new Path(dest.getLocation()), new Path(src.getLocation()),
-            removals);
-
-        if (partitionListener != null && descriptor.isPartitioned()) {
-          partitionListener.partitionAdded(
-              namespace, name, dest.getRelativeLocation().toString());
-        }
-
-      } else {
-        throw new IllegalArgumentException(
-            "Incompatible PartitionView: " + src.getClass().getName());
       }
+    } else {
+      // stage data in the dataset, remove existing data, then finish the move
+      PartitionView<E> srcPartition = Iterables.getOnlyElement(
+          update.getCoveringPartitions());
+      List<Pair<Path, Path>> staged = FileSystemUtil.stageMove(fileSystem,
+          new Path(srcPartition.getLocation()), new Path(unbounded.getLocation()),
+          "replace" /* data should replace to recover from a failure */ );
+      deleteAll(); // remove all existing files
+      FileSystemUtil.finishMove(fileSystem, staged);
     }
   }
 
