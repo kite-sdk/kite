@@ -18,6 +18,7 @@ package org.kitesdk.data.spi;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.LinkedHashMultimap;
 import java.util.AbstractSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -50,8 +51,23 @@ public class CharSequences {
 
   @Immutable
   public static class ImmutableCharSequenceSet extends AbstractSet<CharSequence> {
-    private final HashMultimap<Integer, CharSequence> storage = HashMultimap.create();
+    private final LinkedHashMultimap<Integer, CharSequence> storage =
+        LinkedHashMultimap.create();
     private final int size;
+
+    public ImmutableCharSequenceSet(Object... strings) {
+      int count = 0;
+      for (Object obj : strings) {
+        CharSequence seq = (CharSequence) obj;
+        // like guava collections, do not allow null
+        Preconditions.checkNotNull(seq, "Null values are not allowed");
+        if (!contains(seq)) { // don't add duplicates
+          storage.put(CharSequences.hashCode(seq), seq);
+          count += 1;
+        }
+      }
+      this.size = count;
+    }
 
     public ImmutableCharSequenceSet(Iterable<? extends CharSequence> strings) {
       int count = 0;
