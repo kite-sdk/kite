@@ -44,8 +44,7 @@ public abstract class Predicates {
   public static <T> In<T> in(T... set) {
     T item = set[0];
     if (item != null && item instanceof CharSequence) {
-      return (In<T>) new In(new CharSequences.ImmutableCharSequenceSet(
-          (Set<CharSequence>) Sets.newHashSet(set)));
+      return (In<T>) new In(new CharSequences.ImmutableCharSequenceSet(set));
     }
     return new In<T>(set);
   }
