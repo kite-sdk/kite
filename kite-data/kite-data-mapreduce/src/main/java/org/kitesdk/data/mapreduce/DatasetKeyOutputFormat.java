@@ -47,6 +47,7 @@ import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.DataModelUtil;
 import org.kitesdk.data.spi.DatasetRepositories;
 import org.kitesdk.data.spi.DatasetRepository;
+import org.kitesdk.data.spi.DefaultConfiguration;
 import org.kitesdk.data.spi.Mergeable;
 import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.spi.Registration;
@@ -499,6 +500,8 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
 
   @Override
   public OutputCommitter getOutputCommitter(TaskAttemptContext taskAttemptContext) {
+    Configuration conf = Hadoop.TaskAttemptContext.getConfiguration.invoke(taskAttemptContext);
+    DefaultConfiguration.set(conf);
     View<E> view = load(taskAttemptContext);
     return usePerTaskAttemptDatasets(view) ?
         new MergeOutputCommitter<E>() : new NullOutputCommitter();
