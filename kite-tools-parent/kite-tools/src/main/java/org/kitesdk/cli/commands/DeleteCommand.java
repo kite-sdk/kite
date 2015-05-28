@@ -17,16 +17,12 @@ package org.kitesdk.cli.commands;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.io.IOException;
-import java.net.URI;
 import java.util.List;
-import java.util.Map;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.View;
-import org.kitesdk.data.spi.DatasetRepository;
 import org.slf4j.Logger;
 
 @Parameters(commandDescription = "Delete a view or a dataset and its metadata")
@@ -41,8 +37,6 @@ public class DeleteCommand extends BaseDatasetCommand {
 
   @Override
   public int run() throws IOException {
-    DatasetRepository repo = getDatasetRepository();
-
     if (targets == null || targets.isEmpty()) {
       throw new IllegalArgumentException("No views or datasets were specified.");
     }
@@ -56,7 +50,7 @@ public class DeleteCommand extends BaseDatasetCommand {
       } else if (isDatasetUri(uriOrName)) {
         Datasets.delete(uriOrName);
       } else {
-        repo.delete(namespace, uriOrName);
+        getDatasetRepository().delete(namespace, uriOrName);
       }
       console.debug("Deleted {}", uriOrName);
     }
