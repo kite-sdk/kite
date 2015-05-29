@@ -19,9 +19,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.CloudSolrServer;
+import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrServer;
 import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
@@ -33,19 +33,19 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 
 /**
- * A vehicle to load (or delete) documents into a local or remote {@link SolrServer}.
+ * A vehicle to load (or delete) documents into a local or remote {@link SolrClient}.
  * This class should be considered private and it's API is subject to change without notice.
  */
 public class SolrServerDocumentLoader implements DocumentLoader {
 
-  private final SolrServer server; // proxy to local or remote solr server
+  private final SolrClient server; // proxy to local or remote solr server
   private long numSentItems = 0; // number of requests sent in the current transaction
   private final int batchSize;
   private final List batch = new ArrayList();
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SolrServerDocumentLoader.class);
 
-  public SolrServerDocumentLoader(SolrServer server, int batchSize) {
+  public SolrServerDocumentLoader(SolrClient server, int batchSize) {
     if (server == null) {
       throw new IllegalArgumentException("solr server must not be null");
     }
@@ -165,7 +165,7 @@ public class SolrServerDocumentLoader implements DocumentLoader {
   @Override
   public UpdateResponse rollbackTransaction() throws SolrServerException, IOException {
     LOGGER.trace("rollback");
-    if (!(server instanceof CloudSolrServer)) {
+    if (!(server instanceof CloudSolrClient)) {
       return server.rollback();
     } else {
       return new UpdateResponse();
@@ -184,7 +184,7 @@ public class SolrServerDocumentLoader implements DocumentLoader {
     return server.ping();
   }
 
-  public SolrServer getSolrServer() {
+  public SolrClient getSolrServer() {
     return server;
   }
   

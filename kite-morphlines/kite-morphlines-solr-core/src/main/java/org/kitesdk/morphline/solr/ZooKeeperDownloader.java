@@ -22,11 +22,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.solr.cloud.ZkController;
-import org.apache.solr.common.cloud.Aliases;
-import org.apache.solr.common.cloud.ClusterState;
-import org.apache.solr.common.cloud.SolrZkClient;
-import org.apache.solr.common.cloud.ZkNodeProps;
-import org.apache.solr.common.cloud.ZkStateReader;
+import org.apache.solr.common.cloud.*;
 import org.apache.solr.common.util.StrUtils;
 import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
@@ -90,7 +86,7 @@ final class ZooKeeperDownloader {
       configName = props.getStr(ZkController.CONFIGNAME_PROP);
     }
     
-    if (configName != null && !zkClient.exists(ZkController.CONFIGS_ZKNODE + "/" + configName, true)) {
+    if (configName != null && !zkClient.exists(ZkStateReader.CONFIGS_ZKNODE + "/" + configName, true)) {
       LOG.error("Specified config does not exist in ZooKeeper:" + configName);
       throw new IllegalArgumentException("Specified config does not exist in ZooKeeper:"
         + configName);
@@ -99,42 +95,42 @@ final class ZooKeeperDownloader {
     return configName;
   }
 
-  /**
-   * Download and return the config directory from ZK
-   */
-  public File downloadConfigDir(SolrZkClient zkClient, String configName, File dir)
-  throws IOException, InterruptedException, KeeperException {
-    Preconditions.checkArgument(dir.exists());
-    Preconditions.checkArgument(dir.isDirectory());
-    ZkController.downloadConfigDir(zkClient, configName, dir);
-    File confDir = new File(dir, "conf");
-    if (!confDir.isDirectory()) {
-      // create a temporary directory with "conf" subdir and mv the config in there.  This is
-      // necessary because of CDH-11188; solrctl does not generate nor accept directories with e.g.
-      // conf/solrconfig.xml which is necessary for proper solr operation.  This should work
-      // even if solrctl changes.
-      confDir = new File(Files.createTempDir().getAbsolutePath(), "conf");
-      confDir.getParentFile().deleteOnExit();
-      Files.move(dir, confDir);
-      dir = confDir.getParentFile();
+    /**
+     * Download and return the config directory from ZK
+     */
+    public File downloadConfigDir(SolrZkClient zkClient, String configName, File dir)
+            throws IOException, InterruptedException, KeeperException {
+        Preconditions.checkArgument(dir.exists());
+        Preconditions.checkArgument(dir.isDirectory());
+        ZkConfigManager manager = new ZkConfigManager(zkClient);
+        manager.downloadConfigDir(configName, dir.toPath());
+        File confDir = new File(dir, "conf");
+        if (!confDir.isDirectory()) {
+            // create a temporary directory with "conf" subdir and mv the config in there.  This is
+            // necessary because of CDH-11188; solrctl does not generate nor accept directories with e.g.
+            // conf/solrconfig.xml which is necessary for proper solr operation.  This should work
+            // even if solrctl changes.
+            confDir = new File(Files.createTempDir().getAbsolutePath(), "conf");
+            confDir.getParentFile().deleteOnExit();
+            Files.move(dir, confDir);
+            dir = confDir.getParentFile();
+        }
+        verifyConfigDir(confDir);
+        return dir;
     }
-    verifyConfigDir(confDir);
-    return dir;
-  }
-  
-  private void verifyConfigDir(File confDir) throws IOException {
-    File solrConfigFile = new File(confDir, "solrconfig.xml");
-    if (!solrConfigFile.exists()) {
-      throw new IOException("Detected invalid Solr config dir in ZooKeeper - Reason: File not found: "
-          + solrConfigFile.getName());
-    }
-    if (!solrConfigFile.isFile()) {
-      throw new IOException("Detected invalid Solr config dir in ZooKeeper - Reason: Not a file: "
-          + solrConfigFile.getName());
-    }
-    if (!solrConfigFile.canRead()) {
-      throw new IOException("Insufficient permissions to read file: " + solrConfigFile);
-    }    
-  }
 
+    private void verifyConfigDir(File confDir) throws IOException {
+        File solrConfigFile = new File(confDir, "solrconfig.xml");
+        if (!solrConfigFile.exists()) {
+            throw new IOException("Detected invalid Solr config dir in ZooKeeper - Reason: File not found: "
+                    + solrConfigFile.getName());
+        }
+        if (!solrConfigFile.isFile()) {
+            throw new IOException("Detected invalid Solr config dir in ZooKeeper - Reason: Not a file: "
+                    + solrConfigFile.getName());
+        }
+        if (!solrConfigFile.canRead()) {
+            throw new IOException("Insufficient permissions to read file: " + solrConfigFile);
+        }
+    }
 }

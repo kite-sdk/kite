@@ -16,7 +16,7 @@
 package org.kitesdk.morphline.solr;
 
 import org.apache.http.client.HttpClient;
-import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrServer;
+import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * ConcurrentUpdateSolrServer that propagates exceptions up to the submitter of
  * requests on blockUntilFinished()
  */
-final class SafeConcurrentUpdateSolrServer extends ConcurrentUpdateSolrServer {
+final class SafeConcurrentUpdateSolrServer extends ConcurrentUpdateSolrClient {
 
   private Throwable currentException = null;
   private final Object myLock = new Object();

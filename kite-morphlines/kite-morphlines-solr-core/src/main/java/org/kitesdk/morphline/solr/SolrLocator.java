@@ -20,7 +20,7 @@ import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.impl.CloudSolrServer;
 import org.apache.solr.common.cloud.SolrZkClient;
@@ -80,7 +80,7 @@ public class SolrLocator {
     configs.validateArguments(config);
   }
   
-  public SolrServer getSolrServer() {
+  public SolrClient getSolrServer() {
     if (zkHost != null && zkHost.length() > 0) {
       if (collectionName == null || collectionName.length() == 0) {
         throw new MorphlineCompilationException("Parameter 'zkHost' requires that you also pass parameter 'collection'", config);
@@ -100,7 +100,7 @@ public class SolrLocator {
       }
       int solrServerNumThreads = 2;
       int solrServerQueueLength = solrServerNumThreads;
-      SolrServer server = new SafeConcurrentUpdateSolrServer(solrUrl, solrServerQueueLength, solrServerNumThreads);
+      SolrClient server = new SafeConcurrentUpdateSolrServer(solrUrl, solrServerQueueLength, solrServerNumThreads);
       return server;
     }
   }
@@ -113,7 +113,7 @@ public class SolrLocator {
       }
     }
     
-    SolrServer solrServer = getSolrServer();
+    SolrClient solrServer = getSolrServer();
     if (solrServer instanceof CloudSolrServer) {
       try {
         ((CloudSolrServer)solrServer).setIdField(getIndexSchema().getUniqueKeyField().getName());
