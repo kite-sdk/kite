@@ -25,14 +25,29 @@ import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.runners.Parameterized;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.spi.DatasetRepository;
+import org.kitesdk.data.spi.DefaultConfiguration;
 import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
 
 public class FileSystemTestBase {
+
+  private static Configuration original = null;
+
+  @BeforeClass
+  public static void saveDefaultConfiguration() {
+    original = DefaultConfiguration.get();
+  }
+
+  @AfterClass
+  public static void restoreDefaultConfiguration() {
+    DefaultConfiguration.set(original);
+  }
 
   public FileSystemTestBase(Format format) {
     this.format = format;

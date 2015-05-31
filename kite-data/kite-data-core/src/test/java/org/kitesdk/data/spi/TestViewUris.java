@@ -17,6 +17,7 @@
 package org.kitesdk.data.spi;
 
 import java.net.URI;
+import java.util.UUID;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericRecord;
@@ -119,6 +120,23 @@ public class TestViewUris {
     assertViewUriEquivalent("encoded multi-value constraints",
         "view:file:/tmp/test_name?color=a%2Cb,c",
         test.with("color", "a,b", "c"));
+  }
+
+  @Test
+  public void testURIStringEquality() {
+    for(int i = 0; i < 10; i++) {
+      String a = UUID.randomUUID().toString();
+      String b = UUID.randomUUID().toString();
+      String originalUri = "view:file:/tmp/test_name?color="+ a + "," + b;
+      View<GenericRecord> view = Datasets.load(originalUri);
+      String afterUri = view.getUri().toString();
+      if(!originalUri.equals(afterUri)) {
+        System.out.println("Iteration: " + i);
+        System.out.println("Start: " + originalUri);
+        System.out.println("End  : " + afterUri);
+      }
+      Assert.assertEquals(originalUri, afterUri);
+    }
   }
 
   public void assertViewUriEquivalent(String desc, String uri,

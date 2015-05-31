@@ -42,7 +42,7 @@ public class In<T> extends RegisteredPredicate<T> {
   }
 
   public static <T> In<T> fromString(String set, Schema schema) {
-    Set<T> values = Sets.newHashSet();
+    Set<T> values = Sets.newLinkedHashSet();
     for (String value : Splitter.on(',').split(set)) {
       values.add(SchemaUtil.<T>fromString(value, schema));
     }

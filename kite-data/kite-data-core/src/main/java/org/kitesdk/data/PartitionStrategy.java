@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import org.kitesdk.data.spi.PartitionStrategyParser;
 import org.kitesdk.data.spi.partition.DayOfMonthFieldPartitioner;
+import org.kitesdk.data.spi.partition.LongFixedSizeRangeFieldPartitioner;
 import org.kitesdk.data.spi.partition.HourFieldPartitioner;
 import org.kitesdk.data.spi.partition.MinuteFieldPartitioner;
 import org.kitesdk.data.spi.partition.MonthFieldPartitioner;
@@ -364,6 +365,50 @@ public class PartitionStrategy {
      */
     public Builder range(String sourceName, String... upperBounds) {
       add(new RangeFieldPartitioner(sourceName, upperBounds));
+      return this;
+    }
+
+    /**
+     * Configure a range partitioner with fixed-size ranges. A value <code>v</code>
+     * is placed in the partition <code>floor(v/size)*size</code>.
+     *
+     * The partition name will be the source field name with a "_range" suffix.
+     * For example, fixedSizeRange("number", 10) creates "number_range"
+     * partitions.
+     *
+     * @param sourceName
+     *          The entity field name from which to get values to be
+     *          partitioned.
+     * @param size
+     *          The size of the range.
+     * @return An instance of the builder for method chaining.
+     * @see IntRangeFieldPartitioner
+     */
+    public Builder fixedSizeRange(String sourceName, long size) {
+      add(new LongFixedSizeRangeFieldPartitioner(sourceName, size));
+      return this;
+    }
+
+    /**
+     * Configure a range partitioner with fixed-size ranges. A value <code>v</code>
+     * is placed in the partition <code>floor(v/size)*size</code>.
+     *
+     * If name is null, the partition name will be the source field name with a "_range" suffix.
+     * For example, fixedSizeRange("number", 10) creates "number_range"
+     * partitions.
+     *
+     * @param sourceName
+     *          The entity field name from which to get values to be
+     *          partitioned.
+     * @param name
+     *          The entity field name of the partition.
+     * @param size
+     *          The size of the range.
+     * @return An instance of the builder for method chaining.
+     * @see IntRangeFieldPartitioner
+     */
+    public Builder fixedSizeRange(String sourceName, @Nullable String name, long size) {
+      add(new LongFixedSizeRangeFieldPartitioner(sourceName, name, size));
       return this;
     }
 

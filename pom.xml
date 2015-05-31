@@ -124,7 +124,7 @@
     <previous.project.version>1.0.0</previous.project.version>
 
     <cdh4.version>4.4.0</cdh4.version>
-    <cdh5.version>5.2.0</cdh5.version>
+    <cdh5.version>5.4.2</cdh5.version>
     <cdh.version>${cdh4.version}</cdh.version>
 
     <!-- artifacts that depend on profiles -->
@@ -149,13 +149,13 @@
     <vers.hadoop2>2.6.0</vers.hadoop2>
     <vers.hadoop-cdh4>2.0.0-cdh${cdh4.version}</vers.hadoop-cdh4>
     <vers.hadoop-mr1-cdh4>2.0.0-mr1-cdh${cdh4.version}</vers.hadoop-mr1-cdh4>
-    <vers.hadoop-cdh5>2.5.0-cdh${cdh5.version}</vers.hadoop-cdh5>
+    <vers.hadoop-cdh5>2.6.0-cdh${cdh5.version}</vers.hadoop-cdh5>
     <vers.hbase1>0.94.6</vers.hbase1>
     <vers.hbase2>0.98.3-hadoop2</vers.hbase2>
     <vers.hbase-cdh4>0.94.6-cdh${cdh4.version}</vers.hbase-cdh4>
-    <vers.hbase-cdh5>0.98.6-cdh${cdh5.version}</vers.hbase-cdh5>
-    <vers.hive>0.13.1</vers.hive>
-    <vers.hive-cdh5>0.13.1-cdh${cdh5.version}</vers.hive-cdh5>
+    <vers.hbase-cdh5>1.0.0-cdh${cdh5.version}</vers.hbase-cdh5>
+    <vers.hive>0.13.0</vers.hive>
+    <vers.hive-cdh5>1.1.0-cdh${cdh5.version}</vers.hive-cdh5>
     <vers.jetty>8.1.14.v20131031</vers.jetty>
     <vers.jexl>2.1.1</vers.jexl>
     <vers.compress>1.4.1</vers.compress>
@@ -1284,29 +1284,6 @@
     </profile>
 
     <profile>
-      <id>hadoop-1</id>
-      <activation>
-        <property>
-          <name>hadoop.profile</name>
-          <value>1</value>
-        </property>
-      </activation>
-      <properties>
-        <!-- test hadoop-1 with the same jars that were produced for default profile -->
-        <maven.main.skip>true</maven.main.skip>
-        <artifact.hadoop-deps>kite-hadoop1-dependencies</artifact.hadoop-deps>
-        <artifact.hadoop-test-deps>kite-hadoop1-test-dependencies</artifact.hadoop-test-deps>
-        <artifact.hbase-deps>kite-hbase1-dependencies</artifact.hbase-deps>
-        <artifact.hbase-test-deps>kite-hbase1-test-dependencies</artifact.hbase-test-deps>
-        <vers.crunch>${vers.crunch-base}</vers.crunch>
-        <vers.flume>1.4.0</vers.flume>
-        <vers.hive>0.10.0</vers.hive>
-        <vers.commons-lang>2.4</vers.commons-lang>
-        <test.aws.access.key></test.aws.access.key> <!-- don't test S3 -->
-      </properties>
-    </profile>
-
-    <profile>
       <id>cdh4</id>
       <activation>
         <property>
@@ -1348,10 +1325,11 @@
         <vers.crunch>${vers.crunch-cdh5}</vers.crunch>
         <vers.flume>1.5.0-cdh${cdh5.version}</vers.flume>
         <vers.hive>${vers.hive-cdh5}</vers.hive>
-        <vers.oozie>4.0.0-cdh${cdh5.version}</vers.oozie>
+        <vers.oozie>4.1.0-cdh${cdh5.version}</vers.oozie>
         <vers.solr>${vers.solr-cdh5}</vers.solr>
         <solr.expected.version>${vers.solr-cdh5}</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->
-        <vers.hadoop-aws>2.5.0-cdh5.3.0</vers.hadoop-aws>
+        <vers.hadoop-aws>2.6.0-cdh${cdh5.version}</vers.hadoop-aws>
+        <vers.spark>1.3.0-cdh${cdh5.version}</vers.spark>
       </properties>
     </profile>
 

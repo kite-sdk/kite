@@ -34,6 +34,7 @@ import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.Datasets;
+import org.kitesdk.data.spi.DefaultConfiguration;
 import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.spi.PartitionedDataset;
 import org.kitesdk.data.TypeNotFoundException;
@@ -258,6 +259,8 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR",
       justification="Delegate set by setConf")
   public RecordReader<E, Void> createRecordReader(InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
+    Configuration conf = Hadoop.TaskAttemptContext.getConfiguration.invoke(taskAttemptContext);
+    DefaultConfiguration.init(conf);
     return delegate.createRecordReader(inputSplit, taskAttemptContext);
   }
 
