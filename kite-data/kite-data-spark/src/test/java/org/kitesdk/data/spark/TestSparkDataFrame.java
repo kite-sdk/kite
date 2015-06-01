@@ -21,11 +21,14 @@ import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SQLContext;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.kitesdk.data.*;
 import scala.Tuple2;
@@ -36,6 +39,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestSparkDataFrame {
+
+    private transient JavaSparkContext sc;
+
+    @Before
+    public void setUp() {
+        sc = new JavaSparkContext("local", "JavaAPISuite");
+    }
+
+    @After
+    public void tearDown() {
+        sc.stop();
+        sc = null;
+    }
 
     public static class Person implements Serializable {
         final String name;
@@ -87,7 +103,7 @@ public class TestSparkDataFrame {
 
         cleanup();
 
-        SQLContext sqlContext = new org.apache.spark.sql.SQLContext(SparkTestHelper.getSparkContext());
+        SQLContext sqlContext = new org.apache.spark.sql.SQLContext(sc);
 
         Dataset<GenericRecord> products = generateDataset(format, CompressionType.Snappy);
 
@@ -125,7 +141,7 @@ public class TestSparkDataFrame {
 
         cleanup();
 
-        SQLContext sqlContext = new org.apache.spark.sql.SQLContext(SparkTestHelper.getSparkContext());
+        SQLContext sqlContext = new org.apache.spark.sql.SQLContext(sc);
 
         URI datasetURI = URIBuilder.build("repo:file:////" + System.getProperty("user.dir") + "/tmp", "test", "persons");
 
@@ -135,7 +151,7 @@ public class TestSparkDataFrame {
         peopleList.add(new Person("Giuditta", 12));
         peopleList.add(new Person("Vita", 19));
 
-        DataFrame people = sqlContext.createDataFrame(SparkTestHelper.getSparkContext().parallelize(peopleList), Person.class);
+        DataFrame people = sqlContext.createDataFrame(sc.parallelize(peopleList), Person.class);
         people.registerTempTable("people");
 
         DataFrame teenagers = sqlContext.sql("SELECT * FROM people WHERE age >= 13 AND age <= 19");

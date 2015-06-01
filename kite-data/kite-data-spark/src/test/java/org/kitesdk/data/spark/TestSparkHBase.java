@@ -19,6 +19,9 @@ package org.kitesdk.data.spark;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
@@ -34,6 +37,21 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 public class TestSparkHBase extends HBaseTestBase {
+
+    private transient JavaSparkContext sc;
+
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        sc = new JavaSparkContext("local", "JavaAPISuite");
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        sc.stop();
+        sc = null;
+        super.after();
+    }
 
     @Test
     @SuppressWarnings("deprecation")
@@ -65,7 +83,7 @@ public class TestSparkHBase extends HBaseTestBase {
         DatasetKeyOutputFormat.configure(job).writeTo(outputDataset);
 
         @SuppressWarnings("unchecked")
-        JavaPairRDD<GenericRecord, Void> inputData = SparkTestHelper.getSparkContext()
+        JavaPairRDD<GenericRecord, Void> inputData = sc
                 .newAPIHadoopRDD(job.getConfiguration(), DatasetKeyInputFormat.class,
                         GenericRecord.class, Void.class);
 

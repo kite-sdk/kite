@@ -35,29 +35,20 @@ case class User(name: String, creationDate: Long, favoriteColor: String)
 @RunWith(classOf[JUnitRunner])
 class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll with TestSupport {
 
-  var sparkContext: SparkContext = _
-
-  override def beforeAll(): Unit = {
-    val conf = new SparkConf().
-      setAppName("spark-kite-spec-test").
-      set("spark.driver.allowMultipleContexts", "true").
-      set("spark.serializer", "org.apache.spark.serializer.KryoSerializer").
-      setMaster("local")
-    sparkContext = new SparkContext(conf)
-  }
-
-  override def afterAll(): Unit = {
-    sparkContext.stop()
-  }
-
   "Spark" must {
     "be able to create a SchemaRDD/Dataframe from a kite parquet dataset" in {
+
+      val conf = new SparkConf().
+        setAppName("spark-kite-spec-test").
+        set("spark.serializer", "org.apache.spark.serializer.KryoSerializer").
+        setMaster("local")
+      sc = new SparkContext(conf)
 
       cleanup()
 
       val products: Dataset[GenericRecord] = generateDataset(Formats.PARQUET, CompressionType.Snappy)
 
-      val sqlContext = new SQLContext(sparkContext)
+      val sqlContext = new SQLContext(sc)
 
       val data = sqlContext.kiteDatasetFile(products)
 
@@ -79,11 +70,17 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
   "Spark" must {
     "be able to create a SchemaRDD/Dataframe from a kite avro dataset" in {
 
+      val conf = new SparkConf().
+        setAppName("spark-kite-spec-test").
+        set("spark.serializer", "org.apache.spark.serializer.KryoSerializer").
+        setMaster("local")
+      sc = new SparkContext(conf)
+
       cleanup()
 
       val products = generateDataset(Formats.AVRO, CompressionType.Snappy)
 
-      val sqlContext = new SQLContext(sparkContext)
+      val sqlContext = new SQLContext(sc)
 
       val data = sqlContext.kiteDatasetFile(products)
 
@@ -104,15 +101,21 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
 
   private def testCreateKiteDataset(format: Format): Unit = {
 
+    val conf = new SparkConf().
+      setAppName("spark-kite-spec-test").
+      set("spark.serializer", "org.apache.spark.serializer.KryoSerializer").
+      setMaster("local")
+    sc = new SparkContext(conf)
+
     cleanup()
 
-    val sqlContext = new SQLContext(sparkContext)
+    val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._
 
     val datasetURI = URIBuilder.build(s"repo:file:////${System.getProperty("user.dir")}/target/tmp", "test", "persons")
 
     val peopleList = List(Person("David", 50), Person("Ruben", 14), Person("Giuditta", 12), Person("Vita", 19))
-    val people = sparkContext.parallelize[Person](peopleList).toDF()
+    val people = sc.parallelize[Person](peopleList).toDF()
     people.registerTempTable("people")
 
     val teenagers = sqlContext.sql("SELECT * FROM people WHERE age >= 13 AND age <= 19")
@@ -148,18 +151,24 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
 
   "Spark" must {
     "be able to append a SchemaRDD/Dataframe to an existing dataset" in {
+
+      val conf = new SparkConf().
+        setAppName("spark-kite-spec-test").
+        set("spark.serializer", "org.apache.spark.serializer.KryoSerializer").
+        setMaster("local")
+      sc = new SparkContext(conf)
       cleanup()
 
-      val sqlContext = new SQLContext(sparkContext)
+      val sqlContext = new SQLContext(sc)
       import sqlContext.implicits._
 
       val datasetURI = URIBuilder.build(s"repo:file:////${System.getProperty("user.dir")}/target/tmp", "test", "persons1")
 
       val peopleList1 = List(Person("David", 50), Person("Ruben", 14))
-      val people1 = sparkContext.parallelize[Person](peopleList1).toDF()
+      val people1 = sc.parallelize[Person](peopleList1).toDF()
 
       val peopleList2 = List(Person("Giuditta", 12), Person("Vita", 19))
-      val people2 = sparkContext.parallelize[Person](peopleList2).toDF()
+      val people2 = sc.parallelize[Person](peopleList2).toDF()
 
       val descriptor = new SparkDatasetDescriptor.Builder().dataFrame(people1).format(Formats.AVRO).compressionType(CompressionType.Snappy).build()
       val dataset1 = KiteDatasetSaver.saveAsKiteDataset(descriptor, datasetURI)
@@ -183,18 +192,25 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
 
   "Spark" must {
     "be able to overwrite with SchemaRDD/Dataframe an existing dataset" in {
+
+      val conf = new SparkConf().
+        setAppName("spark-kite-spec-test").
+        set("spark.serializer", "org.apache.spark.serializer.KryoSerializer").
+        setMaster("local")
+      sc = new SparkContext(conf)
+
       cleanup()
 
-      val sqlContext = new SQLContext(sparkContext)
+      val sqlContext = new SQLContext(sc)
       import sqlContext.implicits._
 
       val datasetURI = URIBuilder.build(s"repo:file:////${System.getProperty("user.dir")}/target/tmp", "test", "persons2")
 
       val peopleList1 = List(Person("David", 50), Person("Ruben", 14))
-      val people1 = sparkContext.parallelize[Person](peopleList1).toDF()
+      val people1 = sc.parallelize[Person](peopleList1).toDF()
 
       val peopleList2 = List(Person("Giuditta", 12), Person("Vita", 19))
-      val people2 = sparkContext.parallelize[Person](peopleList2).toDF()
+      val people2 = sc.parallelize[Person](peopleList2).toDF()
 
       val descriptor = new SparkDatasetDescriptor.Builder().dataFrame(people1).format(Formats.AVRO).compressionType(CompressionType.Snappy).build()
       val dataset1 = KiteDatasetSaver.saveAsKiteDataset(descriptor, datasetURI)
@@ -219,9 +235,15 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
   "Spark" must {
     "be able to create a SchemaRDD/Dataframe from a kite avro dataset using a reflection based schema" in {
 
+      val conf = new SparkConf().
+        setAppName("spark-kite-spec-test").
+        set("spark.serializer", "org.apache.spark.serializer.KryoSerializer").
+        setMaster("local")
+      sc = new SparkContext(conf)
+
       cleanup()
 
-      val sqlContext = new SQLContext(sparkContext)
+      val sqlContext = new SQLContext(sc)
 
       val datasetURI = URIBuilder.build(s"repo:file:////${System.getProperty("user.dir")}/target/tmp", "test", "persons3")
 
@@ -247,9 +269,15 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
   "Spark" must {
     "be able to create a SchemaRDD/Dataframe from a partitioned kite avro dataset" in {
 
+      val conf = new SparkConf().
+        setAppName("spark-kite-spec-test").
+        set("spark.serializer", "org.apache.spark.serializer.KryoSerializer").
+        setMaster("local")
+      sc = new SparkContext(conf)
+
       cleanup()
 
-      val sqlContext = new SQLContext(sparkContext)
+      val sqlContext = new SQLContext(sc)
 
       val partitionStrategy = new PartitionStrategy.Builder().identity("favoriteColor", "favorite_color").build()
 
@@ -286,9 +314,15 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
   "Spark" must {
     "be able to create a partitioned kite avro dataset from a SchemaRDD/Dataframe" in {
 
+      val conf = new SparkConf().
+        setAppName("spark-kite-spec-test").
+        set("spark.serializer", "org.apache.spark.serializer.KryoSerializer").
+        setMaster("local")
+      sc = new SparkContext(conf)
+
       cleanup()
 
-      val sqlContext = new SQLContext(sparkContext)
+      val sqlContext = new SQLContext(sc)
       import sqlContext.implicits._
 
       val datasetURI = URIBuilder.build(s"repo:file:////${System.getProperty("user.dir")}/target/tmp", "test", "users2")
@@ -296,7 +330,7 @@ class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll wi
       val colors = Array[String]("green", "blue", "pink", "brown", "yellow")
       val rand = new Random()
       val usersList = (1 to 100).map(i => User("user-" + i, System.currentTimeMillis(), colors(rand.nextInt(colors.length))))
-      val users = sparkContext.parallelize[User](usersList).toDF()
+      val users = sc.parallelize[User](usersList).toDF()
       users.registerTempTable("user")
 
       val partitionStrategy = new PartitionStrategy.Builder().identity("favoriteColor", "favorite_color").build()
