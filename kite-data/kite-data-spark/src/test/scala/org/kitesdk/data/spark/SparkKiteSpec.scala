@@ -23,7 +23,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.junit.runner.RunWith
 import org.kitesdk.data._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
+import org.scalatest.{MustMatchers, WordSpec}
 
 import scala.beans.BeanProperty
 import scala.util.Random
@@ -33,7 +33,7 @@ case class Person(@BeanProperty name: String, @BeanProperty age: Int)
 case class User(name: String, creationDate: Long, favoriteColor: String)
 
 @RunWith(classOf[JUnitRunner])
-class SparkKiteSpec extends WordSpec with MustMatchers with BeforeAndAfterAll with TestSupport {
+class SparkKiteSpec extends WordSpec with MustMatchers with TestSupport {
 
   "Spark" must {
     "be able to create a SchemaRDD/Dataframe from a kite parquet dataset" in {
