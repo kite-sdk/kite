@@ -62,6 +62,10 @@ public class CompactionTask<T> implements Configurable {
     return task.getConf();
   }
 
+  public void setNumPartitionWriters(int numPartitionWriters) {
+    task.setNumPartitionWriters(numPartitionWriters);
+  }
+
   @SuppressWarnings("unchecked")
   private void checkCompactable(View<T> view) {
     Dataset<T> dataset = view.getDataset();

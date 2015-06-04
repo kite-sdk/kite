@@ -48,6 +48,10 @@ public class CopyCommand extends BaseDatasetCommand {
       description="The number of writer processes to use")
   int numWriters = -1;
 
+  @Parameter(names={"--files-per-partition"},
+      description="The number of files per partition to create")
+  int numPartitionWriters = -1;
+
   @Parameter(
       names={"--overwrite"},
       description="Remove any data already in the target view or dataset")
@@ -73,6 +77,10 @@ public class CopyCommand extends BaseDatasetCommand {
 
     if (numWriters >= 0) {
       task.setNumWriters(numWriters);
+    }
+
+    if (numPartitionWriters >= 0) {
+      task.setNumWriters(numPartitionWriters);
     }
 
     if (overwrite) {
