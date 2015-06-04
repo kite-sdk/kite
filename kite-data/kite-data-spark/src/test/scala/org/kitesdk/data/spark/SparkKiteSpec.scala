@@ -16,7 +16,6 @@
 
 package org.kitesdk.data.spark
 
-import org.apache.avro.generic.GenericData.Record
 import org.apache.avro.generic.{GenericRecord, GenericRecordBuilder}
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.{SparkConf, SparkContext}
@@ -285,7 +284,7 @@ class SparkKiteSpec extends WordSpec with MustMatchers with TestSupport {
 
       val descriptor = new DatasetDescriptor.Builder().schemaUri("resource:user.avsc").partitionStrategy(partitionStrategy).format(Formats.AVRO).build()
 
-      val userDataset = Datasets.create[Record, Dataset[Record]](datasetURI, descriptor, classOf[Record])
+      val userDataset = Datasets.create[GenericRecord, Dataset[GenericRecord]](datasetURI, descriptor, classOf[GenericRecord])
 
       val colors = Array[String]("green", "blue", "pink", "brown", "yellow")
       val rand = new Random()

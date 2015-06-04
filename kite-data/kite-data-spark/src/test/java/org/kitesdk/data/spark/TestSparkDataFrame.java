@@ -73,7 +73,7 @@ public class TestSparkDataFrame {
 
     private static void cleanup() throws Exception {
         Configuration conf = new Configuration();
-        Path dir = new Path(System.getProperty("user.dir") + "/tmp/");
+        Path dir = new Path(System.getProperty("user.dir") + "/target/tmp/");
         FileSystem fileSystem = dir.getFileSystem(conf);
         if (fileSystem.exists(dir))
             fileSystem.delete(dir, true);
@@ -81,7 +81,7 @@ public class TestSparkDataFrame {
 
     private static Dataset<GenericRecord> generateDataset(Format format, CompressionType compressionType) throws Exception {
         DatasetDescriptor descriptor = new DatasetDescriptor.Builder().schemaUri("resource:product.avsc").compressionType(compressionType).format(format).build(); //Snappy compression is the default
-        Dataset<GenericRecord> products = Datasets.create("dataset:file://" + System.getProperty("user.dir") + "/tmp/test/products", descriptor, GenericRecord.class);
+        Dataset<GenericRecord> products = Datasets.create("dataset:file://" + System.getProperty("user.dir") + "/target/tmp/test/products", descriptor, GenericRecord.class);
         DatasetWriter<GenericRecord> writer = products.newWriter();
         GenericRecordBuilder builder = new GenericRecordBuilder(descriptor.getSchema());
         for (long i = 1; i <= 100; ++i) {
@@ -143,7 +143,7 @@ public class TestSparkDataFrame {
 
         SQLContext sqlContext = new org.apache.spark.sql.SQLContext(sc);
 
-        URI datasetURI = URIBuilder.build("repo:file:////" + System.getProperty("user.dir") + "/tmp", "test", "persons");
+        URI datasetURI = URIBuilder.build("repo:file:////" + System.getProperty("user.dir") + "/target/tmp", "test", "persons");
 
         List<Person> peopleList = new ArrayList<Person>();
         peopleList.add(new Person("David", 50));

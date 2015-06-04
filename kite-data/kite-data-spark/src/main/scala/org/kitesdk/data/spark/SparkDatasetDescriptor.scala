@@ -24,16 +24,14 @@ import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.DataFrame
 import org.kitesdk.data._
 
-class SparkDatasetDescriptor(
-                              val dataFrame: DataFrame,
-                              schemaUri: URI,
-                              format: Format,
-                              location: URI,
-                              properties: java.util.Map[String, String],
-                              partitionStrategy: PartitionStrategy,
-                              columnMapping: ColumnMapping,
-                              compressionType: CompressionType
-                              )
+class SparkDatasetDescriptor(val dataFrame: DataFrame,
+                             schemaUri: URI,
+                             format: Format,
+                             location: URI,
+                             properties: java.util.Map[String, String],
+                             partitionStrategy: PartitionStrategy,
+                             columnMapping: ColumnMapping,
+                             compressionType: CompressionType)
   extends DatasetDescriptor(
     getSchema(dataFrame.schema),
     schemaUri,
