@@ -58,10 +58,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 public class TestCopyCommandCluster extends MiniDFSTest {
 
-  protected static final String source = "users_source";
-  protected static final String dest = "users_dest";
-  protected static final String avsc = "target/user.avsc";
-  protected static String repoUri;
+  private static final String source = "users_source";
+  private static final String dest = "users_dest";
+  private static final String dest_partitioned = "users_dest_partitioned";
+  private static final String avsc = "target/user.avsc";
+  private static String repoUri;
 
   @BeforeClass
   public static void createSourceDataset() throws Exception {
@@ -107,6 +108,7 @@ public class TestCopyCommandCluster extends MiniDFSTest {
   @After
   public void deleteDestination() throws Exception {
     TestUtil.run("delete", dest, "-r", repoUri, "-d", "target/data");
+    TestUtil.run("delete", dest_partitioned, "-r", repoUri, "-d", "target/data");
   }
 
   @Test
@@ -183,6 +185,33 @@ public class TestCopyCommandCluster extends MiniDFSTest {
     verifyNoMoreInteractions(console);
   }
 
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testCopyWithNumPartitionWriters() throws Exception {
+    Assume.assumeTrue(setLocalReducerMax(getConfiguration(), 3));
+
+    command.repoURI = repoUri;
+    command.numWriters = 3;
+    command.numPartitionWriters = 4;
+    command.datasets = Lists.newArrayList(source, dest);
+
+    int rc = command.run();
+    Assert.assertEquals("Should return success", 0, rc);
+
+    DatasetRepository repo = DatasetRepositories.repositoryFor("repo:" + repoUri);
+    FileSystemDataset<GenericData.Record> ds =
+        (FileSystemDataset<GenericData.Record>) repo.<GenericData.Record>
+            load("default", dest);
+    int size = DatasetTestUtilities.datasetSize(ds);
+    Assert.assertEquals("Should contain copied records", 6, size);
+
+    Assert.assertEquals("Should produce 4 files",
+        4, Iterators.size(ds.pathIterator()));
+
+    verify(console).info("Added {} records to \"{}\"", 6l, dest);
+    verifyNoMoreInteractions(console);
+  }
+
   private boolean setLocalReducerMax(Configuration conf, int max) {
     try {
       Job job = Hadoop.Job.newInstance.invoke(new Configuration(false));
@@ -208,8 +237,8 @@ public class TestCopyCommandCluster extends MiniDFSTest {
   public void testPartitionedCopyWithNumWriters() throws Exception {
     command.repoURI = repoUri;
     command.numWriters = 3;
-    command.datasets = Lists.newArrayList(source, "dest_partitioned");
-    URI dsUri = URIBuilder.build("repo:" + repoUri, "default", "dest_partitioned");
+    command.datasets = Lists.newArrayList(source, dest_partitioned);
+    URI dsUri = URIBuilder.build("repo:" + repoUri, "default", dest_partitioned);
     Datasets.<Object, Dataset<Object>>create(dsUri, new DatasetDescriptor.Builder()
         .partitionStrategy(new PartitionStrategy.Builder()
             .hash("id", 2)
@@ -227,14 +256,50 @@ public class TestCopyCommandCluster extends MiniDFSTest {
     DatasetRepository repo = DatasetRepositories.repositoryFor("repo:" + repoUri);
     FileSystemDataset<GenericData.Record> ds =
         (FileSystemDataset<GenericData.Record>) repo.<GenericData.Record>
-            load("default", "dest_partitioned");
+            load("default", dest_partitioned);
     int size = DatasetTestUtilities.datasetSize(ds);
     Assert.assertEquals("Should contain copied records", 6, size);
 
     Assert.assertEquals("Should produce 2 partitions",
         2, Iterators.size(ds.pathIterator()));
 
-    verify(console).info("Added {} records to \"{}\"", 6l, "dest_partitioned");
+    verify(console).info("Added {} records to \"{}\"", 6l, dest_partitioned);
+    verifyNoMoreInteractions(console);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testPartitionedCopyWithNumWritersNumFilesPerPartition() throws Exception {
+    command.repoURI = repoUri;
+    command.numWriters = 1;
+    command.numPartitionWriters = 5;
+    command.datasets = Lists.newArrayList(source, dest_partitioned);
+    URI dsUri = URIBuilder.build("repo:" + repoUri, "default", dest_partitioned);
+    Datasets.<Object, Dataset<Object>>create(dsUri, new DatasetDescriptor.Builder()
+        .partitionStrategy(new PartitionStrategy.Builder()
+            .hash("id", 2)
+            .build())
+        .schema(SchemaBuilder.record("User").fields()
+            .requiredLong("id")
+            .optionalString("username")
+            .optionalString("email")
+            .endRecord())
+        .build(), Object.class);
+
+    int rc = command.run();
+    Assert.assertEquals("Should return success", 0, rc);
+
+    DatasetRepository repo = DatasetRepositories.repositoryFor("repo:" + repoUri);
+    FileSystemDataset<GenericData.Record> ds =
+        (FileSystemDataset<GenericData.Record>) repo.<GenericData.Record>
+            load("default", dest_partitioned);
+    int size = DatasetTestUtilities.datasetSize(ds);
+    Assert.assertEquals("Should contain copied records", 6, size);
+
+    Assert.assertEquals("Should produce 2 partitions",
+        2, Iterators.size(ds.pathIterator()));
+
+    verify(console).info("Added {} records to \"{}\"", 6l, dest_partitioned);
     verifyNoMoreInteractions(console);
   }
 

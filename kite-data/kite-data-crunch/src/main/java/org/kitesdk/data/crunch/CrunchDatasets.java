@@ -191,12 +191,40 @@ public class CrunchDatasets {
   public static <E> PCollection<E> partition(PCollection<E> collection,
                                              View<E> view,
                                              int numWriters) {
+    return partition(collection, view, numWriters, 1);
+  }
+
+  /**
+   * Partitions {@code collection} to be stored efficiently in {@code View}.
+   * <p>
+   * This restructures the parallel collection so that all of the entities that
+   * will be stored in a given partition will be evenly distributed across a specified
+   * {@code numPartitionWriters}.
+   * <p>
+   * If the dataset is not partitioned, then this will structure all of the
+   * entities to produce a number of files equal to {@code numWriters}.
+   *
+   * @param collection a collection of entities
+   * @param view a {@link View} of a dataset to partition the collection for
+   * @param numWriters the number of writers that should be used
+   * @param numPartitionWriters the number of writers data for a single partition will be distributed across
+   * @param <E> the type of entities in the collection and underlying dataset
+   * @return an equivalent collection of entities partitioned for the view
+   * @see #partition(PCollection, View)
+   *
+   * @since 1.1.0
+   */
+  public static <E> PCollection<E> partition(PCollection<E> collection,
+                                             View<E> view,
+                                             int numWriters, int numPartitionWriters) {
+    //ensure the number of writers is honored whether it is per partition or total.
     DatasetDescriptor descriptor = view.getDataset().getDescriptor();
     if (descriptor.isPartitioned()) {
-      GetStorageKey<E> getKey = new GetStorageKey<E>(view);
-      PTable<GenericData.Record, E> table = collection
-          .by(getKey, Avros.generics(getKey.schema()));
-      PGroupedTable<GenericData.Record, E> grouped =
+      GetStorageKey<E> getKey = new GetStorageKey<E>(view,
+          numPartitionWriters > 0 ? numPartitionWriters : 1);
+      PTable<Pair<GenericData.Record, Integer>, E> table = collection
+          .by(getKey, Avros.pairs(Avros.generics(getKey.schema()), Avros.ints()));
+      PGroupedTable<Pair<GenericData.Record, Integer>, E> grouped =
           numWriters > 0 ? table.groupByKey(numWriters) : table.groupByKey();
       return grouped.ungroup().values();
     } else {
@@ -224,19 +252,20 @@ public class CrunchDatasets {
     }
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
-      value="SE_NO_SERIALVERSIONID",
-      justification="Purposely not supported across versions")
-  private static class GetStorageKey<E> extends MapFn<E, GenericData.Record> {
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value={"SE_NO_SERIALVERSIONID","SE_TRANSIENT_FIELD_NOT_RESTORED"},
+      justification="Purposely not supported across versions, fields properly initialized")
+  private static class GetStorageKey<E> extends MapFn<E, Pair<GenericData.Record, Integer>> {
     private final String strategyString;
     private final String schemaString;
     private final Class<E> type;
     private final Map<String, String> constraints;
+    private final int numPartitionWriters;
     private transient AvroStorageKey key = null;
     private transient EntityAccessor<E> accessor = null;
     private transient Map<String, Object> provided = null;
+    private transient int count;
 
-    private GetStorageKey(View<E> view) {
+    private GetStorageKey(View<E> view, int numPartitionWriters) {
       DatasetDescriptor descriptor = view.getDataset().getDescriptor();
       // get serializable versions of transient objects
       this.strategyString = descriptor.getPartitionStrategy()
@@ -250,6 +279,7 @@ public class CrunchDatasets {
       } else {
         this.constraints = null;
       }
+      this.numPartitionWriters = numPartitionWriters > 0 ? numPartitionWriters : 1;
     }
 
     public Schema schema() {
@@ -271,11 +301,14 @@ public class CrunchDatasets {
               .getProvidedValues();
         }
       }
+      count = 0;
     }
 
     @Override
-    public AvroStorageKey map(E entity) {
-      return key.reuseFor(entity, provided, accessor);
+    public Pair<GenericData.Record, Integer> map(E entity) {
+      int marker = count % numPartitionWriters;
+      count++;
+      return Pair.<GenericData.Record, Integer>of(key.reuseFor(entity, provided, accessor), marker);
     }
   }
 
