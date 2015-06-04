@@ -15,7 +15,6 @@
  */
 package org.kitesdk.data.spark;
 
-import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.hadoop.conf.Configuration;
@@ -85,7 +84,7 @@ public class TestSparkDataFrame {
         DatasetWriter<GenericRecord> writer = products.newWriter();
         GenericRecordBuilder builder = new GenericRecordBuilder(descriptor.getSchema());
         for (long i = 1; i <= 100; ++i) {
-            GenericData.Record record = builder.set("name", "product-" + i).set("id", i).build();
+            GenericRecord record = builder.set("name", "product-" + i).set("id", i).build();
             writer.write(record);
         }
         writer.close();
