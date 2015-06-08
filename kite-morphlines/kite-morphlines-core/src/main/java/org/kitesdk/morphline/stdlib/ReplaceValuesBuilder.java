@@ -25,7 +25,7 @@ import org.kitesdk.morphline.api.MorphlineContext;
 import com.typesafe.config.Config;
 
 /**
- * Removes all record field values for which all of the following conditions hold:
+ * Replaces all record field values for which all of the following conditions hold:
  * 
  * 1) the field name matches at least one of the given nameBlacklist predicates but none of the
  * given nameWhitelist predicates.
@@ -36,16 +36,16 @@ import com.typesafe.config.Config;
  * If the blacklist specification is absent it defaults to MATCH ALL. If the whitelist specification
  * is absent it defaults to MATCH NONE.
  */
-public final class RemoveValuesBuilder implements CommandBuilder {
+public final class ReplaceValuesBuilder implements CommandBuilder {
 
   @Override
   public Collection<String> getNames() {
-    return Collections.singletonList("removeValues");
+    return Collections.singletonList("replaceValues");
   }
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new ReplaceValues(this, config, parent, child, context, true);
+    return new ReplaceValues(this, config, parent, child, context, false);
   }
-    
+
 }

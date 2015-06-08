@@ -59,7 +59,8 @@ public final class RemoveFieldsBuilder implements CommandBuilder {
       super(builder, config, parent, child, context);
       List<String> includes = getConfigs().getStringList(config, "blacklist", Collections.singletonList("*"));
       List<String> excludes = getConfigs().getStringList(config, "whitelist", Collections.<String>emptyList());
-      this.nameMatcher = new PatternNameMatcher(includes, excludes, 10000);
+      int cacheCapacity = getConfigs().getInt(config, "cacheCapacity", 10000);
+      this.nameMatcher = new PatternNameMatcher(includes, excludes, cacheCapacity);
       validateArguments();
     }
 
