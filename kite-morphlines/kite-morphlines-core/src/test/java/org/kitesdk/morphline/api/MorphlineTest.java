@@ -303,6 +303,66 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
 
   @Test
+  public void testReplaceValues() throws Exception {
+    morphline = createMorphline("test-morphlines/replaceValues");
+    for (int i = 0; i < 2; i++) {
+      Record record = new Record();
+      record.put("foobar", "data");
+      record.put("foo", "foo");
+      record.put("foo", "foobar");
+      record.put("foo", "barx");
+      record.put("foo", "barox");
+      record.put("foo", "baz");
+      record.put("foo", "baz");
+      record.put("foo", "hello");
+      record.put("barx", "foo");
+      record.put("barox", "foo");
+      record.put("baz", "foo");
+      record.put("baz", "foo");
+      record.put("hello", "foo");
+      
+      Record expected = new Record();
+      expected.put("foobar", "data");
+      expected.put("foo", "myReplacement");
+      expected.put("foo", "foobar");
+      expected.put("foo", "myReplacement");
+      expected.put("foo", "barox");
+      expected.put("foo", "myReplacement");
+      expected.put("foo", "myReplacement");
+      expected.put("foo", "hello");
+      expected.put("barx", "myReplacement");
+      expected.put("barox", "foo");
+      expected.put("baz", "myReplacement");
+      expected.put("baz", "myReplacement");
+      expected.put("hello", "foo");
+      processAndVerifySuccess(record, expected);
+    }
+  }
+
+  @Test
+  public void testReplaceValuesWithLiteralsOnly() throws Exception {
+    morphline = createMorphline("test-morphlines/replaceValuesWithLiteralsOnly");
+    for (int i = 0; i < 2; i++) {
+      Record record = new Record();
+      record.put("foo", "foo");
+      record.put("foo", "baz");
+      record.put("bar", "bar");
+      record.put("baz", "baz");
+      record.put("baz", "xxxx");
+      record.put("hello", "data");
+      
+      Record expected = new Record();
+      expected.put("foo", "foo");
+      expected.put("foo", "baz");
+      expected.put("bar", "bar");
+      expected.put("baz", "myReplacement");
+      expected.put("baz", "myReplacement");
+      expected.put("hello", "data");
+      processAndVerifySuccess(record, expected);
+    }
+  }
+
+  @Test
   public void testNotifications() throws Exception {
     morphline = createMorphline("test-morphlines/pipeWithTwoBasicCommands");
     Notifications.notifyBeginTransaction(morphline);
