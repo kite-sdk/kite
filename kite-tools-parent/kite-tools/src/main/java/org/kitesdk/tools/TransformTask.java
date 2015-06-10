@@ -62,9 +62,11 @@ public class TransformTask<S, T> extends Configured {
   private final DoFn<S, T> transform;
   private boolean compact = true;
   private int numWriters = -1;
+  private int numPartitionWriters = -1;
   private Target.WriteMode mode = Target.WriteMode.APPEND;
 
   private long count = 0;
+
 
   public TransformTask(View<S> from, View<T> to, DoFn<S, T> transform) {
     this.from = from;
@@ -79,6 +81,7 @@ public class TransformTask<S, T> extends Configured {
   public TransformTask noCompaction() {
     this.compact = false;
     this.numWriters = 0;
+    this.numPartitionWriters = 0;
     return this;
   }
 
@@ -90,6 +93,13 @@ public class TransformTask<S, T> extends Configured {
     } else {
       this.numWriters = numWriters;
     }
+    return this;
+  }
+
+  public TransformTask setNumPartitionWriters(int numPartitionWriters) {
+    Preconditions.checkArgument(numPartitionWriters >= 0,
+        "Invalid number of partition writers: " + numPartitionWriters);
+    this.numPartitionWriters = numPartitionWriters;
     return this;
   }
 
@@ -125,7 +135,7 @@ public class TransformTask<S, T> extends Configured {
 
     if (compact) {
       // the transform must be run before partitioning
-      collection = CrunchDatasets.partition(collection, to, numWriters);
+      collection = CrunchDatasets.partition(collection, to, numWriters, numPartitionWriters);
     }
 
     pipeline.write(collection, CrunchDatasets.asTarget(to), mode);

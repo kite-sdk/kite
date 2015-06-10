@@ -43,6 +43,10 @@ public class CompactCommand extends BaseDatasetCommand {
       description="The number of writer processes to use")
   int numWriters = -1;
 
+  @Parameter(names={"--files-per-partition"},
+      description="The number of files per partition to create")
+  int numPartitionWriters = -1;
+
   @Override
   public int run() throws IOException {
     Preconditions.checkArgument(datasets.size() == 1,
@@ -62,6 +66,10 @@ public class CompactCommand extends BaseDatasetCommand {
 
     if (numWriters >= 0) {
       task.setNumWriters(numWriters);
+    }
+
+    if (numPartitionWriters >= 0) {
+      task.setNumPartitionWriters(numPartitionWriters);
     }
 
     PipelineResult result = task.run();
