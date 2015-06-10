@@ -52,12 +52,14 @@ public class TestCopyCommandClusterChangedNameWithPartitioning extends TestCopyC
     psOut.write(partitionStrategy.toString(true).getBytes());
     psOut.close();
 
-    return ImmutableList.of("-p", partitionStrategyJson);
+    return ImmutableList.of(
+        "-p", partitionStrategyJson,
+        "--set", "kite.writer.cache-size=20");
   }
 
   @Override
   public void testCopyWithoutCompaction() throws Exception {
-    testCopyWithoutCompaction(6);
+    testCopyWithoutCompaction(5);
   }
 
   @Override
