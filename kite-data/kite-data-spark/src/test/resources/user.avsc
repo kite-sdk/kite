@@ -1,0 +1,20 @@
+{
+  "type": "record",
+  "name": "User",
+  "namespace": "org.kitesdk.examples.data",
+  "doc": "A user record",
+  "fields": [
+    {
+      "name": "username",
+      "type": "string"
+    },
+    {
+      "name": "creationDate",
+      "type": "long"
+    },
+    {
+      "name": "favoriteColor",
+      "type": "string"
+    }
+  ]
+}

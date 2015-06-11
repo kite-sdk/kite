@@ -67,15 +67,20 @@
   </scm>
 
   <properties>
+    <!-- Scala versions -->
+    <scala.base.version>2.10</scala.base.version>
+    <scala.version>2.10.5</scala.version>
+    <scalatest.version>2.2.4</scalatest.version>
+
     <!-- dependency version properties -->
     <kite.version>1.0.1-SNAPSHOT</kite.version>
-    <kite.avro.version>1.7.5-cdh5.1.0</kite.avro.version>
-    <kite.crunch.version>0.10.0-cdh5.1.0</kite.crunch.version>
+    <kite.avro.version>1.7.6-cdh5.4.2</kite.avro.version>
+    <kite.crunch.version>0.11.0-cdh5.4.2</kite.crunch.version>
     <kite.findbugs.version>2.0.1</kite.findbugs.version>
-    <kite.hive.version>0.12.0-cdh5.1.0</kite.hive.version>
-    <kite.oozie.version>4.0.0-cdh5.1.0</kite.oozie.version>
-    <kite.spark.version>1.0.0-cdh5.1.0</kite.spark.version>
-    <kite.parquet.version>1.2.5-cdh5.1.0</kite.parquet.version>
+    <kite.hive.version>1.1.0-cdh5.4.2</kite.hive.version>
+    <kite.oozie.version>4.0.0-cdh5.4.2</kite.oozie.version>
+    <kite.spark.version>1.3.0-cdh5.4.2</kite.spark.version>
+    <kite.parquet.version>1.5.0-cdh5.4.2</kite.parquet.version>
 
     <!-- other properties to help apps -->
     <hadoop.guava.version>11.0.2</hadoop.guava.version>
@@ -401,6 +406,32 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-sql_${scala.base.version}</artifactId>
+      <scope>provided</scope>
+      <optional>true</optional>
+      <exclusions>
+        <!-- Exclude Spark's Hadoop dependencies -->
+        <exclusion>
+          <artifactId>hadoop-annotations</artifactId>
+          <groupId>org.apache.hadoop</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>hadoop-auth</artifactId>
+          <groupId>org.apache.hadoop</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>hadoop-client</artifactId>
+          <groupId>org.apache.hadoop</groupId>
+        </exclusion>
+        <!-- Exclude conflicting servlet-api -->
+        <exclusion>
+          <artifactId>servlet-api</artifactId>
+          <groupId>javax.servlet</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
 
   </dependencies>
 
@@ -408,7 +439,7 @@
     <dependencies>
       <dependency>
         <groupId>org.apache.spark</groupId>
-        <artifactId>spark-core_2.10</artifactId>
+        <artifactId>spark-core_${scala.base.version}</artifactId>
         <version>${kite.spark.version}</version>
         <scope>provided</scope>
         <optional>true</optional>
@@ -433,6 +464,35 @@
           </exclusion>
         </exclusions>
       </dependency>
+      <dependency>
+        <groupId>org.apache.spark</groupId>
+        <artifactId>spark-sql_${scala.base.version}</artifactId>
+        <version>${kite.spark.version}</version>
+        <scope>provided</scope>
+        <optional>true</optional>
+        <exclusions>
+          <!-- Exclude Spark's Hadoop dependencies -->
+          <exclusion>
+            <artifactId>hadoop-annotations</artifactId>
+            <groupId>org.apache.hadoop</groupId>
+          </exclusion>
+          <exclusion>
+            <artifactId>hadoop-auth</artifactId>
+            <groupId>org.apache.hadoop</groupId>
+          </exclusion>
+          <exclusion>
+            <artifactId>hadoop-client</artifactId>
+            <groupId>org.apache.hadoop</groupId>
+          </exclusion>
+          <!-- Exclude conflicting servlet-api -->
+          <exclusion>
+            <artifactId>servlet-api</artifactId>
+            <groupId>javax.servlet</groupId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+
       <!-- manage parquet dependency versions !-->
       <dependency>
         <groupId>com.twitter</groupId>
