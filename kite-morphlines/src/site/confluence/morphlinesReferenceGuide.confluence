@@ -3418,7 +3418,7 @@ h2. solrCell
 
 The {{solrCell}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-solr-cell/src/main/java/org/kitesdk/morphline/solrcell/SolrCellBuilder.java]) pipes the first attachment of a record into one of the given Apache [Tika|http://tika.apache.org] parsers, then maps the Tika output back to a record using Apache SolrCell.
 
-The Tika parser is chosen from the configurable list of parsers, depending on the MIME type specified in the input record. Typically, this requires an upstream {{detectMimeType}} command.
+The Tika parser is chosen from the configurable list of parsers, depending on the MIME type specified in the input record. Typically, this requires an upstream [#detectMimeType] command.
 
 The command provides the following configuration options:
 
