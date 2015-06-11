@@ -1,0 +1,16 @@
+{
+  "type": "record",
+  "name": "Product",
+  "namespace": "org.kitesdk.examples.data.generic",
+  "doc": "A product record",
+  "fields": [
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "id",
+      "type": "long"
+    }
+  ]
+}
