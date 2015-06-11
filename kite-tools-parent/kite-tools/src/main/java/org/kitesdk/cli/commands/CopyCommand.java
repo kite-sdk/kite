@@ -57,7 +57,7 @@ public class CopyCommand extends BaseDatasetCommand {
 
   @Parameter(names={"--files-per-partition"},
       description="The number of files per partition to create")
-  int numPartitionWriters = -1;
+  int filesPerPartition = -1;
 
   @Parameter(
       names={"--overwrite"},
@@ -103,8 +103,8 @@ public class CopyCommand extends BaseDatasetCommand {
       task.setNumWriters(numWriters);
     }
 
-    if (numPartitionWriters >= 0) {
-      task.setNumWriters(numPartitionWriters);
+    if (filesPerPartition > 0) {
+      task.setFilesPerPartition(filesPerPartition);
     }
 
     if (overwrite) {

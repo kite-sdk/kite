@@ -45,7 +45,7 @@ public class CompactCommand extends BaseDatasetCommand {
 
   @Parameter(names={"--files-per-partition"},
       description="The number of files per partition to create")
-  int numPartitionWriters = -1;
+  int filesPerPartition = -1;
 
   @Override
   public int run() throws IOException {
@@ -68,8 +68,8 @@ public class CompactCommand extends BaseDatasetCommand {
       task.setNumWriters(numWriters);
     }
 
-    if (numPartitionWriters >= 0) {
-      task.setNumPartitionWriters(numPartitionWriters);
+    if (filesPerPartition > 0) {
+      task.setFilesPerPartition(filesPerPartition);
     }
 
     PipelineResult result = task.run();

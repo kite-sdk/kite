@@ -45,7 +45,7 @@ public class TestCopyCommandClusterChangedNameWithPartitioning extends TestCopyC
   @Override
   public List<String> getExtraCreateArgs() throws Exception {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
-      .hash("id", "part", 5)
+      .hash("id", "part", 2)
       .build();
 
     FileOutputStream psOut = new FileOutputStream(partitionStrategyJson);
@@ -59,12 +59,19 @@ public class TestCopyCommandClusterChangedNameWithPartitioning extends TestCopyC
 
   @Override
   public void testCopyWithoutCompaction() throws Exception {
-    testCopyWithoutCompaction(5);
+    testCopyWithoutCompaction(2);
   }
 
   @Override
   public void testCopyWithNumWriters() throws Exception {
-    testCopyWithNumWriters(5);
+    testCopyWithNumWriters(2);
   }
-  
+
+  @Override
+  public void testCopyWithNumPartitionWriters() throws Exception {
+    // 2 partitions and 3 files in each partition
+    // don't use 2 files per partition or the files get messed up because the
+    // file number and partition number happen to align to the same values
+    testCopyWithNumPartitionWriters(10, 3, 6);
+  }
 }

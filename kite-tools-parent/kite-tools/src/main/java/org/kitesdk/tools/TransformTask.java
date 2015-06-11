@@ -96,8 +96,8 @@ public class TransformTask<S, T> extends Configured {
     return this;
   }
 
-  public TransformTask setNumPartitionWriters(int numPartitionWriters) {
-    Preconditions.checkArgument(numPartitionWriters >= 0,
+  public TransformTask setFilesPerPartition(int numPartitionWriters) {
+    Preconditions.checkArgument(numPartitionWriters > 0,
         "Invalid number of partition writers: " + numPartitionWriters);
     this.numPartitionWriters = numPartitionWriters;
     return this;

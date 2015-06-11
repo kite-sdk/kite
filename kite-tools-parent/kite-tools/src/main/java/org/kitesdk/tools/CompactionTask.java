@@ -62,8 +62,8 @@ public class CompactionTask<T> implements Configurable {
     return task.getConf();
   }
 
-  public void setNumPartitionWriters(int numPartitionWriters) {
-    task.setNumPartitionWriters(numPartitionWriters);
+  public void setFilesPerPartition(int filesPerPartition) {
+    task.setFilesPerPartition(filesPerPartition);
   }
 
   @SuppressWarnings("unchecked")

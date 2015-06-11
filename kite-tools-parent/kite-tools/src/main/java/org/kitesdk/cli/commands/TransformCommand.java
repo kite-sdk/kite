@@ -53,6 +53,10 @@ public class TransformCommand extends BaseDatasetCommand {
       description="The number of writer processes to use")
   int numWriters = -1;
 
+  @Parameter(names={"--files-per-partition"},
+      description="The number of files per partition to create")
+  int filesPerPartition = -1;
+
   @Parameter(names={"--transform"},
       description="A transform DoFn class name")
   String transform = null;
@@ -100,6 +104,10 @@ public class TransformCommand extends BaseDatasetCommand {
 
     if (numWriters >= 0) {
       task.setNumWriters(numWriters);
+    }
+
+    if (filesPerPartition > 0) {
+      task.setFilesPerPartition(filesPerPartition);
     }
 
     PipelineResult result = task.run();

@@ -22,14 +22,15 @@ import com.google.common.io.Files;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.LocalJobRunner;
 import org.apache.hadoop.mapreduce.Job;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.kitesdk.cli.TestUtil;
 import org.kitesdk.compat.DynMethods;
 import org.kitesdk.compat.Hadoop;
@@ -41,7 +42,6 @@ import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.URIBuilder;
 import org.kitesdk.data.spi.DatasetRepositories;
 import org.kitesdk.data.spi.DatasetRepository;
-import org.kitesdk.data.spi.filesystem.DatasetTestUtilities;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 import org.slf4j.Logger;
 
@@ -56,8 +56,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 public class TestCompactCommandCluster extends MiniDFSTest {
 
-  private static final String source = "users_source";
-  private static final String source_partitioned = "users_source_partitioned";
+  @Rule
+  public final TemporaryFolder temp = new TemporaryFolder();
+
+  private static final String unpartitioned = "users_source";
+  private static final String partitioned = "users_source_partitioned";
   private static final String avsc = "target/user.avsc";
   private static String repoUri;
   private int numRecords;
@@ -65,24 +68,26 @@ public class TestCompactCommandCluster extends MiniDFSTest {
   @Before
   public void createDatasets() throws Exception {
     repoUri = "hdfs://" + getDFS().getUri().getAuthority() + "/tmp/data";
-    TestUtil.run("delete", source, "-r", repoUri, "-d", "target/data");
+    TestUtil.run("delete", unpartitioned, "-r", repoUri, "-d", "target/data");
 
-    String csv = "target/users.csv";
+    File csvFile = temp.newFile("users.csv");
+    csvFile.delete();
+    String csv = csvFile.toString();
     BufferedWriter writer = Files.newWriter(
-        new File(csv), CSVSchemaCommand.SCHEMA_CHARSET);
+        csvFile, CSVSchemaCommand.SCHEMA_CHARSET);
 
     writer.append("id,username,email\n");
-    numRecords = 10;
+    numRecords = 30;
     for(int i = 0; i < numRecords; i++) {
       writer.append(i+",test"+i+",test"+i+"@example.com\n");
     }
     writer.close();
 
     TestUtil.run("-v", "csv-schema", csv, "-o", avsc, "--class", "User");
-    TestUtil.run("create", source, "-s", avsc,
+    TestUtil.run("create", unpartitioned, "-s", avsc,
         "-r", repoUri, "-d", "target/data");
 
-    URI dsUri = URIBuilder.build("repo:" + repoUri, "default", source_partitioned);
+    URI dsUri = URIBuilder.build("repo:" + repoUri, "default", partitioned);
     Datasets.<Object, Dataset<Object>>create(dsUri, new DatasetDescriptor.Builder()
         .partitionStrategy(new PartitionStrategy.Builder()
             .hash("id", 2)
@@ -95,8 +100,8 @@ public class TestCompactCommandCluster extends MiniDFSTest {
         .build(), Object.class);
 
 
-    TestUtil.run("csv-import", csv, source, "-r", repoUri, "-d", "target/data");
-    TestUtil.run("csv-import", csv, source_partitioned, "-r", repoUri, "-d", "target/data");
+    TestUtil.run("csv-import", csv, unpartitioned, "-r", repoUri, "-d", "target/data");
+    TestUtil.run("csv-import", csv, partitioned, "-r", repoUri, "-d", "target/data");
   }
 
   @Before
@@ -108,37 +113,37 @@ public class TestCompactCommandCluster extends MiniDFSTest {
 
   @After
   public void deleteSourceDatasets() throws Exception {
-    TestUtil.run("delete", source, "-r", repoUri, "-d", "target/data");
-    TestUtil.run("delete", source_partitioned, "-r", repoUri, "-d", "target/data");
+    TestUtil.run("delete", unpartitioned, "-r", repoUri, "-d", "target/data");
+    TestUtil.run("delete", partitioned, "-r", repoUri, "-d", "target/data");
   }
 
   private Logger console;
   private CompactCommand command;
 
   @Test
-  public void testBasicCompact() throws Exception {
+  public void testBasicUnpartitionedCompact() throws Exception {
     command.repoURI = repoUri;
-    command.datasets = Lists.newArrayList(source);
+    command.datasets = Lists.newArrayList(unpartitioned);
 
     int rc = command.run();
     Assert.assertEquals("Should return success", 0, rc);
 
     DatasetRepository repo = DatasetRepositories.repositoryFor("repo:" + repoUri);
-    int size = DatasetTestUtilities.datasetSize(repo.load("default", source));
+    int size = Iterators.size(repo.load("default", unpartitioned).newReader());
     Assert.assertEquals("Should contain copied records", numRecords, size);
 
-    verify(console).info("Compacted {} records in \"{}\"", (long)numRecords, source);
+    verify(console).info("Compacted {} records in \"{}\"", (long)numRecords, unpartitioned);
     verifyNoMoreInteractions(console);
   }
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testCompactWithNumWriters() throws Exception {
+  public void testCompactUnpartitionedWithNumWriters() throws Exception {
     Assume.assumeTrue(setLocalReducerMax(getConfiguration(), 3));
 
     command.repoURI = repoUri;
     command.numWriters = 3;
-    command.datasets = Lists.newArrayList(source);
+    command.datasets = Lists.newArrayList(unpartitioned);
 
     int rc = command.run();
     Assert.assertEquals("Should return success", 0, rc);
@@ -146,26 +151,26 @@ public class TestCompactCommandCluster extends MiniDFSTest {
     DatasetRepository repo = DatasetRepositories.repositoryFor("repo:" + repoUri);
     FileSystemDataset<GenericData.Record> ds =
         (FileSystemDataset<GenericData.Record>) repo.<GenericData.Record>
-            load("default", source);
-    int size = DatasetTestUtilities.datasetSize(ds);
+            load("default", unpartitioned);
+    int size = Iterators.size(ds.newReader());
     Assert.assertEquals("Should contain copied records", numRecords, size);
 
     Assert.assertEquals("Should produce 3 files",
         3, Iterators.size(ds.pathIterator()));
 
-    verify(console).info("Compacted {} records in \"{}\"",(long) numRecords, source);
+    verify(console).info("Compacted {} records in \"{}\"",(long) numRecords, unpartitioned);
     verifyNoMoreInteractions(console);
   }
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testCompactWithNumPartitionWriters() throws Exception {
+  public void testCompactUnpartitionedWithNumPartitionWriters() throws Exception {
     Assume.assumeTrue(setLocalReducerMax(getConfiguration(), 3));
 
     command.repoURI = repoUri;
     command.numWriters = 3;
-    command.numPartitionWriters = 4;
-    command.datasets = Lists.newArrayList(source);
+    command.filesPerPartition = 4;
+    command.datasets = Lists.newArrayList(unpartitioned);
 
     int rc = command.run();
     Assert.assertEquals("Should return success", 0, rc);
@@ -173,15 +178,15 @@ public class TestCompactCommandCluster extends MiniDFSTest {
     DatasetRepository repo = DatasetRepositories.repositoryFor("repo:" + repoUri);
     FileSystemDataset<GenericData.Record> ds =
         (FileSystemDataset<GenericData.Record>) repo.<GenericData.Record>
-            load("default", source);
-    int size = DatasetTestUtilities.datasetSize(ds);
+            load("default", unpartitioned);
+    int size = Iterators.size(ds.newReader());
     Assert.assertEquals("Should contain copied records", numRecords, size);
 
-    //ignore the numPartitionWriters
+    // ignores numPartitionWriters
     Assert.assertEquals("Should produce 3 files",
         3, Iterators.size(ds.pathIterator()));
 
-    verify(console).info("Compacted {} records in \"{}\"", (long)numRecords, source);
+    verify(console).info("Compacted {} records in \"{}\"", (long)numRecords, unpartitioned);
     verifyNoMoreInteractions(console);
   }
 
@@ -191,8 +196,8 @@ public class TestCompactCommandCluster extends MiniDFSTest {
     Assume.assumeTrue(setLocalReducerMax(getConfiguration(), 2));
     command.repoURI = repoUri;
     command.numWriters = 2;
-    command.numPartitionWriters = 1;
-    command.datasets = Lists.newArrayList(source_partitioned);
+    command.filesPerPartition = 1;
+    command.datasets = Lists.newArrayList(partitioned);
 
     int rc = command.run();
     Assert.assertEquals("Should return success", 0, rc);
@@ -200,24 +205,29 @@ public class TestCompactCommandCluster extends MiniDFSTest {
     DatasetRepository repo = DatasetRepositories.repositoryFor("repo:" + repoUri);
     FileSystemDataset<GenericData.Record> ds =
         (FileSystemDataset<GenericData.Record>) repo.<GenericData.Record>
-            load("default", source_partitioned);
-    int size = DatasetTestUtilities.datasetSize(ds);
+            load("default", partitioned);
+    int size = Iterators.size(ds.newReader());
     Assert.assertEquals("Should contain copied records", numRecords, size);
 
     Assert.assertEquals("Should produce 2 partitions", 2, Iterators.size(ds.getCoveringPartitions().iterator()));
+    Assert.assertEquals(
+        "Should produce 2 files: " + Iterators.toString(ds.pathIterator()),
+        2, Iterators.size(ds.pathIterator()));
 
-    verify(console).info("Compacted {} records in \"{}\"", (long) numRecords, source_partitioned);
+    verify(console).info("Compacted {} records in \"{}\"", (long) numRecords, partitioned);
     verifyNoMoreInteractions(console);
   }
 
   @Test
   @SuppressWarnings("unchecked")
   public void testPartitionedCompactWithNumWritersNumFilesPerPartition() throws Exception {
-    Assume.assumeTrue(setLocalReducerMax(getConfiguration(), 5));
+    Assume.assumeTrue(setLocalReducerMax(getConfiguration(), 2));
     command.repoURI = repoUri;
-    command.numWriters = 1;
-    command.numPartitionWriters = 5;
-    command.datasets = Lists.newArrayList(source_partitioned);
+    // if a reducer gets multiple parts of a partition, they will be combined
+    // use more reducers to reduce the likelihood of that case
+    command.numWriters = 10;
+    command.filesPerPartition = 3;
+    command.datasets = Lists.newArrayList(partitioned);
 
     int rc = command.run();
     Assert.assertEquals("Should return success", 0, rc);
@@ -225,13 +235,14 @@ public class TestCompactCommandCluster extends MiniDFSTest {
     DatasetRepository repo = DatasetRepositories.repositoryFor("repo:" + repoUri);
     FileSystemDataset<GenericData.Record> ds =
         (FileSystemDataset<GenericData.Record>) repo.<GenericData.Record>
-            load("default", source_partitioned);
-    int size = DatasetTestUtilities.datasetSize(ds);
+            load("default", partitioned);
+    int size = Iterators.size(ds.newReader());
     Assert.assertEquals("Should contain copied records", numRecords, size);
 
     Assert.assertEquals("Should produce 2 partitions", 2, Iterators.size(ds.getCoveringPartitions().iterator()));
+    Assert.assertEquals("Should produce 6 files", 6, Iterators.size(ds.pathIterator()));
 
-    verify(console).info("Compacted {} records in \"{}\"", (long)numRecords, source_partitioned);
+    verify(console).info("Compacted {} records in \"{}\"", (long)numRecords, partitioned);
     verifyNoMoreInteractions(console);
   }
 

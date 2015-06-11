@@ -220,8 +220,7 @@ public class CrunchDatasets {
     //ensure the number of writers is honored whether it is per partition or total.
     DatasetDescriptor descriptor = view.getDataset().getDescriptor();
     if (descriptor.isPartitioned()) {
-      GetStorageKey<E> getKey = new GetStorageKey<E>(view,
-          numPartitionWriters > 0 ? numPartitionWriters : 1);
+      GetStorageKey<E> getKey = new GetStorageKey<E>(view, numPartitionWriters);
       PTable<Pair<GenericData.Record, Integer>, E> table = collection
           .by(getKey, Avros.pairs(Avros.generics(getKey.schema()), Avros.ints()));
       PGroupedTable<Pair<GenericData.Record, Integer>, E> grouped =
@@ -252,7 +251,8 @@ public class CrunchDatasets {
     }
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value={"SE_NO_SERIALVERSIONID","SE_TRANSIENT_FIELD_NOT_RESTORED"},
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+      value={"SE_NO_SERIALVERSIONID","SE_TRANSIENT_FIELD_NOT_RESTORED"},
       justification="Purposely not supported across versions, fields properly initialized")
   private static class GetStorageKey<E> extends MapFn<E, Pair<GenericData.Record, Integer>> {
     private final String strategyString;
@@ -307,7 +307,7 @@ public class CrunchDatasets {
     @Override
     public Pair<GenericData.Record, Integer> map(E entity) {
       int marker = count % numPartitionWriters;
-      count++;
+      count += 1;
       return Pair.<GenericData.Record, Integer>of(key.reuseFor(entity, provided, accessor), marker);
     }
   }
