@@ -30,12 +30,12 @@ public interface Replaceable<T> {
    * @param part the object to replace parts of this
    * @return {@code true} if the object can replace parts of this
    */
-  public boolean canReplace(T part);
+  boolean canReplace(T part);
 
   /**
    * Replace part of {@code this} with the {@code replacement} object.
    *
    * @param replacement the object to replace parts of this
    */
-  public void replace(T replacement);
+  void replace(T target, T replacement);
 }

@@ -40,6 +40,7 @@ import org.kitesdk.data.Datasets;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.Signalable;
 import org.kitesdk.data.TypeNotFoundException;
+import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.Compatibility;
@@ -72,7 +73,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   public static final String KITE_TYPE = "kite.outputEntityType";
   public static final String KITE_WRITE_MODE = "kite.outputMode";
 
-  public static enum WriteMode {
+  public enum WriteMode {
     DEFAULT, APPEND, OVERWRITE
   }
 
@@ -384,7 +385,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
       Dataset<E> jobDataset = repo.load(TEMP_NAMESPACE, jobDatasetName);
       WriteMode mode = conf.getEnum(KITE_WRITE_MODE, WriteMode.DEFAULT);
       if (mode == WriteMode.OVERWRITE && canReplace(targetView)) {
-        ((Replaceable<Dataset<E>>) targetView.getDataset()).replace(jobDataset);
+        ((Replaceable<View<E>>) targetView.getDataset()).replace(targetView, jobDataset);
       } else {
         ((Mergeable<Dataset<E>>) targetView.getDataset()).merge(jobDataset);
       }
