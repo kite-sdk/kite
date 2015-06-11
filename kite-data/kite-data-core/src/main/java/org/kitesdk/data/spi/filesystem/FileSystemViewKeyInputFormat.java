@@ -20,12 +20,12 @@ import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
 import org.apache.avro.hadoop.io.AvroSerialization;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapreduce.AvroJob;
 import org.apache.avro.mapreduce.AvroKeyInputFormat;
-import org.apache.avro.specific.SpecificData;
-import org.apache.avro.specific.SpecificRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
@@ -71,37 +71,37 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
   public FileSystemViewKeyInputFormat(FileSystemDataset<E> dataset,
       Configuration conf) {
     this.dataset = dataset;
+    this.view = null;
     LOG.debug("Dataset: {}", dataset);
 
     Format format = dataset.getDescriptor().getFormat();
 
-    boolean isSpecific = SpecificRecord.class.isAssignableFrom(dataset.getType());
-
-    if (Formats.AVRO.equals(format)) {
-      setModel.invoke(conf,
-          DataModelUtil.getDataModelForType(dataset.getType()).getClass());
-
-      // Use the reader's schema type if provided.
-      if (isSpecific) {
-
-        conf.set(AVRO_SCHEMA_INPUT_KEY,
-            SpecificData.get().getSchema(dataset.getType()).toString());
-      }
-    } else if (Formats.PARQUET.equals(format)) {
-
-      // Use the reader's schema type if provided.
-      if (isSpecific) {
-
-        AvroReadSupport.setAvroReadSchema(conf,
-            SpecificData.get().getSchema(dataset.getType()));
-      }
-    }
+    setConfigProperties(conf, format, dataset.getSchema(), dataset.getType());
   }
 
   public FileSystemViewKeyInputFormat(FileSystemView<E> view, Configuration conf) {
-    this((FileSystemDataset<E>) view.getDataset(), conf);
+    this.dataset = (FileSystemDataset<E>) view.getDataset();
     this.view = view;
     LOG.debug("View: {}", view);
+
+    Format format = dataset.getDescriptor().getFormat();
+
+    setConfigProperties(conf, format, view.getSchema(), view.getType());
+  }
+
+  private static void setConfigProperties(Configuration conf, Format format,
+                                          Schema schema, Class<?> type) {
+    GenericData model = DataModelUtil.getDataModelForType(type);
+    if (Formats.AVRO.equals(format)) {
+      setModel.invoke(conf, model.getClass());
+      conf.set(AVRO_SCHEMA_INPUT_KEY, schema.toString());
+
+    } else if (Formats.PARQUET.equals(format)) {
+      // TODO: update to a version of Parquet with setAvroDataSupplier
+      //AvroReadSupport.setAvroDataSupplier(conf,
+      //    DataModelUtil.supplierClassFor(model));
+      AvroReadSupport.setAvroReadSchema(conf, schema);
+    }
   }
 
   @Override
@@ -117,8 +117,6 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
         AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
         return delegate.getSplits(jobContext);
       } else if (Formats.PARQUET.equals(format)) {
-        // TODO: use later version of parquet (with https://github.com/Parquet/parquet-mr/pull/282) so we can set the schema correctly
-        // AvroParquetInputFormat.setReadSchema(job, view.getDescriptor().getSchema());
         AvroParquetInputFormat delegate = new AvroParquetInputFormat();
         return delegate.getSplits(jobContext);
       } else if (Formats.JSON.equals(format)) {
@@ -175,20 +173,23 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
     Format format = dataset.getDescriptor().getFormat();
     if (Formats.AVRO.equals(format)) {
       return new AvroKeyReaderWrapper(new AvroKeyInputFormat<E>());
+
     } else if (Formats.PARQUET.equals(format)) {
       return new ValueReaderWrapper(new AvroParquetInputFormat());
+
     } else if (Formats.JSON.equals(format)) {
       JSONInputFormat<E> delegate = new JSONInputFormat<E>();
-      delegate.setDescriptor(dataset.getDescriptor());
-      delegate.setType(dataset.getType());
+      delegate.setView(view != null ? view : dataset);
       return delegate.createRecordReader(inputSplit, taskAttemptContext);
+
     } else if (Formats.CSV.equals(format)) {
       CSVInputFormat<E> delegate = new CSVInputFormat<E>();
-      delegate.setDescriptor(dataset.getDescriptor());
-      delegate.setType(dataset.getType());
+      delegate.setView(view != null ? view : dataset);
       return delegate.createRecordReader(inputSplit, taskAttemptContext);
+
     } else if (Formats.INPUTFORMAT.equals(format)) {
       return InputFormatUtil.newRecordReader(dataset.getDescriptor());
+
     } else {
       throw new UnsupportedOperationException(
           "Not a supported format: " + format);

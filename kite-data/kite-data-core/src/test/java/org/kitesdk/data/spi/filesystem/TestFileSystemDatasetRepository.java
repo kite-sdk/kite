@@ -295,11 +295,14 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
           .schema(ReflectData.AllowNull.get().getSchema(ObjectPoJo.class))
           .build(), ObjectPoJo.class);
 
-      TestHelpers.assertThrows("AllowNull primitives should not accept null",
+      // should load the dataset because PrimitivePoJo can be used to write
+      final Dataset<PrimitivePoJo> dataset = repo.load(
+          NAMESPACE, name, PrimitivePoJo.class);
+      TestHelpers.assertThrows("AllowNull primitives cannot read nullable type",
           IncompatibleSchemaException.class, new Runnable() {
             @Override
             public void run() {
-              repo.load(NAMESPACE, name, PrimitivePoJo.class);
+              dataset.newReader();
             }
           });
 

@@ -21,6 +21,7 @@ import com.beust.jcommander.Parameters;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.avro.Schema;
@@ -71,7 +72,7 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
 
   @DynamicParameter(names = {"--set", "--property"},
       description = "Add a property pair: prop.name=value")
-  Map<String, String> properties;
+  Map<String, String> properties = new HashMap<String, String>();
 
   public CreateDatasetCommand(Logger console) {
     super(console);

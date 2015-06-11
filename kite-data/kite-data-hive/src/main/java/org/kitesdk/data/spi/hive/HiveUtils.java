@@ -35,6 +35,7 @@ import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Order;
@@ -44,6 +45,8 @@ import org.apache.hadoop.hive.metastore.api.StorageDescriptor;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorUtils;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
+import org.kitesdk.compat.DynMethods;
+import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetIOException;
@@ -472,6 +475,16 @@ class HiveUtils {
       return newClass;
     } catch (ClassNotFoundException ex) {
       return oldClass;
+    }
+  }
+
+  public static void addResource(Configuration hiveConf, Configuration conf) {
+    if (Hadoop.Configuration.addResource.isNoop()) {
+      for (Map.Entry<String, String> entry : conf) {
+        hiveConf.set(entry.getKey(), entry.getValue());
+      }
+    } else {
+      Hadoop.Configuration.addResource.invoke(hiveConf, conf);
     }
   }
 }

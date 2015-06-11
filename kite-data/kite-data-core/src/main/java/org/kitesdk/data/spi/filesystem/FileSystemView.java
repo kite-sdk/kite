@@ -43,6 +43,7 @@ import org.apache.hadoop.fs.Path;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.io.IOException;
+import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,13 +83,27 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
     this.signalManager = view.signalManager;
   }
 
+  private FileSystemView(FileSystemView<?> view, Schema schema, Class<E> type) {
+    super(view, schema, type);
+    this.fs = view.fs;
+    this.root = view.root;
+    this.listener = view.listener;
+    this.signalManager = view.signalManager;
+  }
+
   @Override
   protected FileSystemView<E> filter(Constraints c) {
     return new FileSystemView<E>(this, c);
   }
 
   @Override
+  protected <T> AbstractRefinableView<T> project(Schema schema, Class<T> type) {
+    return new FileSystemView<T>(this, schema, type);
+  }
+
+  @Override
   public DatasetReader<E> newReader() {
+    checkSchemaForRead();
     AbstractDatasetReader<E> reader = new MultiFileDatasetReader<E>(fs,
         pathIterator(), dataset.getDescriptor(), constraints, getAccessor());
     reader.initialize();
@@ -97,6 +112,7 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
 
   @Override
   public DatasetWriter<E> newWriter() {
+    checkSchemaForWrite();
     AbstractDatasetWriter<E> writer;
     if (dataset.getDescriptor().isPartitioned()) {
       writer = PartitionedDatasetWriter.newWriter(this);

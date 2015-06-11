@@ -461,7 +461,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
       }
       FileSystemDataset fsDataset = (FileSystemDataset) target;
       PartitionKey key = fsDataset.keyFromDirectory(new Path(partitionDir));
-      if (key != null) {
+      if (key != null && !key.getValues().isEmpty()) {
         working = fsDataset.getPartition(key, true);
       }
       return new DatasetRecordWriter<E>(working);

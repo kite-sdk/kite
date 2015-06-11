@@ -15,11 +15,14 @@
  */
 package org.kitesdk.data.mapreduce;
 
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -39,6 +42,7 @@ import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.spi.PartitionedDataset;
 import org.kitesdk.data.TypeNotFoundException;
 import org.kitesdk.data.View;
+import org.kitesdk.data.spi.DataModelUtil;
 import org.kitesdk.data.spi.InputFormatAccessor;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 import org.slf4j.Logger;
@@ -61,6 +65,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
   public static final String KITE_INPUT_URI = "kite.inputUri";
   public static final String KITE_PARTITION_DIR = "kite.inputPartitionDir";
   public static final String KITE_TYPE = "kite.inputEntityType";
+  public static final String KITE_READER_SCHEMA = "kite.readerSchema";
 
   private Configuration conf;
   private InputFormat<E, Void> delegate;
@@ -104,7 +109,17 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
       for (String property : descriptor.listProperties()) {
         conf.set(property, descriptor.getProperty(property));
       }
-      withType(view.getType());
+
+      if (DataModelUtil.isGeneric(view.getType())) {
+        Schema datasetSchema = view.getDataset().getDescriptor().getSchema();
+        // only set the read schema if the view is a projection
+        if (!datasetSchema.equals(view.getSchema())) {
+          withSchema(view.getSchema());
+        }
+      } else {
+        withType(view.getType());
+      }
+
       conf.set(KITE_INPUT_URI, view.getUri().toString());
       return this;
     }
@@ -135,9 +150,27 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
      * @return this for method chaining
      */
     public <E> ConfigBuilder withType(Class<E> type) {
+      String readerSchema = conf.get(KITE_READER_SCHEMA);
+      Preconditions.checkArgument(
+          DataModelUtil.isGeneric(type) || readerSchema == null,
+          "Can't configure a type when a reader schema is already set: {}",
+          readerSchema);
+
       conf.setClass(KITE_TYPE, type, type);
       return this;
     }
+
+    public ConfigBuilder withSchema(Schema readerSchema) {
+      Class<?> type = conf.getClass(KITE_TYPE, null);
+      Preconditions.checkArgument(
+          type == null || DataModelUtil.isGeneric(type),
+          "Can't configure a reader schema when a type is already set: {}",
+          type);
+
+      conf.set(KITE_READER_SCHEMA, readerSchema.toString());
+      return this;
+    }
+
   }
 
   /**
@@ -230,7 +263,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
 
   @SuppressWarnings({"deprecation", "unchecked"})
   private static <E> View<E> load(Configuration conf) {
-    Class<E> type; 
+    Class<E> type;
     try {
       type = (Class<E>)conf.getClass(KITE_TYPE, GenericData.Record.class);
     } catch (RuntimeException e) {
@@ -243,8 +276,19 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
         throw e;
       }
     }
+
+    String schemaStr = conf.get(KITE_READER_SCHEMA);
+    Schema projection = null;
+    if (schemaStr != null) {
+      projection = new Schema.Parser().parse(schemaStr);
+    }
+
     String inputUri = conf.get(KITE_INPUT_URI);
-    return Datasets.<E, View<E>>load(inputUri, type);
+    if (projection != null) {
+      return Datasets.load(inputUri).asSchema(projection).asType(type);
+    } else {
+      return Datasets.load(inputUri, type);
+    }
   }
 
   @Override

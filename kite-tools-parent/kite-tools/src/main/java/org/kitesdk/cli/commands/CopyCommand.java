@@ -22,13 +22,20 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.crunch.PipelineResult;
 import org.apache.crunch.Target;
 import org.kitesdk.data.View;
 import org.kitesdk.tools.CopyTask;
 import org.slf4j.Logger;
 
-import static org.apache.avro.generic.GenericData.Record;
+import org.apache.hadoop.hive.conf.HiveConf;
+import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
+import org.apache.hadoop.hive.thrift.DelegationTokenIdentifier;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.security.token.Token;
+import org.apache.thrift.TException;
 
 @Parameters(commandDescription="Copy records from one Dataset to another")
 public class CopyCommand extends BaseDatasetCommand {
@@ -60,12 +67,29 @@ public class CopyCommand extends BaseDatasetCommand {
     Preconditions.checkArgument(datasets.size() == 2,
         "Cannot copy multiple datasets");
 
-    View<Record> source = load(datasets.get(0), Record.class);
-    View<Record> dest = load(datasets.get(1), Record.class);
+    View<GenericRecord> dest = load(datasets.get(1));
+    View<GenericRecord> source = load(datasets.get(0))
+        .asSchema(dest.getSchema());
 
-    CopyTask task = new CopyTask<Record>(source, dest);
+    CopyTask task = new CopyTask<GenericRecord>(source, dest);
 
-    task.setConf(getConf());
+    JobConf conf = new JobConf(getConf());
+
+    try {
+      if ((isHiveView(source) || isHiveView(dest))
+          && conf.getBoolean(HiveConf.ConfVars.METASTORE_USE_THRIFT_SASL.varname, false)) {
+        // Need to set up delegation token auth
+        HiveMetaStoreClient metaStoreClient = new HiveMetaStoreClient(new HiveConf());
+        String hiveTokenStr = metaStoreClient.getDelegationToken("yarn");
+        Token<DelegationTokenIdentifier> hiveToken = new Token<DelegationTokenIdentifier>();
+        hiveToken.decodeFromUrlString(hiveTokenStr);
+        conf.getCredentials().addToken(new Text("HIVE_METASTORE_TOKEN"), hiveToken);
+    }
+    } catch (TException ex) {
+      throw new RuntimeException("Unable to obtain Hive delegation token");
+    }
+
+    task.setConf(conf);
 
     if (noCompaction) {
       task.noCompaction();
@@ -98,5 +122,9 @@ public class CopyCommand extends BaseDatasetCommand {
         "# Copy the movies dataset into HBase in a map-only job",
         "movies dataset:hbase:zk-host/movies --no-compaction"
     );
+  }
+
+  private boolean isHiveView(View<?> view) {
+    return view.getDataset().getUri().toString().startsWith("dataset:hive:");
   }
 }

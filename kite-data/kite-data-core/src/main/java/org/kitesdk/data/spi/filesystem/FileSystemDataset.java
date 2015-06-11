@@ -82,6 +82,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
 
   // reusable path converter, has no relevant state
   private final PathConversion convert;
+  private final SignalManager signalManager;
 
   FileSystemDataset(FileSystem fileSystem, Path directory,
                     String namespace, String name,
@@ -108,9 +109,9 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     this.uri = uri;
 
     Path signalsPath = new Path(directory, SIGNALS_DIRECTORY_NAME);
-    SignalManager signalManager = new SignalManager(fileSystem, signalsPath);
-
-    this.unbounded = new FileSystemPartitionView<E>(this, partitionListener, signalManager, type);
+    this.signalManager = new SignalManager(fileSystem, signalsPath);
+    this.unbounded = new FileSystemPartitionView<E>(
+        this, partitionListener, signalManager, type);
 
     // remove this.partitionKey for 0.14.0
     this.partitionKey = null;
@@ -125,6 +126,32 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     this(fileSystem, directory, namespace, name, descriptor, uri,
         partitionListener, type);
     this.partitionKey = partitionKey;
+  }
+
+  private FileSystemDataset(FileSystemDataset<?> toCopy, Class<E> type) {
+    super(type, toCopy.descriptor.getSchema());
+    this.fileSystem = toCopy.fileSystem;
+    this.directory = toCopy.directory;
+    this.namespace = toCopy.namespace;
+    this.name = toCopy.name;
+    this.descriptor = toCopy.descriptor;
+    this.partitionStrategy = toCopy.partitionStrategy;
+    this.partitionListener = toCopy.partitionListener;
+    this.convert = toCopy.convert;
+    this.uri = toCopy.uri;
+    this.signalManager = toCopy.signalManager;
+    this.unbounded = new FileSystemPartitionView<E>(
+        this, partitionListener, signalManager, type);
+    this.partitionKey = null;
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <T> Dataset<T> asType(Class<T> type) {
+    if (getType().equals(type)) {
+      return (Dataset<T>) this;
+    }
+    return new FileSystemDataset<T>(this, type);
   }
 
   @Override

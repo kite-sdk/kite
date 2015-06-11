@@ -63,7 +63,7 @@ public class JSONFileReader<E> extends AbstractDatasetReader<E> {
                         EntityAccessor<E> accessor) {
     this.fs = fileSystem;
     this.path = path;
-    this.schema = accessor.getEntitySchema();
+    this.schema = accessor.getReadSchema();
     this.model = DataModelUtil.getDataModelForType(accessor.getType());
     this.state = ReaderWriterState.NEW;
   }

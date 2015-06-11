@@ -17,6 +17,8 @@ package org.kitesdk.data;
 
 import java.net.URI;
 import javax.annotation.concurrent.Immutable;
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
 
 /**
  * A {@code View} is a subset of a {@link Dataset}.
@@ -109,6 +111,15 @@ public interface View<E> {
   public Class<E> getType();
 
   /**
+   * Get the schema of entities contained in this {@code View}.
+   *
+   * @return the schema of entities contained in this view
+   *
+   * @since 1.1.0
+   */
+  public Schema getSchema();
+
+  /**
    * Check whether this {@link View} contains any records.
    *
    * Implementations should return once a single record in this view is found.
@@ -152,4 +163,31 @@ public interface View<E> {
    * @since 1.1.0
    */
   public Iterable<PartitionView<E>> getCoveringPartitions();
+
+  /**
+   * Creates a copy of this {@code View} that projects entities to the given
+   * {@link Schema}.
+   * <p>
+   * This method always returns a {@code View} with type {@link GenericRecord}.
+   *
+   * @param schema an Avro schema to project entities to
+   * @return a copy of this view that projects entities to the given schema
+   * @throws IncompatibleSchemaException
+   *          If the given {@code schema} is incompatible with the underlying
+   *          dataset.
+   */
+  View<GenericRecord> asSchema(Schema schema);
+
+  /**
+   * Creates a copy of this {@code View} that reads and writes entities of the
+   * given type class.
+   *
+   * @param <T> the type of entities that will be read or written by this view
+   * @param type an entity class to use
+   * @return a copy of this view that projects entities to the given type
+   * @throws IncompatibleSchemaException
+   *          If the given {@code type} is incompatible with the underlying
+   *          dataset.
+   */
+  <T> View<T> asType(Class<T> type);
 }

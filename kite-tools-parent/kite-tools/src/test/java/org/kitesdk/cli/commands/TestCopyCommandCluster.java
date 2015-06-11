@@ -22,13 +22,12 @@ import com.google.common.io.Files;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.LocalJobRunner;
 import org.apache.hadoop.mapreduce.Job;
 import org.junit.After;
@@ -59,11 +58,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 public class TestCopyCommandCluster extends MiniDFSTest {
 
-  private static final String source = "users_source";
-  private static final String dest = "users_dest";
-  private static final String avsc = "target/user.avsc";
-  private static final Pattern UPPER_CASE = Pattern.compile("^[A-Z]+\\d*$");
-  private static String repoUri;
+  protected static final String source = "users_source";
+  protected static final String dest = "users_dest";
+  protected static final String avsc = "target/user.avsc";
+  protected static String repoUri;
 
   @BeforeClass
   public static void createSourceDataset() throws Exception {
@@ -82,7 +80,8 @@ public class TestCopyCommandCluster extends MiniDFSTest {
     writer.append("6,user6,user6@example.com\n");
     writer.close();
 
-    TestUtil.run("-v", "csv-schema", csv, "-o", avsc, "--class", "User");
+    TestUtil.run("-v", "csv-schema", csv, "-o", avsc, "--class", "User",
+      "--require", "id");
     TestUtil.run("create", source, "-s", avsc,
         "-r", repoUri, "-d", "target/data");
     TestUtil.run("csv-import", csv, source, "-r", repoUri, "-d", "target/data");
@@ -93,8 +92,8 @@ public class TestCopyCommandCluster extends MiniDFSTest {
     TestUtil.run("delete", source, "-r", repoUri, "-d", "target/data");
   }
 
-  private Logger console;
-  private CopyCommand command;
+  protected Logger console;
+  protected CopyCommand command;
 
   @Before
   public void createDestination() throws Exception {
@@ -128,6 +127,10 @@ public class TestCopyCommandCluster extends MiniDFSTest {
 
   @Test
   public void testCopyWithoutCompaction() throws Exception {
+    testCopyWithoutCompaction(1);
+  }
+
+  public void testCopyWithoutCompaction(int expectedFiles) throws Exception {
     command.repoURI = repoUri;
     command.noCompaction = true;
     command.datasets = Lists.newArrayList(source, dest);
@@ -142,16 +145,21 @@ public class TestCopyCommandCluster extends MiniDFSTest {
     int size = DatasetTestUtilities.datasetSize(ds);
     Assert.assertEquals("Should contain copied records", 6, size);
 
-    Assert.assertEquals("Should produce 1 files",
-        1, Iterators.size(ds.pathIterator()));
+    Path[] paths = Iterators.toArray(ds.pathIterator(), Path.class);
+    Assert.assertEquals("Should produce " + expectedFiles + " files: " + Arrays.toString(paths),
+        expectedFiles, Iterators.size(ds.pathIterator()));
 
     verify(console).info("Added {} records to \"{}\"", 6l, dest);
     verifyNoMoreInteractions(console);
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   public void testCopyWithNumWriters() throws Exception {
+    testCopyWithNumWriters(3);
+  }
+
+  @SuppressWarnings("unchecked")
+  public void testCopyWithNumWriters(int expectedFiles) throws Exception {
     Assume.assumeTrue(setLocalReducerMax(getConfiguration(), 3));
 
     command.repoURI = repoUri;
@@ -168,8 +176,8 @@ public class TestCopyCommandCluster extends MiniDFSTest {
     int size = DatasetTestUtilities.datasetSize(ds);
     Assert.assertEquals("Should contain copied records", 6, size);
 
-    Assert.assertEquals("Should produce 3 files",
-        3, Iterators.size(ds.pathIterator()));
+    Assert.assertEquals("Should produce " + expectedFiles + " files",
+        expectedFiles, Iterators.size(ds.pathIterator()));
 
     verify(console).info("Added {} records to \"{}\"", 6l, dest);
     verifyNoMoreInteractions(console);

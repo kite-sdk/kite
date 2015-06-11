@@ -155,7 +155,11 @@ public class Loader implements Loadable {
 
   private static Configuration newHiveConf(Configuration base) {
     checkHiveDependencies(); // ensure HIVE_CONF is present
-    return HIVE_CONF.newInstance(base, HIVE_CONF.getConstructedClass());
+    Configuration conf = HIVE_CONF.newInstance(base, HIVE_CONF.getConstructedClass());
+
+    // Add everything in base back in to work around a bug in HiveConf
+    HiveUtils.addResource(conf, base);
+    return conf;
   }
 
   private synchronized static void checkHiveDependencies() {

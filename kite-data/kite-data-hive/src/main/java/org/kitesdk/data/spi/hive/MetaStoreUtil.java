@@ -74,6 +74,9 @@ public class MetaStoreUtil {
 
   public MetaStoreUtil(Configuration conf) {
     this.hiveConf = new HiveConf(conf, HiveConf.class);
+    // Add the passed configuration back into the HiveConf to work around
+    // a Hive bug that resets to defaults
+    HiveUtils.addResource(hiveConf, conf);
     if (!allowLocalMetaStore(hiveConf) &&
         isEmpty(hiveConf, Loader.HIVE_METASTORE_URI_PROP)) {
       LOG.warn("Aborting use of local MetaStore. " +

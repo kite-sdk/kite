@@ -90,7 +90,7 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
   private void openNextReader() {
     if (Formats.PARQUET.equals(descriptor.getFormat())) {
       this.reader = new ParquetFileSystemDatasetReader(fileSystem,
-          filesIter.next(), accessor.getEntitySchema(), accessor.getType());
+          filesIter.next(), accessor.getReadSchema(), accessor.getType());
     } else if (Formats.JSON.equals(descriptor.getFormat())) {
       this.reader = new JSONFileReader<E>(
           fileSystem, filesIter.next(), accessor);
@@ -101,7 +101,7 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
       this.reader = new InputFormatReader(fileSystem, filesIter.next(), descriptor);
     } else {
       this.reader = new FileSystemDatasetReader<E>(fileSystem, filesIter.next(),
-          accessor.getEntitySchema(), accessor.getType());
+          accessor.getReadSchema(), accessor.getType());
     }
     reader.initialize();
     this.readerIterator = Iterators.filter(reader,

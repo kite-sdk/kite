@@ -100,6 +100,13 @@ public class DynMethods {
     }
 
     /**
+     * @return whether the method is a noop
+     */
+    public boolean isNoop() {
+      return this == NOOP;
+    }
+
+    /**
      * Returns this method as a StaticMethod.
      *
      * @return a {@link StaticMethod} for this method

@@ -74,7 +74,7 @@ public class CSVFileReader<E> extends AbstractDatasetReader<E> {
                        EntityAccessor<E> accessor) {
     this.fs = fileSystem;
     this.path = path;
-    this.schema = accessor.getEntitySchema();
+    this.schema = accessor.getReadSchema();
     this.recordClass = accessor.getType();
     this.state = ReaderWriterState.NEW;
     this.props = CSVProperties.fromDescriptor(descriptor);

@@ -34,6 +34,7 @@ import org.kitesdk.data.spi.partition.ProvidedFieldPartitioner;
 public class EntityAccessor<E> {
 
   private final Schema schema;
+  private final Schema writeSchema;
   private final Class<E> type;
   private final GenericData model;
   private final Map<String, List<Schema.Field>> cache = Maps.newHashMap();
@@ -41,6 +42,7 @@ public class EntityAccessor<E> {
   EntityAccessor(Class<E> type, Schema schema) {
     this.type = DataModelUtil.resolveType(type, schema);
     this.schema = DataModelUtil.getReaderSchema(this.type, schema);
+    this.writeSchema = DataModelUtil.getWriterSchema(this.type, this.schema);
     this.model = DataModelUtil.getDataModelForType(this.type);
   }
 
@@ -48,8 +50,12 @@ public class EntityAccessor<E> {
     return type;
   }
 
-  public Schema getEntitySchema() {
+  public Schema getReadSchema() {
     return schema;
+  }
+
+  public Schema getWriteSchema() {
+    return writeSchema;
   }
 
   public Object get(E object, String name) {

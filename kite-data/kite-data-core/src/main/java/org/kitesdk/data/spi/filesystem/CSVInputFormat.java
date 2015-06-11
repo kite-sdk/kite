@@ -28,6 +28,8 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.View;
+import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.DataModelUtil;
 import org.kitesdk.data.spi.EntityAccessor;
 
@@ -35,12 +37,9 @@ class CSVInputFormat<E> extends FileInputFormat<E, Void> {
   private DatasetDescriptor descriptor = null;
   private EntityAccessor<E> accessor = null;
 
-  public void setDescriptor(DatasetDescriptor descriptor) {
-    this.descriptor = descriptor;
-  }
-
-  public void setType(Class<E> type) {
-    this.accessor = DataModelUtil.accessor(type, descriptor.getSchema());
+  public void setView(View<E> view) {
+    this.descriptor = view.getDataset().getDescriptor();
+    this.accessor = DataModelUtil.accessor(view.getType(), view.getSchema());
   }
 
   @Override
