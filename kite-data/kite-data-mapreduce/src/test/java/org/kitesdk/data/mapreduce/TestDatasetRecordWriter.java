@@ -26,6 +26,7 @@ import org.junit.runners.Parameterized;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.Format;
+import org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.DatasetRecordWriter;
 import org.kitesdk.data.spi.SchemaValidationUtil;
 
 @RunWith(Parameterized.class)
@@ -51,9 +52,8 @@ public class TestDatasetRecordWriter extends FileSystemTestBase {
 
   @Test
   public void testBasicRecordWriter() {
-    DatasetKeyOutputFormat.DatasetRecordWriter<GenericData.Record> recordWriter;
-    recordWriter =
-      new DatasetKeyOutputFormat.DatasetRecordWriter<GenericData.Record>(dataset);
+    DatasetRecordWriter<GenericData.Record> recordWriter;
+    recordWriter = new DatasetRecordWriter<GenericData.Record>(dataset, false);
 
     ImmutableList<Integer> counts = ImmutableList.of(1, 2, 3, 4, 5, 6, 7, 8, 9,
       10);
