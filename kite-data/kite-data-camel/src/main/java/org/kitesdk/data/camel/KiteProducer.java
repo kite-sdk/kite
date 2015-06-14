@@ -54,6 +54,7 @@ public class KiteProducer extends DefaultProducer {
 
             if (ep.isAppend()) {
                 dataset = Datasets.load(ep.getUri(), Object.class);
+                descriptor = dataset.getDescriptor();
                 writer = dataset.newWriter();
             } else {
 

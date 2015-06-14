@@ -113,7 +113,7 @@ public class KiteTest extends CamelTestSupport {
         InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("product.avsc");
         Schema schema = new Schema.Parser().parse(inputStream);
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-        List<GenericRecord> data = new LinkedList<GenericRecord>();
+        SortedSet<GenericRecord> data = new TreeSet<GenericRecord>();
         for (long i = 0; i < 20; ++i) {
             GenericRecord record = builder.set("name", "product-" + i).set("id", i).build();
             data.add(record);
@@ -138,9 +138,9 @@ public class KiteTest extends CamelTestSupport {
         context.stop();
 
         Dataset<GenericRecord> products = Datasets.load("dataset:file://" + System.getProperty("user.dir") + "/target/tmp/test/products", GenericRecord.class);
-        DatasetReader<GenericRecord> reader = products.newReader();
+        DatasetReader<GenericRecord> reader = dataset.newReader();
 
-        List<GenericRecord> data2Compare = new LinkedList<GenericRecord>();
+        SortedSet<GenericRecord> data2Compare = new TreeSet<GenericRecord>();
         for (GenericRecord record : reader)
             data2Compare.add(record);
         reader.close();
