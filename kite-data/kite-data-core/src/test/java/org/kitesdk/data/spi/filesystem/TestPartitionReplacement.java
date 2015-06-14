@@ -113,7 +113,7 @@ public class TestPartitionReplacement {
     Iterators.transform(temporary.pathIterator(), new GetFilename());
     Assert.assertFalse("Sanity check", originalFiles.equals(replacementFiles));
 
-    unpartitioned.replace(temporary);
+    unpartitioned.replace(unpartitioned, temporary);
 
     Set<String> replacedFiles = Sets.newHashSet(
         Iterators.transform(unpartitioned.pathIterator(), new GetFilename()));
@@ -136,7 +136,7 @@ public class TestPartitionReplacement {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            unpartitioned.replace(partitioned);
+            unpartitioned.replace(unpartitioned, partitioned);
           }
         });
     TestHelpers.assertThrows(
@@ -144,7 +144,7 @@ public class TestPartitionReplacement {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            unpartitioned.replace(partition0);
+            unpartitioned.replace(unpartitioned, partition0);
           }
         });
   }
@@ -159,7 +159,7 @@ public class TestPartitionReplacement {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            partitioned.replace(unpartitioned);
+            partitioned.replace(partitioned, unpartitioned);
           }
         });
   }
@@ -170,7 +170,7 @@ public class TestPartitionReplacement {
         partitioned.canReplace(partitioned));
     Assert.assertTrue(
         "Should not allow replacement test with a different dataset",
-        partitioned.canReplace(partitioned));
+        !partitioned.canReplace(temporary));
 
     Set<String> originalFiles = Sets.newHashSet(
         Iterators.transform(partitioned.pathIterator(), new GetFilename()));
@@ -180,7 +180,7 @@ public class TestPartitionReplacement {
         originalFiles.size(), replacementFiles.size());
     Assert.assertFalse("Sanity check", originalFiles.equals(replacementFiles));
 
-    partitioned.replace(temporary);
+    partitioned.replace(partitioned, temporary);
 
     Set<String> replacedFiles = Sets.newHashSet(
         Iterators.transform(partitioned.pathIterator(), new GetFilename()));
@@ -216,7 +216,7 @@ public class TestPartitionReplacement {
     expectedFiles.removeAll(originalPartitionFiles);
     expectedFiles.addAll(replacementFiles);
 
-    partitioned.replace(temp0);
+    partitioned.replace(partition0, temp0);
 
     Set<String> replacedFiles = Sets.newHashSet(
         Iterators.transform(partitioned.pathIterator(), new GetFilename()));
@@ -257,7 +257,7 @@ public class TestPartitionReplacement {
         "Should not allow replacement test with a different dataset",
         partitioned.canReplace(temp0));
 
-    partitioned.replace(temp0);
+    partitioned.replace(partition0, temp0);
 
     Set<String> replacedFiles = Sets.newHashSet(
         Iterators.transform(partitioned.pathIterator(), new GetFilename()));
@@ -307,7 +307,7 @@ public class TestPartitionReplacement {
         "Should not allow replacement test with a different dataset",
         partitioned.canReplace(temp0));
 
-    partitioned.replace(temp0);
+    partitioned.replace(partition0, temp0);
 
     Set<String> replacedFiles = Sets.newHashSet(
         Iterators.transform(partitioned.pathIterator(), new GetFilename()));
@@ -320,6 +320,47 @@ public class TestPartitionReplacement {
         dirIterator.hasNext());
     Assert.assertEquals("Should have the correct directory name",
         "id_hash=0", onlyDirectory.getName());
+  }
+
+  @Test
+  public void testReplaceRemovesPartitionsNotIndividuallyReplaced() throws IOException {
+    // remove 2 of the partitions in the temp dataset and replace the entire
+    // partitioned dataset. the partitions that weren't replaced in the final
+    // dataset should not exist either.
+
+    Assert.assertTrue("Should allow replacing a whole dataset",
+        partitioned.canReplace(partitioned));
+    Assert.assertTrue(
+        "Should not allow replacement test with a different dataset",
+        !partitioned.canReplace(temporary));
+
+    // delete the odd partition numbers
+    FileSystem local = LocalFileSystem.getInstance();
+    local.delete(
+        new Path(temporary.getDirectory(), "id_hash=1"),
+        true /* recursive */);
+    local.delete(
+        new Path(temporary.getDirectory(), "id_hash=3"),
+        true /* recursive */);
+    // also delete a partition that will be replaced in the partitioned dataset
+    local.delete(
+        new Path(partitioned.getDirectory(), "id_hash=2"),
+        true /* recursive */);
+
+    Set<String> originalFiles = Sets.newHashSet(
+        Iterators.transform(partitioned.pathIterator(), new GetFilename()));
+    Set<String> replacementFiles = Sets.newHashSet(
+        Iterators.transform(temporary.pathIterator(), new GetFilename()));
+    Assert.assertFalse("Sanity check", originalFiles.equals(replacementFiles));
+
+    partitioned.replace(partitioned, temporary);
+
+    Set<String> replacedFiles = Sets.newHashSet(
+        Iterators.transform(partitioned.pathIterator(), new GetFilename()));
+    Assert.assertEquals("Should contain the only the replacement files",
+        replacementFiles, replacedFiles);
+    Assert.assertEquals("Should have only 2 files (1 in each partition)",
+        2, replacedFiles.size());
   }
 
   private static class GetFilename implements Function<Path, String> {

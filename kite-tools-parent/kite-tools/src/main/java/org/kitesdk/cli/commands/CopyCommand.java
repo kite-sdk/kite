@@ -29,14 +29,6 @@ import org.kitesdk.data.View;
 import org.kitesdk.tools.CopyTask;
 import org.slf4j.Logger;
 
-import org.apache.hadoop.hive.conf.HiveConf;
-import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
-import org.apache.hadoop.hive.thrift.DelegationTokenIdentifier;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.security.token.Token;
-import org.apache.thrift.TException;
-
 @Parameters(commandDescription="Copy records from one Dataset to another")
 public class CopyCommand extends BaseDatasetCommand {
 
@@ -54,6 +46,10 @@ public class CopyCommand extends BaseDatasetCommand {
   @Parameter(names={"--num-writers"},
       description="The number of writer processes to use")
   int numWriters = -1;
+
+  @Parameter(names={"--files-per-partition"},
+      description="The number of files per partition to create")
+  int filesPerPartition = -1;
 
   @Parameter(
       names={"--overwrite"},
@@ -73,23 +69,7 @@ public class CopyCommand extends BaseDatasetCommand {
 
     CopyTask task = new CopyTask<GenericRecord>(source, dest);
 
-    JobConf conf = new JobConf(getConf());
-
-    try {
-      if ((isHiveView(source) || isHiveView(dest))
-          && conf.getBoolean(HiveConf.ConfVars.METASTORE_USE_THRIFT_SASL.varname, false)) {
-        // Need to set up delegation token auth
-        HiveMetaStoreClient metaStoreClient = new HiveMetaStoreClient(new HiveConf());
-        String hiveTokenStr = metaStoreClient.getDelegationToken("yarn");
-        Token<DelegationTokenIdentifier> hiveToken = new Token<DelegationTokenIdentifier>();
-        hiveToken.decodeFromUrlString(hiveTokenStr);
-        conf.getCredentials().addToken(new Text("HIVE_METASTORE_TOKEN"), hiveToken);
-    }
-    } catch (TException ex) {
-      throw new RuntimeException("Unable to obtain Hive delegation token");
-    }
-
-    task.setConf(conf);
+    task.setConf(getConf());
 
     if (noCompaction) {
       task.noCompaction();
@@ -97,6 +77,10 @@ public class CopyCommand extends BaseDatasetCommand {
 
     if (numWriters >= 0) {
       task.setNumWriters(numWriters);
+    }
+
+    if (filesPerPartition > 0) {
+      task.setFilesPerPartition(filesPerPartition);
     }
 
     if (overwrite) {
@@ -122,9 +106,5 @@ public class CopyCommand extends BaseDatasetCommand {
         "# Copy the movies dataset into HBase in a map-only job",
         "movies dataset:hbase:zk-host/movies --no-compaction"
     );
-  }
-
-  private boolean isHiveView(View<?> view) {
-    return view.getDataset().getUri().toString().startsWith("dataset:hive:");
   }
 }

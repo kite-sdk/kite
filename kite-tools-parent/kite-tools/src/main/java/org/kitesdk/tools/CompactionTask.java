@@ -62,6 +62,10 @@ public class CompactionTask<T> implements Configurable {
     return task.getConf();
   }
 
+  public void setFilesPerPartition(int filesPerPartition) {
+    task.setFilesPerPartition(filesPerPartition);
+  }
+
   @SuppressWarnings("unchecked")
   private void checkCompactable(View<T> view) {
     Dataset<T> dataset = view.getDataset();

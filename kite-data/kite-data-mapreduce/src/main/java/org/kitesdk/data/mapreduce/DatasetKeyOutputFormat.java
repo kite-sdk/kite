@@ -21,7 +21,6 @@ import java.net.URI;
 import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
-import org.apache.avro.reflect.ReflectData;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
@@ -40,6 +39,7 @@ import org.kitesdk.data.Datasets;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.Signalable;
 import org.kitesdk.data.TypeNotFoundException;
+import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.Compatibility;
@@ -71,8 +71,9 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   public static final String KITE_PARTITION_DIR = "kite.outputPartitionDir";
   public static final String KITE_TYPE = "kite.outputEntityType";
   public static final String KITE_WRITE_MODE = "kite.outputMode";
+  public static final String KITE_COPY_RECORDS = "kite.copyOutputRecords";
 
-  public static enum WriteMode {
+  public enum WriteMode {
     DEFAULT, APPEND, OVERWRITE
   }
 
@@ -305,23 +306,21 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
 
     private DatasetWriter<E> datasetWriter;
     private GenericData dataModel;
-    private boolean copyEntities;
+    private boolean copyRecords;
     private Schema schema;
 
-    public DatasetRecordWriter(View<E> view) {
+    public DatasetRecordWriter(View<E> view, boolean copyRecords) {
       this.datasetWriter = view.newWriter();
 
       this.schema = view.getDataset().getDescriptor().getSchema();
       this.dataModel = DataModelUtil.getDataModelForType(
           view.getType());
-      if (dataModel.getClass() != ReflectData.class) {
-        copyEntities = true;
-      }
+      this.copyRecords = copyRecords;
     }
 
     @Override
     public void write(E key, Void v) {
-      if (copyEntities) {
+      if (copyRecords) {
         key = copy(key);
       }
       datasetWriter.write(key);
@@ -384,7 +383,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
       Dataset<E> jobDataset = repo.load(TEMP_NAMESPACE, jobDatasetName);
       WriteMode mode = conf.getEnum(KITE_WRITE_MODE, WriteMode.DEFAULT);
       if (mode == WriteMode.OVERWRITE && canReplace(targetView)) {
-        ((Replaceable<Dataset<E>>) targetView.getDataset()).replace(jobDataset);
+        ((Replaceable<View<E>>) targetView.getDataset()).replace(targetView, jobDataset);
       } else {
         ((Mergeable<Dataset<E>>) targetView.getDataset()).merge(jobDataset);
       }
@@ -452,6 +451,8 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
       working = target;
     }
 
+    boolean copyRecords = conf.getBoolean(KITE_COPY_RECORDS, false);
+
     String partitionDir = conf.get(KITE_PARTITION_DIR);
     if (working.getDataset().getDescriptor().isPartitioned() &&
         partitionDir != null) {
@@ -464,9 +465,9 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
       if (key != null && !key.getValues().isEmpty()) {
         working = fsDataset.getPartition(key, true);
       }
-      return new DatasetRecordWriter<E>(working);
+      return new DatasetRecordWriter<E>(working, copyRecords);
     } else {
-      return new DatasetRecordWriter<E>(working);
+      return new DatasetRecordWriter<E>(working, copyRecords);
     }
   }
 

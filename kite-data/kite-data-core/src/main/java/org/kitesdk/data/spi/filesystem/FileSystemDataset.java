@@ -17,6 +17,7 @@ package org.kitesdk.data.spi.filesystem;
 
 import java.util.Iterator;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
@@ -54,6 +55,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 import org.apache.avro.generic.IndexedRecord;
 import org.kitesdk.data.Formats;
 
@@ -419,15 +421,19 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   }
 
   @Override
-  public void replace(View<E> update) {
-    DatasetDescriptor updateDescriptor = update.getDataset().getDescriptor();
+  public void replace(View<E> target, View<E> replacement) {
+    DatasetDescriptor updateDescriptor = replacement.getDataset().getDescriptor();
 
     // check that the dataset's descriptor can read the update
     Compatibility.checkCompatible(updateDescriptor, descriptor);
 
     if (descriptor.isPartitioned()) {
+      // track current partitions: either replace or delete
+      Set<PartitionView<E>> notReplaced = Sets.newHashSet(
+          target.getCoveringPartitions());
+
       // replace leaf partitions one at a time
-      for (PartitionView<E> src : update.getCoveringPartitions()) {
+      for (PartitionView<E> src : replacement.getCoveringPartitions()) {
         if (src instanceof FileSystemPartitionView) {
           FileSystemPartitionView<E> dest = getPartitionView(
               ((FileSystemPartitionView<E>) src).getRelativeLocation());
@@ -441,13 +447,14 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
               .toConstraintsView()
               .getCoveringPartitions();
           for (PartitionView<E> partition : existingPartitions) {
-            FileSystemPartitionView<E> toRemove =
+            FileSystemPartitionView<E> toReplace =
                 (FileSystemPartitionView<E>) partition;
-            Path path = new Path(toRemove.getLocation());
+            Path path = new Path(toReplace.getLocation());
             removals.add(path);
+            notReplaced.remove(toReplace);
             if (partitionListener != null && descriptor.isPartitioned()) {
               partitionListener.partitionDeleted(
-                  namespace, name, toRemove.getRelativeLocation().toString());
+                  namespace, name, toReplace.getRelativeLocation().toString());
             }
           }
 
@@ -466,10 +473,16 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
               "Incompatible PartitionView: " + src.getClass().getName());
         }
       }
+
+      // remove the original partitions that were not individually replaced
+      for (PartitionView<E> toRemove : notReplaced) {
+        toRemove.deleteAll();
+      }
+
     } else {
       // stage data in the dataset, remove existing data, then finish the move
       PartitionView<E> srcPartition = Iterables.getOnlyElement(
-          update.getCoveringPartitions());
+          replacement.getCoveringPartitions());
       List<Pair<Path, Path>> staged = FileSystemUtil.stageMove(fileSystem,
           new Path(srcPartition.getLocation()), new Path(unbounded.getLocation()),
           "replace" /* data should replace to recover from a failure */ );
