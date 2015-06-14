@@ -35,6 +35,12 @@ import org.apache.crunch.types.avro.Avros;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.hive.conf.HiveConf;
+import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
+import org.apache.hadoop.hive.thrift.DelegationTokenIdentifier;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.security.token.Token;
+import org.apache.thrift.TException;
 import org.kitesdk.compat.DynMethods;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetException;
@@ -62,9 +68,11 @@ public class TransformTask<S, T> extends Configured {
   private final DoFn<S, T> transform;
   private boolean compact = true;
   private int numWriters = -1;
+  private int numPartitionWriters = -1;
   private Target.WriteMode mode = Target.WriteMode.APPEND;
 
   private long count = 0;
+
 
   public TransformTask(View<S> from, View<T> to, DoFn<S, T> transform) {
     this.from = from;
@@ -79,6 +87,7 @@ public class TransformTask<S, T> extends Configured {
   public TransformTask noCompaction() {
     this.compact = false;
     this.numWriters = 0;
+    this.numPartitionWriters = 0;
     return this;
   }
 
@@ -90,6 +99,13 @@ public class TransformTask<S, T> extends Configured {
     } else {
       this.numWriters = numWriters;
     }
+    return this;
+  }
+
+  public TransformTask setFilesPerPartition(int numPartitionWriters) {
+    Preconditions.checkArgument(numPartitionWriters > 0,
+        "Invalid number of partition writers: " + numPartitionWriters);
+    this.numPartitionWriters = numPartitionWriters;
     return this;
   }
 
@@ -112,6 +128,10 @@ public class TransformTask<S, T> extends Configured {
       setConf(conf);
     }
 
+    if (isHive(from) || isHive(to)) {
+      setConf(addHiveDelegationToken(getConf()));
+    }
+
     PType<T> toPType = ptype(to);
     MapFn<T, T> validate = new CheckEntityClass<T>(to.getType());
 
@@ -125,7 +145,7 @@ public class TransformTask<S, T> extends Configured {
 
     if (compact) {
       // the transform must be run before partitioning
-      collection = CrunchDatasets.partition(collection, to, numWriters);
+      collection = CrunchDatasets.partition(collection, to, numWriters, numPartitionWriters);
     }
 
     pipeline.write(collection, CrunchDatasets.asTarget(to), mode);
@@ -175,6 +195,37 @@ public class TransformTask<S, T> extends Configured {
             "Object does not match expected type " + entityClass +
             ": " + String.valueOf(input));
       }
+    }
+  }
+
+  private static boolean isHive(View<?> view) {
+    return "hive".equals(
+        URI.create(view.getUri().getSchemeSpecificPart()).getScheme());
+  }
+
+  private static final Text HIVE_MS_TOKEN_ALIAS = new Text("HIVE_METASTORE_TOKEN");
+
+  private static Configuration addHiveDelegationToken(Configuration conf) {
+    // this uses a JobConf because we don't have access to the MR Job
+    JobConf jobConf = new JobConf(conf);
+
+    try {
+      if (conf.getBoolean(
+          HiveConf.ConfVars.METASTORE_USE_THRIFT_SASL.varname, false)) {
+        // Need to set up delegation token auth
+        HiveMetaStoreClient metaStoreClient = new HiveMetaStoreClient(new HiveConf());
+        String hiveTokenStr = metaStoreClient.getDelegationToken("yarn");
+        Token<DelegationTokenIdentifier> hiveToken = new Token<DelegationTokenIdentifier>();
+        hiveToken.decodeFromUrlString(hiveTokenStr);
+        jobConf.getCredentials().addToken(HIVE_MS_TOKEN_ALIAS, hiveToken);
+      }
+
+      return jobConf;
+
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to obtain Hive delegation token", e);
+    } catch (TException e) {
+      throw new RuntimeException("Unable to obtain Hive delegation token", e);
     }
   }
 }

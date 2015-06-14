@@ -56,14 +56,6 @@ public abstract class TestCopyCommandClusterSchemaEvolution extends TestCopyComm
     command.setConf(new Configuration());
   }
 
-  @Ignore
-  @Override
-  public void testPartitionedCopyWithNumWriters() throws Exception {
-    super.testPartitionedCopyWithNumWriters(); //To change body of generated methods, choose Tools | Templates.
-  }
-
-  
-
   public abstract Schema getEvolvedSchema(Schema original) throws Exception;
 
   public abstract List<String> getExtraCreateArgs() throws Exception;
