@@ -138,7 +138,7 @@ public class KiteTest extends CamelTestSupport {
         context.stop();
 
         Dataset<GenericRecord> products = Datasets.load("dataset:file://" + System.getProperty("user.dir") + "/target/tmp/test/products", GenericRecord.class);
-        DatasetReader<GenericRecord> reader = dataset.newReader();
+        DatasetReader<GenericRecord> reader = products.newReader();
 
         SortedSet<GenericRecord> data2Compare = new TreeSet<GenericRecord>();
         for (GenericRecord record : reader)
