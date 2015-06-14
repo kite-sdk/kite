@@ -48,6 +48,9 @@ public class KiteEndpoint extends DefaultEndpoint {
     @UriParam(name = "partitionStrategy")
     private String partitionStrategy;
 
+    @UriParam(name = "append", defaultValue = "false")
+    private boolean append = false;
+
     protected KiteEndpoint(String endpointUri, String remaining, KiteComponent component) throws URISyntaxException {
         super(endpointUri, component);
         this.uri = new URI(remaining);
@@ -106,5 +109,13 @@ public class KiteEndpoint extends DefaultEndpoint {
 
     public void setPartitionStrategy(String partitionStrategy) {
         this.partitionStrategy = partitionStrategy;
+    }
+
+    public boolean isAppend() {
+        return append;
+    }
+
+    public void setAppend(String append) {
+        this.append = Boolean.parseBoolean(append);
     }
 }

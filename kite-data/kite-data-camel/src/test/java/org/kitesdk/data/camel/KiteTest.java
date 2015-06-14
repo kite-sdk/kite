@@ -25,9 +25,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.Assert;
 import org.junit.Test;
-import org.kitesdk.data.Dataset;
-import org.kitesdk.data.DatasetReader;
-import org.kitesdk.data.Datasets;
+import org.kitesdk.data.*;
 
 import java.io.File;
 import java.io.InputStream;
@@ -98,6 +96,57 @@ public class KiteTest extends CamelTestSupport {
         reader.close();
 
         Assert.assertArrayEquals(data.toArray(), data2CompareLazy.toArray());
+
+        cleanup();
+    }
+
+    @Test
+    public void appendToDataset() throws Exception {
+
+        cleanup();
+
+        DatasetDescriptor datasetDescriptor = new DatasetDescriptor.Builder().schemaUri("resource:product.avsc").build();
+        Dataset<GenericRecord> dataset = Datasets.create("dataset:file://" + System.getProperty("user.dir") + "/target/tmp/test/products", datasetDescriptor, GenericRecord.class);
+
+        DatasetWriter<GenericRecord> writer = dataset.newWriter();
+
+        InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("product.avsc");
+        Schema schema = new Schema.Parser().parse(inputStream);
+        GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+        List<GenericRecord> data = new LinkedList<GenericRecord>();
+        for (long i = 0; i < 10; ++i) {
+            GenericRecord record = builder.set("name", "product-" + i).set("id", i).build();
+            data.add(record);
+        }
+        for (GenericRecord record : data)
+            writer.write(record);
+        writer.close();
+
+        RouteBuilder rb = new RouteBuilder() {
+            @Override
+            public void configure() throws Exception {
+                from("direct:test").to("kite:dataset:file://" + System.getProperty("user.dir") + "/target/tmp/test/products?append=true");
+            }
+        };
+        context.addRoutes(rb);
+        context.start();
+
+        for (long i = 10; i < 20; ++i) {
+            GenericRecord record = builder.set("name", "product-" + i).set("id", i).build();
+            data.add(record);
+            sendBodies("direct:test", record);
+        }
+        context.stop();
+
+        Dataset<GenericRecord> products = Datasets.load("dataset:file://" + System.getProperty("user.dir") + "/target/tmp/test/products", GenericRecord.class);
+        DatasetReader<GenericRecord> reader = products.newReader();
+
+        List<GenericRecord> data2Compare = new LinkedList<GenericRecord>();
+        for (GenericRecord record : reader)
+            data2Compare.add(record);
+        reader.close();
+
+        Assert.assertArrayEquals(data.toArray(), data2Compare.toArray());
 
         cleanup();
     }

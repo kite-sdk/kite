@@ -52,32 +52,38 @@ public class KiteProducer extends DefaultProducer {
         try {
             KiteEndpoint ep = (KiteEndpoint) getEndpoint();
 
-            String schema = ep.getSchema();
-
-            if (schema == null)
-                throw new CamelException("the schema must be defined");
-
-            String ps = ep.getPartitionStrategy();
-
-            builder = new DatasetDescriptor.Builder().compressionType(ep.getCompressionType()).format(ep.getFormat());
-            if (ps != null) {
-                if (ps.startsWith("literal:"))
-                    builder.partitionStrategyLiteral(ps.split("literal:")[1]);
-                else
-                    builder.partitionStrategyUri(ps);
-            }
-            if (schema.equals("lazy")) {
-                lazy = true;
-            } else if (schema.startsWith("class:")) {
-                String className = schema.split("class:")[1];
-                Class<?> klass = ObjectHelper.loadClass(className);
-                descriptor = builder.schema(klass).build();
-                dataset = Datasets.create(ep.getUri(), descriptor, Object.class);
+            if (ep.isAppend()) {
+                dataset = Datasets.load(ep.getUri(), Object.class);
                 writer = dataset.newWriter();
             } else {
-                descriptor = builder.schemaUri(ep.getSchema()).build();
-                dataset = Datasets.create(ep.getUri(), descriptor, Object.class);
-                writer = dataset.newWriter();
+
+                String schema = ep.getSchema();
+
+                if (schema == null)
+                    throw new CamelException("the schema must be defined");
+
+                String ps = ep.getPartitionStrategy();
+
+                builder = new DatasetDescriptor.Builder().compressionType(ep.getCompressionType()).format(ep.getFormat());
+                if (ps != null) {
+                    if (ps.startsWith("literal:"))
+                        builder.partitionStrategyLiteral(ps.split("literal:")[1]);
+                    else
+                        builder.partitionStrategyUri(ps);
+                }
+                if (schema.equals("lazy")) {
+                    lazy = true;
+                } else if (schema.startsWith("class:")) {
+                    String className = schema.split("class:")[1];
+                    Class<?> klass = ObjectHelper.loadClass(className);
+                    descriptor = builder.schema(klass).build();
+                    dataset = Datasets.create(ep.getUri(), descriptor, Object.class);
+                    writer = dataset.newWriter();
+                } else {
+                    descriptor = builder.schemaUri(ep.getSchema()).build();
+                    dataset = Datasets.create(ep.getUri(), descriptor, Object.class);
+                    writer = dataset.newWriter();
+                }
             }
         } catch (IOException e) {
             throw new CamelException(e);
@@ -95,6 +101,8 @@ public class KiteProducer extends DefaultProducer {
             Object record = exchange.getIn().getBody();
             if (lazy && descriptor == null) {
                 KiteEndpoint ep = (KiteEndpoint) getEndpoint();
+                if (ep.isAppend())
+                    throw new CamelException("lazy is not support in append mode");
                 Class<?> instanceClass = record.getClass();
                 if (GenericContainer.class.isAssignableFrom(instanceClass)) {
                     Method method = instanceClass.getMethod("getSchema");
