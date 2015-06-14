@@ -114,12 +114,14 @@ public class KiteTest extends CamelTestSupport {
         Schema schema = new Schema.Parser().parse(inputStream);
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
         List<GenericRecord> data = new LinkedList<GenericRecord>();
-        for (long i = 0; i < 10; ++i) {
+        for (long i = 0; i < 20; ++i) {
             GenericRecord record = builder.set("name", "product-" + i).set("id", i).build();
             data.add(record);
         }
-        for (GenericRecord record : data)
-            writer.write(record);
+
+        Iterator<GenericRecord> iter = data.iterator();
+        for (int i = 0; i < 10; ++i)
+            writer.write(iter.next());
         writer.close();
 
         RouteBuilder rb = new RouteBuilder() {
@@ -131,11 +133,8 @@ public class KiteTest extends CamelTestSupport {
         context.addRoutes(rb);
         context.start();
 
-        for (long i = 10; i < 20; ++i) {
-            GenericRecord record = builder.set("name", "product-" + i).set("id", i).build();
-            data.add(record);
-            sendBodies("direct:test", record);
-        }
+        for (int i = 10; i < 20; ++i)
+            sendBodies("direct:test", iter.next());
         context.stop();
 
         Dataset<GenericRecord> products = Datasets.load("dataset:file://" + System.getProperty("user.dir") + "/target/tmp/test/products", GenericRecord.class);
