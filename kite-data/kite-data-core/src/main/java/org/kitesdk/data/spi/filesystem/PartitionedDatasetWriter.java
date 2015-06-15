@@ -40,11 +40,14 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.apache.hadoop.fs.Path;
+import org.kitesdk.data.spi.ClockReady;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>> extends
-    AbstractDatasetWriter<E> {
+import static org.kitesdk.data.spi.filesystem.FileSystemProperties.WRITER_CACHE_SIZE_PROP;
+
+abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>>
+    extends AbstractDatasetWriter<E> implements ClockReady {
 
   private static final Logger LOG = LoggerFactory
     .getLogger(PartitionedDatasetWriter.class);
@@ -89,19 +92,8 @@ abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>> extend
     this.view = view;
     this.partitionStrategy = descriptor.getPartitionStrategy();
 
-    int maxWriters = DEFAULT_WRITER_CACHE_SIZE;
-    if (descriptor.hasProperty(FileSystemProperties.WRITER_CACHE_SIZE_PROP)) {
-      try {
-        maxWriters = Integer.parseInt(
-            descriptor.getProperty(FileSystemProperties.WRITER_CACHE_SIZE_PROP));
-      } catch (NumberFormatException e) {
-        LOG.warn("Not an integer: " + FileSystemProperties.WRITER_CACHE_SIZE_PROP + "=" +
-            descriptor.getProperty(FileSystemProperties.WRITER_CACHE_SIZE_PROP));
-      }
-    } else if (partitionStrategy.getCardinality() != FieldPartitioner.UNKNOWN_CARDINALITY) {
-        maxWriters = Math.min(maxWriters, partitionStrategy.getCardinality());
-    }
-    this.maxWriters = maxWriters;
+    this.maxWriters = DescriptorUtil.getInt(WRITER_CACHE_SIZE_PROP, descriptor,
+        Math.min(DEFAULT_WRITER_CACHE_SIZE, partitionStrategy.getCardinality()));
 
     this.state = ReaderWriterState.NEW;
     this.reusedKey = new StorageKey(partitionStrategy);
@@ -169,6 +161,17 @@ abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>> extend
       }
 
       state = ReaderWriterState.CLOSED;
+    }
+  }
+
+  @Override
+  public void tick() {
+    if (ReaderWriterState.OPEN == state) {
+      for (DatasetWriter<E> writer : cachedWriters.asMap().values()) {
+        if (writer instanceof ClockReady) {
+          ((ClockReady) writer).tick();
+        }
+      }
     }
   }
 

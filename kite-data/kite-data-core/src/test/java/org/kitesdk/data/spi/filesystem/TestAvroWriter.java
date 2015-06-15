@@ -39,6 +39,11 @@ public class TestAvroWriter extends TestFileSystemWriters {
   public FileSystemWriter<Record> newWriter(Path directory, Schema schema) {
     return FileSystemWriter.newWriter(fs, directory,
         new DatasetDescriptor.Builder()
+            .property(
+                "kite.writer.roll-interval-seconds", String.valueOf(1))
+            .property(
+                "kite.writer.target-file-size",
+                String.valueOf(2 * 1024 * 1024)) // 2 MB
             .schema(schema)
             .format("avro")
             .build());

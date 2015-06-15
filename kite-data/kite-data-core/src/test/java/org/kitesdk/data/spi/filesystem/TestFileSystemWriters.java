@@ -16,11 +16,13 @@
 
 package org.kitesdk.data.spi.filesystem;
 
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData.Record;
@@ -29,10 +31,12 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.MiniDFSTest;
+import org.kitesdk.data.spi.ClockReady;
 import org.kitesdk.data.spi.InitializeAccessor;
 import org.kitesdk.data.spi.ReaderWriterState;
 
@@ -91,6 +95,103 @@ public abstract class TestFileSystemWriters extends MiniDFSTest {
     DatasetReader<Record> reader = newReader(stats[0].getPath(), TEST_SCHEMA);
     Assert.assertEquals("Should match written records",
         written, Lists.newArrayList((Iterator) init(reader)));
+  }
+
+  @Test
+  public void testTargetFileSize() throws IOException {
+    init(fsWriter);
+
+    FileStatus[] stats = fs.listStatus(testDirectory, PathFilters.notHidden());
+    Assert.assertEquals("Should contain no visible files", 0, stats.length);
+    stats = fs.listStatus(testDirectory);
+    Assert.assertEquals("Should contain a hidden file", 1, stats.length);
+
+    List<Record> written = Lists.newArrayList();
+    for (long i = 0; i < 100000; i += 1) {
+      // use a UUID to make the file size bigger
+      Record record = record(i, UUID.randomUUID().toString());
+      fsWriter.write(record);
+      written.add(record);
+    }
+
+    stats = fs.listStatus(testDirectory, PathFilters.notHidden());
+    Assert.assertEquals("Should contain a rolled file", 1, stats.length);
+    stats = fs.listStatus(testDirectory);
+    Assert.assertEquals("Should contain a hidden file and a rolled file",
+        2, stats.length);
+
+    fsWriter.close();
+
+    stats = fs.listStatus(testDirectory, PathFilters.notHidden());
+    Assert.assertEquals("Should contain a visible data file", 2, stats.length);
+
+    List<Record> actualContent = Lists.newArrayList();
+    DatasetReader<Record> reader = newReader(stats[0].getPath(), TEST_SCHEMA);
+    Iterators.addAll(actualContent, init(reader));
+    reader = newReader(stats[1].getPath(), TEST_SCHEMA);
+    Iterators.addAll(actualContent, init(reader));
+
+    Assert.assertTrue("Should match written records",
+        written.equals(actualContent));
+
+    double ratioToTarget = (((double) stats[0].getLen()) / 2 / 1024 / 1024);
+    Assert.assertTrue(
+        "Should be within 10% of target size: " + ratioToTarget * 100,
+        ratioToTarget > 0.90 && ratioToTarget < 1.10);
+  }
+
+  @Test
+  public void testTimeBasedRoll() throws Exception {
+    // time-based operations are done when clock ticks are passed to the writer
+    // with ClockReady#tick.
+    init(fsWriter);
+
+    FileStatus[] stats = fs.listStatus(testDirectory, PathFilters.notHidden());
+    Assert.assertEquals("Should contain no visible files", 0, stats.length);
+    stats = fs.listStatus(testDirectory);
+    Assert.assertEquals("Should contain a hidden file", 1, stats.length);
+
+    // write the first half of the records
+    List<Record> firstHalf = Lists.newArrayList();
+    for (long i = 0; i < 50000; i += 1) {
+      // use a UUID to make the file size bigger
+      Record record = record(i, UUID.randomUUID().toString());
+      fsWriter.write(record);
+      firstHalf.add(record);
+    }
+
+    // the writer is configured to roll every 1 second, so this guarantees it
+    // will roll when tick is called
+    Thread.sleep(1000);
+    fsWriter.tick(); // send a clock signal to trigger the roll
+
+    // write the second half of the records
+    List<Record> secondHalf = Lists.newArrayList();
+    for (long i = 0; i < 50000; i += 1) {
+      // use a UUID to make the file size bigger
+      Record record = record(i, UUID.randomUUID().toString());
+      fsWriter.write(record);
+      secondHalf.add(record);
+    }
+
+    stats = fs.listStatus(testDirectory, PathFilters.notHidden());
+    Assert.assertEquals("Should contain a rolled file", 1, stats.length);
+    stats = fs.listStatus(testDirectory);
+    Assert.assertEquals("Should contain a hidden file and a rolled file",
+        2, stats.length);
+
+    fsWriter.close();
+
+    stats = fs.listStatus(testDirectory, PathFilters.notHidden());
+    Assert.assertEquals("Should contain a visible data file", 2, stats.length);
+
+    DatasetReader<Record> reader = newReader(stats[0].getPath(), TEST_SCHEMA);
+    Assert.assertEquals("First file should have half the records",
+        firstHalf, Lists.newArrayList((Iterable) init(reader)));
+
+    reader = newReader(stats[1].getPath(), TEST_SCHEMA);
+    Assert.assertEquals("Second file should have half the records",
+        secondHalf, Lists.newArrayList((Iterable) init(reader)));
   }
 
   @Test

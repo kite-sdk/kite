@@ -64,6 +64,12 @@ class DurableParquetAppender<E extends IndexedRecord> implements FileSystemWrite
   }
 
   @Override
+  public long pos() throws IOException {
+    // based on final Parquet file size, not temporary Avro size
+    return parquetAppender.pos();
+  }
+
+  @Override
   public void flush() throws IOException {
     avroAppender.flush();
   }

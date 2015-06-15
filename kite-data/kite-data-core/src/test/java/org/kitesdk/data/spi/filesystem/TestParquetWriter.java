@@ -38,6 +38,8 @@ public class TestParquetWriter extends TestFileSystemWriters {
   public FileSystemWriter<Record> newWriter(Path directory, Schema schema) {
     return FileSystemWriter.newWriter(fs, directory,
         new DatasetDescriptor.Builder()
+            .property(
+                "kite.writer.roll-interval-seconds", String.valueOf(1))
             .schema(schema)
             .format("parquet")
             .build());
@@ -111,5 +113,11 @@ public class TestParquetWriter extends TestFileSystemWriters {
             .build());
     Assert.assertEquals("Enabling the non-durable parquet appender should get us a non-durable appender",
         ParquetAppender.class, writer.newAppender(testDirectory).getClass());
+  }
+
+  @Override
+  @Ignore // Needs PARQUET-308 to estimate current file size
+  public void testTargetFileSize() throws IOException {
+    super.testTargetFileSize();
   }
 }

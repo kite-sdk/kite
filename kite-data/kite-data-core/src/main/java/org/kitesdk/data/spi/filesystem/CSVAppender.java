@@ -62,6 +62,11 @@ class CSVAppender<E> implements FileSystemWriter.FileAppender<E> {
   }
 
   @Override
+  public long pos() throws IOException {
+    return outgoing.getPos();
+  }
+
+  @Override
   public void close() throws IOException {
     writer.close();
     outgoing.close();

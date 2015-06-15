@@ -42,12 +42,22 @@ import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.spi.AbstractDatasetWriter;
 import org.kitesdk.data.spi.DescriptorUtil;
 import org.kitesdk.data.spi.ReaderWriterState;
+import org.kitesdk.data.spi.ClockReady;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
+import static org.kitesdk.data.spi.filesystem.FileSystemProperties.ROLL_INTERVAL_S_PROP;
+import static org.kitesdk.data.spi.filesystem.FileSystemProperties.TARGET_FILE_SIZE_PROP;
+
+class FileSystemWriter<E> extends AbstractDatasetWriter<E> implements ClockReady {
 
   private static final Logger LOG = LoggerFactory.getLogger(FileSystemWriter.class);
+
+  // number of records to write before estimating the record size
+  private static final int MIN_RECORDS_BEFORE_ROLL_CHECK = 1000;
+  // minimum file size before estimating size check, accounts for block writes
+  private static final long MIN_SIZE_BEFORE_ROLL_CHECK = 5 * 1024; // 5 kB
+
   private static final Set<Format> SUPPORTED_FORMATS = ImmutableSet
       .<Format>builder()
       .add(Formats.AVRO)
@@ -61,18 +71,23 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
     ));
   }
 
-  static interface FileAppender<E> extends java.io.Flushable, Closeable {
-    public void open() throws IOException;
-    public void append(E entity) throws IOException;
-    public void sync() throws IOException;
-    public void cleanup() throws IOException;
+  interface FileAppender<E> extends java.io.Flushable, Closeable {
+    void open() throws IOException;
+    void append(E entity) throws IOException;
+    long pos() throws IOException;
+    void sync() throws IOException;
+    void cleanup() throws IOException;
   }
 
   private final Path directory;
   private final DatasetDescriptor descriptor;
+  private final long targetFileSize;
+  private final long rollIntervalMillis;
   private Path tempPath;
   private Path finalPath;
   private long count = 0;
+  private long nextRollCheck = MIN_RECORDS_BEFORE_ROLL_CHECK;
+  private long nextRollTime = Long.MAX_VALUE; // do not roll by default
 
   protected final FileSystem fs;
   protected FileAppender<E> appender;
@@ -93,6 +108,16 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
     this.descriptor = descriptor;
     this.conf = new Configuration(fs.getConf());
     this.state = ReaderWriterState.NEW;
+
+    // get file rolling properties
+    if (!Formats.PARQUET.equals(descriptor.getFormat())) {
+      this.targetFileSize = DescriptorUtil.getLong(
+          TARGET_FILE_SIZE_PROP, descriptor, -1);
+    } else {
+      targetFileSize = -1;
+    }
+    this.rollIntervalMillis = 1000 * DescriptorUtil.getLong(
+        ROLL_INTERVAL_S_PROP, descriptor, -1);
 
     // copy file format settings from custom properties to the Configuration
     for (String prop : descriptor.listProperties()) {
@@ -143,6 +168,10 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
     }
 
     this.count = 0;
+    this.nextRollCheck = MIN_RECORDS_BEFORE_ROLL_CHECK;
+    if (rollIntervalMillis > 0) {
+      this.nextRollTime = System.currentTimeMillis() + rollIntervalMillis;
+    }
 
     LOG.info("Opened output appender {} for {}", appender, finalPath);
 
@@ -157,6 +186,7 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
     try {
       appender.append(entity);
       count += 1;
+      checkSizeBasedFileRoll();
     } catch (RuntimeException e) {
       Throwables.propagateIfInstanceOf(e, DatasetRecordException.class);
       this.state = ReaderWriterState.ERROR;
@@ -240,6 +270,52 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
   }
 
   @Override
+  public void tick() {
+    if (ReaderWriterState.OPEN == state) {
+      checkTimeBasedFileRoll();
+    }
+  }
+
+  private void roll() {
+    close();
+    this.state = ReaderWriterState.NEW;
+    // state used by roll checks are reset by initialize
+    initialize();
+  }
+
+  protected void checkSizeBasedFileRoll() throws IOException {
+    if (targetFileSize > 0 && count >= nextRollCheck) {
+      long pos = appender.pos();
+      // if not enough data has been written to estimate the record size, wait
+      if (pos < MIN_SIZE_BEFORE_ROLL_CHECK) {
+        nextRollCheck = count + MIN_RECORDS_BEFORE_ROLL_CHECK;
+        return;
+      }
+
+      // estimate the number of records left before reaching the target size
+      double recordSizeEstimate = ((double) pos) / count;
+      long recordsLeft = ((long) ((targetFileSize - pos) / recordSizeEstimate));
+
+      if (pos < targetFileSize && recordsLeft > 10) {
+        // set the next check for about half-way to the target size
+        this.nextRollCheck = count +
+            Math.max(MIN_RECORDS_BEFORE_ROLL_CHECK, recordsLeft / 2);
+      } else {
+        this.nextRollCheck = nextRollCheck / 2;
+        roll();
+      }
+    }
+  }
+
+  private void checkTimeBasedFileRoll() {
+    long now = System.currentTimeMillis();
+    if (now >= nextRollTime) {
+      // the next roll time is reset during initialize, called by roll
+      roll();
+    }
+  }
+
+  @Override
   public final boolean isOpen() {
     return state.equals(ReaderWriterState.OPEN);
   }
@@ -311,6 +387,7 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
       try {
         appender.flush();
         this.flushed = true;
+        checkSizeBasedFileRoll();
       } catch (RuntimeException e) {
         this.state = ReaderWriterState.ERROR;
         throw new DatasetOperationException(e,
