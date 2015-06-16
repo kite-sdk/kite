@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<comments
+  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+  xsi:noNamespaceSchemaLocation='comments.xsd'
+  name="Kite_SDK_1.0.0_to_Kite_SDK_1.1.0"
+  jdversion="1.1.1">
+
+<!-- This file contains comments for a JDiff report. -->
+<!-- It is used only in generating the report, and does not need to ship with the final report. -->
+
+<!-- The id attribute in an identifier element identifies the change as noted in the report. -->
+<!-- An id has the form package[.class[.[ctor|method|field].signature]], where [] indicates optional text. -->
+<!-- A comment element can have multiple identifier elements, which will -->
+<!-- will cause the same text to appear at each place in the report, but -->
+<!-- will be converted to separate comments when the comments file is used. -->
+<!-- HTML tags in the text field will appear in the report. -->
+<!-- You also need to close p HTML elements, used for paragraphs - see the top-level documentation. -->
+<comment>
+  <identifier id="org.kitesdk.data"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.IncompatibleSchemaException"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.IncompatibleSchemaException.check_changed(boolean, java.lang.String, java.lang.Object[])"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.PartitionStrategy.Builder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.PartitionStrategy.Builder.fixedSizeRange_added(java.lang.String, java.lang.String, long)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.PartitionStrategy.Builder.fixedSizeRange_added(java.lang.String, long)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.PartitionView"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.Signalable"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.View"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.View.asSchema_added(org.apache.avro.Schema)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.View.asType_added(java.lang.Class&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.View.getCoveringPartitions_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.View.getSchema_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.crunch"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.crunch.CrunchDatasets"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.crunch.CrunchDatasets.partition_added(org.apache.crunch.PCollection&lt;E&gt;, org.kitesdk.data.View&lt;E&gt;, int, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.mapreduce"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.mapreduce.DatasetKeyInputFormat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.mapreduce.DatasetKeyInputFormat.ConfigBuilder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.mapreduce.DatasetKeyInputFormat.ConfigBuilder.withSchema_added(org.apache.avro.Schema)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.mapreduce.DatasetKeyInputFormat.KITE_READER_SCHEMA"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.KITE_COPY_RECORDS"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.KITE_WRITE_MODE"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.WriteMode"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.oozie"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.morphline.scriptengine.java"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.morphline.scriptengine.java.ScriptEvaluator"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.morphline.scriptengine.java.ScriptEvaluator.ctor_added(java.lang.String, java.lang.String, java.lang.Class&lt;T&gt;, java.lang.String[], java.lang.Class[], java.lang.Class[], java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.morphline.stdlib"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.morphline.stdlib.ReplaceValuesBuilder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.tools"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.tools.CompactionTask"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.tools.TransformTask"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.tools.TransformTask.setFilesPerPartition_added(int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.tools.TransformTask.setWriteMode_added(org.apache.crunch.Target.WriteMode)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+
+</comments>
