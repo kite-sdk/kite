@@ -38,7 +38,7 @@
   <parent>
     <groupId>org.kitesdk</groupId>
     <artifactId>kite-parent</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.1.1-SNAPSHOT</version>
   </parent>
 
   <name>Kite Data Module</name>

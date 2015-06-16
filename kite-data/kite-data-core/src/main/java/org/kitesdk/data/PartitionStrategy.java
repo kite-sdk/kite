@@ -383,6 +383,7 @@ public class PartitionStrategy {
      *          The size of the range.
      * @return An instance of the builder for method chaining.
      * @see IntRangeFieldPartitioner
+     * @since 1.1.0
      */
     public Builder fixedSizeRange(String sourceName, long size) {
       add(new LongFixedSizeRangeFieldPartitioner(sourceName, size));
@@ -406,6 +407,7 @@ public class PartitionStrategy {
      *          The size of the range.
      * @return An instance of the builder for method chaining.
      * @see IntRangeFieldPartitioner
+     * @since 1.1.0
      */
     public Builder fixedSizeRange(String sourceName, @Nullable String name, long size) {
       add(new LongFixedSizeRangeFieldPartitioner(sourceName, name, size));

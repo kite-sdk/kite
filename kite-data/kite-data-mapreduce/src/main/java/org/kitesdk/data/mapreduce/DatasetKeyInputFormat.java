@@ -145,6 +145,11 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
      * This Class is used to configure the input {@code Dataset}. If this class
      * cannot be found during job setup, the job will fail and throw a
      * {@link org.kitesdk.data.TypeNotFoundException}.
+     * <p>
+     * If the type is set, then the type's schema is used for the expected
+     * schema and {@link #withSchema(Schema)} should not be called. This may,
+     * however, be used at the same time if the type is a generic record
+     * subclass.
      *
      * @param type the entity Class that will be produced
      * @return this for method chaining
@@ -160,6 +165,16 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
       return this;
     }
 
+    /**
+     * Sets the expected schema to use when reading records from the Dataset.
+     * <p>
+     * If this schema is set, {@link #withType(Class)} should only be called
+     * with a generic record subclass.
+     *
+     * @param readerSchema the expected entity schema
+     * @return this for method chaining
+     * @since 1.1.0
+     */
     public ConfigBuilder withSchema(Schema readerSchema) {
       Class<?> type = conf.getClass(KITE_TYPE, null);
       Preconditions.checkArgument(
