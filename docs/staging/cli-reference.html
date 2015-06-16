@@ -61,7 +61,7 @@
           
           
           
-          <li><a href="/docs/staging/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
+          <li><a href="/docs/staging/introduction-to-datasets.html">Datasets Overview</a></li>
           
           
         </ul>
@@ -128,10 +128,6 @@
           
           
           
-          <li><a href="/docs/staging/lifecycle.html">Dataset Lifecycle</a></li>
-          
-          
-          
           <li><a href="/docs/staging/maven">Maven Plugin</a></li>
           
           
@@ -162,21 +158,25 @@
 
 <hr />
 <ul>
-  <li><a href="#general">general options</a>: options for all commands.</li>
+  <li><a href="#general-options">general options</a>: options for all commands.</li>
   <li><a href="#help">help</a>: get help for the dataset command in general or a specific command.</li>
   <li><a href="#create">create</a>: create a dataset based on an existing schema.</li>
+  <li><a href="#update">update</a>: update the metadata descriptor for a dataset.</li>
+  <li><a href="#compact">compact</a>: compact all or part of a dataset.</li>
+  <li><a href="#list">list</a>: list datasets.</li>
+  <li><a href="#show">show</a>: show the first <em>n</em> records of a dataset.</li>
   <li><a href="#copy">copy</a>: copy one dataset to another dataset.</li>
   <li><a href="#transform">transform</a>: transform records from one dataset and store them in another dataset.</li>
-  <li><a href="#update">update</a>: update the metadata descriptor for a dataset. </li>
   <li><a href="#delete">delete</a>: delete a dataset.</li>
-  <li><a href="#schema">schema</a> : view the schema for an existing dataset.</li>
   <li><a href="#info">info</a>: show metadata for a dataset.</li>
-  <li><a href="#show">show</a>: show the first <em>n</em> records of a dataset.</li>
+  <li><a href="#schema">schema</a> : view the schema for an existing dataset.</li>
   <li><a href="#csv-schema">csv-schema</a>: create a schema from a CSV data sample.</li>
-  <li><a href="#csv-import">csv-import</a>: import CSV data.</li>
   <li><a href="#json-schema">json-schema</a>: create a schema from a JSON data sample.</li>
-  <li><a href="#json-import">json-import</a>: import JSON data.</li>
   <li><a href="#obj-schema">obj-schema</a>: create a schema from a Java object.</li>
+  <li><a href="#csv-import">csv-import</a>: import CSV data.</li>
+  <li><a href="#json-import">json-import</a>: import JSON data.</li>
+  <li><a href="#inputformat-import">inputformat-import</a>: import data using a custom InputFormat.</li>
+  <li><a href="#tar-import">tar-import</a>: import files from a tarball as a dataset.</li>
   <li><a href="#partition-config">partition-config</a>: create a partition strategy for a schema.</li>
   <li><a href="#mapping-config">mapping-config</a>: create a mapping strategy for a schema.</li>
   <li><a href="#log4j-config">log4j-config</a>: Configure Log4j.</li>
@@ -184,7 +184,6 @@
 </ul>
 
 <hr />
-<p><a name="general"></a></p>
 
 <h2 id="general-options">General options</h2>
 
@@ -237,6 +236,456 @@
 </code></pre>
 
 <hr />
+
+<p><a href="#top">Back to the Top</a></p>
+
+<hr />
+
+<h2 id="help">help</h2>
+
+<p>Retrieves details on the functions of one or more dataset commands.</p>
+
+<h3 id="syntax">Syntax</h3>
+
+<pre><code>kite-dataset  [-v] help &lt;commands&gt; [command options]
+</code></pre>
+
+<h3 id="examples">Examples</h3>
+
+<p>Retrieve details for the create command:</p>
+
+<pre><code>kite-dataset help create
+</code></pre>
+
+<hr />
+
+<p><a href="#top">Back to the Top</a></p>
+
+<hr />
+
+<h2 id="create">create</h2>
+
+<p>Create a dataset in a new location or using existing data.</p>
+
+<p>The dataset must be either a full dataset URI beginning with “dataset:” or a dataset name that will be created as a Hive table using the default “dataset:hive:<name>" URI.</name></p>
+
+<p>Any dataset configuration set in the command’s options will be validated against existing data.</p>
+
+<p>If there is no existing data, a schema is required. If existing data is found, the inferred schema, partition strategy, and format will be used unless it is changed by command options.</p>
+
+<h3 id="usage">Usage</h3>
+
+<pre><code>kite-dataset [-v] create &lt;dataset&gt; [command options]
+</code></pre>
+
+<h3 id="options">Options</h3>
+
+<table>
+  <tbody>
+    <tr>
+      <td><code>-s, --schema</code></td>
+      <td>A file containing the Avro schema.</td>
+    </tr>
+    <tr>
+      <td><code>-f, --format</code></td>
+      <td>Set the dataset format, either <code>avro</code> or <code>parquet</code>. Defaults to <code>avro</code></td>
+    </tr>
+    <tr>
+      <td><code>-p, --partition-by</code></td>
+      <td>A file containing a JSON-formatted partition strategy.</td>
+    </tr>
+    <tr>
+      <td><code>-m, --mapping</code></td>
+      <td>A file containing a JSON-formatted column mapping.</td>
+    </tr>
+    <tr>
+      <td><code>--set, --property</code></td>
+      <td>A property to set in the dataset’s descriptor: <code>prop.name=value</code>.</td>
+    </tr>
+    <tr>
+      <td><code>--location</code></td>
+      <td>The location where data is or should be stored.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="examples-1">Examples:</h3>
+
+<p>Create a new dataset in Hive called “users”:</p>
+
+<pre><code>kite-dataset create users --schema user.avsc
+</code></pre>
+
+<p>Create dataset “users” using Parquet format:</p>
+
+<pre><code>kite-dataset create users --schema user.avsc --format parquet
+</code></pre>
+
+<p>Create a Hive dataset for existing data in HDFS using the inferred schema and partition strategy:</p>
+
+<pre><code>kite-dataset create events --location /path/to/events
+</code></pre>
+
+<p>Create dataset “events” with the given partition strategy and set the writer cache size:</p>
+
+<pre><code>kite-dataset create events --partition-by config.json --set kite.writer.cache-size=20
+</code></pre>
+
+<p>Create dataset “users” and set multiple properties:</p>
+
+<pre><code>kite-dataset create users --schema user.avsc --set kite.writer.cache-size=20 --set dfs.blocksize=256m
+</code></pre>
+
+<hr />
+
+<p><a href="#top">Back to the Top</a></p>
+
+<hr />
+
+<h2 id="update">update</h2>
+
+<p>Update the metadata for a dataset.</p>
+
+<p>This command can update a dataset’s schema or partition strategy, and add or change dataset properties.</p>
+
+<p>Schema updates are validated according to Avro’s Schema evolution rules to ensure that the updated schema can read data written with any previous version of the schema.</p>
+
+<p>Partition strategy updates only allow replacing provided partitioners with another partitioner that is compatible with the existing partition data. For example, a provided partitioner called “year” with integer values can be replaced with a year partitioner called “year” that uses a valid timestamp field as its source.</p>
+
+<h3 id="syntax-1">Syntax</h3>
+
+<pre><code>kite-dataset [-v] update &lt;dataset&gt; [command options]
+</code></pre>
+
+<h3 id="options-1">Options</h3>
+
+<table>
+  <tbody>
+    <tr>
+      <td><code>-s, --schema</code></td>
+      <td>A file containing the updated Avro schema.</td>
+    </tr>
+    <tr>
+      <td><code>-p, --partition-by</code></td>
+      <td>A file containing an updated partition strategy.</td>
+    </tr>
+    <tr>
+      <td><code>--set, --property</code></td>
+      <td>Add a property pair: <code>prop.name=value</code>.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="examples-2">Examples:</h3>
+
+<p>Update schema for dataset “users” in Hive:</p>
+
+<pre><code>kite-dataset update users --schema user.avsc
+</code></pre>
+
+<p>Update HDFS dataset by URI, add property:</p>
+
+<pre><code>kite-dataset update dataset:hdfs:/user/me/datasets/users --set kite.write.cache-size=20
+</code></pre>
+
+<hr />
+
+<p><a href="#top">Back to the Top</a></p>
+
+<hr />
+
+<h2 id="compact">compact</h2>
+
+<p>Compact all or part of a dataset.</p>
+
+<p>Compaction will rewrite partitions in the dataset, combining all files in each partition into a single large file using the dataset’s current descriptor properties, like <code>dfs.blocksize</code> or <code>parquet.block.size</code>.</p>
+
+<p>Partitions that have been rewritten will replace existing partitions by moving the rewritten content to a hidden location (a dot folder), deleting the existing partition, and renaming the hidden folder to replace it. This results in a small window of time when data for the partition is not visible.</p>
+
+<p>This compaction does not coordinate with other readers or writers. No other processes should be reading from or writing to the dataset while this command is running.</p>
+
+<p>If multiple directories make up a single logical partition, all of the directories will be replaced with a single rewritten directory with all of the data. This can happen when reading data with older naming schemes. For example, <code>month=5</code> and <code>month=05</code> are two directory names that would be considered the same logical partition.</p>
+
+<h3 id="syntax-2">Syntax</h3>
+
+<pre><code>kite-dataset [-v] comapct &lt;dataset or view&gt; [command options]
+</code></pre>
+
+<h3 id="options-2">Options</h3>
+
+<table>
+  <tbody>
+    <tr>
+      <td><code>--num-writers</code></td>
+      <td>The number of writer processes to use.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="examples-3">Examples:</h3>
+
+<p>Compact all partitions of the <code>events</code> dataset:</p>
+
+<pre><code>kite-dataset compact events
+</code></pre>
+
+<p>Compact all partitions under <code>year=2015</code> in <code>events</code>:</p>
+
+<pre><code>kite-dataset compact view:hive:events?year=2015
+</code></pre>
+
+<hr />
+
+<p><a href="#top">Back to the Top</a></p>
+
+<hr />
+
+<h2 id="list">list</h2>
+
+<p>Lists available dataset URIs.</p>
+
+<p>An optional repository URI can be given to list datasets in repositories other than Hive.</p>
+
+<p><a href="/docs/staging/URIs.html#repository-uris">Repository URIs</a> start with “repo:” and leave out table and namespace options that are in dataset or view URIs.</p>
+
+<h3 id="syntax-3">Syntax</h3>
+
+<pre><code>kite-dataset [-v] list [repository] [command options]
+</code></pre>
+
+<h3 id="examples-4">Examples</h3>
+
+<p>Show all supported Hive datasets:</p>
+
+<pre><code>kite-dataset list
+</code></pre>
+
+<p>Show all datasets in HDFS under <code>/data</code>:</p>
+
+<pre><code>kite-dataset list repo:hdfs:/data
+</code></pre>
+
+<hr />
+
+<p><a href="#top">Back to the Top</a></p>
+
+<hr />
+
+<h2 id="show">show</h2>
+
+<p>Print the first <em>n</em> records in a dataset.</p>
+
+<h3 id="syntax-4">Syntax</h3>
+
+<pre><code>kite-dataset [-v] show &lt;dataset&gt; [command options]
+</code></pre>
+
+<h3 id="options-3">Options</h3>
+
+<table>
+  <tbody>
+    <tr>
+      <td><code>-n, --num-records</code></td>
+      <td>The number of records to print. The default number is 10.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="examples-5">Examples</h3>
+
+<p>Show the first 10 records in dataset “users”:</p>
+
+<pre><code>kite-dataset show users
+</code></pre>
+
+<p>Show the first 50 records in dataset “users”:</p>
+
+<pre><code>kite-dataset show users -n 50
+</code></pre>
+
+<hr />
+
+<p><a href="#top">Back to the Top</a></p>
+
+<hr />
+
+<h2 id="copy">copy</h2>
+
+<p>Copy records from one dataset to another.</p>
+
+<h3 id="syntax-5">Syntax</h3>
+
+<pre><code>kite-dataset [-v] copy &lt;source dataset&gt; &lt;destination dataset&gt; [command options]
+</code></pre>
+
+<h3 id="options-4">Options</h3>
+
+<table>
+  <tbody>
+    <tr>
+      <td><code>--no-compaction</code></td>
+      <td>Copy to output directly, without compacting the data.</td>
+    </tr>
+    <tr>
+      <td><code>--num-writers</code></td>
+      <td>The number of writer processes to use.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="examples-6">Examples</h3>
+
+<p>Copy the contents of <code>movies_avro</code> to <code>movies_parquet</code>:</p>
+
+<pre><code>kite-dataset copy movies_avro movies_parquet
+</code></pre>
+
+<p>Copy the movies dataset into HBase in a map-only job:</p>
+
+<pre><code>kite-dataset copy movies dataset:hbase:zk-host/movies --no-compaction
+</code></pre>
+
+<hr />
+
+<p><a href="#top">Back to the Top</a></p>
+
+<hr />
+
+<h2 id="transform">transform</h2>
+<p>Transforms records from one dataset and stores them in another dataset.</p>
+
+<h3 id="syntax-6">Syntax</h3>
+
+<pre><code>kite-dataset transform &lt;source dataset&gt; &lt;destination dataset&gt; [command options]
+</code></pre>
+
+<h3 id="options-5">Options</h3>
+
+<table>
+  <tbody>
+    <tr>
+      <td><code>--no-compaction</code></td>
+      <td>Copy to output without compacting the data</td>
+    </tr>
+    <tr>
+      <td><code>--num-writers</code></td>
+      <td>The number of writer processes to use</td>
+    </tr>
+    <tr>
+      <td><code>--transform</code></td>
+      <td>A transform DoFn class name</td>
+    </tr>
+    <tr>
+      <td><code>--jar</code></td>
+      <td>Add a jar to the runtime class path</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="examples-7">Examples</h3>
+
+<p>Transform the contents of <code>movies_src</code> using <code>com.example.TransformFn</code>:</p>
+
+<pre><code>kite-dataset  transform movies_src movies --transform com.example.TransformFn --jar fns.jar
+</code></pre>
+
+<hr />
+
+<p><a href="#top">Back to the Top</a></p>
+
+<hr />
+
+<h2 id="delete">delete</h2>
+
+<p>Delete one or more datasets or views.</p>
+
+<p>If deleting a dataset, all data and metadata is deleted. If deleting a view, only data is deleted.</p>
+
+<p>Both datasets and views are identified by URI, but arguments that do not start with “dataset:” or “view:” are assumed to be a Hive table name.</p>
+
+<h3 id="syntax-7">Syntax</h3>
+
+<pre><code>kite-dataset [-v] delete &lt;datasets&gt; [command options]
+</code></pre>
+
+<h3 id="examples-8">Examples</h3>
+
+<p>Delete all data and metadata for the dataset “users”:</p>
+
+<pre><code>kite-dataset delete users
+</code></pre>
+
+<p>Delete just data from the Hive dataset “users”:</p>
+
+<pre><code>kite-dataset delete view:hive:users
+</code></pre>
+
+<hr />
+
+<p><a href="#top">Back to the Top</a></p>
+
+<hr />
+
+<h2 id="info">info</h2>
+
+<p>Print all metadata for a dataset.</p>
+
+<h3 id="syntax-8">Syntax</h3>
+
+<pre><code>kite-dataset info &lt;dataset name&gt;
+</code></pre>
+
+<h3 id="example">Example</h3>
+
+<p>Print all metadata for the “users” dataset:</p>
+
+<pre><code>kite-dataset info users
+</code></pre>
+
+<hr />
+
+<p><a href="#top">Back to the Top</a></p>
+
+<hr />
+
+<h2 id="schema">schema</h2>
+
+<p>Show the schema for a dataset.</p>
+
+<h3 id="syntax-9">Syntax</h3>
+
+<pre><code>kite-dataset [-v] schema &lt;dataset&gt; [command options]
+</code></pre>
+
+<h3 id="options-6">Options</h3>
+
+<table>
+  <tbody>
+    <tr>
+      <td><code>-o, --output</code></td>
+      <td>Save schema in Avro format to a given path.</td>
+    </tr>
+    <tr>
+      <td><code>--minimize</code></td>
+      <td>Minimize schema file size by eliminating white space.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="examples-9">Examples:</h3>
+
+<p>Print the schema for dataset “users” to standard out:</p>
+
+<pre><code>kite-dataset schema users
+</code></pre>
+
+<p>Save the schema for dataset “users” to user.avsc:</p>
+
+<pre><code>dataset schema users -o user.avsc
+</code></pre>
+
+<hr />
+
 <p><a href="#top">Back to the Top</a></p>
 
 <hr />
@@ -256,12 +705,12 @@
 
 <p>See <a href="/docs/staging/read-only-formats.html#csv">CSV format details</a>.</p>
 
-<h3 id="syntax">Syntax</h3>
+<h3 id="syntax-10">Syntax</h3>
 
 <pre><code>kite-dataset [-v] csv-schema &lt;sample csv path&gt; [command options]
 </code></pre>
 
-<h3 id="options">Options</h3>
+<h3 id="options-7">Options</h3>
 
 <table>
   <tbody>
@@ -304,7 +753,7 @@
   </tbody>
 </table>
 
-<h3 id="examples">Examples</h3>
+<h3 id="examples-10">Examples</h3>
 
 <p>Print the schema to standard out:</p>
 
@@ -380,12 +829,12 @@
 
 <p>See <a href="/docs/staging/read-only-formats.html#json">JSON format details</a>.</p>
 
-<h3 id="syntax-1">Syntax</h3>
+<h3 id="syntax-11">Syntax</h3>
 
 <pre><code>kite-dataset [-v] json-schema &lt;sample json path&gt; [command options]
 </code></pre>
 
-<h3 id="options-1">Options</h3>
+<h3 id="options-8">Options</h3>
 
 <table>
   <tbody>
@@ -404,7 +853,7 @@
   </tbody>
 </table>
 
-<h3 id="examples-1">Examples</h3>
+<h3 id="examples-11">Examples</h3>
 
 <p>Print an inferred schema for <code>samples.json</code> to standard out</p>
 
@@ -428,12 +877,12 @@
 
 <p>Fields are assumed to be nullable if they are Objects, or required if they are primitives. You can edit the generated schema directly to remove the <code>null</code> option for specific fields.</p>
 
-<h3 id="syntax-2">Syntax</h3>
+<h3 id="syntax-12">Syntax</h3>
 
 <pre><code>kite-dataset [-v] obj-schema &lt;class name&gt; [command options]
 </code></pre>
 
-<h3 id="options-2">Options</h3>
+<h3 id="options-9">Options</h3>
 
 <table>
   <tbody>
@@ -456,7 +905,7 @@
   </tbody>
 </table>
 
-<h3 id="examples-2">Examples</h3>
+<h3 id="examples-12">Examples</h3>
 
 <p>Create a schema for an example User class:</p>
 
@@ -479,160 +928,6 @@
 
 <hr />
 
-<h2 id="create">create</h2>
-
-<p>After you have generated an Avro schema, you can use <code>create</code> to make an empty dataset.</p>
-
-<h3 id="usage">Usage</h3>
-
-<pre><code>kite-dataset [-v] create &lt;dataset&gt; [command options]
-</code></pre>
-
-<h3 id="options-3">Options</h3>
-
-<table>
-  <tbody>
-    <tr>
-      <td><code>-s, --schema</code></td>
-      <td>A file containing the Avro schema. This value is <strong>required</strong>.</td>
-    </tr>
-    <tr>
-      <td><code>-f, --format</code></td>
-      <td>By default, the dataset is created in Avro format.<br />Use this switch to set the format to Parquet <code>-f parquet</code></td>
-    </tr>
-    <tr>
-      <td><code>-p, --partition-by</code></td>
-      <td>A file containing a JSON-formatted partition strategy.</td>
-    </tr>
-    <tr>
-      <td><code>-m, --mapping</code></td>
-      <td>A file containing a JSON-formatted column mapping.</td>
-    </tr>
-    <tr>
-      <td><code>--set, --property</code></td>
-      <td>A property to set in the dataset’s descriptor: <code>prop.name=value</code>.</td>
-    </tr>
-  </tbody>
-</table>
-
-<p><b>Note:</b> The dataset name must not contain a period (.).</p>
-
-<h3 id="examples-3">Examples:</h3>
-
-<p>Create dataset “users” in Hive:</p>
-
-<pre><code>kite-dataset create users --schema user.avsc
-</code></pre>
-
-<p>Create dataset “users” using Parquet:</p>
-
-<pre><code>kite-dataset create users --schema user.avsc --format parquet
-</code></pre>
-
-<p>Create dataset “users” partitioned by JSON configuration using a cache size of 20 (rather than the default cache size of 10):</p>
-
-<pre><code>kite-dataset create users --schema user.avsc --partition-by user_part.json --set kite.writer.cache-size=20
-</code></pre>
-
-<p>Create dataset “users” and set multiple properties:</p>
-
-<pre><code>kite-dataset create users --schema user.avsc --set kite.writer.cache-size=20 --set dfs.blocksize=256m
-</code></pre>
-
-<hr />
-
-<p><a href="#top">Back to the Top</a></p>
-
-<hr />
-
-<p><a name="update"></a></p>
-
-<h2 id="update">update</h2>
-
-<p>Update the metadata descriptor for a dataset.</p>
-
-<h3 id="syntax-3">Syntax</h3>
-
-<pre><code>kite-dataset [-v] update &lt;dataset&gt; [command options]
-</code></pre>
-
-<h3 id="options-4">Options</h3>
-
-<table>
-  <tbody>
-    <tr>
-      <td><code>-s, --schema</code></td>
-      <td>The file containing the Avro schema.</td>
-    </tr>
-    <tr>
-      <td><code>--set, --property</code></td>
-      <td>Add a property pair: <code>prop.name=value</code>.</td>
-    </tr>
-  </tbody>
-</table>
-
-<h3 id="examples-4">Examples:</h3>
-
-<p>Update schema for dataset “users” in Hive:</p>
-
-<pre><code>kite-dataset update users --schema user.avsc
-</code></pre>
-
-<p>Update HDFS dataset by URI, add property:</p>
-
-<pre><code>kite-dataset update dataset:hdfs:/user/me/datasets/users --set kite.write.cache-size=20
-</code></pre>
-
-<hr />
-
-<p><a href="#top">Back to the Top</a></p>
-
-<hr />
-
-<p><a name="schema"></a></p>
-
-<h2 id="schema">schema</h2>
-
-<p>Show the schema for a dataset.</p>
-
-<h3 id="syntax-4">Syntax</h3>
-
-<pre><code>kite-dataset [-v] schema &lt;dataset&gt; [command options]
-</code></pre>
-
-<h3 id="options-5">Options</h3>
-
-<table>
-  <tbody>
-    <tr>
-      <td><code>-o, --output</code></td>
-      <td>Save schema in Avro format to a given path.</td>
-    </tr>
-    <tr>
-      <td><code>--minimize</code></td>
-      <td>Minimize schema file size by eliminating white space.</td>
-    </tr>
-  </tbody>
-</table>
-
-<h3 id="examples-5">Examples:</h3>
-
-<p>Print the schema for dataset “users” to standard out:</p>
-
-<pre><code>kite-dataset schema users
-</code></pre>
-
-<p>Save the schema for dataset “users” to user.avsc:</p>
-
-<pre><code>dataset schema users -o user.avsc
-</code></pre>
-
-<hr />
-
-<p><a href="#top">Back to the Top</a></p>
-
-<hr />
-
 <h2 id="csv-import">csv-import</h2>
 
 <p>Copy CSV records into a dataset.</p>
@@ -643,12 +938,12 @@
 
 <p>See <a href="/docs/staging/read-only-formats.html#csv">CSV format details</a>.</p>
 
-<h3 id="syntax-5">Syntax</h3>
+<h3 id="syntax-13">Syntax</h3>
 
 <pre><code>kite-dataset [-v] csv-import &lt;csv path&gt; &lt;dataset&gt; [command options]
 </code></pre>
 
-<h3 id="options-6">Options</h3>
+<h3 id="options-10">Options</h3>
 
 <table>
   <tbody>
@@ -691,7 +986,7 @@
   </tbody>
 </table>
 
-<h3 id="examples-6">Examples</h3>
+<h3 id="examples-13">Examples</h3>
 
 <p>Copy the records from <code>sample.csv</code> to a Hive dataset named “sample”:</p>
 
@@ -726,12 +1021,12 @@
 
 <p>See <a href="/docs/staging/read-only-formats.html#json">JSON format details</a>.</p>
 
-<h3 id="syntax-6">Syntax</h3>
+<h3 id="syntax-14">Syntax</h3>
 
 <pre><code>kite-dataset [-v] json-import &lt;json path&gt; &lt;dataset name&gt; [command options]
 </code></pre>
 
-<h3 id="options-7">Options</h3>
+<h3 id="options-11">Options</h3>
 
 <table>
   <tbody>
@@ -754,7 +1049,7 @@
   </tbody>
 </table>
 
-<h3 id="examples-7">Examples</h3>
+<h3 id="examples-14">Examples</h3>
 
 <p>Copy the records from <code>sample.json</code> to dataset <code>sample</code></p>
 
@@ -777,82 +1072,60 @@
 
 <hr />
 
-<p><a name="show"></a></p>
+<h2 id="inputformat-import">inputformat-import</h2>
 
-<h2 id="show">show</h2>
+<p>Copy records read by an InputFormat into a dataset.</p>
 
-<p>Print the first <em>n</em> records in a dataset.</p>
+<p>This will use a custom input format by name and copy the keys or values (set by <code>--record-type</code>) into a dataset.</p>
 
-<h3 id="syntax-7">Syntax</h3>
+<p>Use the <a href="#obj-schema"><code>obj-schema</code> command</a> to infer a schema for the key or value class used by the InputFormat.</p>
 
-<pre><code>kite-dataset [-v] show &lt;dataset&gt; [command options]
+<h3 id="syntax-15">Syntax</h3>
+
+<pre><code>kite-dataset [-v] inputformat-import &lt;data path&gt; &lt;dataset&gt; [command options]
 </code></pre>
 
-<h3 id="options-8">Options</h3>
+<h3 id="options-12">Options</h3>
 
 <table>
   <tbody>
     <tr>
-      <td><code>-n, --num-records</code></td>
-      <td>The number of records to print. The default number is 10.</td>
+      <td><code>--format</code></td>
+      <td>The InputFormat class name. Must include the package.</td>
     </tr>
-  </tbody>
-</table>
-
-<h3 id="examples-8">Examples</h3>
-
-<p>Show the first 10 records in dataset “users”:</p>
-
-<pre><code>kite-dataset show users
-</code></pre>
-
-<p>Show the first 50 records in dataset “users”:</p>
-
-<pre><code>kite-dataset show users -n 50
-</code></pre>
-
-<hr />
-
-<p><a href="#top">Back to the Top</a></p>
-
-<hr />
-
-<p><a name="copy"></a></p>
-
-<h2 id="copy">copy</h2>
-
-<p>Copy records from one dataset to another.</p>
-
-<h3 id="syntax-8">Syntax</h3>
-
-<pre><code>kite-dataset [-v] copy &lt;source dataset&gt; &lt;destination dataset&gt; [command options]
-</code></pre>
-
-<h3 id="options-9">Options</h3>
-
-<table>
-  <tbody>
     <tr>
-      <td><code>--no-compaction</code></td>
-      <td>Copy to output directly, without compacting the data.</td>
+      <td><code>--jar</code></td>
+      <td>Add a jar to the runtime classpath</td>
+    </tr>
+    <tr>
+      <td><code>--record-type</code></td>
+      <td>InputFormat argument to use as the record (<code>key</code> or <code>value</code>)</td>
     </tr>
     <tr>
       <td><code>--num-writers</code></td>
-      <td>The number of writer processes to use.</td>
+      <td>The number of writer processes to use</td>
+    </tr>
+    <tr>
+      <td><code>--no-compaction</code></td>
+      <td>Copy to output directly, without compacting the data</td>
+    </tr>
+    <tr>
+      <td><code>--transform</code></td>
+      <td>A transform DoFn class name</td>
+    </tr>
+    <tr>
+      <td><code>--set, --property</code></td>
+      <td>A property to set on the configuration: <code>prop.name=value</code>.</td>
     </tr>
   </tbody>
 </table>
 
-<h3 id="examples-9">Examples</h3>
+<h3 id="examples-15">Examples</h3>
 
-<p>Copy the contents of <code>movies_avro</code> to <code>movies_parquet</code>:</p>
+<p>Import the keys from a sequence file of <code>MyObject</code> defined in myobject.jar:</p>
 
-<pre><code>kite-dataset copy movies_avro movies_parquet
-</code></pre>
-
-<p>Copy the movies dataset into HBase in a map-only job:</p>
-
-<pre><code>kite-dataset copy movies dataset:hbase:zk-host/movies --no-compaction
+<pre><code>kite-dataset inputformat-import data.seq mytable --jar myobject.jar --record-type key \
+                           --format org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat
 </code></pre>
 
 <hr />
@@ -861,22 +1134,35 @@
 
 <hr />
 
-<p><a name="delete"></a></p>
+<h2 id="tar-import">tar-import</h2>
 
-<h2 id="delete">delete</h2>
+<p>Create a dataset from a tarball or load a tarball into an existing dataset.</p>
 
-<p>Delete one or more datasets and related metadata.</p>
+<p>The datasets that this command will create or write to use a static schema, TarFileEntry, that has 2 fields: filename and filecontent.</p>
 
-<h3 id="syntax-9">Syntax</h3>
+<p>Tarballs imported using this command are converted to Avro or Parquet files of TarFileEntries and are compressed using Snappy compression.</p>
 
-<pre><code>kite-dataset [-v] delete &lt;datasets&gt; [command options]
+<h3 id="syntax-16">Syntax</h3>
+
+<pre><code>kite-dataset [-v] tar-import &lt;tarball&gt; &lt;dataset&gt; [command options]
 </code></pre>
 
-<h3 id="examples-10">Examples</h3>
+<h3 id="options-13">Options</h3>
 
-<p>Delete all data and metadata for the dataset “users”:</p>
+<table>
+  <tbody>
+    <tr>
+      <td><code>--compression</code></td>
+      <td>The compression algorithm used to compress the incoming tarball.</td>
+    </tr>
+  </tbody>
+</table>
 
-<pre><code>kite-dataset delete users
+<h3 id="examples-16">Examples</h3>
+
+<p>Convert a tarball of files to an Avro dataset:</p>
+
+<pre><code>kite-dataset tar-import data.tar.gz dataset:hdfs:/user/me/tar_data
 </code></pre>
 
 <hr />
@@ -884,8 +1170,6 @@
 <p><a href="#top">Back to the Top</a></p>
 
 <hr />
-
-<p><a name="partitionConfig"></a></p>
 
 <h2 id="partition-config">partition-config</h2>
 
@@ -934,12 +1218,12 @@
 
 <p>Provided partitioners do not reference a source field and instead require that a value is provided when writing. Values can be provided by writing to <a href="/docs/staging/view-api.html">views</a>.</p>
 
-<h3 id="syntax-10">Syntax</h3>
+<h3 id="syntax-17">Syntax</h3>
 
 <pre><code>kite-dataset [-v] partition-config &lt;field:type pairs&gt; [command options]
 </code></pre>
 
-<h3 id="options-10">Options:</h3>
+<h3 id="options-14">Options:</h3>
 
 <table>
   <tbody>
@@ -958,7 +1242,7 @@
   </tbody>
 </table>
 
-<h3 id="examples-11">Examples</h3>
+<h3 id="examples-17">Examples</h3>
 
 <p>Partition by email address, balanced across 16 hash partitions and save to a file.</p>
 
@@ -975,8 +1259,6 @@
 <p><a href="#top">Back to the Top</a></p>
 
 <hr />
-
-<p><a name="mapping-config"></a></p>
 
 <h2 id="mapping-config">mapping-config</h2>
 
@@ -1003,12 +1285,12 @@
 
 <p>If the last option is used, the mapping type will determined by the source field type. Numbers will use <code>counter</code>, hash maps and records will use <code>keyAsColumn</code>, and all others will use <code>column</code>.</p>
 
-<h3 id="syntax-11">Syntax</h3>
+<h3 id="syntax-18">Syntax</h3>
 
 <pre><code>kite-dataset  [-v] create-column-mapping &lt;field:type pairs&gt; [command options]
 </code></pre>
 
-<h3 id="options-11">Options</h3>
+<h3 id="options-15">Options</h3>
 
 <table>
   <tbody>
@@ -1027,7 +1309,7 @@
   </tbody>
 </table>
 
-<h3 id="examples-12">Examples</h3>
+<h3 id="examples-18">Examples</h3>
 
 <p>Store email in the key, other fields in column family <code>u</code>:</p>
 
@@ -1050,107 +1332,16 @@
 
 <hr />
 
-<p><a name="help"></a></p>
-
-<h2 id="help">help</h2>
-
-<p>Retrieves details on the functions of one or more dataset commands.</p>
-
-<h3 id="syntax-12">Syntax</h3>
-
-<pre><code>kite-dataset  [-v] help &lt;commands&gt; [command options]
-</code></pre>
-
-<h3 id="examples-13">Examples</h3>
-
-<p>Retrieve details for the create, show, and delete commands.</p>
-
-<pre><code>kite-dataset help create show delete
-
-</code></pre>
-
-<hr />
-
-<p><a href="#top">Back to the Top</a></p>
-
-<hr />
-
-<p><a name="transform"></a></p>
-
-<h2 id="transform">transform</h2>
-<p>Transforms records from one dataset and stores them in another dataset.</p>
-
-<h3 id="syntax-13">Syntax</h3>
-
-<pre><code>kite-dataset transform &lt;source dataset&gt; &lt;destination dataset&gt; [command options]
-</code></pre>
-
-<h3 id="options-12">Options</h3>
-
-<table>
-  <tbody>
-    <tr>
-      <td><code>--no-compaction</code></td>
-      <td>Copy to output without compacting the data</td>
-    </tr>
-    <tr>
-      <td><code>--num-writers</code></td>
-      <td>The number of writer processes to use</td>
-    </tr>
-    <tr>
-      <td><code>--transform</code></td>
-      <td>A transform DoFn class name</td>
-    </tr>
-    <tr>
-      <td><code>--jar</code></td>
-      <td>Add a jar to the runtime class path</td>
-    </tr>
-  </tbody>
-</table>
-
-<h3 id="examples-14">Examples</h3>
-
-<p>Transform the contents of <code>movies_src</code> using <code>com.example.TransformFn</code>:</p>
-
-<pre><code>kite-dataset  transform movies_src movies --transform com.example.TransformFn --jar fns.jar
-</code></pre>
-
-<hr />
-
-<p><a href="#top">Back to the Top</a></p>
-
-<hr />
-
-<p><a name="info"></a></p>
-
-<h2 id="info">info</h2>
-
-<p>Print all metadata for a dataset.</p>
-
-<h3 id="syntax-14">Syntax</h3>
-
-<pre><code>kite-dataset info &lt;dataset name&gt;
-</code></pre>
-
-<h3 id="example">Example</h3>
-
-<p>Print all metadata for the “users” dataset:</p>
-
-<pre><code>kite-dataset info users
-</code></pre>
-
-<p><a name="log4j-config"></a></p>
-
 <h2 id="log4j-config">log4j-config</h2>
 
 <p>Builds a log4j configuration to log events to a dataset.</p>
 
-<h3 id="syntax-15">Syntax</h3>
+<h3 id="syntax-19">Syntax</h3>
 
 <pre><code>kite-dataset log4j-config &lt;dataset name&gt; --host &lt;flume hostname&gt; [command options]
 </code></pre>
 
-<h3 id="options-13">Options</h3>
+<h3 id="options-16">Options</h3>
 
 <table>
   <tbody>
@@ -1173,7 +1364,7 @@
   </tbody>
 </table>
 
-<h3 id="examples-15">Examples</h3>
+<h3 id="examples-19">Examples</h3>
 
 <p>Print log4j configuration to log to dataset “users”:</p>
 
@@ -1196,18 +1387,16 @@
 
 <hr />
 
-<p><a name="flume-config"></a></p>
-
 <h2 id="flume-config">flume-config</h2>
 
 <p>Builds a Flume configuration to log events to a dataset.</p>
 
-<h3 id="syntax-16">Syntax</h3>
+<h3 id="syntax-20">Syntax</h3>
 
 <pre><code>kite-dataset flume-config &lt;dataset name or URI&gt; [command options]
 </code></pre>
 
-<h3 id="options-14">Options</h3>
+<h3 id="options-17">Options</h3>
 
 <table>
   <tbody>
@@ -1278,7 +1467,7 @@
   </tbody>
 </table>
 
-<h3 id="examples-16">Examples</h3>
+<h3 id="examples-20">Examples</h3>
 
 <p>Print Flume configuration to log to dataset “users”:</p>
 
@@ -1313,13 +1502,13 @@
   <div class="wrap columns">
 
     <div class="left">
-      <h2 class="footer-heading">Kite Software Development Kit, 1.0.0</h2>
+      <h2 class="footer-heading">Kite Software Development Kit, 1.1.0</h2>
 
       <ul>
         <li>Kite is licensed under</li>
         <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
         <li>&nbsp;</li>
-        <li>Generated on 24 February 2015</li>
+        <li>Generated on 16 June 2015</li>
       </ul>
 
     </div>
@@ -1341,8 +1530,8 @@
           <div class="right">
             <ul>
               <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
-              <li><a href="/docs/1.0.0/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
-              <li><a href="/docs/1.0.0/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/docs/staging/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/staging/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
               <li><a href="/docs/staging/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
             </ul>
           </div>

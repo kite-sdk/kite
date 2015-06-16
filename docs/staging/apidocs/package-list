@@ -2,6 +2,7 @@ org.kitesdk.data
 org.kitesdk.data.crunch
 org.kitesdk.data.flume
 org.kitesdk.data.mapreduce
+org.kitesdk.data.oozie
 org.kitesdk.minicluster
 org.kitesdk.morphline.api
 org.kitesdk.morphline.avro

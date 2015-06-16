@@ -18,7 +18,7 @@ org.kitesdk.data
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 1.0.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 1.1.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Package</B></FONT>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>
@@ -36,8 +36,8 @@ org.kitesdk.data
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="pkg_org.kitesdk.data.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell3"><FONT SIZE="-2"> DETAIL: &nbsp;
-<a href="#Removed">REMOVED</a>&nbsp;|&nbsp;
-ADDED&nbsp;|&nbsp;
+REMOVED&nbsp;|&nbsp;
+<a href="#Added">ADDED</a>&nbsp;|&nbsp;
 <a href="#Changed">CHANGED</a>
   </FONT></TD>
 </TR>
@@ -48,42 +48,58 @@ ADDED&nbsp;|&nbsp;
 Package <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_top"><tt>org.kitesdk.data</tt></A>
 </H2>
 <p>
-<a NAME="Removed"></a>
-<TABLE summary="Removed Classes" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<a NAME="Added"></a>
+<TABLE summary="Added Interfaces" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Classes</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Interfaces</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="DatasetReaderException"></A>
-  DatasetReaderException
+  <A NAME="PartitionView"></A>
+  <nobr><A HREF="../../apidocs/org/kitesdk/data/PartitionView.html" target="_top"><tt><I>PartitionView</I></tt></A></nobr>
   </TD>
-  <TD VALIGN="TOP"><p>
- Exception thrown for dataset reader-related failures.</TD>
+  <TD VALIGN="TOP">A {@code PartitionView} is a subset of a <A HREF="../../apidocs/org/kitesdk/data/PartitionView/Dataset.html"><TT>Dataset</TT></A> that corresponds to
+ a single partition, with a location.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="DatasetWriterException"></A>
-  DatasetWriterException
+  <A NAME="Signalable"></A>
+  <nobr><A HREF="../../apidocs/org/kitesdk/data/Signalable.html" target="_top"><tt><I>Signalable</I></tt></A></nobr>
   </TD>
-  <TD VALIGN="TOP"><p>
- Exception thrown for dataset writer-related failures.</TD>
+  <TD VALIGN="TOP">Signalable views may signal consumers when their underlying data is ready for
+ consumption.</TD>
 </TR>
 </TABLE>
 &nbsp;
 <p>
 <a NAME="Changed"></a>
-<TABLE summary="Changed Interfaces" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TABLE summary="Changed Classes and Interfaces" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Changed Interfaces</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Changed Classes and Interfaces</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="DatasetWriter"></A>
-  <nobr><A HREF="org.kitesdk.data.DatasetWriter.html"><I>DatasetWriter</I></A></nobr>
+  <A NAME="IncompatibleSchemaException"></A>
+  <nobr><A HREF="org.kitesdk.data.IncompatibleSchemaException.html">IncompatibleSchemaException</A></nobr>
   </TD>
   <TD VALIGN="TOP"><p>
- A stream-oriented dataset writer.</TD>
+ Exception thrown when a schema update is not compatible
+ with the previous schema (or schemas) or with existing
+ datasets (if shared storage is used, for example).</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="PartitionStrategy.Builder"></A>
+  <nobr><A HREF="org.kitesdk.data.PartitionStrategy.Builder.html">PartitionStrategy.Builder</A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A fluent builder to aid in the construction of <A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy/Builder/PartitionStrategy.html"><TT>PartitionStrategy</TT></A>s.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="View"></A>
+  <nobr><A HREF="org.kitesdk.data.View.html"><I>View</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A {@code View} is a subset of a <A HREF="../../apidocs/org/kitesdk/data/View/Dataset.html"><TT>Dataset</TT></A>.</TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -94,7 +110,7 @@ Package <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_t
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 1.0.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 1.1.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Package</B></FONT>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>

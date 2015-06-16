@@ -61,7 +61,7 @@
           
           
           
-          <li><a href="/docs/staging/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
+          <li><a href="/docs/staging/introduction-to-datasets.html">Datasets Overview</a></li>
           
           
         </ul>
@@ -104,7 +104,7 @@
         <ul>
           
           
-          <li><a href="/docs/staging/URIs.html">Kite URIs</a></li>
+          <li><b>Kite URIs</b></li>
           
           
           
@@ -125,10 +125,6 @@
           
           
           <li><a href="/docs/staging/Column-Mapping.html">Column Mapping</a></li>
-          
-          
-          
-          <li><a href="/docs/staging/lifecycle.html">Dataset Lifecycle</a></li>
           
           
           
@@ -175,6 +171,10 @@
       <td><code>dataset:hdfs:/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;</code></td>
     </tr>
     <tr>
+      <td><a href="#s3"><em>S3</em></a></td>
+      <td><code>dataset:s3a://&lt;bucket&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;</code><br /><code>dataset:s3n://&lt;bucket&gt;/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;</code></td>
+    </tr>
+    <tr>
       <td><a href="#local"><em>Local FS</em></a></td>
       <td><code>dataset:file:/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;</code></td>
     </tr>
@@ -208,10 +208,10 @@
 
 <h3 id="hdfs">HDFS</h3>
 
-<p>The URI for a dataset in HDFS uses the following pattern. You provide a path to the dataset.
-<code>
-dataset:hdfs:/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;
-</code></p>
+<p>The URI for a dataset in HDFS uses the following pattern. You provide a path to the dataset.</p>
+
+<pre><code>dataset:hdfs:/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;
+</code></pre>
 
 <p>While it is not a typical use case, there might be times where it is useful to specify the HDFS host and port. You can insert the host and port before the path in the URI. You can use these URIs to select between HDFS instances.</p>
 
@@ -220,9 +220,20 @@ dataset:hdfs:/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;
 <pre><code>dataset:hdfs://&lt;host&gt;[:port]/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;
 </code></pre>
 
+<h3 id="s3">S3</h3>
+
+<p>Kite supports datasets stored in S3 using both <code>s3a</code> and <code>s3n</code> <a href="https://wiki.apache.org/hadoop/AmazonS3">file system schemes</a>. The URI host is used to pass a S3 bucket name.</p>
+
+<p>S3 credentials should be set in the environment configuration using the right property for the FS scheme:</p>
+
+<ul>
+  <li><code>s3a</code>: use <code>fs.s3a.access.key</code> for id and <code>fs.s3a.secret.key</code> for key</li>
+  <li><code>s3n</code>: use <code>fs.s3n.awsAccessKeyId</code> for id and <code>fs.s3n.awsSecretAccessKey</code> for key</li>
+</ul>
+
 <p><a name="local"></a></p>
 
-<h3 id="local-file-system-datasets">Local File System Datasets</h3>
+<h3 id="local-file-system">Local File System</h3>
 
 <p>The local file system dataset URI follows a pattern similar to the HDFS URI, with the <code>file:</code> scheme.</p>
 
@@ -298,7 +309,36 @@ dataset:hdfs:/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;
 
 <h2 id="repository-uris">Repository URIs</h2>
 
-<p>Repository URI patterns always begin with the <code>repo:</code> prefix. In the Kite Dataset API, you use a repository URI with the <a href="/docs/staging/apidocs/org/kitesdk/data/Datasets.html#list"><code>Datasets.list</code></a> method to retrieve a list of valid datasets. </p>
+<p>Repository URI patterns always begin with the <code>repo:</code> prefix and leave out table and namespace options that are in dataset or view URIs.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Scheme</th>
+      <th>Pattern</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><em>Hive</em></td>
+      <td><code>repo:hive</code></td>
+    </tr>
+    <tr>
+      <td><em>HDFS</em></td>
+      <td><code>repo:hdfs:/&lt;path&gt;</code></td>
+    </tr>
+    <tr>
+      <td><em>Local FS</em></td>
+      <td><code>repo:file:/&lt;path&gt;</code></td>
+    </tr>
+    <tr>
+      <td><em>HBase</em></td>
+      <td><code>repo:hbase:&lt;zookeeper&gt;</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>In the Kite Dataset API, you use a repository URI with the <a href="/docs/staging/apidocs/org/kitesdk/data/Datasets.html#list"><code>Datasets.list</code></a> method to retrieve a list of valid datasets. You can also pass a repository URI to the CLI <a href="/docs/staging/cli-reference.html#list">list</a> command.</p>
 
 <p>For example, to list the dataset URIs for the Hive repository, use <code>Datasets.list("repo:hive");</code>.</p>
 
@@ -315,13 +355,13 @@ dataset:hdfs:/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;
   <div class="wrap columns">
 
     <div class="left">
-      <h2 class="footer-heading">Kite Software Development Kit, 1.0.0</h2>
+      <h2 class="footer-heading">Kite Software Development Kit, 1.1.0</h2>
 
       <ul>
         <li>Kite is licensed under</li>
         <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
         <li>&nbsp;</li>
-        <li>Generated on 24 February 2015</li>
+        <li>Generated on 16 June 2015</li>
       </ul>
 
     </div>
@@ -343,8 +383,8 @@ dataset:hdfs:/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;
           <div class="right">
             <ul>
               <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
-              <li><a href="/docs/1.0.0/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
-              <li><a href="/docs/1.0.0/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/docs/staging/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/staging/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
               <li><a href="/docs/staging/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
             </ul>
           </div>

@@ -61,11 +61,15 @@ table td {
 .post-content .left {
   min-width: 40%;
   margin-right: 2em;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .post-content .right {
   min-width: 40%;
   margin-left: 2em;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .columns {

@@ -61,7 +61,7 @@
           
           
           
-          <li><a href="/docs/staging/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
+          <li><a href="/docs/staging/introduction-to-datasets.html">Datasets Overview</a></li>
           
           
         </ul>
@@ -128,10 +128,6 @@
           
           
           
-          <li><a href="/docs/staging/lifecycle.html">Dataset Lifecycle</a></li>
-          
-          
-          
           <li><a href="/docs/staging/maven">Maven Plugin</a></li>
           
           
@@ -166,7 +162,7 @@
 
 <p><code>View</code> instances are <a href="https://jsr-305.googlecode.com/svn/trunk/javadoc/javax/annotation/concurrent/Immutable.html">immutable</a>. You can pass the view to other operations, safe in the knowledge that it won’t be changed at all.</p>
 
-<h2 id="refining-a-view">Refining a View</h2>
+<h2 id="refining-a-view-selecting-records">Refining a View: Selecting Records</h2>
 
 <p>You create a view by adding a constraint to an existing view or dataset using one of the following methods.</p>
 
@@ -243,7 +239,17 @@
 
 <p>If the ratings dataset is partitioned by <code>time</code>, then the view will automatically take advantage of dataset partitioning. Kite intelligently determines which partitions to draw from in response to this filter value. See <a href="/docs/staging/Partitioned-Datasets.html" title="See [Partitioned Datasets][partitioned-datasets].">Partitioned Datasets</a>.</p>
 
-<h2 id="loading-a-view">Loading a View</h2>
+<h2 id="using-different-classes-and-schemas-selecting-columns">Using Different Classes and Schemas: Selecting Columns</h2>
+
+<p>By default, views will use Avro’s <code>GenericRecord</code> type when returning records. You can set the type that will be constructed by calling <a href="/docs/staging/apidocs/org/kitesdk/data/View.html#asType(java.lang.Class)"><code>View#asType(Class)</code></a> and passing a class that is compatible with the dataset’s schema. Kite will automatically set the read schema based on the type you pass.</p>
+
+<p>You can also set the read schema and still use generic records by calling <a href="/docs/staging/apidocs/org/kitesdk/data/View.html#asSchema(org.apache.avro.Schema)"><code>View#asSchema(Schema)</code></a> with your read schema.</p>
+
+<p>Both <code>asType</code> and <code>asSchema</code> will load only the requested data fields from the dataset. Selecting fields avoids spending extra time deserializing some fields in Avro and enables Parquet to skip large portions of the underlying data. This can be used to drastically improve read speeds.</p>
+
+<h2 id="working-with-views">Working with Views</h2>
+
+<h3 id="loading-a-view">Loading a View</h3>
 
 <p>In addition to creating a view with the API, you can load a view from a <a href="/docs/staging/URIs.html#view-uris">view URI</a>. A view URIs is analogous to a dataset URI, where the scheme is <code>view:</code> instead of <code>dataset:</code> and constraints are added as query arguments.</p>
 
@@ -257,37 +263,37 @@
 </tr></table>
 </div>
 
-<h2 id="inspecting-a-view">Inspecting a View</h2>
+<h3 id="inspecting-a-view">Inspecting a View</h3>
 
 <p>In some use cases, it might not be necessary to return a set of values, but only verify that values do or do not exist. For example, you might want to only submit a MapReduce job if there are values that would be processed. These methods allow you to inspect a view at runtime.</p>
 
-<h3 id="isempty">isEmpty</h3>
+<h4 id="isempty">isEmpty</h4>
 
 <p>The <a href="/docs/staging/apidocs/org/kitesdk/data/View.html#isEmpty()"><code>isEmpty</code></a> method returns whether your <code>View</code> contains any records at all.</p>
 
-<h3 id="geturi">getUri</h3>
+<h4 id="geturi">getUri</h4>
 
 <p>The <a href="/docs/staging/apidocs/org/kitesdk/data/View.html#getUri()"><code>getUri</code></a> method returns a URI for a <code>View</code> that can be passed to <code>Datasets.load</code>.</p>
 
-<h3 id="includes">includes</h3>
+<h4 id="includes">includes</h4>
 
 <p>The <a href="/docs/staging/apidocs/org/kitesdk/data/View.html#includes(E)"><code>includes</code></a> method returns whether an entity matches a view’s constraints. That is, whether the record would be included in this <code>View</code> if it were present in the <code>Dataset</code>.</p>
 
-<h2 id="working-with-records-in-a-view">Working with Records in a View</h2>
+<h3 id="working-with-records-in-a-view">Working with Records in a View</h3>
 
 <p>You can interact with records in a view the way you would work with records in a full dataset. You can use <code>newReader</code> and <code>newWriter</code> to get the same reader or writer objects, but they are restricted to operations on the view. </p>
 
-<h3 id="newreader">newReader</h3>
+<h4 id="newreader">newReader</h4>
 
 <p>The <a href="/docs/staging/apidocs/org/kitesdk/data/View.html#newReader()"><code>newReader</code></a> method creates an appropriate <code>DatasetReader</code> that returns only records that match the view’s constraints.</p>
 
-<h3 id="newwriter">newWriter</h3>
+<h4 id="newwriter">newWriter</h4>
 
 <p>The <a href="/docs/staging/apidocs/org/kitesdk/data/View.html#newWriter()"><code>newWriter</code></a> method creates an appropriate <code>DatasetWriter</code> that will write only records that match the view’s constraints. For more information, see <a href="/docs/staging/writing-to-views.html">Writing to Views</a>.</p>
 
 <p>See [Restricted Views][restricted-views].</p>
 
-<h3 id="deleteall">deleteAll</h3>
+<h4 id="deleteall">deleteAll</h4>
 
 <p>The <a href="/docs/staging/apidocs/org/kitesdk/data/View.html#deleteAll()"><code>deleteAll</code></a> method deletes all entities in the dataset that match the view’s constraints.</p>
 
@@ -315,13 +321,13 @@
   <div class="wrap columns">
 
     <div class="left">
-      <h2 class="footer-heading">Kite Software Development Kit, 1.0.0</h2>
+      <h2 class="footer-heading">Kite Software Development Kit, 1.1.0</h2>
 
       <ul>
         <li>Kite is licensed under</li>
         <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
         <li>&nbsp;</li>
-        <li>Generated on 24 February 2015</li>
+        <li>Generated on 16 June 2015</li>
       </ul>
 
     </div>
@@ -343,8 +349,8 @@
           <div class="right">
             <ul>
               <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
-              <li><a href="/docs/1.0.0/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
-              <li><a href="/docs/1.0.0/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/docs/staging/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/staging/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
               <li><a href="/docs/staging/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
             </ul>
           </div>

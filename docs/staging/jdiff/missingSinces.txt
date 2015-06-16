@@ -1,3 +1,19 @@
-NO DOC BLOCK: org.kitesdk.morphline.solr.LoadSolrBuilder Field LOAD_SOLR_CHILD_DOCUMENTS
-NO DOC BLOCK: org.kitesdk.morphline.solr.LoadSolrBuilder Field LOAD_SOLR_DELETE_BY_ID
-NO DOC BLOCK: org.kitesdk.morphline.solr.LoadSolrBuilder Field LOAD_SOLR_DELETE_BY_QUERY
+OK: org.kitesdk.tools.CompactionTask Class
+NO DOC BLOCK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.WriteMode Class
+OK: org.kitesdk.data.PartitionView Interface
+MISSING @SINCE TAG: org.kitesdk.morphline.stdlib.ReplaceValuesBuilder Class
+OK: org.kitesdk.data.Signalable Interface
+NO DOC BLOCK: org.kitesdk.morphline.scriptengine.java.ScriptEvaluator Constructor (java.lang.String, java.lang.String, java.lang.Class<T>, java.lang.String[], java.lang.Class[], java.lang.Class[], java.lang.String)
+OK: org.kitesdk.data.View Method asSchema(org.apache.avro.Schema)
+OK: org.kitesdk.data.View Method asType(java.lang.Class<T>)
+OK: org.kitesdk.data.PartitionStrategy.Builder Method fixedSizeRange(java.lang.String, java.lang.String, long)
+OK: org.kitesdk.data.PartitionStrategy.Builder Method fixedSizeRange(java.lang.String, long)
+OK: org.kitesdk.data.View Method getCoveringPartitions()
+OK: org.kitesdk.data.View Method getSchema()
+OK: org.kitesdk.data.crunch.CrunchDatasets Method partition(org.apache.crunch.PCollection<E>, org.kitesdk.data.View<E>, int, int)
+OK: org.kitesdk.tools.TransformTask Method setFilesPerPartition(int)
+MISSING @SINCE TAG: org.kitesdk.tools.TransformTask Method setWriteMode(org.apache.crunch.Target.WriteMode)
+OK: org.kitesdk.data.mapreduce.DatasetKeyInputFormat.ConfigBuilder Method withSchema(org.apache.avro.Schema)
+NO DOC BLOCK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat Field KITE_COPY_RECORDS
+NO DOC BLOCK: org.kitesdk.data.mapreduce.DatasetKeyInputFormat Field KITE_READER_SCHEMA
+NO DOC BLOCK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat Field KITE_WRITE_MODE
