@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.kitesdk</groupId>
     <artifactId>kite-data</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1-SNAPSHOT</version>
   </parent>
 
   <name>Kite Data HBase Module</name>
@@ -171,7 +171,7 @@
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-core</artifactId>
-      <version>1.1.0</version>
+      <version>1.1.1-SNAPSHOT</version>
     </dependency>
 
     <!-- Hadoop and HBase -->
@@ -228,7 +228,7 @@
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-core</artifactId>
-      <version>1.1.0</version>
+      <version>1.1.1-SNAPSHOT</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
