@@ -175,6 +175,8 @@ public interface View<E> {
    * @throws IncompatibleSchemaException
    *          If the given {@code schema} is incompatible with the underlying
    *          dataset.
+   *
+   * @since 1.1.0
    */
   View<GenericRecord> asSchema(Schema schema);
 
@@ -188,6 +190,8 @@ public interface View<E> {
    * @throws IncompatibleSchemaException
    *          If the given {@code type} is incompatible with the underlying
    *          dataset.
+   *
+   * @since 1.1.0
    */
   <T> View<T> asType(Class<T> type);
 }

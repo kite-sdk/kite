@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.kitesdk</groupId>
   <artifactId>kite-parent</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.1.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <modules>
@@ -1302,7 +1302,7 @@
         <vers.flume>1.4.0-cdh${cdh4.version}</vers.flume>
         <vers.hive>0.10.0-cdh${cdh4.version}</vers.hive>
         <vers.oozie>3.3.2-cdh${cdh4.version}</vers.oozie>
-        <test.aws.access.key></test.aws.access.key> <!-- don't test S3 -->
+        <test.aws.access.key /> <!-- don't test S3 -->
       </properties>
     </profile>
 
