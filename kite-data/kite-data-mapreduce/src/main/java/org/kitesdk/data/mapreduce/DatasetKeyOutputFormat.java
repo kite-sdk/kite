@@ -39,7 +39,6 @@ import org.kitesdk.data.Datasets;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.Signalable;
 import org.kitesdk.data.TypeNotFoundException;
-import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.Compatibility;

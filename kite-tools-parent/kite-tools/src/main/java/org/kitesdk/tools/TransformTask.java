@@ -84,6 +84,12 @@ public class TransformTask<S, T> extends Configured {
     return count;
   }
 
+  /**
+   * Do not shuffle data to writers to minimize the number of files. Write from
+   * each read task.
+   *
+   * @return this for method chaining
+   */
   public TransformTask noCompaction() {
     this.compact = false;
     this.numWriters = 0;
@@ -91,6 +97,14 @@ public class TransformTask<S, T> extends Configured {
     return this;
   }
 
+  /**
+   * Set the number of concurrent writer processes.
+   * <p>
+   * If set to 0, this disables compaction.
+   *
+   * @param numWriters the number of concurrent writer processes
+   * @return this for method chaining
+   */
   public TransformTask setNumWriters(int numWriters) {
     Preconditions.checkArgument(numWriters >= 0,
         "Invalid number of reducers: " + numWriters);
@@ -102,13 +116,26 @@ public class TransformTask<S, T> extends Configured {
     return this;
   }
 
-  public TransformTask setFilesPerPartition(int numPartitionWriters) {
-    Preconditions.checkArgument(numPartitionWriters > 0,
-        "Invalid number of partition writers: " + numPartitionWriters);
-    this.numPartitionWriters = numPartitionWriters;
+  /**
+   * Set the number of files to create in each output partition.
+   *
+   * @param filesPerPartition a target number of files per output partition
+   * @return this for method chaining
+   * @since 1.1.0
+   */
+  public TransformTask setFilesPerPartition(int filesPerPartition) {
+    Preconditions.checkArgument(filesPerPartition > 0,
+        "Invalid number of files per partition: " + filesPerPartition);
+    this.numPartitionWriters = filesPerPartition;
     return this;
   }
 
+  /**
+   * Set the output write mode: default, overwrite, or append.
+   *
+   * @param mode the output write mode
+   * @return this for method chaining
+   */
   public TransformTask setWriteMode(Target.WriteMode mode) {
     Preconditions.checkArgument(mode != Target.WriteMode.CHECKPOINT,
         "Checkpoint is not an allowed write mode");

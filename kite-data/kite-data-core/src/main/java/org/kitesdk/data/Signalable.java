@@ -18,6 +18,8 @@ package org.kitesdk.data;
 /**
  * Signalable views may signal consumers when their underlying data is ready for
  * consumption. Not all View implementations provide this capability.
+ *
+ * @since 1.1.0
  */
 public interface Signalable<E> extends View<E> {
 
