@@ -45,6 +45,7 @@ import org.kitesdk.data.Formats;
 import org.kitesdk.data.LocalFileSystem;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.TestHelpers;
+import org.kitesdk.data.View;
 import org.kitesdk.data.spi.DescriptorUtil;
 
 import static org.kitesdk.data.CompressionType.Uncompressed;
@@ -106,8 +107,8 @@ public class TestFileSystemUtil {
     Dataset<GenericRecord> dataset = Datasets.create(datasetUri, descriptor);
 
     // write two so that the descriptor uses the directory rather than a file
-    writeUserToDataset(dataset);
-    writeUserToDataset(dataset);
+    writeUserToView(dataset);
+    writeUserToView(dataset);
 
     DatasetDescriptor expected = dataset.getDescriptor();
     DatasetDescriptor actual = Iterables.getOnlyElement(
@@ -133,11 +134,47 @@ public class TestFileSystemUtil {
     Dataset<GenericRecord> dataset = Datasets.create(datasetUri, descriptor);
 
     // write two so that the descriptor uses the directory rather than a file
-    writeUserToDataset(dataset);
-    writeUserToDataset(dataset);
+    writeUserToView(dataset);
+    writeUserToView(dataset);
 
     Path datasetPath = new Path(folder.toURI());
     Path partitionPath = new Path(datasetPath, "id_hash=1");
+
+    DatasetDescriptor actual = Iterables.getOnlyElement(
+        FileSystemUtil.findPotentialDatasets(fs, root));
+
+    Assert.assertFalse("Should not flag at mixed depth",
+        descriptor.hasProperty("kite.filesystem.mixed-depth"));
+    Assert.assertEquals("Location should be at the partition directory",
+        partitionPath.toUri(), actual.getLocation());
+    Assert.assertEquals("Should use user schema",
+        USER_SCHEMA, actual.getSchema());
+    Assert.assertEquals("Should have Avro format",
+        Formats.AVRO, actual.getFormat());
+    Assert.assertFalse("Should not be partitioned", actual.isPartitioned());
+  }
+
+  @Test
+  public void testPartitionedDatasetWithEscapedChars() throws Exception {
+    File folder = temp.newFolder("a/b/c/d/e/dataset_name");
+    Path root = new Path(temp.getRoot().toURI());
+    FileSystem fs = LocalFileSystem.getInstance();
+    URI datasetUri = URI.create("dataset:file:" + folder.getAbsolutePath());
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA)
+        .partitionStrategy(new PartitionStrategy.Builder()
+            .provided("s")
+            .build())
+        .build();
+
+    Dataset<GenericRecord> dataset = Datasets.create(datasetUri, descriptor);
+
+    // write two so that the descriptor uses the directory rather than a file
+    writeUserToView(dataset.with("s", "test/-0"));
+    writeUserToView(dataset.with("s", "test/-0"));
+
+    Path datasetPath = new Path(folder.toURI());
+    Path partitionPath = new Path(datasetPath, "s=test%2F-0");
 
     DatasetDescriptor actual = Iterables.getOnlyElement(
         FileSystemUtil.findPotentialDatasets(fs, root));
@@ -664,7 +701,7 @@ public class TestFileSystemUtil {
     return new Path(file).getParent().toUri();
   }
 
-  public void writeUserToDataset(Dataset<GenericRecord> dataset) {
+  public void writeUserToView(View<GenericRecord> dataset) {
     DatasetWriter<GenericRecord> writer = null;
     try {
       writer = dataset.newWriter();

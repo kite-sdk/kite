@@ -399,8 +399,12 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
           partitionListener.partitionAdded(namespace, name, relative.toString());
         }
 
+        // use new Path(String) for locations because setting the URI directly
+        // results in the location URI being unescaped. the URI from
+        // #getLocation() is not a Path internal URI from with extra escapes
         List<Pair<Path, Path>> staged = FileSystemUtil.stageMove(fileSystem,
-            new Path(src.getLocation()), new Path(dest.getLocation()),
+            new Path(src.getLocation().toString()),
+            new Path(dest.getLocation().toString()),
             "tmp" /* data should be added to recover from a failure */ );
         FileSystemUtil.finishMove(fileSystem, staged);
 
@@ -451,7 +455,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
           for (PartitionView<E> partition : existingPartitions) {
             FileSystemPartitionView<E> toReplace =
                 (FileSystemPartitionView<E>) partition;
-            Path path = new Path(toReplace.getLocation());
+            Path path = new Path(toReplace.getLocation().toString());
             removals.add(path);
             notReplaced.remove(toReplace);
             if (partitionListener != null && descriptor.isPartitioned()) {
@@ -462,7 +466,8 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
 
           // replace the directory all at once
           FileSystemUtil.replace(fileSystem, directory,
-              new Path(dest.getLocation()), new Path(src.getLocation()),
+              new Path(dest.getLocation().toString()),
+              new Path(src.getLocation().toString()),
               removals);
 
           if (partitionListener != null && descriptor.isPartitioned()) {
@@ -486,7 +491,8 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
       PartitionView<E> srcPartition = Iterables.getOnlyElement(
           replacement.getCoveringPartitions());
       List<Pair<Path, Path>> staged = FileSystemUtil.stageMove(fileSystem,
-          new Path(srcPartition.getLocation()), new Path(unbounded.getLocation()),
+          new Path(srcPartition.getLocation().toString()),
+          new Path(unbounded.getLocation().toString()),
           "replace" /* data should replace to recover from a failure */ );
       deleteAll(); // remove all existing files
       FileSystemUtil.finishMove(fileSystem, staged);
