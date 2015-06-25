@@ -37,6 +37,14 @@
       <groupId>org.apache.hbase</groupId>
       <artifactId>hbase-testing-util</artifactId>
       <version>${vers.hbase-cdh5}</version>
+      <exclusions>
+        <!-- Pulls in the mr1 dependency, which causes a runtime VerifyError.
+             Hadoop must be provided anyway. -->
+        <exclusion>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 
