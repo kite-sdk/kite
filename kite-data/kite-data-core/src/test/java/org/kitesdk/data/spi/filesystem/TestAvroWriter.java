@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
@@ -29,7 +28,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
-import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Flushable;
 import org.kitesdk.data.Syncable;
 import org.kitesdk.data.spi.ReaderWriterState;
@@ -37,13 +35,13 @@ import org.kitesdk.data.spi.ReaderWriterState;
 public class TestAvroWriter extends TestFileSystemWriters {
   @Override
   public FileSystemWriter<Record> newWriter(Path directory, Schema schema) {
-    return FileSystemWriter.newWriter(fs, directory,
+    return FileSystemWriter.newWriter(fs, directory, 100, 2 * 1024 * 1024,
         new DatasetDescriptor.Builder()
             .property(
-                "kite.writer.roll-interval-seconds", String.valueOf(1))
+                "kite.writer.roll-interval-seconds", String.valueOf(10))
             .property(
                 "kite.writer.target-file-size",
-                String.valueOf(2 * 1024 * 1024)) // 2 MB
+                String.valueOf(32 * 1024 * 1024)) // 32 MB
             .schema(schema)
             .format("avro")
             .build());

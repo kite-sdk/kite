@@ -18,6 +18,7 @@ package org.kitesdk.data.spi.filesystem;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import java.io.IOException;
 import java.util.Iterator;
@@ -31,12 +32,10 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.MiniDFSTest;
-import org.kitesdk.data.spi.ClockReady;
 import org.kitesdk.data.spi.InitializeAccessor;
 import org.kitesdk.data.spi.ReaderWriterState;
 
@@ -116,6 +115,10 @@ public abstract class TestFileSystemWriters extends MiniDFSTest {
 
     stats = fs.listStatus(testDirectory, PathFilters.notHidden());
     Assert.assertEquals("Should contain a rolled file", 1, stats.length);
+
+    // keep track of the rolled file for the size check
+    FileStatus rolledFile = stats[0];
+
     stats = fs.listStatus(testDirectory);
     Assert.assertEquals("Should contain a hidden file and a rolled file",
         2, stats.length);
@@ -131,10 +134,12 @@ public abstract class TestFileSystemWriters extends MiniDFSTest {
     reader = newReader(stats[1].getPath(), TEST_SCHEMA);
     Iterators.addAll(actualContent, init(reader));
 
+    Assert.assertEquals("Should have the same number of records",
+        written.size(), actualContent.size());
     Assert.assertTrue("Should match written records",
-        written.equals(actualContent));
+        Sets.newHashSet(written).equals(Sets.newHashSet(actualContent)));
 
-    double ratioToTarget = (((double) stats[0].getLen()) / 2 / 1024 / 1024);
+    double ratioToTarget = (((double) rolledFile.getLen()) / 2 / 1024 / 1024);
     Assert.assertTrue(
         "Should be within 10% of target size: " + ratioToTarget * 100,
         ratioToTarget > 0.90 && ratioToTarget < 1.10);
@@ -176,6 +181,10 @@ public abstract class TestFileSystemWriters extends MiniDFSTest {
 
     stats = fs.listStatus(testDirectory, PathFilters.notHidden());
     Assert.assertEquals("Should contain a rolled file", 1, stats.length);
+
+    // keep track of the rolled file for the content check
+    FileStatus rolledFile = stats[0];
+
     stats = fs.listStatus(testDirectory);
     Assert.assertEquals("Should contain a hidden file and a rolled file",
         2, stats.length);
@@ -185,13 +194,22 @@ public abstract class TestFileSystemWriters extends MiniDFSTest {
     stats = fs.listStatus(testDirectory, PathFilters.notHidden());
     Assert.assertEquals("Should contain a visible data file", 2, stats.length);
 
-    DatasetReader<Record> reader = newReader(stats[0].getPath(), TEST_SCHEMA);
-    Assert.assertEquals("First file should have half the records",
-        firstHalf, Lists.newArrayList((Iterable) init(reader)));
+    DatasetReader<Record> reader = newReader(rolledFile.getPath(), TEST_SCHEMA);
+    int count = 0;
+    for (Record actual : init(reader)) {
+      count += 1;
+      Assert.assertEquals(firstHalf.get(((Long) actual.get("id")).intValue()), actual);
+    }
+    Assert.assertEquals("First half should have 50,000 records", 50000, count);
 
-    reader = newReader(stats[1].getPath(), TEST_SCHEMA);
-    Assert.assertEquals("Second file should have half the records",
-        secondHalf, Lists.newArrayList((Iterable) init(reader)));
+    FileStatus closedFile = rolledFile.equals(stats[0]) ? stats[1] : stats[0];
+    reader = newReader(closedFile.getPath(), TEST_SCHEMA);
+    count = 0;
+    for (Record actual : init(reader)) {
+      count += 1;
+      Assert.assertEquals(secondHalf.get(((Long) actual.get("id")).intValue()), actual);
+    }
+    Assert.assertEquals("Second half should have 50,000 records", 50000, count);
   }
 
   @Test

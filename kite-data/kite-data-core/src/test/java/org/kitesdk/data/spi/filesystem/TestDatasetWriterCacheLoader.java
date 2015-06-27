@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import com.google.common.cache.CacheLoader;
 import com.google.common.io.Files;
 import java.io.IOException;
 import junit.framework.Assert;
@@ -66,7 +67,18 @@ public class TestDatasetWriterCacheLoader {
   @Test
   public void testInitializeAfterParitionAddedCallback() throws Exception {
     PartitionedDatasetWriter.DatasetWriterCacheLoader<Object> loader
-      = new PartitionedDatasetWriter.DatasetWriterCacheLoader<Object>(view);
+      = new PartitionedDatasetWriter.DatasetWriterCacheLoader<Object>(
+        view, new PartitionedDatasetWriter.ConfAccessor() {
+      @Override
+      public long getTargetFileSize() {
+        return -1;
+      }
+
+      @Override
+      public long getRollIntervalMillis() {
+        return -1;
+      }
+    });
 
     StorageKey key = new StorageKey.Builder(partitionStrategy)
       .add("username", "test1")
@@ -77,7 +89,18 @@ public class TestDatasetWriterCacheLoader {
   @Test
   public void testIncrementatlInitializeAfterParitionAddedCallback() throws Exception {
     PartitionedDatasetWriter.IncrementalDatasetWriterCacheLoader<Object> loader
-      = new PartitionedDatasetWriter.IncrementalDatasetWriterCacheLoader<Object>(view);
+      = new PartitionedDatasetWriter.IncrementalDatasetWriterCacheLoader<Object>(
+        view, new PartitionedDatasetWriter.ConfAccessor() {
+      @Override
+      public long getTargetFileSize() {
+        return -1;
+      }
+
+      @Override
+      public long getRollIntervalMillis() {
+        return -1;
+      }
+    });
 
     StorageKey key = new StorageKey.Builder(partitionStrategy)
       .add("username", "test1")

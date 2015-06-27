@@ -42,14 +42,11 @@ import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.spi.AbstractDatasetWriter;
 import org.kitesdk.data.spi.DescriptorUtil;
 import org.kitesdk.data.spi.ReaderWriterState;
-import org.kitesdk.data.spi.ClockReady;
+import org.kitesdk.data.spi.RollingWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.kitesdk.data.spi.filesystem.FileSystemProperties.ROLL_INTERVAL_S_PROP;
-import static org.kitesdk.data.spi.filesystem.FileSystemProperties.TARGET_FILE_SIZE_PROP;
-
-class FileSystemWriter<E> extends AbstractDatasetWriter<E> implements ClockReady {
+class FileSystemWriter<E> extends AbstractDatasetWriter<E> implements RollingWriter {
 
   private static final Logger LOG = LoggerFactory.getLogger(FileSystemWriter.class);
 
@@ -81,8 +78,8 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> implements ClockReady
 
   private final Path directory;
   private final DatasetDescriptor descriptor;
-  private final long targetFileSize;
-  private final long rollIntervalMillis;
+  private long targetFileSize;
+  private long rollIntervalMillis;
   private Path tempPath;
   private Path finalPath;
   private long count = 0;
@@ -99,25 +96,19 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> implements ClockReady
   @VisibleForTesting
   final Configuration conf;
 
-  private FileSystemWriter(FileSystem fs, Path path, DatasetDescriptor descriptor) {
+  private FileSystemWriter(FileSystem fs, Path path, long rollIntervalMillis,
+                           long targetFileSize, DatasetDescriptor descriptor) {
     Preconditions.checkNotNull(fs, "File system is not defined");
     Preconditions.checkNotNull(path, "Destination directory is not defined");
     Preconditions.checkNotNull(descriptor, "Descriptor is not defined");
+
     this.fs = fs;
     this.directory = path;
+    this.rollIntervalMillis = rollIntervalMillis;
+    this.targetFileSize = targetFileSize;
     this.descriptor = descriptor;
     this.conf = new Configuration(fs.getConf());
     this.state = ReaderWriterState.NEW;
-
-    // get file rolling properties
-    if (!Formats.PARQUET.equals(descriptor.getFormat())) {
-      this.targetFileSize = DescriptorUtil.getLong(
-          TARGET_FILE_SIZE_PROP, descriptor, -1);
-    } else {
-      targetFileSize = -1;
-    }
-    this.rollIntervalMillis = 1000 * DescriptorUtil.getLong(
-        ROLL_INTERVAL_S_PROP, descriptor, -1);
 
     // copy file format settings from custom properties to the Configuration
     for (String prop : descriptor.listProperties()) {
@@ -270,6 +261,21 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> implements ClockReady
   }
 
   @Override
+  public void setRollIntervalMillis(long rollIntervalMillis) {
+    if (ReaderWriterState.OPEN == state) {
+      // adjust the current roll interval in case the time window got smaller
+      long lastRollTime = nextRollTime - this.rollIntervalMillis;
+      this.nextRollTime = lastRollTime + rollIntervalMillis;
+    }
+    this.rollIntervalMillis = rollIntervalMillis;
+  }
+
+  @Override
+  public void setTargetFileSize(long targetSizeBytes) {
+    this.targetFileSize = targetSizeBytes;
+  }
+
+  @Override
   public void tick() {
     if (ReaderWriterState.OPEN == state) {
       checkTimeBasedFileRoll();
@@ -356,28 +362,35 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> implements ClockReady
   }
 
   static <E> FileSystemWriter<E> newWriter(FileSystem fs, Path path,
+                                           long rollIntervalMillis,
+                                           long targetFileSize,
                                            DatasetDescriptor descriptor) {
     Format format = descriptor.getFormat();
     if (Formats.PARQUET.equals(format)) {
       // by default, Parquet is not durable
       if (DescriptorUtil.isDisabled(
           FileSystemProperties.NON_DURABLE_PARQUET_PROP, descriptor)) {
-        return new IncrementalWriter<E>(fs, path, descriptor);
+        return new IncrementalWriter<E>(
+            fs, path, rollIntervalMillis, targetFileSize, descriptor);
       } else {
-        return new FileSystemWriter<E>(fs, path, descriptor);
+        return new FileSystemWriter<E>(
+            fs, path, rollIntervalMillis, targetFileSize, descriptor);
       }
     } else if (Formats.AVRO.equals(format) || Formats.CSV.equals(format)) {
-      return new IncrementalWriter<E>(fs, path, descriptor);
+      return new IncrementalWriter<E>(
+          fs, path, rollIntervalMillis, targetFileSize, descriptor);
     } else {
-      return new FileSystemWriter<E>(fs, path, descriptor);
+      return new FileSystemWriter<E>(
+          fs, path, rollIntervalMillis, targetFileSize, descriptor);
     }
   }
 
   static class IncrementalWriter<E> extends FileSystemWriter<E>
       implements Flushable, Syncable {
     private IncrementalWriter(FileSystem fs, Path path,
+                              long rollIntervalMillis, long targetFileSize,
                               DatasetDescriptor descriptor) {
-      super(fs, path, descriptor);
+      super(fs, path, rollIntervalMillis, targetFileSize, descriptor);
     }
 
     @Override
