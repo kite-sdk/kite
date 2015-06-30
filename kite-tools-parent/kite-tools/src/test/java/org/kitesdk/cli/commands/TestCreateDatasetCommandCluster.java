@@ -28,8 +28,6 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hive.metastore.api.Table;
-import org.apache.hadoop.hive.ql.metadata.HiveUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -154,7 +152,16 @@ public class TestCreateDatasetCommandCluster extends MiniDFSTest {
   }
 
   @Test
-  public void testCreateWithExistingDataPartitions() throws IOException {
+  public void testCreateWithExistingDataPartitionsExternalHive() throws IOException {
+    createWithExistingDataPartitions("dataset:hive:/tmp/datasets/users", "datasets");
+  }
+
+  @Test
+  public void testCreateWithExistingDataPartitionsManagedHive() throws IOException {
+    createWithExistingDataPartitions("dataset:hive:users", "default");
+  }
+
+  private void createWithExistingDataPartitions(String datasetUri, String database) throws IOException {
     Configuration existing = DefaultConfiguration.get();
     try {
       DefaultConfiguration.set(getConfiguration());
@@ -183,12 +190,12 @@ public class TestCreateDatasetCommandCluster extends MiniDFSTest {
       Logger console = mock(Logger.class);
       CreateDatasetCommand create = new CreateDatasetCommand(console);
       create.setConf(getConfiguration());
-      create.datasets = Lists.newArrayList("dataset:hive:users");
+      create.datasets = Lists.newArrayList(datasetUri);
       create.location = "hdfs:/tmp/datasets/users";
       create.run();
 
       // validate the dataset
-      Dataset<GenericRecord> loaded = Datasets.load("dataset:hive:users");
+      Dataset<GenericRecord> loaded = Datasets.load(datasetUri);
       Assert.assertNotNull("Should successfully create Hive dataset", loaded);
       Assert.assertTrue("Should be partitioned",
           loaded.getDescriptor().isPartitioned());
@@ -199,7 +206,7 @@ public class TestCreateDatasetCommandCluster extends MiniDFSTest {
           expectedStrategy, loaded.getDescriptor().getPartitionStrategy());
 
       MetaStoreUtil meta = new MetaStoreUtil(getConfiguration());
-      List<String> partitions = meta.listPartitions("default", "users", (short) 10);
+      List<String> partitions = meta.listPartitions(database, "users", (short) 10);
       Assert.assertEquals("Table should have a partition",
           1, partitions.size());
       Assert.assertTrue("Partition should exist",
@@ -208,7 +215,7 @@ public class TestCreateDatasetCommandCluster extends MiniDFSTest {
           partitions.get(0).contains("/tmp/datasets/users/username_hash="));
 
     } finally {
-      Datasets.delete("dataset:hive:users");
+      Datasets.delete(datasetUri);
       DefaultConfiguration.set(existing);
     }
   }
