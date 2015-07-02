@@ -100,7 +100,7 @@ public final class QuotedCSVTokenizer implements CSVTokenizer {
           }
           numChars += line.length();
           if (!verifyRecordLength(
-              numChars, maxCharactersPerRecord, line, ignoreTooLongRecords, LOG)) {
+              numChars, maxCharactersPerRecord, sb, line, ignoreTooLongRecords, LOG)) {
             return false; // attempt to ignore it
           }
         } else {
@@ -142,9 +142,13 @@ public final class QuotedCSVTokenizer implements CSVTokenizer {
     }
   }
 
-  public static boolean verifyRecordLength(int numChars, int maxChars, String line, boolean ignoreTooLongRecords, Logger LOG) {
+  public static boolean verifyRecordLength(int numChars, int maxChars, StringBuilder prefix, String line,
+      boolean ignoreTooLongRecords, Logger LOG) {
     if (numChars <= maxChars) {
       return true;
+    }
+    if (prefix != null && prefix.length() > 0) {
+      line = prefix.toString() + line;
     }
     if (line.length() > 10000) {
       line = line.substring(0, 10000) + " ..."; // prevent gigantic messages

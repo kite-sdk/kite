@@ -144,7 +144,7 @@ public final class ReadCSVBuilder implements CommandBuilder {
         }
 
         if (!QuotedCSVTokenizer.verifyRecordLength(
-            line.length(), maxCharactersPerRecord, line, ignoreTooLongRecords, LOG)) {
+            line.length(), maxCharactersPerRecord, null, line, ignoreTooLongRecords, LOG)) {
           continue; // ignore
         }
         
