@@ -148,7 +148,7 @@ public final class QuotedCSVTokenizer implements CSVTokenizer {
       return true;
     }
     if (prefix != null && prefix.length() > 0) {
-      line = prefix.toString() + line;
+      line = prefix + line;
     }
     if (line.length() > 10000) {
       line = line.substring(0, 10000) + " ..."; // prevent gigantic messages
