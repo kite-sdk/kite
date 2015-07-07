@@ -360,7 +360,9 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
 
   public void addExistingPartitions() {
     if (partitionListener != null && descriptor.isPartitioned()) {
-      for (Path partition : pathIterator()) {
+      for (Iterator<Path> i = dirIterator(); i.hasNext(); ) {
+        Path partition = i.next();
+        LOG.info("Adding partition {}", partition);
         partitionListener.partitionAdded(namespace, name, partition.toString());
       }
     }
