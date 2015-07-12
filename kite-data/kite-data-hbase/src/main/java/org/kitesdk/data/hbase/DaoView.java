@@ -22,8 +22,10 @@ import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Flushable;
+import org.kitesdk.data.hbase.impl.BaseDao;
 import org.kitesdk.data.hbase.impl.EntityBatch;
 import org.kitesdk.data.hbase.impl.EntityScanner;
+import org.kitesdk.data.hbase.spi.HBaseConstrainableReader;
 import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.AbstractDatasetReader;
 import org.kitesdk.data.spi.AbstractDatasetWriter;
@@ -34,6 +36,7 @@ import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.InitializeAccessor;
 import org.kitesdk.data.spi.InputFormatAccessor;
+import org.kitesdk.data.spi.ServerSideConstrainableReader;
 import org.kitesdk.data.spi.StorageKey;
 import org.kitesdk.data.spi.Marker;
 import org.kitesdk.data.spi.MarkerRange;
@@ -70,6 +73,19 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
     return new DaoView<T>(this, schema, type);
   }
 
+  private ServerSideConstrainableReader<E> newReaderFactory() {
+    Preconditions.checkArgument(dataset.getDao() instanceof BaseDao);
+    Iterable<MarkerRange> markerRanges = constraints.toKeyRanges();
+    // TODO: combine all ranges into a single reader
+    MarkerRange range = Iterables.getOnlyElement(markerRanges);
+    return new HBaseConstrainableReader<E>(
+        ((BaseDao<E>) dataset.getDao()).getScannerBuilder()
+            .setStartKey(toPartitionKey(range.getStart()))
+            .setStartInclusive(range.getStart().isInclusive())
+            .setStopKey(toPartitionKey(range.getEnd()))
+            .setStopInclusive(range.getEnd().isInclusive()));
+  }
+
   EntityScanner<E> newEntityScanner() {
     Iterable<MarkerRange> markerRanges = constraints.toKeyRanges();
     // TODO: combine all ranges into a single reader
@@ -81,14 +97,14 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
 
   @Override
   public DatasetReader<E> newReader() {
-    final DatasetReader<E> wrappedReader = newEntityScanner();
+    final ServerSideConstrainableReader<E> wrappedReader = newReaderFactory();
     final Iterator<E> filteredIterator = constraints.filter(
-        wrappedReader.iterator(), getAccessor());
+        wrappedReader, getAccessor());
     AbstractDatasetReader<E> reader = new AbstractDatasetReader<E>() {
       @Override
       public void initialize() {
-        if (wrappedReader instanceof InitializeAccessor) {
-          ((InitializeAccessor) wrappedReader).initialize();
+        if (filteredIterator instanceof InitializeAccessor) {
+          ((InitializeAccessor) filteredIterator).initialize();
         }
       }
 
