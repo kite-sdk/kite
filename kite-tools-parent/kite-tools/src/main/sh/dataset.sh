@@ -119,6 +119,17 @@ if [ ! -z "$KITE_USER_CLASSPATH" ]; then
 fi
 debug "Using HADOOP_CLASSPATH=${HADOOP_CLASSPATH}"
 
+OPT_OOZIE_ACTION_XML="-conf ${OOZIE_ACTION_CONF_XML}"
+if [ -z ${OOZIE_ACTION_CONF_XML} ]; then
+    # If the environment variable is not set, then neither do we set this
+    # value as a config variable
+    # The variable should only be set when this executable is called
+    # from within an Oozie shell action, in which case Oozie itself
+    # will set this variable.
+    OPT_OOZIE_ACTION_XML=""
+fi
+debug "OPT_OOZIE_ACTION_XML=${OPT_OOZIE_ACTION_XML}"
+
 export HADOOP_CLASSPATH
 export HADOOP_COMMON_HOME
 export HADOOP_MAPRED_HOME
@@ -127,7 +138,7 @@ export HIVE_CONF_DIR
 export HIVE_HOME
 
 if [ -x "$HADOOP_COMMON_HOME/bin/hadoop" ]; then
-  exec ${HADOOP_COMMON_HOME}/bin/hadoop jar "$0" $flags org.kitesdk.cli.Main --dollar-zero "$0" "$@"
+  exec ${HADOOP_COMMON_HOME}/bin/hadoop jar "$0" $flags org.kitesdk.cli.Main ${OPT_OOZIE_ACTION_XML} $config --dollar-zero "$0" "$@"
 else
   echo "ERROR: Cannot find Hadoop installation!"
   echo "You can fix this warning by setting HADOOP_HOME"
