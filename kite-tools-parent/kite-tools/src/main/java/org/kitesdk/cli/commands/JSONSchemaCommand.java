@@ -65,6 +65,15 @@ public class JSONSchemaCommand extends BaseCommand {
       description="Minimize schema file size by eliminating white space")
   boolean minimize=false;
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+      value="UWF_NULL_FIELD",
+      justification = "Field set by JCommander")
+  @Parameter(names={"-n", "--num-records"},
+             description="Number of records to derive schema from",
+             arity=1)
+  int numRecords = 10;  // By default we look at first 10 records
+
+
   @Override
   public int run() throws IOException {
     Preconditions.checkArgument(samplePaths != null && !samplePaths.isEmpty(),
@@ -74,7 +83,7 @@ public class JSONSchemaCommand extends BaseCommand {
 
     // assume fields are nullable by default, users can easily change this
     Schema sampleSchema = JsonUtil.inferSchema(
-        open(samplePaths.get(0)), recordName, 10);
+        open(samplePaths.get(0)), recordName, numRecords);
 
     if (sampleSchema != null) {
       output(sampleSchema.toString(!minimize), console, outputPath);
