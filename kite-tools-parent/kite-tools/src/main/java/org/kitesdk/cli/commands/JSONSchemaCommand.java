@@ -21,17 +21,12 @@ import com.beust.jcommander.Parameters;
 import com.beust.jcommander.internal.Lists;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
+import org.apache.avro.Schema;
+import org.kitesdk.data.spi.JsonUtil;
+import org.slf4j.Logger;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
-import java.util.Set;
-import org.apache.avro.Schema;
-import org.apache.hadoop.conf.Configuration;
-import org.kitesdk.data.spi.JsonUtil;
-import org.kitesdk.data.spi.filesystem.CSVProperties;
-import org.kitesdk.data.spi.filesystem.CSVUtil;
-import org.slf4j.Logger;
 
 @Parameters(commandDescription="Build a schema from a JSON data sample")
 public class JSONSchemaCommand extends BaseCommand {
@@ -65,6 +60,13 @@ public class JSONSchemaCommand extends BaseCommand {
       description="Minimize schema file size by eliminating white space")
   boolean minimize=false;
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+      value="UWF_NULL_FIELD",
+      justification = "Field set by JCommander")
+  @Parameter(names={"-n", "--num-records"},
+      description="Number of records to use when building the schema", arity=1)
+  int numRecords = 10;  // By default we look at first 10 records
+
   @Override
   public int run() throws IOException {
     Preconditions.checkArgument(samplePaths != null && !samplePaths.isEmpty(),
@@ -74,7 +76,7 @@ public class JSONSchemaCommand extends BaseCommand {
 
     // assume fields are nullable by default, users can easily change this
     Schema sampleSchema = JsonUtil.inferSchema(
-        open(samplePaths.get(0)), recordName, 10);
+        open(samplePaths.get(0)), recordName, numRecords);
 
     if (sampleSchema != null) {
       output(sampleSchema.toString(!minimize), console, outputPath);
