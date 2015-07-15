@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.oozie.ErrorCode;
@@ -27,7 +28,9 @@ import org.apache.oozie.XException;
 import org.apache.oozie.action.hadoop.LauncherURIHandler;
 import org.apache.oozie.dependency.URIHandler;
 import org.apache.oozie.dependency.URIHandlerException;
+import org.apache.oozie.service.HCatAccessorService;
 import org.apache.oozie.service.HadoopAccessorException;
+import org.apache.oozie.service.Services;
 import org.apache.oozie.service.URIHandlerService;
 import org.apache.oozie.util.XLog;
 import org.kitesdk.data.DatasetException;
@@ -36,6 +39,7 @@ import org.kitesdk.data.Datasets;
 import org.kitesdk.data.Signalable;
 import org.kitesdk.data.URIBuilder;
 import org.kitesdk.data.View;
+import org.kitesdk.data.spi.DefaultConfiguration;
 
 /**
  * A Kite URI handler that works with {@link Signalable} views.
@@ -49,6 +53,8 @@ public class KiteURIHandler implements URIHandler {
 
   private Set<String> supportedSchemes;
   private List<Class<?>> classesToShip;
+
+  private AtomicBoolean confLoaded = new AtomicBoolean(false);
 
   @Override
   public void init(final Configuration conf) {
@@ -101,9 +107,35 @@ public class KiteURIHandler implements URIHandler {
     return null;
   }
 
+  private void loadConfiguration() {
+    if(Services.get() != null) {
+      HCatAccessorService hcatService = Services.get().get(HCatAccessorService.class);
+      if(hcatService != null) {
+        Configuration hcatConf = hcatService.getHCatConf();
+        if(hcatConf != null) {
+          DefaultConfiguration.set(hcatConf);
+        } else {
+          // kite conf was null
+          LOG.warn("Configuration for Kite not loaded, HCatAccessorService config was null.");
+        }
+      } else {
+        // service was null
+        LOG.error("Configuration for Kite not loaded, HCatAccessorService was not available.");
+      }
+    } else {
+      // services were null
+      LOG.error("Configuration for Kite not loaded, oozie services were not available.");
+    }
+  }
+
   @SuppressWarnings("rawtypes")
   @Override
   public boolean exists(final URI uri, final Context context) throws URIHandlerException {
+    // load the configuration if it hasn't been yet
+    if(confLoaded.compareAndSet(false, true)) {
+      loadConfiguration();
+    }
+
     try {
       View<GenericRecord> view = Datasets.load(uri);
       if(view instanceof Signalable) {
