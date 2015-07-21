@@ -23,8 +23,6 @@ import java.util.Collections;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PositionedReadable;
 import org.apache.hadoop.fs.Seekable;
 import org.apache.hadoop.io.SequenceFile;
@@ -84,14 +82,8 @@ public final class ReadSequenceFileBuilder implements CommandBuilder {
       SequenceFile.Metadata sequenceFileMetaData = null;
       SequenceFile.Reader reader = null;
       try {
-        // Need to pass valid FS and path, although overriding openFile means
-        // they will not be used.
-        reader = new SequenceFile.Reader(FileSystem.getLocal(conf), new Path("/"), conf) {
-          @Override
-          protected FSDataInputStream openFile(FileSystem fs, Path f, int sz, long l) throws IOException {
-            return new FSDataInputStream(new ForwardOnlySeekable(in));
-          }
-        };
+        reader = new SequenceFile.Reader(conf, SequenceFile.Reader.stream(new FSDataInputStream(new ForwardOnlySeekable(in))));
+
         if (includeMetaData) {
           sequenceFileMetaData = reader.getMetadata();
         }
