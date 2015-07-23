@@ -16,20 +16,23 @@
 
 package org.kitesdk.cli.commands;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.hadoop.conf.Configuration;
+import org.kitesdk.data.spi.filesystem.CSVProperties;
+import org.kitesdk.data.spi.filesystem.CSVUtil;
+import org.slf4j.Logger;
+
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.beust.jcommander.internal.Lists;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.List;
-import java.util.Set;
-import org.apache.hadoop.conf.Configuration;
-import org.kitesdk.data.spi.filesystem.CSVProperties;
-import org.kitesdk.data.spi.filesystem.CSVUtil;
-import org.slf4j.Logger;
 
 @Parameters(commandDescription="Build a schema from a CSV data sample")
 public class CSVSchemaCommand extends BaseCommand {
@@ -90,6 +93,10 @@ public class CSVSchemaCommand extends BaseCommand {
       description="Do not allow null values for the given field")
   List<String> requiredFields;
 
+  @Parameter(names="--field-type",
+      description="Specify the type for a field. Format is field_name=field_type. Valid types are string, long, float, and double.")
+  List<String> fieldTypes;
+
   @Override
   public int run() throws IOException {
     Preconditions.checkArgument(samplePaths != null && !samplePaths.isEmpty(),
@@ -116,11 +123,19 @@ public class CSVSchemaCommand extends BaseCommand {
     if (requiredFields != null) {
       required = ImmutableSet.copyOf(requiredFields);
     }
+    
+    HashMap<String,String> types = new HashMap<String,String>();
+    if (fieldTypes != null) {
+      for (String fieldType : fieldTypes) {
+        String[] ft = fieldType.split("=", 2);
+        types.put(ft[0], ft[1]);
+      }
+    }
 
     // assume fields are nullable by default, users can easily change this
     String sampleSchema = CSVUtil
         .inferNullableSchema(
-            recordName, open(samplePaths.get(0)), props, required)
+            recordName, open(samplePaths.get(0)), props, required, types)
         .toString(!minimize);
 
     output(sampleSchema, console, outputPath);
