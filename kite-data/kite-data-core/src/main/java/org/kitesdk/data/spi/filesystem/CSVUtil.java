@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -215,13 +216,26 @@ public class CSVUtil {
           throw new DatasetException("Found null value for required field: " +
               fieldName + " (" + types[i] + ")");
         }
-        fieldAssembler = fieldAssembler.name(fieldName)
-            .doc("Type inferred from '" + sample(values[i]) + "'")
-            .type(schema(types[i], false)).noDefault();
+        if (specifiedTypes != null && specifiedTypes.containsKey(fieldName)) {
+          fieldAssembler = fieldAssembler.name(fieldName)
+              .doc("Type specified by '" + sample(values[i]) + "'")
+              .type(schema(types[i], false)).noDefault();
+        } else {
+          fieldAssembler = fieldAssembler.name(fieldName)
+              .doc("Type inferred from '" + sample(values[i]) + "'")
+              .type(schema(types[i], false)).noDefault();
+        }
       } else {
-        SchemaBuilder.GenericDefault<Schema> defaultBuilder = fieldAssembler.name(fieldName)
-            .doc("Type inferred from '" + sample(values[i]) + "'")
-            .type(schema(types[i], makeNullable || foundNull));
+        SchemaBuilder.GenericDefault<Schema> defaultBuilder;
+        if (specifiedTypes != null && specifiedTypes.containsKey(fieldName)) {
+          defaultBuilder = fieldAssembler.name(fieldName)
+              .doc("Type specified by '" + sample(values[i]) + "'")
+              .type(schema(types[i], makeNullable || foundNull));
+        } else {
+          defaultBuilder = fieldAssembler.name(fieldName)
+              .doc("Type inferred from '" + sample(values[i]) + "'")
+              .type(schema(types[i], makeNullable || foundNull));
+        }
         if (makeNullable || foundNull) {
           fieldAssembler = defaultBuilder.withDefault(null);
         } else {
@@ -282,7 +296,7 @@ public class CSVUtil {
       return null;
     }
       
-    String type = typeString.toLowerCase();
+    String type = typeString.toLowerCase(Locale.ENGLISH);
     if (type.equals("long")) {
       return Schema.Type.LONG;
     } else if (type.equals("double")) {
