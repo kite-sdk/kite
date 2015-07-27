@@ -72,7 +72,7 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
   private final DatasetDescriptor descriptor;
   private Path tempPath;
   private Path finalPath;
-  private int count = 0;
+  private long count = 0;
 
   protected final FileSystem fs;
   protected FileAppender<E> appender;
