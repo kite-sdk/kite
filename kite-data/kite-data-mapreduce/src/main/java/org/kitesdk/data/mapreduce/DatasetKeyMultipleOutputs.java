@@ -24,6 +24,7 @@ import org.apache.hadoop.mapreduce.*;
 import org.kitesdk.data.*;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 /**
@@ -398,8 +399,18 @@ public class DatasetKeyMultipleOutputs {
             Constructor<?> cons = c.getConstructor(Configuration.class,
                     TaskAttemptID.class);
             return (TaskAttemptContext) cons.newInstance(conf, taskId);
-        } catch (Exception e) {
+        } catch (NoSuchMethodException e) {
             throw new IllegalStateException(e);
+
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+
+        } catch (InstantiationException e) {
+            throw new IllegalStateException(e);
+
+        } catch (InvocationTargetException e) {
+            throw new IllegalStateException(e);
+            
         }
     }
 
@@ -421,6 +432,7 @@ public class DatasetKeyMultipleOutputs {
     }
 
 
+    @SuppressWarnings("unchecked")
     private <E extends IndexedRecord> Dataset getDataset(String namedOutput) {
         Dataset dataset = dataSets.get(namedOutput);
 
@@ -436,7 +448,7 @@ public class DatasetKeyMultipleOutputs {
             throw new IllegalArgumentException("URI for namedoutput " + namedOutput + " not defined!");
         }
 
-        Class<? extends E> tClass;
+        Class<E> tClass;
         try {
             tClass = (Class<E>)context.getConfiguration().getClass(MO_PREFIX + namedOutput + MO_TYPE, GenericData.Record.class);
         } catch (RuntimeException e) {
@@ -471,7 +483,7 @@ public class DatasetKeyMultipleOutputs {
         Format format = null;
 
         if (context.getConfiguration().get(MO_PREFIX + namedOutput + ".keyschema") != null)
-            schema = Schema.parse(context.getConfiguration().get(
+            schema = new Schema.Parser().parse(context.getConfiguration().get(
                     MO_PREFIX + namedOutput + ".keyschema"));
         else {
             throw new IllegalArgumentException("Keyschema for namedoutput " + namedOutput + " not defined!");
