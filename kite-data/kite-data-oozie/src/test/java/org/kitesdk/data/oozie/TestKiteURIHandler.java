@@ -16,6 +16,9 @@
 package org.kitesdk.data.oozie;
 
 import org.kitesdk.data.PartitionView;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -27,12 +30,15 @@ import java.util.Set;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.oozie.ErrorCode;
 import org.apache.oozie.XException;
 import org.apache.oozie.dependency.URIHandlerException;
+import org.apache.oozie.service.ServiceException;
+import org.apache.oozie.service.Services;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -51,10 +57,12 @@ import org.kitesdk.data.RefinableView;
 import org.kitesdk.data.View;
 import org.kitesdk.data.oozie.KiteURIHandler;
 import org.kitesdk.data.spi.DatasetRepository;
+import org.kitesdk.data.spi.DefaultConfiguration;
 import org.kitesdk.data.spi.OptionBuilder;
 import org.kitesdk.data.spi.Registration;
 import org.kitesdk.data.spi.URIPattern;
 import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
+import com.google.common.io.Files;
 
 @RunWith(Parameterized.class)
 public class TestKiteURIHandler extends MiniDFSTest {
@@ -76,6 +84,10 @@ public class TestKiteURIHandler extends MiniDFSTest {
   protected Configuration conf;
   protected DatasetDescriptor testDescriptor;
   protected FileSystem fs;
+  private Configuration startingConf;
+  private String startingOozieHome;
+
+  private File serviceTempDir;
 
   public TestKiteURIHandler(boolean distributed) {
     this.distributed = distributed;
@@ -91,6 +103,23 @@ public class TestKiteURIHandler extends MiniDFSTest {
   @After
   public void removeDataPath() throws IOException {
     fs.delete(new Path("target/data"), true);
+    // restore configuration
+    DefaultConfiguration.set(startingConf);
+
+    if(serviceTempDir != null) {
+      FileUtils.deleteDirectory(serviceTempDir);
+      serviceTempDir = null;
+    }
+    if(Services.get() != null) {
+      Services.get().destroy();
+    }
+
+    if(startingOozieHome == null) {
+      System.clearProperty("oozie.home.dir");
+    } else {
+      System.setProperty("oozie.home.dir", startingOozieHome);
+      startingOozieHome = null;
+    }
   }
 
   @Before
@@ -116,6 +145,9 @@ public class TestKiteURIHandler extends MiniDFSTest {
 
     uriHandler = new KiteURIHandler();
 
+    startingConf = DefaultConfiguration.get();
+
+    startingOozieHome = System.getProperty("oozie.home.dir");
   }
 
   private KiteURIHandler uriHandler;
@@ -213,6 +245,89 @@ public class TestKiteURIHandler extends MiniDFSTest {
     URI uri = new URI("view:unreadiable:default/person?version=201404240000");
 
     Assert.assertFalse(uriHandler.exists(uri, null));
+  }
+
+  @Test
+  public void loadConfigFromHCatAccessor() throws URIHandlerException, URISyntaxException, ServiceException, IOException {
+    setupKiteConfigurationService(true, true);
+    URI uri = new URI("view:file:target/data/data/nomailbox?message=hello");
+    uriHandler.exists(uri, null);
+
+    Configuration defaultConf = DefaultConfiguration.get();
+    Assert.assertEquals("test.value", defaultConf.get("test.property"));
+
+    Services.get().get(KiteConfigurationService.class).getKiteConf().set("test.value", "something.else");
+    // doesn't modify default config on further exist calls
+    uriHandler.exists(uri, null);
+
+    defaultConf = DefaultConfiguration.get();
+    Assert.assertEquals("test.value", defaultConf.get("test.property"));
+    Assert.assertEquals("something.else", Services.get().get(KiteConfigurationService.class).getKiteConf().get("test.value"));
+  }
+
+  @Test
+  public void noConfigLoadedWhenNoServices() throws URIHandlerException, URISyntaxException {
+    URI uri = new URI("view:file:target/data/data/nomailbox?message=hello");
+    uriHandler.exists(uri, null);
+    Assert.assertNull(Services.get());
+  }
+
+  @Test
+  public void noConfigLoadedWhenNoKiteService() throws URIHandlerException, URISyntaxException, ServiceException, FileNotFoundException, IOException {
+    setupKiteConfigurationService(false, false);
+
+    URI uri = new URI("view:file:target/data/data/nomailbox?message=hello");
+    uriHandler.exists(uri, null);
+    Assert.assertNotNull(Services.get());
+    Assert.assertNull(Services.get().get(KiteConfigurationService.class));
+  }
+
+  @Test
+  public void noConfigLoadedIfNoKiteServiceConfig() throws URIHandlerException, URISyntaxException, ServiceException, FileNotFoundException, IOException {
+    setupKiteConfigurationService(true, false);
+    URI uri = new URI("view:file:target/data/data/nomailbox?message=hello");
+    uriHandler.exists(uri, null);
+    Assert.assertNotNull(Services.get());
+    Assert.assertNotNull(Services.get().get(KiteConfigurationService.class));
+    Assert.assertNull(Services.get().get(KiteConfigurationService.class).getKiteConf());
+  }
+
+  private void setupKiteConfigurationService(boolean loadKiteService, boolean loadKiteConfig) throws ServiceException, FileNotFoundException, IOException {
+    serviceTempDir = Files.createTempDir();
+    File confDir = new File(serviceTempDir, "conf");
+    File hadoopConfDir = new File(confDir, "hadoop-conf");
+    File hadoopConfTarget = new File(hadoopConfDir, "hadoop-site.xml");
+    File actionConfDir = new File(confDir, "action-conf");
+    File hiveConfDir = new File(confDir, "hive-conf");
+    File hiveConfTarget = new File(hiveConfDir, "hive-site.xml");
+    File oozieSiteTarget = new File(confDir, "oozie-site.xml");
+    confDir.mkdir();
+    hadoopConfDir.mkdir();
+    actionConfDir.mkdir();
+    hiveConfDir.mkdir();
+
+    Configuration oozieSiteConf = new Configuration(false);
+
+    if(loadKiteConfig) {
+      oozieSiteConf.set("oozie.service.KiteConfigurationService.kite.configuration", hiveConfTarget.getAbsolutePath());
+    }
+
+    oozieSiteConf.set("oozie.services", "org.apache.oozie.service.HadoopAccessorService");
+    oozieSiteConf.writeXml(new FileOutputStream(oozieSiteTarget));
+    conf.writeXml(new FileOutputStream(hadoopConfTarget));
+
+    Configuration hiveConf = new Configuration(false);
+    hiveConf.set("test.property", "test.value");
+    hiveConf.writeXml(new FileOutputStream(hiveConfTarget));
+
+    // set to the temp directory
+    System.setProperty("oozie.home.dir", serviceTempDir.getAbsolutePath());
+
+    Services services = new Services();
+    services.init();
+    if(loadKiteService) {
+      services.setService(KiteConfigurationService.class);
+    }
   }
 
   //minimal implementation of the dataset stack to get an non-readiable view to load in the handler
