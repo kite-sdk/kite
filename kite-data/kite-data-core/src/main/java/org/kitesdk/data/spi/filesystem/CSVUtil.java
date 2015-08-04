@@ -26,6 +26,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -75,9 +76,10 @@ public class CSVUtil {
   private static final Pattern LONG = Pattern.compile("\\d+");
   private static final Pattern DOUBLE = Pattern.compile("\\d*\\.\\d*[dD]?");
   private static final Pattern FLOAT = Pattern.compile("\\d*\\.\\d*[fF]?");
+  private static final Pattern BOOLEAN = Pattern.compile("^(true|false)$");
   private static final int DEFAULT_INFER_LINES = 25;
   private static final Set<String> NO_REQUIRED_FIELDS = ImmutableSet.of();
-  private static final HashMap<String,String> NO_SPECIFIED_TYPES = null;
+  private static final Map<String,String> NO_SPECIFIED_TYPES = null;
 
   public static Schema inferNullableSchema(String name, InputStream incoming,
                                            CSVProperties props)
@@ -94,7 +96,7 @@ public class CSVUtil {
 
   public static Schema inferNullableSchema(String name, InputStream incoming,
                                            CSVProperties props,
-                                           Set<String> requiredFields, HashMap<String,String> fieldTypes)
+                                           Set<String> requiredFields, Map<String,String> fieldTypes)
       throws IOException {
     return inferSchemaInternal(name, incoming, props, requiredFields, fieldTypes, true);
   }
@@ -112,10 +114,17 @@ public class CSVUtil {
     return inferSchemaInternal(name, incoming, props, requiredFields, NO_SPECIFIED_TYPES, false);
   }
 
+  public static Schema inferSchema(String name, InputStream incoming,
+                                   CSVProperties props,
+                                   Set<String> requiredFields, Map<String,String> fieldTypes)
+      throws IOException {
+    return inferSchemaInternal(name, incoming, props, requiredFields, fieldTypes, false);
+  }
+
   private static Schema inferSchemaInternal(String name, InputStream incoming,
                                             CSVProperties props,
                                             Set<String> requiredFields,
-                                            HashMap<String,String> specifiedTypes,
+                                            Map<String,String> specifiedTypes,
                                             boolean makeNullable)
       throws IOException {
     CSVReader reader = newReader(incoming, props);
@@ -147,7 +156,7 @@ public class CSVUtil {
     String[] values = new String[header.length];
     boolean[] nullable = new boolean[header.length];
     boolean[] empty = new boolean[header.length];
-
+    
     for (int processed = 0; processed < DEFAULT_INFER_LINES; processed += 1) {
       if (line == null) {
         break;
@@ -156,19 +165,10 @@ public class CSVUtil {
       for (int i = 0; i < header.length; i += 1) {
         if (i < line.length) {
           if (types[i] == null) {
-            String fieldName = header[i].trim();
-            if (specifiedTypes != null && specifiedTypes.containsKey(fieldName)) {
-              types[i] = stringToFieldType(specifiedTypes.get(fieldName));
-              if (types[i] != null) {
-                // reconstruct command line arg as the value used
-                values[i] = "--field-type " + fieldName + "=" + specifiedTypes.get(fieldName);
-              }
-            } else {
-              types[i] = inferFieldType(line[i]);
-              if (types[i] != null) {
-                // keep track of the value used
-                values[i] = line[i];
-              }
+            types[i] = inferFieldType(line[i]);
+            if (types[i] != null) {
+              // keep track of the value used
+              values[i] = line[i];
             }
           }
 
@@ -210,6 +210,18 @@ public class CSVUtil {
       // the empty string is not considered null for string fields
       boolean foundNull = (nullable[i] ||
           (empty[i] && types[i] != Schema.Type.STRING));
+      
+      if (specifiedTypes != null && specifiedTypes.containsKey(fieldName)) {
+        Schema.Type specifiedType = stringToFieldType(specifiedTypes.get(fieldName));
+        if (areCompatibleTypes(types[i], specifiedType)) {
+          if (specifiedType == Schema.Type.BOOLEAN && BOOLEAN.matcher(values[i].trim()).matches() == false) {
+              throw new DatasetException("aField '" + fieldName + "' is specified as type '" + specifiedType + "', but value '" + values[i] + "' appears to be of type '" + types[i] + "'.");
+          }
+          types[i] = specifiedType; // override inferred type with specified type
+        } else {
+          throw new DatasetException("bField '" + fieldName + "' is specified as type '" + specifiedType + "', but value '" + values[i] + "' appears to be of type '" + types[i] + "'.");
+        }
+      }
 
       if (requiredFields.contains(fieldName)) {
         if (foundNull) {
@@ -299,13 +311,38 @@ public class CSVUtil {
     String type = typeString.toLowerCase(Locale.ENGLISH);
     if (type.equals("long")) {
       return Schema.Type.LONG;
+    } else if (type.equals("int")) {
+      return Schema.Type.INT;
     } else if (type.equals("double")) {
       return Schema.Type.DOUBLE;
     } else if (type.equals("float")) {
       return Schema.Type.FLOAT;
     } else if (type.equals("string")) {
       return Schema.Type.STRING;
+    } else if (type.equals("boolean")) {
+      return Schema.Type.BOOLEAN;
     }
     return null; // type not recognized
+  }
+  
+  private static boolean areCompatibleTypes(Schema.Type inferredType, Schema.Type specifiedType) {
+    if (inferredType == specifiedType) {
+      return true;
+    } else if (specifiedType == Schema.Type.STRING) {
+      return true;
+    } else if (inferredType == Schema.Type.STRING) {
+      if (specifiedType == Schema.Type.BOOLEAN) {
+        return true;
+      }
+    } else if (inferredType == Schema.Type.LONG) {
+      if (specifiedType == Schema.Type.INT || specifiedType == Schema.Type.DOUBLE || specifiedType == Schema.Type.FLOAT) {
+        return true;
+      }
+    } else if (inferredType == Schema.Type.DOUBLE) {
+      if (specifiedType == Schema.Type.FLOAT) {
+        return true;
+      }
+    }
+    return false;
   }
 }
