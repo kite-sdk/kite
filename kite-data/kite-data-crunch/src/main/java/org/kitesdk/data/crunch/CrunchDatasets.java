@@ -345,6 +345,9 @@ public class CrunchDatasets {
     }
   }
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+      value={"SE_NO_SERIALVERSIONID"},
+      justification="Purposely not supported across versions")
   private static class ExtractKeysFn<E>
       extends DoFn<E, Pair<Pair<GenericData.Record, Integer>, Pair<GenericData.Record, E>>> {
 
@@ -371,6 +374,9 @@ public class CrunchDatasets {
     }
   }
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+      value={"SE_NO_SERIALVERSIONID"},
+      justification="Purposely not supported across versions")
   private static class ExtractEntityFn<E>
       extends DoFn<Pair<GenericData.Record, Iterable<Pair<GenericData.Record, E>>>, E> {
     @Override
