@@ -148,6 +148,34 @@
     </dependency>
 
     <dependency>
+      <!-- not usually provided -->
+      <groupId>org.apache.crunch</groupId>
+      <artifactId>crunch-core</artifactId>
+      <scope>compile</scope>
+      <version>${vers.crunch-cdh5}</version>
+      <exclusions>
+        <exclusion>
+          <!-- Avro is provided
+               This is excluded because this pulls in the hadoop1 version
+               because the crunch pom selects the dependency using a profile
+               -->
+          <groupId>org.apache.avro</groupId>
+          <artifactId>avro-mapred</artifactId>
+        </exclusion>
+        <exclusion>
+          <!-- kite doesn't use trevni -->
+          <groupId>org.apache.avro</groupId>
+          <artifactId>trevni-avro</artifactId>
+        </exclusion>
+        <exclusion>
+          <!-- kite doesn't use trevni -->
+          <groupId>org.apache.avro</groupId>
+          <artifactId>trevni-core</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
       <groupId>commons-configuration</groupId>
       <artifactId>commons-configuration</artifactId>
       <version>1.6</version>

@@ -48,4 +48,16 @@ public class FileSystemProperties {
    * Used to enable record reuse, if supported by the implementation.
    */
   public static final String REUSE_RECORDS = "kite.reader.reuse-records";
+
+  /**
+   * Used to set the target size, in bytes, for data files. Data files will be
+   * closed and finalized once they reach this size.
+   */
+  public static final String TARGET_FILE_SIZE_PROP = "kite.writer.target-file-size";
+
+  /**
+   * Used to set the roll interval, in seconds, for data files. Data files will
+   * be closed and finalized once they reach this age.
+   */
+  public static final String ROLL_INTERVAL_S_PROP = "kite.writer.roll-interval-seconds";
 }

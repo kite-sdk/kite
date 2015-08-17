@@ -29,6 +29,7 @@ import org.kitesdk.data.Formats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parquet.avro.AvroParquetWriter;
+import parquet.hadoop.ParquetFileWriter;
 import parquet.hadoop.ParquetWriter;
 import parquet.hadoop.metadata.CompressionCodecName;
 
@@ -36,7 +37,7 @@ class ParquetAppender<E extends IndexedRecord> implements FileSystemWriter.FileA
 
   private static final Logger LOG = LoggerFactory
     .getLogger(ParquetAppender.class);
-  private static final int DEFAULT_BLOCK_SIZE = 50 * 1024 * 1024;
+  private static final int DEFAULT_ROW_GROUP_SIZE = 50 * 1024 * 1024;
 
   private final Path path;
   private final Schema schema;
@@ -64,7 +65,7 @@ class ParquetAppender<E extends IndexedRecord> implements FileSystemWriter.FileA
       codecName = getCompressionCodecName();
     }
     avroParquetWriter = new AvroParquetWriter<E>(fileSystem.makeQualified(path),
-        schema, codecName, DEFAULT_BLOCK_SIZE,
+        schema, codecName, DEFAULT_ROW_GROUP_SIZE,
         ParquetWriter.DEFAULT_PAGE_SIZE,
         ParquetWriter.DEFAULT_IS_DICTIONARY_ENABLED, conf);
   }
@@ -72,6 +73,13 @@ class ParquetAppender<E extends IndexedRecord> implements FileSystemWriter.FileA
   @Override
   public void append(E entity) throws IOException {
     avroParquetWriter.write(entity);
+  }
+
+  @Override
+  public long pos() throws IOException {
+    // TODO: add a callback to set the position when Parquet decides to flush
+    // this is not a good way to find out the current position
+    return fileSystem.getFileStatus(path).getLen();
   }
 
   @Override

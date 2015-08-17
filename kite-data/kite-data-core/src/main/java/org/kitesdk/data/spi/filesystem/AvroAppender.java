@@ -76,6 +76,11 @@ class AvroAppender<E> implements FileSystemWriter.FileAppender<E> {
   }
 
   @Override
+  public long pos() throws IOException {
+    return out.getPos();
+  }
+
+  @Override
   public void flush() throws IOException {
     // Avro sync forces the end of the current block so the data is recoverable
     dataFileWriter.flush();

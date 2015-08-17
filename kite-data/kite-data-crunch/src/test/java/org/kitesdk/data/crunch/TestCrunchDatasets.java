@@ -299,7 +299,7 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
         Assert.assertEquals(1, datasetSize(outputDataset));
     }
 
-  
+
   @Test
   public void testViewUris() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
@@ -317,7 +317,7 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     View<Record> inputView = Datasets.<Record, Dataset<Record>> load(sourceViewUri,
         Record.class);
     Assert.assertEquals(1, datasetSize(inputView));
-    
+
     Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
     PCollection<GenericData.Record> data = pipeline.read(CrunchDatasets
         .asSource(sourceViewUri, GenericData.Record.class));
@@ -329,7 +329,7 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
     Assert.assertEquals(1, datasetSize(outputDataset));
   }
-  
+
   @Test
   public void testDatasetUris() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
@@ -482,7 +482,7 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
   }
 
   @Test
-     public void testUseReaderSchema() throws IOException {
+  public void testUseReaderSchema() throws IOException {
 
     // Create a schema with only a username, so we can test reading it
     // with an enhanced record structure.
@@ -629,5 +629,29 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     pipeline.write(data, CrunchDatasets.asTarget(outputView),
         Target.WriteMode.CHECKPOINT);
     pipeline.done();
+  }
+
+  @Test
+  public void testMultipleFileReadingFromCrunch() throws IOException {
+    Dataset<Record> inputDatasetA = repo.create("ns", "inA", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).build());
+    Dataset<Record> inputDatasetB = repo.create("ns", "inB", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).build());
+    Dataset<Record> outputDataset = repo.create("ns", "out", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).build());
+
+    // write two files, each of 5 records
+    writeTestUsers(inputDatasetA, 5, 0);
+    writeTestUsers(inputDatasetB, 5, 5);
+
+    Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
+    PCollection<GenericData.Record> dataA = pipeline.read(
+        CrunchDatasets.asSource(inputDatasetA));
+    PCollection<GenericData.Record> dataB = pipeline.read(
+        CrunchDatasets.asSource(inputDatasetB));
+    pipeline.write(dataA.union(dataB), CrunchDatasets.asTarget(outputDataset), Target.WriteMode.APPEND);
+    pipeline.run();
+
+    checkTestUsers(outputDataset, 10);
   }
 }

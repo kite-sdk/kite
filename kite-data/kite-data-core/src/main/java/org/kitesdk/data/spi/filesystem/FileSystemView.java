@@ -117,7 +117,8 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
     if (dataset.getDescriptor().isPartitioned()) {
       writer = PartitionedDatasetWriter.newWriter(this);
     } else {
-      writer = FileSystemWriter.newWriter(fs, root, dataset.getDescriptor());
+      writer = FileSystemWriter.newWriter(
+          fs, root, -1, -1 /* get from descriptor */, dataset.getDescriptor());
     }
     writer.initialize();
     return writer;
