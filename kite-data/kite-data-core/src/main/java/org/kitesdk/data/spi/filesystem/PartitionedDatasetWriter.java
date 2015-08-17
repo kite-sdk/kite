@@ -27,8 +27,8 @@ import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.spi.AbstractDatasetWriter;
 import org.kitesdk.data.spi.DescriptorUtil;
 import org.kitesdk.data.spi.EntityAccessor;
-import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.PartitionListener;
+import org.kitesdk.data.spi.RollingWriter;
 import org.kitesdk.data.spi.StorageKey;
 import org.kitesdk.data.spi.ReaderWriterState;
 import com.google.common.base.Objects;
@@ -40,11 +40,16 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.apache.hadoop.fs.Path;
+import org.kitesdk.data.spi.ClockReady;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>> extends
-    AbstractDatasetWriter<E> {
+import static org.kitesdk.data.spi.filesystem.FileSystemProperties.ROLL_INTERVAL_S_PROP;
+import static org.kitesdk.data.spi.filesystem.FileSystemProperties.TARGET_FILE_SIZE_PROP;
+import static org.kitesdk.data.spi.filesystem.FileSystemProperties.WRITER_CACHE_SIZE_PROP;
+
+abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>>
+    extends AbstractDatasetWriter<E> implements RollingWriter {
 
   private static final Logger LOG = LoggerFactory
     .getLogger(PartitionedDatasetWriter.class);
@@ -62,6 +67,17 @@ abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>> extend
   private final Map<String, Object> provided;
 
   protected ReaderWriterState state;
+  protected long targetFileSize;
+  protected long rollIntervalMillis;
+
+  /**
+   * Accessor for the cache loaders to use the current roll config values.
+   */
+  public interface ConfAccessor {
+    long getTargetFileSize();
+
+    long getRollIntervalMillis();
+  }
 
   static <E> PartitionedDatasetWriter<E, ?> newWriter(FileSystemView<E> view) {
     DatasetDescriptor descriptor = view.getDataset().getDescriptor();
@@ -89,24 +105,27 @@ abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>> extend
     this.view = view;
     this.partitionStrategy = descriptor.getPartitionStrategy();
 
-    int maxWriters = DEFAULT_WRITER_CACHE_SIZE;
-    if (descriptor.hasProperty(FileSystemProperties.WRITER_CACHE_SIZE_PROP)) {
-      try {
-        maxWriters = Integer.parseInt(
-            descriptor.getProperty(FileSystemProperties.WRITER_CACHE_SIZE_PROP));
-      } catch (NumberFormatException e) {
-        LOG.warn("Not an integer: " + FileSystemProperties.WRITER_CACHE_SIZE_PROP + "=" +
-            descriptor.getProperty(FileSystemProperties.WRITER_CACHE_SIZE_PROP));
-      }
-    } else if (partitionStrategy.getCardinality() != FieldPartitioner.UNKNOWN_CARDINALITY) {
-        maxWriters = Math.min(maxWriters, partitionStrategy.getCardinality());
+    int defaultMaxWriters = partitionStrategy.getCardinality();
+    if (defaultMaxWriters < 0 || defaultMaxWriters > DEFAULT_WRITER_CACHE_SIZE) {
+      defaultMaxWriters = DEFAULT_WRITER_CACHE_SIZE;
     }
-    this.maxWriters = maxWriters;
+    this.maxWriters = DescriptorUtil.getInt(WRITER_CACHE_SIZE_PROP, descriptor,
+        defaultMaxWriters);
 
     this.state = ReaderWriterState.NEW;
     this.reusedKey = new StorageKey(partitionStrategy);
     this.accessor = view.getAccessor();
     this.provided = view.getProvidedValues();
+
+    // get file rolling properties
+    if (!Formats.PARQUET.equals(descriptor.getFormat())) {
+      this.targetFileSize = DescriptorUtil.getLong(
+          TARGET_FILE_SIZE_PROP, descriptor, -1);
+    } else {
+      targetFileSize = -1;
+    }
+    this.rollIntervalMillis = 1000 * DescriptorUtil.getLong(
+        ROLL_INTERVAL_S_PROP, descriptor, -1);
   }
 
   @Override
@@ -173,6 +192,41 @@ abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>> extend
   }
 
   @Override
+  public void setRollIntervalMillis(long rollIntervalMillis) {
+    this.rollIntervalMillis = rollIntervalMillis;
+    if (ReaderWriterState.OPEN == state) {
+      for (DatasetWriter<E> writer : cachedWriters.asMap().values()) {
+        if (writer instanceof RollingWriter) {
+          ((RollingWriter) writer).setRollIntervalMillis(rollIntervalMillis);
+        }
+      }
+    }
+  }
+
+  @Override
+  public void setTargetFileSize(long targetSizeBytes) {
+    this.targetFileSize = targetSizeBytes;
+    if (ReaderWriterState.OPEN == state) {
+      for (DatasetWriter<E> writer : cachedWriters.asMap().values()) {
+        if (writer instanceof RollingWriter) {
+          ((RollingWriter) writer).setTargetFileSize(targetSizeBytes);
+        }
+      }
+    }
+  }
+
+  @Override
+  public void tick() {
+    if (ReaderWriterState.OPEN == state) {
+      for (DatasetWriter<E> writer : cachedWriters.asMap().values()) {
+        if (writer instanceof ClockReady) {
+          ((ClockReady) writer).tick();
+        }
+      }
+    }
+  }
+
+  @Override
   public boolean isOpen() {
     return state.equals(ReaderWriterState.OPEN);
   }
@@ -193,11 +247,13 @@ abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>> extend
 
     private final FileSystemView<E> view;
     private final PathConversion convert;
+    private final ConfAccessor conf;
 
-    public DatasetWriterCacheLoader(FileSystemView<E> view) {
+    public DatasetWriterCacheLoader(FileSystemView<E> view, ConfAccessor conf) {
       this.view = view;
       this.convert = new PathConversion(
           view.getDataset().getDescriptor().getSchema());
+      this.conf = conf;
     }
 
     @Override
@@ -210,6 +266,7 @@ abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>> extend
       FileSystemWriter<E> writer = FileSystemWriter.newWriter(
           dataset.getFileSystem(),
           new Path(dataset.getDirectory(), partition),
+          conf.getRollIntervalMillis(), conf.getTargetFileSize(),
           dataset.getDescriptor());
 
       PartitionListener listener = dataset.getPartitionListener();
@@ -234,11 +291,14 @@ abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>> extend
 
     private final FileSystemView<E> view;
     private final PathConversion convert;
+    private final ConfAccessor conf;
 
-    public IncrementalDatasetWriterCacheLoader(FileSystemView<E> view) {
+    public IncrementalDatasetWriterCacheLoader(FileSystemView<E> view,
+                                               ConfAccessor conf) {
       this.view = view;
       this.convert = new PathConversion(
           view.getDataset().getDescriptor().getSchema());
+      this.conf = conf;
     }
 
     @Override
@@ -254,6 +314,7 @@ abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>> extend
       FileSystemWriter<E> writer = FileSystemWriter.newWriter(
           dataset.getFileSystem(),
           new Path(dataset.getDirectory(), partition),
+          conf.getRollIntervalMillis(), conf.getTargetFileSize(),
           dataset.getDescriptor());
 
       PartitionListener listener = dataset.getPartitionListener();
@@ -298,7 +359,17 @@ abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>> extend
 
     @Override
     protected CacheLoader<StorageKey, FileSystemWriter<E>> createCacheLoader() {
-      return new DatasetWriterCacheLoader<E>(view);
+      return new DatasetWriterCacheLoader<E>(view, new ConfAccessor() {
+        @Override
+        public long getTargetFileSize() {
+          return NonDurablePartitionedDatasetWriter.this.targetFileSize;
+        }
+
+        @Override
+        public long getRollIntervalMillis() {
+          return NonDurablePartitionedDatasetWriter.this.rollIntervalMillis;
+        }
+      });
     }
   }
 
@@ -313,7 +384,18 @@ abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>> extend
     @Override
     protected CacheLoader<StorageKey, FileSystemWriter.IncrementalWriter<E>>
         createCacheLoader() {
-      return new IncrementalDatasetWriterCacheLoader<E>(view);
+      return new IncrementalDatasetWriterCacheLoader<E>(
+          view, new ConfAccessor() {
+        @Override
+        public long getTargetFileSize() {
+          return IncrementalPartitionedDatasetWriter.this.targetFileSize;
+        }
+
+        @Override
+        public long getRollIntervalMillis() {
+          return IncrementalPartitionedDatasetWriter.this.rollIntervalMillis;
+        }
+      });
     }
 
     @Override

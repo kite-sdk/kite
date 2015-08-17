@@ -35,6 +35,9 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.lib.input.CombineFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.CombineFileRecordReader;
+import org.apache.hadoop.mapreduce.lib.input.CombineFileSplit;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.kitesdk.compat.DynMethods;
 import org.kitesdk.compat.Hadoop;
@@ -114,10 +117,10 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
     if (setInputPaths(jobContext, job)) {
       if (Formats.AVRO.equals(format)) {
         AvroJob.setInputKeySchema(job, dataset.getDescriptor().getSchema());
-        AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
+        AvroCombineInputFormat<E> delegate = new AvroCombineInputFormat<E>();
         return delegate.getSplits(jobContext);
       } else if (Formats.PARQUET.equals(format)) {
-        AvroParquetInputFormat delegate = new AvroParquetInputFormat();
+        AvroParquetCombineInputFormat delegate = new AvroParquetCombineInputFormat();
         return delegate.getSplits(jobContext);
       } else if (Formats.JSON.equals(format)) {
         return new JSONInputFormat().getSplits(jobContext);
@@ -172,10 +175,10 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
       TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
     Format format = dataset.getDescriptor().getFormat();
     if (Formats.AVRO.equals(format)) {
-      return new AvroKeyReaderWrapper(new AvroKeyInputFormat<E>());
+      return new AvroKeyReaderWrapper(new AvroCombineInputFormat<E>());
 
     } else if (Formats.PARQUET.equals(format)) {
-      return new ValueReaderWrapper(new AvroParquetInputFormat());
+      return new ValueReaderWrapper(new AvroParquetCombineInputFormat());
 
     } else if (Formats.JSON.equals(format)) {
       JSONInputFormat<E> delegate = new JSONInputFormat<E>();
@@ -198,7 +201,7 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
 
   private static class AvroKeyReaderWrapper<E> extends
       AbstractKeyRecordReaderWrapper<E, AvroKey<E>, NullWritable> {
-    public AvroKeyReaderWrapper(AvroKeyInputFormat<E> inputFormat) {
+    public AvroKeyReaderWrapper(AvroCombineInputFormat<E> inputFormat) {
       super(inputFormat);
     }
 
@@ -208,4 +211,48 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
     }
   }
 
+  private static class AvroCombineFileRecordReader<E> extends AbstractCombineFileRecordReader<AvroKey<E>, NullWritable> {
+
+    public AvroCombineFileRecordReader(CombineFileSplit split, TaskAttemptContext context, Integer idx) {
+      super(split, context, idx);
+    }
+
+    @Override
+    FileInputFormat<AvroKey<E>, NullWritable> getInputFormat() {
+      return new AvroKeyInputFormat<E>();
+    }
+  }
+
+  /**
+   * Combines multiple small Avro files into a single input split.
+   */
+  private static class AvroCombineInputFormat<E> extends AbstractKiteCombineFileInputFormat<AvroKey<E>, NullWritable> {
+
+    @Override
+    Class<? extends AbstractCombineFileRecordReader> getRecordReaderClass() {
+      return AvroCombineFileRecordReader.class;
+    }
+  }
+
+  private static class AvroParquetCombineFileRecordReader<E> extends AbstractCombineFileRecordReader<Void, E> {
+    public AvroParquetCombineFileRecordReader(CombineFileSplit split, TaskAttemptContext context, Integer idx) {
+      super(split, context, idx);
+    }
+
+    @Override
+    FileInputFormat<Void, E> getInputFormat() {
+      return new AvroParquetInputFormat<E>();
+    }
+  }
+
+  /**
+   * Combines multiple small Parquet files into a single input split.
+   */
+  private static class AvroParquetCombineInputFormat<E> extends AbstractKiteCombineFileInputFormat<Void, E> {
+
+    @Override
+    Class<? extends AbstractCombineFileRecordReader> getRecordReaderClass() {
+      return AvroParquetCombineFileRecordReader.class;
+    }
+  }
 }

@@ -25,7 +25,6 @@ import org.apache.crunch.ReadableData;
 import org.apache.crunch.Source;
 import org.apache.crunch.SourceTarget;
 import org.apache.crunch.impl.mr.run.CrunchMapper;
-import org.apache.crunch.impl.mr.run.RuntimeParameters;
 import org.apache.crunch.io.CrunchInputs;
 import org.apache.crunch.io.FormatBundle;
 import org.apache.crunch.io.ReadableSourceTarget;
@@ -37,15 +36,11 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.TaskInputOutputContext;
-import org.kitesdk.data.Dataset;
 import org.kitesdk.data.Datasets;
-import org.kitesdk.data.Format;
-import org.kitesdk.data.Formats;
 import org.kitesdk.data.View;
 import org.kitesdk.data.mapreduce.DatasetKeyInputFormat;
 import org.kitesdk.data.spi.LastModifiedAccessor;
 import org.kitesdk.data.spi.SizeAccessor;
-import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,14 +75,6 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
     Configuration temp = new Configuration(false /* use an empty conf */ );
     DatasetKeyInputFormat.configure(temp).readFrom(view);
     this.formatBundle = inputBundle(temp);
-
-    Dataset<E> dataset = view.getDataset();
-
-    // Disable CombineFileInputFormat in Crunch unless we're dealing with Avro or Parquet files
-    Format format = dataset.getDescriptor().getFormat();
-    boolean isAvroOrParquetFile = (dataset instanceof FileSystemDataset)
-        && (Formats.AVRO.equals(format) || Formats.PARQUET.equals(format));
-    formatBundle.set(RuntimeParameters.DISABLE_COMBINE_FILE, Boolean.toString(!isAvroOrParquetFile));
   }
 
   public DatasetSourceTarget(URI uri, AvroType<E> avroType) {

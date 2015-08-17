@@ -36,6 +36,7 @@ import java.util.concurrent.ThreadFactory;
 import org.apache.avro.Schema;
 import org.apache.crunch.DoFn;
 import org.apache.crunch.PipelineResult;
+import org.apache.crunch.Target;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.compat.DynConstructors;
@@ -82,6 +83,10 @@ public class InputFormatImportCommand extends BaseDatasetCommand {
       description="The number of writer processes to use")
   int numWriters = -1;
 
+  @Parameter(names={"--files-per-partition"},
+      description="The number of files per partition to create")
+  int filesPerPartition = -1;
+
   @Parameter(names={"--transform"},
       description="A transform DoFn class name")
   String transform = null;
@@ -89,6 +94,11 @@ public class InputFormatImportCommand extends BaseDatasetCommand {
   @Parameter(names="--jar",
       description="Add a jar to the runtime classpath")
   List<String> jars;
+
+  @Parameter(
+      names={"--overwrite"},
+      description="Remove any data already in the target view or dataset")
+  boolean overwrite = false;
 
   @Override
   @SuppressWarnings("unchecked")
@@ -172,6 +182,14 @@ public class InputFormatImportCommand extends BaseDatasetCommand {
 
       if (numWriters >= 0) {
         task.setNumWriters(numWriters);
+      }
+
+      if (filesPerPartition > 0) {
+        task.setFilesPerPartition(filesPerPartition);
+      }
+
+      if (overwrite) {
+        task.setWriteMode(Target.WriteMode.OVERWRITE);
       }
 
       PipelineResult result;

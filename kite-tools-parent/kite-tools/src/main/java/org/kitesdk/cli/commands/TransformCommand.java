@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.List;
 import org.apache.crunch.DoFn;
 import org.apache.crunch.PipelineResult;
+import org.apache.crunch.Target;
 import org.kitesdk.compat.DynConstructors;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.View;
@@ -64,6 +65,11 @@ public class TransformCommand extends BaseDatasetCommand {
   @Parameter(names="--jar",
       description="Add a jar to the runtime classpath")
   List<String> jars;
+
+  @Parameter(
+      names={"--overwrite"},
+      description="Remove any data already in the target view or dataset")
+  boolean overwrite = false;
 
   @Override
   public int run() throws IOException {
@@ -108,6 +114,10 @@ public class TransformCommand extends BaseDatasetCommand {
 
     if (filesPerPartition > 0) {
       task.setFilesPerPartition(filesPerPartition);
+    }
+
+    if (overwrite) {
+      task.setWriteMode(Target.WriteMode.OVERWRITE);
     }
 
     PipelineResult result = task.run();

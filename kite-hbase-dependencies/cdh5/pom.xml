@@ -67,6 +67,12 @@
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>jetty-util</artifactId>
         </exclusion>
+        <!-- Pulls in the mr1 dependency, which causes a runtime VerifyError.
+             Hadoop must be provided anyway. -->
+        <exclusion>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-core</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <!-- needed for MR classes -->
@@ -139,6 +145,12 @@
         <exclusion>
           <groupId>tomcat</groupId>
           <artifactId>jasper-runtime</artifactId>
+        </exclusion>
+        <!-- Pulls in the mr1 dependency, which causes a runtime VerifyError.
+             Hadoop must be provided anyway. -->
+        <exclusion>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-core</artifactId>
         </exclusion>
       </exclusions>
     </dependency>

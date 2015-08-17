@@ -49,4 +49,49 @@ public class DescriptorUtil {
     }
     return false;
   }
+
+  /**
+   * Returns the value of the property parsed as a long, or the default value.
+   * <p>
+   * If the value cannot be parsed as a long, this will return the default
+   * value.
+   *
+   * @param prop a String property name
+   * @param descriptor a {@link DatasetDescriptor}
+   * @param defaultValue default value if prop is not present or is invalid
+   * @return the value of prop parsed as a long or the default value
+   */
+  public static long getLong(String prop, DatasetDescriptor descriptor,
+                             long defaultValue) {
+    if (descriptor.hasProperty(prop)) {
+      String asString = descriptor.getProperty(prop);
+      try {
+        return Long.parseLong(asString);
+      } catch (NumberFormatException e) {
+        // return the default value
+      }
+    }
+    return defaultValue;
+  }
+
+  /**
+   * Returns the value of the property parsed as an int, or the default value.
+   * <p>
+   * If the value cannot be parsed as an int or if the value is larger than the
+   * maximum value of an int, this will return the default value.
+   *
+   * @param prop a String property name
+   * @param descriptor a {@link DatasetDescriptor}
+   * @param defaultValue default value if prop is not present or is invalid
+   * @return the value of prop parsed as an int or the default value
+   */
+  public static int getInt(String prop, DatasetDescriptor descriptor,
+                            int defaultValue) {
+    long asLong = getLong(prop, descriptor, defaultValue);
+    if (asLong > Integer.MAX_VALUE) {
+      return defaultValue;
+    } else {
+      return (int) asLong;
+    }
+  }
 }
