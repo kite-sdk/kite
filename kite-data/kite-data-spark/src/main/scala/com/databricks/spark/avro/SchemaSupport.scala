@@ -15,29 +15,36 @@
  */
 package com.databricks.spark.avro
 
+import org.apache.avro.generic.GenericRecord
 import org.apache.avro.{Schema, SchemaBuilder}
-import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.types.{DataType, StructType}
+import org.apache.spark.sql.{Row, SQLContext}
 
 /*
-This trait reuses everything is already available on the spark-avro libraries, however part of the AVRO schema support is either private or
+This object reuses everything is already available on the spark-avro libraries, however part of the AVRO schema support is either private or
 package private. This is why I had to use the reflection for calling a private method and to put this trait in this specific package.
  */
-trait SchemaSupport {
+object SchemaSupport {
 
-  private def invokePrivate(x: AnyRef, methodName: String, _args: Any*): Any = {
+  private[spark] def invokePrivate(x: AnyRef, methodName: String, _args: Any*): Any = {
     val args = _args.map(_.asInstanceOf[AnyRef])
     def _parents: Stream[Class[_]] = Stream(x.getClass) #::: _parents.map(_.getSuperclass)
     val parents = _parents.takeWhile(_ != null).toList
     val methods = parents.flatMap(_.getDeclaredMethods)
-    val method = methods.find(_.getName == methodName).getOrElse(throw new IllegalArgumentException("Method " + methodName + " not found"))
+    val method = methods.find(_.getName == methodName).
+      getOrElse(throw new IllegalArgumentException("Method " + methodName + " not found"))
     method.setAccessible(true)
     method.invoke(x, args: _*)
   }
 
-  def createConverter(dataType: DataType, structName: String): (Any) => Any = AvroSaver.createConverter(dataType, structName)
+  def createConverter(dataType: DataType, structName: String): (Any) => Any =
+    AvroSaver.createConverter(dataType, structName)
 
-  def createConverter(sqlContext: SQLContext, schema: Schema): Any => Any = invokePrivate(AvroRelation("", Some(getSchemaType(schema)), 0)(sqlContext), "com$databricks$spark$avro$AvroRelation$$createConverter", schema).asInstanceOf[(Any) => Any]
+  def createConverter(sqlContext: SQLContext, schema: Schema): Any => Any =
+    invokePrivate(AvroRelation("",
+      Some(getSchemaType(schema)), 0)(sqlContext),
+      "com$databricks$spark$avro$AvroRelation$$createConverter",
+      schema).asInstanceOf[(Any) => Any]
 
   def getSchema(structType: StructType): Schema = {
     val builder = SchemaBuilder.record("topLevelRecord")
@@ -46,5 +53,11 @@ trait SchemaSupport {
   }
 
   def getSchemaType(schema: Schema): StructType = SchemaConverters.toSqlType(schema).dataType.asInstanceOf[StructType]
+
+  def rowsToAvro(rows: Iterator[Row],
+                 schema: StructType): Iterator[(GenericRecord, Null)] = {
+    val converter = createConverter(schema, "topLevelGenericRecord")
+    rows.map(x => (converter(x).asInstanceOf[GenericRecord], null))
+  }
 
 }

@@ -15,24 +15,16 @@
  */
 package org.kitesdk.data
 
-import com.databricks.spark.avro.SchemaSupport
-import org.apache.avro.generic.GenericRecord
-import org.apache.hadoop.mapreduce.Job
-import org.apache.spark.sql.{DataFrame, Row}
-import org.kitesdk.data.mapreduce.DatasetKeyInputFormat
+import org.apache.spark.sql.DataFrame
 
 import scala.language.existentials
 
-package object spark extends SchemaSupport {
+package object spark {
 
   implicit class KiteDatasetContext(sqlContext: org.apache.spark.sql.SQLContext) {
-    def kiteDatasetFile(dataSet: Dataset[_], job: Option[Job] = None): DataFrame = {
-      val j = job.getOrElse(Job.getInstance())
-      DatasetKeyInputFormat.configure(j).readFrom(dataSet).withType(classOf[GenericRecord])
-      val rdd = sqlContext.sparkContext.newAPIHadoopRDD(j.getConfiguration, classOf[DatasetKeyInputFormat[GenericRecord]], classOf[GenericRecord], classOf[Void])
-      val converter = createConverter(sqlContext, dataSet.getDescriptor.getSchema)
-      val rel = rdd.map(record => converter(record._1).asInstanceOf[Row])
-      sqlContext.createDataFrame(rel, getSchemaType(dataSet.getDescriptor.getSchema))
+    def kiteDataset(dataSet: Dataset[_]): DataFrame = {
+      sqlContext.baseRelationToDataFrame(
+        new KiteDatasetRelation(Map("uri" -> dataSet.getUri.toString))(sqlContext))
     }
   }
 

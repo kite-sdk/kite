@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.kitesdk.data.spark
 
 import org.apache.avro.generic.{GenericRecord, GenericRecordBuilder}
-import org.apache.spark.sql.SQLContext
+import org.apache.spark.sql.{SQLContext, SaveMode}
 import org.apache.spark.{SparkConf, SparkContext}
 import org.junit.runner.RunWith
 import org.kitesdk.data._
@@ -49,7 +48,7 @@ class SparkKiteSpec extends WordSpec with MustMatchers with TestSupport {
 
       val sqlContext = new SQLContext(sc)
 
-      val data = sqlContext.kiteDatasetFile(products)
+      val data = sqlContext.load(source = "org.kitesdk.data.spark", Map("uri" -> products.getUri.toString))
 
       data.registerTempTable("product")
 
@@ -67,6 +66,42 @@ class SparkKiteSpec extends WordSpec with MustMatchers with TestSupport {
   }
 
   "Spark" must {
+    "be able to create a SchemaRDD/Dataframe from a kite parquet dataset using SQL" in {
+
+      val conf = new SparkConf().
+        setAppName("spark-kite-spec-test").
+        set("spark.serializer", "org.apache.spark.serializer.KryoSerializer").
+        setMaster("local")
+      sc = new SparkContext(conf)
+
+      cleanup()
+
+      val products: Dataset[GenericRecord] = generateDataset(Formats.PARQUET, CompressionType.Snappy)
+
+      val sqlContext = new SQLContext(sc)
+
+      val data = sqlContext.sql(
+        s"""
+           |CREATE TEMPORARY TABLE product
+           |USING org.kitesdk.data.spark
+           |OPTIONS (uri "${products.getUri.toString}")
+        """.stripMargin)
+
+      val res = sqlContext.sql("select * from product where id < 10")
+
+      res.map(row => (row.getAs[String](0), row.getAs[Long](1))).collect() must be(
+        for {
+          i <- 1 to 9
+        } yield (s"product-$i", i.toLong)
+      )
+
+      cleanup()
+
+    }
+  }
+
+
+  "Spark" must {
     "be able to create a SchemaRDD/Dataframe from a kite avro dataset" in {
 
       val conf = new SparkConf().
@@ -81,7 +116,7 @@ class SparkKiteSpec extends WordSpec with MustMatchers with TestSupport {
 
       val sqlContext = new SQLContext(sc)
 
-      val data = sqlContext.kiteDatasetFile(products)
+      val data = sqlContext.load(source = "org.kitesdk.data.spark", Map("uri" -> products.getUri.toString))
 
       data.registerTempTable("product")
 
@@ -119,9 +154,16 @@ class SparkKiteSpec extends WordSpec with MustMatchers with TestSupport {
 
     val teenagers = sqlContext.sql("SELECT * FROM people WHERE age >= 13 AND age <= 19")
 
-    val descriptor = new SparkDatasetDescriptor.Builder().dataFrame(teenagers).format(format).compressionType(CompressionType.Snappy).build()
+    teenagers.save("org.kitesdk.data.spark",
+      SaveMode.ErrorIfExists,
+      Map(
+        "uri" -> datasetURI.toString,
+        "format" -> format.getName,
+        "compressionType" -> "snappy"
+      )
+    )
 
-    val dataset = KiteDatasetSaver.saveAsKiteDataset(descriptor, datasetURI)
+    val dataset: Dataset[GenericRecord] = Datasets.load(datasetURI)
     val reader = dataset.newReader()
 
     import collection.JavaConversions._
@@ -169,12 +211,34 @@ class SparkKiteSpec extends WordSpec with MustMatchers with TestSupport {
       val peopleList2 = List(Person("Giuditta", 12), Person("Vita", 19))
       val people2 = sc.parallelize[Person](peopleList2).toDF()
 
-      val descriptor = new SparkDatasetDescriptor.Builder().dataFrame(people1).format(Formats.AVRO).compressionType(CompressionType.Snappy).build()
-      val dataset1 = KiteDatasetSaver.saveAsKiteDataset(descriptor, datasetURI)
+      intercept[AssertionError](
+        people1.save("org.kitesdk.data.spark",
+          SaveMode.ErrorIfExists,
+          Map(
+            //"uri" -> datasetURI.toString,
+            "format" -> "avro",
+            "compressionType" -> "snappy"
+          )
+        )
+      )
 
-      val dataset2 = KiteDatasetSaver.saveAsKiteDataset(people2, dataset1, WriteMode.APPEND)
+      people1.save("org.kitesdk.data.spark",
+        SaveMode.ErrorIfExists,
+        Map(
+          "uri" -> datasetURI.toString,
+          "format" -> "avro",
+          "compressionType" -> "snappy"
+        )
+      )
 
-      val reader = dataset2.newReader()
+      people2.save("org.kitesdk.data.spark",
+        SaveMode.Append,
+        Map(
+          "uri" -> datasetURI.toString
+        )
+      )
+
+      val reader = Datasets.load[Dataset[GenericRecord]](datasetURI).newReader()
 
       import collection.JavaConversions._
 
@@ -211,12 +275,25 @@ class SparkKiteSpec extends WordSpec with MustMatchers with TestSupport {
       val peopleList2 = List(Person("Giuditta", 12), Person("Vita", 19))
       val people2 = sc.parallelize[Person](peopleList2).toDF()
 
-      val descriptor = new SparkDatasetDescriptor.Builder().dataFrame(people1).format(Formats.AVRO).compressionType(CompressionType.Snappy).build()
-      val dataset1 = KiteDatasetSaver.saveAsKiteDataset(descriptor, datasetURI)
+      people1.save("org.kitesdk.data.spark",
+        SaveMode.ErrorIfExists,
+        Map(
+          "uri" -> datasetURI.toString,
+          "format" -> "avro",
+          "compressionType" -> "snappy"
+        )
+      )
 
-      val dataset2 = KiteDatasetSaver.saveAsKiteDataset(people2, dataset1, WriteMode.OVERWRITE)
+      people2.save("org.kitesdk.data.spark",
+        SaveMode.Overwrite,
+        Map(
+          "uri" -> datasetURI.toString,
+          "format" -> "avro",
+          "compressionType" -> "snappy"
+        )
+      )
 
-      val reader = dataset2.newReader()
+      val reader = Datasets.load[Dataset[GenericRecord]](datasetURI).newReader()
 
       import collection.JavaConversions._
 
@@ -256,7 +333,7 @@ class SparkKiteSpec extends WordSpec with MustMatchers with TestSupport {
       peopleList.foreach(writer.write)
       writer.close()
 
-      val data = sqlContext.kiteDatasetFile(peopleDataset)
+      val data = sqlContext.kiteDataset(peopleDataset)
 
       data.collect().sortBy(_.getAs[String](0).split("-")(1).toInt).map(row => Person(row.getAs[String](0), row.getAs[Int](1))) must be(peopleList)
 
@@ -301,7 +378,8 @@ class SparkKiteSpec extends WordSpec with MustMatchers with TestSupport {
       })
       writer.close()
 
-      val data = sqlContext.kiteDatasetFile(userDataset)
+      val data = sqlContext.load(source = "org.kitesdk.data.spark", Map("uri" -> datasetURI.toString))
+
       data.collect().sortBy(_.getAs[String](0).split("-")(1).toInt).
         map(record => (record.getAs[String](0), record.getAs[Long](1), record.getAs[String](2))) must be(users)
 
@@ -333,15 +411,34 @@ class SparkKiteSpec extends WordSpec with MustMatchers with TestSupport {
       users.registerTempTable("user")
 
       val partitionStrategy = new PartitionStrategy.Builder().identity("favoriteColor", "favorite_color").build()
-      val descriptor = new SparkDatasetDescriptor.Builder().dataFrame(users).format(Formats.AVRO).compressionType(CompressionType.Snappy).partitionStrategy(partitionStrategy).build()
-      val dataset = KiteDatasetSaver.saveAsKiteDataset(descriptor, datasetURI)
+
+      users.save("org.kitesdk.data.spark",
+        SaveMode.ErrorIfExists,
+        Map(
+          "uri" -> datasetURI.toString,
+          "format" -> "avro",
+          "compressionType" -> "snappy",
+          "partitionStrategyLiteral" -> partitionStrategy.toString(true)
+        )
+      )
+
+      val dataset = Datasets.load[Dataset[GenericRecord]](datasetURI)
 
       val reader = dataset.newReader()
       import collection.JavaConversions._
       reader.iterator().toList.sortBy(_.get(0).toString.split("-")(1).toInt).map(record => User(record.get(0).toString, record.get(1).asInstanceOf[Long], record.get(2).toString)) must be(usersList)
       reader.close()
 
-      val ds2 = KiteDatasetSaver.saveAsKiteDataset(users, dataset, WriteMode.OVERWRITE)
+      users.save("org.kitesdk.data.spark",
+        SaveMode.Overwrite,
+        Map(
+          "uri" -> datasetURI.toString,
+          "format" -> "avro",
+          "compressionType" -> "snappy",
+          "partitionStrategyLiteral" -> partitionStrategy.toString(true)
+        )
+      )
+      val ds2 = Datasets.load[Dataset[GenericRecord]](datasetURI)
       val reader2 = ds2.newReader()
       import collection.JavaConversions._
       reader2.iterator().toList.map(record => User(record.get(0).toString, record.get(1).asInstanceOf[Long], record.get(2).toString)).foreach(println)

@@ -25,6 +25,7 @@ import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SQLContext;
+import org.apache.spark.sql.SaveMode;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -35,7 +36,9 @@ import scala.Tuple2;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TestSparkDataFrame {
 
@@ -106,7 +109,11 @@ public class TestSparkDataFrame {
 
         Dataset<GenericRecord> products = generateDataset(format, CompressionType.Snappy);
 
-        DataFrame data = KiteDatasetLoader.loadAsDataFrame(sqlContext, products);
+        Map<String, String> params = new HashMap<String, String>();
+
+        params.put("uri", products.getUri().toString());
+
+        DataFrame data = sqlContext.load("org.kitesdk.data.spark", params);
 
         data.registerTempTable("product");
 
@@ -155,9 +162,17 @@ public class TestSparkDataFrame {
 
         DataFrame teenagers = sqlContext.sql("SELECT * FROM people WHERE age >= 13 AND age <= 19");
 
-        SparkDatasetDescriptor descriptor = new SparkDatasetDescriptor.Builder().dataFrame(teenagers).format(format).compressionType(CompressionType.Snappy).build();
+        Map<String, String> params = new HashMap<String, String>();
 
-        Dataset<GenericRecord> dataset = KiteDatasetSaver.saveAsKiteDataset(descriptor, datasetURI);
+        params.put("uri", datasetURI.toString());
+
+        params.put("compressionType", "snappy");
+
+        params.put("format", format.getName());
+
+        teenagers.save("org.kitesdk.data.spark", SaveMode.Append.ErrorIfExists, params);
+
+        Dataset<GenericRecord> dataset = Datasets.load(datasetURI);
 
         DatasetReader<GenericRecord> reader = dataset.newReader();
 
