@@ -38,16 +38,22 @@ public class DefaultConfiguration {
   private static Configuration conf;
 
   static{
-    //read system property for Oozie Action Configuration XML
+    // read system property for Oozie Action Configuration XML
     String oozieActionXml = System.getProperty("oozie.action.conf.xml");
-    if(oozieActionXml != null && oozieActionXml.length() > 0) {
+    if (oozieActionXml != null && oozieActionXml.length() > 0) {
       Configuration.addDefaultResource(new Path("file:///", oozieActionXml).toString());
     }
 
     conf = new Configuration();
+
+    // check for Oozie delegation tokens
+    // based on Oozie's SqoopMain
+    String tokenFile = System.getenv("HADOOP_TOKEN_FILE_LOCATION");
+    if (tokenFile != null) {
+      conf.set("mapreduce.job.credentials.binary", tokenFile);
+      System.setProperty("mapreduce.job.credentials.binary", tokenFile);
+    }
   }
-
-
 
   /**
    * Get a copy of the default Hadoop {@link Configuration}.
