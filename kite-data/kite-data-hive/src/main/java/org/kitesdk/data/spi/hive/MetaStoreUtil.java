@@ -15,16 +15,14 @@
  */
 package org.kitesdk.data.spi.hive;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import java.util.List;
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.metastore.api.AlreadyExistsException;
 import org.apache.hadoop.hive.metastore.api.Database;
-import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.InvalidObjectException;
 import org.apache.hadoop.hive.metastore.api.InvalidOperationException;
 import org.apache.hadoop.hive.metastore.api.MetaException;
@@ -38,6 +36,8 @@ import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.DatasetOperationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.List;
+import java.util.Map;
 
 public class MetaStoreUtil {
 
@@ -72,6 +72,41 @@ public class MetaStoreUtil {
     }
   }
 
+  public static final Map<String, MetaStoreUtil> INSTANCES = Maps.newHashMap();
+
+  public static MetaStoreUtil get(Configuration conf) {
+    HiveConf hiveConf = new HiveConf(conf, HiveConf.class);
+    // Add the passed configuration back into the HiveConf to work around
+    // a Hive bug that resets to defaults
+    HiveUtils.addResource(hiveConf, conf);
+
+    if (isEmpty(hiveConf, Loader.HIVE_METASTORE_URI_PROP)) {
+      if (allowLocalMetaStore(hiveConf)) {
+        return new MetaStoreUtil(hiveConf);
+      } else {
+        LOG.warn("Aborting use of local MetaStore. " +
+                "Allow local MetaStore by setting {}=true in HiveConf",
+            ALLOW_LOCAL_METASTORE);
+        throw new IllegalArgumentException(
+            "Missing Hive MetaStore connection URI");
+      }
+    }
+
+    // get the URI and cache instances to a non-local metastore
+    String uris = hiveConf.get(Loader.HIVE_METASTORE_URI_PROP);
+    MetaStoreUtil util;
+    synchronized (INSTANCES) {
+      util = INSTANCES.get(uris);
+      if (util == null) {
+        util = new MetaStoreUtil(hiveConf);
+        INSTANCES.put(uris, util);
+      }
+    }
+
+    return util;
+  }
+
+  @Deprecated
   public MetaStoreUtil(Configuration conf) {
     this.hiveConf = new HiveConf(conf, HiveConf.class);
     // Add the passed configuration back into the HiveConf to work around
@@ -86,17 +121,26 @@ public class MetaStoreUtil {
           "Missing Hive MetaStore connection URI");
     }
     try {
-      client = new HiveMetaStoreClient(hiveConf);
+      this.client = new HiveMetaStoreClient(hiveConf);
     } catch (TException e) {
       throw new DatasetOperationException("Hive metastore exception", e);
     }
   }
 
-  private boolean allowLocalMetaStore(HiveConf conf) {
+  private MetaStoreUtil(HiveConf conf) {
+    this.hiveConf = conf;
+    try {
+      this.client = new HiveMetaStoreClient(hiveConf);
+    } catch (TException e) {
+      throw new DatasetOperationException("Hive metastore exception", e);
+    }
+  }
+
+  private static boolean allowLocalMetaStore(HiveConf conf) {
     return conf.getBoolean(ALLOW_LOCAL_METASTORE, false);
   }
 
-  private boolean isEmpty(HiveConf conf, String prop) {
+  private static boolean isEmpty(HiveConf conf, String prop) {
     String value = conf.get(prop);
     return (value == null || value.isEmpty());
   }

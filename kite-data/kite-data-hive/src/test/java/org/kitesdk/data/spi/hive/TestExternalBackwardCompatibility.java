@@ -62,7 +62,7 @@ public class TestExternalBackwardCompatibility {
   public void addTableToDefault() {
     // this test uses the local FS because
     this.conf = new Configuration();
-    this.metastore = new MetaStoreUtil(conf);
+    this.metastore = MetaStoreUtil.get(conf);
     cleanHive();
     metastore.dropTable("default", "test");
     this.descriptor = new DatasetDescriptor.Builder()
@@ -77,7 +77,7 @@ public class TestExternalBackwardCompatibility {
   @After
   public void cleanHive() {
     // ensures all tables are removed
-    MetaStoreUtil metastore = new MetaStoreUtil(conf);
+    MetaStoreUtil metastore = MetaStoreUtil.get(conf);
     for (String database : metastore.getAllDatabases()) {
       for (String table : metastore.getAllTables(database)) {
         metastore.dropTable(database, table);

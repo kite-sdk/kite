@@ -37,7 +37,7 @@ public class TestHivePartitioning {
   @After
   public void cleanHive() {
     // ensures all tables are removed
-    MetaStoreUtil metastore = new MetaStoreUtil(new Configuration());
+    MetaStoreUtil metastore = MetaStoreUtil.get(new Configuration());
     for (String database : metastore.getAllDatabases()) {
       for (String table : metastore.getAllTables(database)) {
         metastore.dropTable(database, table);
