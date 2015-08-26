@@ -20,6 +20,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.CombineFileSplit;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.kitesdk.data.DatasetOperationException;
 
 /**
  * Base class for wrapping file-based record readers with CombineFileInputFormat functionality. This allows multiple
@@ -49,11 +50,17 @@ abstract class AbstractCombineFileRecordReader<K, V> extends RecordReader<K, V> 
     if (delegate != null) {
       delegate.close();
     }
-    CombineFileSplit combineSplit = (CombineFileSplit) split;
-    FileSplit fileSplit = new FileSplit(combineSplit.getPath(idx), combineSplit.getOffset(idx),
-        combineSplit.getLength(idx), combineSplit.getLocations());
-    delegate = getInputFormat().createRecordReader(fileSplit, context);
-    delegate.initialize(fileSplit, context);
+    if (split instanceof CombineFileSplit) {
+      CombineFileSplit combineSplit = (CombineFileSplit) split;
+      FileSplit fileSplit = new FileSplit(combineSplit.getPath(idx), combineSplit.getOffset(idx),
+          combineSplit.getLength(idx), combineSplit.getLocations());
+      delegate = getInputFormat().createRecordReader(fileSplit, context);
+      delegate.initialize(fileSplit, context);
+    } else {
+      throw new DatasetOperationException(
+          "Split is not a CombineFileSplit: %s:%s",
+          split.getClass().getCanonicalName(), split);
+    }
   }
 
   @Override

@@ -26,6 +26,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.CombineFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.CombineFileRecordReader;
 import org.apache.hadoop.mapreduce.lib.input.CombineFileSplit;
+import org.kitesdk.data.DatasetOperationException;
 
 /**
  * A Kite-specific subclass of CombineFileInputFormat and CombineFileRecordReader to work around the fact that
@@ -89,15 +90,28 @@ abstract class AbstractKiteCombineFileInputFormat<K, V> extends CombineFileInput
 
     @Override
     public void initialize(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
-      KiteCombineFileSplit kiteCombineFileSplit = (KiteCombineFileSplit) split;
-      super.initialize(kiteCombineFileSplit.getCombineFileSplit(), context);
+      if (split instanceof KiteCombineFileSplit) {
+        KiteCombineFileSplit kiteCombineFileSplit = (KiteCombineFileSplit) split;
+        super.initialize(kiteCombineFileSplit.getCombineFileSplit(), context);
+      } else {
+        throw new DatasetOperationException(
+            "Split is not a KiteCombineFileSplit: %s:%s",
+            split.getClass().getCanonicalName(), split);
+      }
     }
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public RecordReader<K, V> createRecordReader(InputSplit inputSplit, TaskAttemptContext taskContext) throws IOException {
-    return new KiteCombineFileRecordReader((KiteCombineFileSplit) inputSplit, taskContext, getRecordReaderClass());
+  public RecordReader<K, V> createRecordReader(InputSplit split, TaskAttemptContext taskContext) throws IOException {
+    if (split instanceof KiteCombineFileSplit) {
+      return new KiteCombineFileRecordReader(
+          (KiteCombineFileSplit) split, taskContext, getRecordReaderClass());
+    } else {
+      throw new DatasetOperationException(
+          "Split is not a KiteCombineFileSplit: %s:%s",
+          split.getClass().getCanonicalName(), split);
+    }
   }
 
   @Override
