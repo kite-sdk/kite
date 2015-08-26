@@ -2,8 +2,6 @@ language: java
 jdk:
   - oraclejdk7
 
-sudo: false
-
 env:
   - HADOOP_PROFILE=default
   - HADOOP_PROFILE=cdh4
