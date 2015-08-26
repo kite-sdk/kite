@@ -681,7 +681,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
           "Configuration or FileSystem must be set");
       Preconditions.checkState(type != null, "No type specified");
 
-      this.directory = new Path(descriptor.getLocation());
+      this.directory = new Path(descriptor.getLocation().toString());
 
       if (fileSystem == null) {
         try {

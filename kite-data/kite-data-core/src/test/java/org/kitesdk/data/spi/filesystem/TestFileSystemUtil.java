@@ -182,7 +182,7 @@ public class TestFileSystemUtil {
     Assert.assertFalse("Should not flag at mixed depth",
         descriptor.hasProperty("kite.filesystem.mixed-depth"));
     Assert.assertEquals("Location should be at the partition directory",
-        partitionPath.toUri(), actual.getLocation());
+        URI.create(partitionPath.toString()), actual.getLocation());
     Assert.assertEquals("Should use user schema",
         USER_SCHEMA, actual.getSchema());
     Assert.assertEquals("Should have Avro format",

@@ -230,7 +230,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
     // we still need to delete the data directory
     boolean changed = metadataProvider.delete(namespace, name);
 
-    Path dataLocation = new Path(descriptor.getLocation());
+    Path dataLocation = new Path(descriptor.getLocation().toString());
     FileSystem dataFS = fsForPath(dataLocation, conf);
 
     if (fs.getUri().equals(dataFS.getUri())) {
