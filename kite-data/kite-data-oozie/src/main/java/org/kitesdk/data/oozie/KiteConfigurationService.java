@@ -39,12 +39,10 @@ public class KiteConfigurationService implements Service {
   public static final String KITE_CONFIGURATION = CONF_PREFIX + "kite.configuration";
 
   private static XLog LOG = XLog.getLog(KiteConfigurationService.class);
-  private Configuration conf;
   private Configuration kiteConf;
 
   @Override
   public void init(Services services) throws ServiceException {
-    conf = services.getConf();
     try {
       loadKiteConf(services);
     } catch(IOException ioe) {
@@ -61,9 +59,9 @@ public class KiteConfigurationService implements Service {
   // configuration methodology. Modification includes the
   // ability to specify multiple paths to configurations
   private void loadKiteConf(Services services) throws IOException {
-    String[] paths = conf.getStrings(KITE_CONFIGURATION);
+    String[] paths = services.getConf().getStrings(KITE_CONFIGURATION);
     if (paths != null && paths.length != 0) {
-      kiteConf = new Configuration();
+      kiteConf = new Configuration(false);
       for(String path : paths) {
         if (path.startsWith("hdfs")) {
             Path p = new Path(path);
