@@ -276,7 +276,7 @@ public class CSVUtil {
     return Schema.Type.STRING;
   }
 
-  private static boolean mergeType(Schema.Type prevType, Schema.Type currType) {
+  private static boolean mergeTypes(Schema.Type prevType, Schema.Type currType) {
     if (Schema.Type.LONG.equals(prevType)) {
       if (Schema.Type.FLOAT.equals(currType)) {
         return true;
