@@ -38,7 +38,7 @@ public class TestHiveManagedMetadataProvider extends TestMetadataProviders {
   @After
   public void cleanHive() {
     // ensures all tables are removed
-    MetaStoreUtil metastore = new MetaStoreUtil(getConfiguration());
+    MetaStoreUtil metastore = MetaStoreUtil.get(getConfiguration());
     for (String database : metastore.getAllDatabases()) {
       for (String table : metastore.getAllTables(database)) {
         metastore.dropTable(database, table);

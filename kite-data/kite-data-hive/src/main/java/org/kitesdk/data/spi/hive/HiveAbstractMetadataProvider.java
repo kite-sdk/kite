@@ -60,7 +60,7 @@ abstract class HiveAbstractMetadataProvider extends AbstractMetadataProvider imp
 
   protected MetaStoreUtil getMetaStoreUtil() {
     if (metastore == null) {
-      metastore = new MetaStoreUtil(conf);
+      metastore = MetaStoreUtil.get(conf);
     }
     return metastore;
   }

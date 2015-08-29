@@ -36,7 +36,7 @@ public class TestHiveDatasetURIsCompatibility {
       .schemaLiteral("\"string\"")
       .build();
 
-  private static final MetaStoreUtil metastore = new MetaStoreUtil(new Configuration());
+  private static final MetaStoreUtil metastore = MetaStoreUtil.get(new Configuration());
 
   @Before
   @After
