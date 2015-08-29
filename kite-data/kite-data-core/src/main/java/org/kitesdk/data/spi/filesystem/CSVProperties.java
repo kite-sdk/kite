@@ -35,7 +35,6 @@ public class CSVProperties {
   public static final String HEADER_PROPERTY = "kite.csv.header";
   public static final String HAS_HEADER_PROPERTY = "kite.csv.has-header";
   public static final String LINES_TO_SKIP_PROPERTY = "kite.csv.lines-to-skip";
-  public static final String LINES_TO_SAMPLE_PROPERTY = "kite.csv.lines-to-sample";
 
   // old properties
   public static final String OLD_CHARSET_PROPERTY = "cdk.csv.charset";
@@ -50,7 +49,6 @@ public class CSVProperties {
   public static final String DEFAULT_ESCAPE = "\\";
   public static final String DEFAULT_HAS_HEADER = "false";
   public static final int DEFAULT_LINES_TO_SKIP = 0;
-  public static final int DEFAULT_LINES_TO_SAMPLE = 25;
 
   // configuration
   public final String charset;
@@ -60,11 +58,10 @@ public class CSVProperties {
   public final String header;
   public final boolean useHeader;
   public final int linesToSkip;
-  public final int linesToSample;
 
   private CSVProperties(String charset, String delimiter, String quote,
                         String escape, String header, boolean useHeader,
-                        int linesToSkip, int linesToSample) {
+                        int linesToSkip) {
     this.charset = charset;
     this.delimiter = delimiter;
     this.quote = quote;
@@ -72,7 +69,6 @@ public class CSVProperties {
     this.header = header;
     this.useHeader = useHeader;
     this.linesToSkip = linesToSkip;
-    this.linesToSample = linesToSample;
   }
 
   private CSVProperties(DatasetDescriptor descriptor) {
@@ -110,18 +106,6 @@ public class CSVProperties {
       }
     }
     this.linesToSkip = lines;
-    final String linesToSampleString = descriptor.getProperty(LINES_TO_SAMPLE_PROPERTY);
-    int samples = DEFAULT_LINES_TO_SAMPLE;
-    if (linesToSampleString != null) {
-      try {
-        samples = Integer.parseInt(linesToSampleString);
-      } catch (NumberFormatException ex) {
-        LOG.debug("Defaulting lines to sample, failed ot parse: {}",
-            linesToSampleString);
-        // samples remains set to default
-      }
-    }
-    this.linesToSample = samples;
   }
 
   /**
@@ -144,8 +128,7 @@ public class CSVProperties {
         .property(ESCAPE_CHAR_PROPERTY, escape)
         .property(QUOTE_CHAR_PROPERTY, quote)
         .property(HAS_HEADER_PROPERTY, Boolean.toString(useHeader))
-        .property(LINES_TO_SKIP_PROPERTY, Integer.toString(linesToSkip))
-        .property(LINES_TO_SAMPLE_PROPERTY, Integer.toString(linesToSample));
+        .property(LINES_TO_SKIP_PROPERTY, Integer.toString(linesToSkip));
 
     if (header != null) {
       builder.property(HEADER_PROPERTY, header);
@@ -165,7 +148,6 @@ public class CSVProperties {
     private String escape = DEFAULT_ESCAPE;
     private boolean useHeader = Boolean.valueOf(DEFAULT_HAS_HEADER);
     private int linesToSkip = DEFAULT_LINES_TO_SKIP;
-    private int linesToSample = DEFAULT_LINES_TO_SAMPLE;
     private String header = null;
 
     public Builder charset(String charset) {
@@ -208,15 +190,10 @@ public class CSVProperties {
       return this;
     }
 
-    public Builder linesToSample(int linesToSample) {
-      this.linesToSample = linesToSample;
-      return this;
-    }
-
     public CSVProperties build() {
       return new CSVProperties(
           charset, delimiter, quote, escape,
-          header, useHeader, linesToSkip, linesToSample);
+          header, useHeader, linesToSkip);
     }
   }
 }
