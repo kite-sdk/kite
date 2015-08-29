@@ -65,22 +65,16 @@ public class JSONSchemaCommand extends BaseCommand {
       description="Minimize schema file size by eliminating white space")
   boolean minimize=false;
 
-  @Parameter(names={"-n", "--samples"},
-      description="Number of objects to sample when inferencing schema")
-  int objectsToSample = 10;
-
   @Override
   public int run() throws IOException {
     Preconditions.checkArgument(samplePaths != null && !samplePaths.isEmpty(),
         "Sample JSON path is required");
     Preconditions.checkArgument(samplePaths.size() == 1,
         "Only one JSON sample can be given");
-    Preconditions.checkArgument(objectsToSample > 0,
-        "At least one object must be sampled");
 
     // assume fields are nullable by default, users can easily change this
     Schema sampleSchema = JsonUtil.inferSchema(
-        open(samplePaths.get(0)), recordName, objectsToSample);
+        open(samplePaths.get(0)), recordName, 10);
 
     if (sampleSchema != null) {
       output(sampleSchema.toString(!minimize), console, outputPath);
