@@ -72,37 +72,54 @@ public class CSVUtil {
   private static final Pattern DOUBLE = Pattern.compile("\\d*\\.\\d*[dD]?");
   private static final Pattern FLOAT = Pattern.compile("\\d*\\.\\d*[fF]?");
   private static final Set<String> NO_REQUIRED_FIELDS = ImmutableSet.of();
+  private static final int DEFAULT_NUM_RECORDS = 10;
 
   public static Schema inferNullableSchema(String name, InputStream incoming,
                                            CSVProperties props)
       throws IOException {
-    return inferSchemaInternal(name, incoming, props, NO_REQUIRED_FIELDS, true);
+    return inferSchemaInternal(name, incoming, props, NO_REQUIRED_FIELDS, true, DEFAULT_NUM_RECORDS);
   }
 
   public static Schema inferNullableSchema(String name, InputStream incoming,
                                            CSVProperties props,
                                            Set<String> requiredFields)
       throws IOException {
-    return inferSchemaInternal(name, incoming, props, requiredFields, true);
+    return inferSchemaInternal(name, incoming, props, requiredFields, true, DEFAULT_NUM_RECORDS);
+  }
+
+  public static Schema inferNullableSchema(String name, InputStream incoming,
+                                           CSVProperties props,
+                                           int numRecords)
+      throws IOException {
+    return inferSchemaInternal(name, incoming, props, NO_REQUIRED_FIELDS, true, numRecords);
+  }
+
+  public static Schema inferNullableSchema(String name, InputStream incoming,
+                                           CSVProperties props,
+                                           Set<String> requiredFields,
+                                           int numRecords)
+      throws IOException {
+    return inferSchemaInternal(name, incoming, props, requiredFields, true, numRecords);
   }
 
   public static Schema inferSchema(String name, InputStream incoming,
                                    CSVProperties props)
       throws IOException {
-    return inferSchemaInternal(name, incoming, props, NO_REQUIRED_FIELDS, false);
+    return inferSchemaInternal(name, incoming, props, NO_REQUIRED_FIELDS, false, DEFAULT_NUM_RECORDS);
   }
 
   public static Schema inferSchema(String name, InputStream incoming,
                                    CSVProperties props,
                                    Set<String> requiredFields)
       throws IOException {
-    return inferSchemaInternal(name, incoming, props, requiredFields, false);
+    return inferSchemaInternal(name, incoming, props, requiredFields, false, DEFAULT_NUM_RECORDS);
   }
 
   private static Schema inferSchemaInternal(String name, InputStream incoming,
                                             CSVProperties props,
                                             Set<String> requiredFields,
-                                            boolean makeNullable)
+                                            boolean makeNullable,
+                                            int numRecords)
       throws IOException {
     CSVReader reader = newReader(incoming, props);
 
@@ -134,7 +151,7 @@ public class CSVUtil {
     boolean[] nullable = new boolean[header.length];
     boolean[] empty = new boolean[header.length];
 
-    for (int processed = 0; processed < props.linesToSample; processed += 1) {
+    for (int processed = 0; processed < numRecords; processed += 1) {
       if (line == null) {
         break;
       }
@@ -148,7 +165,7 @@ public class CSVUtil {
             if (types[i] != null) {
               values[i] = line[i];
             }
-          } else if (promoteType(prevType, currType)) {
+          } else if (mergeType(prevType, currType)) {
             types[i] = currType;
             values[i] = line[i];
           }
@@ -259,7 +276,7 @@ public class CSVUtil {
     return Schema.Type.STRING;
   }
 
-  private static boolean promoteType(Schema.Type prevType, Schema.Type currType) {
+  private static boolean mergeType(Schema.Type prevType, Schema.Type currType) {
     if (Schema.Type.LONG.equals(prevType)) {
       if (Schema.Type.FLOAT.equals(currType)) {
         return true;
