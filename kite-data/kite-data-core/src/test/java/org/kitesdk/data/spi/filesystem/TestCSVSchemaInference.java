@@ -297,7 +297,6 @@ public class TestCSVSchemaInference {
 
   @Test
   public void testSchemaTypePromotion() throws Exception {
-        LOG.debug("########## testSchemaTypePromotion ##############");
     InputStream stream = new ByteArrayInputStream(csvLines2.getBytes("utf8"));
     Schema schema = CSVUtil.inferSchema("TestRecord", stream,
         new CSVProperties.Builder().hasHeader().build());
@@ -317,8 +316,6 @@ public class TestCSVSchemaInference {
         schema.getField("nullable_double2").schema());
     Assert.assertEquals("Should infer a nullable string (third row is string)",
         schema(Schema.Type.STRING), schema.getField("string").schema());
-
-    LOG.debug("########## END typePromotion ############");
   }
 
   @Test
