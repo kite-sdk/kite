@@ -165,7 +165,7 @@ public class CSVUtil {
             if (types[i] != null) {
               values[i] = line[i];
             }
-          } else if (mergeType(prevType, currType)) {
+          } else if (mergeTypes(prevType, currType)) {
             types[i] = currType;
             values[i] = line[i];
           }
