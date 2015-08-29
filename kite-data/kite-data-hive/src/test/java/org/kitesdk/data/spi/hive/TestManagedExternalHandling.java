@@ -62,7 +62,7 @@ public class TestManagedExternalHandling {
   @After
   public void cleanHive() {
     // ensures all tables are removed
-    MetaStoreUtil metastore = new MetaStoreUtil(new Configuration());
+    MetaStoreUtil metastore = MetaStoreUtil.get(new Configuration());
     for (String database : metastore.getAllDatabases()) {
       for (String table : metastore.getAllTables(database)) {
         metastore.dropTable(database, table);
@@ -146,7 +146,7 @@ public class TestManagedExternalHandling {
   @Test
   public void testRepositoryList() throws Exception {
     // create unreadable hive tables
-    MetaStoreUtil metastore = new MetaStoreUtil(new Configuration());
+    MetaStoreUtil metastore = MetaStoreUtil.get(new Configuration());
     metastore.dropTable("default", "bad_type");
     metastore.dropTable("bad", "bad_serde");
     metastore.dropTable("bad", "bad_schema");
