@@ -20,8 +20,9 @@ import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.impl.CloudSolrServer;
 import org.apache.solr.common.cloud.SolrZkClient;
 import org.apache.solr.core.CoreContainer;
@@ -80,14 +81,14 @@ public class SolrLocator {
     configs.validateArguments(config);
   }
   
-  public SolrServer getSolrServer() {
+  public SolrClient getSolrClient() {
     if (zkHost != null && zkHost.length() > 0) {
       if (collectionName == null || collectionName.length() == 0) {
         throw new MorphlineCompilationException("Parameter 'zkHost' requires that you also pass parameter 'collection'", config);
       }
-      CloudSolrServer cloudSolrServer = new CloudSolrServer(zkHost);
-      cloudSolrServer.setDefaultCollection(collectionName);
-      return cloudSolrServer;
+      CloudSolrClient cloudSolrClient = new CloudSolrClient(zkHost);
+      cloudSolrClient.setDefaultCollection(collectionName);
+      return cloudSolrClient;
     } else {
       if (solrUrl == null && solrHomeDir != null) {
         CoreContainer coreContainer = new CoreContainer(solrHomeDir);
@@ -100,7 +101,7 @@ public class SolrLocator {
       }
       int solrServerNumThreads = 2;
       int solrServerQueueLength = solrServerNumThreads;
-      SolrServer server = new SafeConcurrentUpdateSolrServer(solrUrl, solrServerQueueLength, solrServerNumThreads);
+      SolrClient server = new SafeConcurrentUpdateSolrServer(solrUrl, solrServerQueueLength, solrServerNumThreads);
       return server;
     }
   }
@@ -113,13 +114,13 @@ public class SolrLocator {
       }
     }
     
-    SolrServer solrServer = getSolrServer();
-    if (solrServer instanceof CloudSolrServer) {
+    SolrClient solrClient = getSolrClient();
+    if (solrClient instanceof CloudSolrServer) {
       try {
-        ((CloudSolrServer)solrServer).setIdField(getIndexSchema().getUniqueKeyField().getName());
+        ((CloudSolrClient)solrClient).setIdField(getIndexSchema().getUniqueKeyField().getName());
       } catch (RuntimeException e) {
         try {
-          solrServer.shutdown(); // release resources
+          solrClient.shutdown(); // release resources
         } catch (Exception ex2) {
           LOG.debug("Cannot get index schema and cannot shutdown CloudSolrServer", ex2);
         }
@@ -127,7 +128,7 @@ public class SolrLocator {
       }      
     }
     
-    return new SolrServerDocumentLoader(solrServer, batchSize);
+    return new SolrServerDocumentLoader(solrClient, batchSize);
   }
 
   public IndexSchema getIndexSchema() {

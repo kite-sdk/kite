@@ -166,8 +166,8 @@
     <vers.slf4j>1.6.1</vers.slf4j>
     <vers.codahale.metrics>3.0.2</vers.codahale.metrics>
     <vers.typesafe.config>1.0.2</vers.typesafe.config>
-    <vers.solr>4.10.3</vers.solr>
-    <solr.expected.version>4.10.3</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->
+    <vers.solr>5.1.0</vers.solr>
+    <solr.expected.version>5.1.0</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->
     <vers.solr-cdh5>4.10.3</vers.solr-cdh5>
     <vers.tika>1.5</vers.tika>
     <vers.jackson>2.3.1</vers.jackson>
@@ -235,7 +235,7 @@
 
   <build>
     <plugins>
-      <plugin>
+      <!--<plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
         <version>${vers.maven-enforcer-plugin}</version>
@@ -273,7 +273,7 @@
             <phase>pre-site</phase>
           </execution>
         </executions>
-      </plugin>
+      </plugin>-->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
