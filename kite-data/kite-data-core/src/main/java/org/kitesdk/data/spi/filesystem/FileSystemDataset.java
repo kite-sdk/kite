@@ -110,7 +110,8 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     this.convert = new PathConversion(descriptor.getSchema());
     this.uri = uri;
 
-    Path signalsPath = new Path(directory, SIGNALS_DIRECTORY_NAME);
+    Path signalsPath = new Path(getDirectory(fileSystem, directory),
+        SIGNALS_DIRECTORY_NAME);
     this.signalManager = new SignalManager(fileSystem, signalsPath);
     this.unbounded = new FileSystemPartitionView<E>(
         this, partitionListener, signalManager, type);
@@ -698,4 +699,23 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     }
   }
 
+  /**
+   * Returns the closest directory for the given {@code path}.
+   *
+   * @param fs a {@link FileSystem} to search
+   * @param path a {@link Path} to resolve
+   * @return the closest directory to {@link Path}
+   */
+  private static Path getDirectory(FileSystem fs, Path path) {
+    try {
+      if (!fs.exists(path) || fs.isDirectory(path)) {
+        return path;
+      } else {
+        return path.getParent();
+      }
+
+    } catch (IOException e) {
+      throw new DatasetIOException("Cannot access path: " + path, e);
+    }
+  }
 }
