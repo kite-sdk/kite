@@ -148,10 +148,6 @@ public class TransformTask<S, T> extends Configured {
       // copy to avoid making changes to the caller's configuration
       Configuration conf = new Configuration(getConf());
       conf.set("mapreduce.framework.name", "local");
-      // replace the default FS for Crunch to avoid distributed cache errors.
-      // this doesn't affect the source or target, they are fully-qualified.
-      conf.set("fs.defaultFS", "file:/");
-      conf.set("fs.default.name", "file:/");
       setConf(conf);
     }
 

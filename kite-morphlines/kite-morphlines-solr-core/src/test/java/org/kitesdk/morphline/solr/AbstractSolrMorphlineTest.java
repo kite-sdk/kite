@@ -18,6 +18,7 @@ package org.kitesdk.morphline.solr;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -133,6 +134,8 @@ public class AbstractSolrMorphlineTest extends SolrTestCaseJ4 {
     
     assumeTrue("This test has issues with this locale: https://issues.apache.org/jira/browse/SOLR-5778", 
         "GregorianCalendar".equals(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getClass().getSimpleName()));
+    assumeTrue("This test has issues with locales with non-Arabic digits",
+        "1".equals(NumberFormat.getInstance().format(1)));
     deleteAllDocuments();
     int numDocs = 0;    
     for (int i = 0; i < 1; i++) {

@@ -64,7 +64,7 @@ public class FileSystemUtil {
     Preconditions.checkNotNull(descriptor.getLocation(),
         "Cannot get FileSystem for a descriptor with no location");
 
-    Path dataPath = new Path(descriptor.getLocation());
+    Path dataPath = new Path(descriptor.getLocation().toString());
     FileSystem fs = null;
 
     try {

@@ -18,6 +18,7 @@ package org.kitesdk.data.hbase.tool;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
@@ -42,8 +43,8 @@ import org.kitesdk.data.hbase.testing.HBaseTestUtils;
  * Test of using schema tool to migrate schemas in a directory.
  */
 public class SchemaToolTest {
-  private static final String tableName = "simple";
   private static final String managedTableName = "managed_schemas";
+  private static String tableName;
   private static File simpleSchemaFile;
   private static String simpleSchema;
 
@@ -63,11 +64,11 @@ public class SchemaToolTest {
 
   @AfterClass
   public static void afterClass() throws Exception {
-    HBaseTestUtils.util.deleteTable(Bytes.toBytes(tableName));
   }
-  
+
   @Before
   public void before() throws Exception {
+    tableName = UUID.randomUUID().toString().substring(0, 8);
     tablePool = new HTablePool(HBaseTestUtils.getConf(), 10);
     manager = new DefaultSchemaManager(tablePool);
     tool = new SchemaTool(new HBaseAdmin(HBaseTestUtils.getConf()),
@@ -77,13 +78,17 @@ public class SchemaToolTest {
   @After
   public void after() throws Exception {
     tablePool.close();
-    HBaseTestUtils.util.truncateTable(Bytes.toBytes(tableName));
+    HBaseTestUtils.util.deleteTable(Bytes.toBytes(tableName));
     HBaseTestUtils.util.truncateTable(Bytes.toBytes(managedTableName));
   }
 
   @Test
   public void testMigrateDirectory() throws Exception {
     tool.createOrMigrateSchemaDirectory("classpath:SchemaTool", true);
+
+    // the table name is set in the schema file, so use that table name to
+    // verify that creatOrMigrateSchemaDirectory worked
+    tableName = "simple";
 
     Dao<SimpleHBaseRecord> dao = new SpecificAvroDao<SimpleHBaseRecord>(
         tablePool, tableName, "SimpleHBaseRecord", manager);

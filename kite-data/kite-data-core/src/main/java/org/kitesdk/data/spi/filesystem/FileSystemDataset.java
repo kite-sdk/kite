@@ -110,7 +110,8 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     this.convert = new PathConversion(descriptor.getSchema());
     this.uri = uri;
 
-    Path signalsPath = new Path(directory, SIGNALS_DIRECTORY_NAME);
+    Path signalsPath = new Path(getDirectory(fileSystem, directory),
+        SIGNALS_DIRECTORY_NAME);
     this.signalManager = new SignalManager(fileSystem, signalsPath);
     this.unbounded = new FileSystemPartitionView<E>(
         this, partitionListener, signalManager, type);
@@ -399,8 +400,12 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
           partitionListener.partitionAdded(namespace, name, relative.toString());
         }
 
+        // use new Path(String) for locations because setting the URI directly
+        // results in the location URI being unescaped. the URI from
+        // #getLocation() is not a Path internal URI from with extra escapes
         List<Pair<Path, Path>> staged = FileSystemUtil.stageMove(fileSystem,
-            new Path(src.getLocation()), new Path(dest.getLocation()),
+            new Path(src.getLocation().toString()),
+            new Path(dest.getLocation().toString()),
             "tmp" /* data should be added to recover from a failure */ );
         FileSystemUtil.finishMove(fileSystem, staged);
 
@@ -451,7 +456,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
           for (PartitionView<E> partition : existingPartitions) {
             FileSystemPartitionView<E> toReplace =
                 (FileSystemPartitionView<E>) partition;
-            Path path = new Path(toReplace.getLocation());
+            Path path = new Path(toReplace.getLocation().toString());
             removals.add(path);
             notReplaced.remove(toReplace);
             if (partitionListener != null && descriptor.isPartitioned()) {
@@ -462,7 +467,8 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
 
           // replace the directory all at once
           FileSystemUtil.replace(fileSystem, directory,
-              new Path(dest.getLocation()), new Path(src.getLocation()),
+              new Path(dest.getLocation().toString()),
+              new Path(src.getLocation().toString()),
               removals);
 
           if (partitionListener != null && descriptor.isPartitioned()) {
@@ -486,7 +492,8 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
       PartitionView<E> srcPartition = Iterables.getOnlyElement(
           replacement.getCoveringPartitions());
       List<Pair<Path, Path>> staged = FileSystemUtil.stageMove(fileSystem,
-          new Path(srcPartition.getLocation()), new Path(unbounded.getLocation()),
+          new Path(srcPartition.getLocation().toString()),
+          new Path(unbounded.getLocation().toString()),
           "replace" /* data should replace to recover from a failure */ );
       deleteAll(); // remove all existing files
       FileSystemUtil.finishMove(fileSystem, staged);
@@ -675,7 +682,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
           "Configuration or FileSystem must be set");
       Preconditions.checkState(type != null, "No type specified");
 
-      this.directory = new Path(descriptor.getLocation());
+      this.directory = new Path(descriptor.getLocation().toString());
 
       if (fileSystem == null) {
         try {
@@ -692,4 +699,23 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     }
   }
 
+  /**
+   * Returns the closest directory for the given {@code path}.
+   *
+   * @param fs a {@link FileSystem} to search
+   * @param path a {@link Path} to resolve
+   * @return the closest directory to {@link Path}
+   */
+  private static Path getDirectory(FileSystem fs, Path path) {
+    try {
+      if (!fs.exists(path) || fs.isDirectory(path)) {
+        return path;
+      } else {
+        return path.getParent();
+      }
+
+    } catch (IOException e) {
+      throw new DatasetIOException("Cannot access path: " + path, e);
+    }
+  }
 }

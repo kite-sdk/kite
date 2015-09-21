@@ -33,7 +33,6 @@ import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.PartitionView;
 import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.Constraints;
-import org.kitesdk.data.spi.Conversions;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.PartitionListener;
 import org.kitesdk.data.spi.SchemaUtil;
@@ -47,7 +46,6 @@ class FileSystemPartitionView<E> extends FileSystemView<E>
     implements PartitionView<E> {
 
   private static final Splitter PATH_SPLITTER = Splitter.on('/');
-  private static final Splitter KV_SPLITTER = Splitter.on('=').limit(2);
 
   private final Path location;
   private final URI relativeLocation;
@@ -63,7 +61,7 @@ class FileSystemPartitionView<E> extends FileSystemView<E>
 
   static <E> FileSystemPartitionView<E> getPartition(
       FileSystemPartitionView<E> base, URI location) {
-    URI relative = relativize(base.root.toUri(), location);
+    URI relative = relativize(URI.create(base.root.toString()), location);
 
     if (relative == null) {
       return base;
@@ -75,7 +73,8 @@ class FileSystemPartitionView<E> extends FileSystemView<E>
   static <E> FileSystemPartitionView<E> getPartition(
       FileSystemPartitionView<E> base, Path location) {
     URI relative = relativize(
-        base.root.toUri(), (location == null ? null : location.toUri()));
+        URI.create(base.root.toString()),
+        (location == null ? null : URI.create(location.toString())));
 
     if (relative == null) {
       return base;
@@ -93,7 +92,8 @@ class FileSystemPartitionView<E> extends FileSystemView<E>
 
   @Override
   public URI getLocation() {
-    return location.toUri();
+    // location.toUri() returns an internal URI that is escaped
+    return URI.create(location.toString());
   }
 
   URI getRelativeLocation() {
@@ -111,8 +111,8 @@ class FileSystemPartitionView<E> extends FileSystemView<E>
         new Predicate<PartitionView<E>>() {
           @Override
           public boolean apply(@Nullable PartitionView<E> input) {
-            return input != null &&
-                contains(location.toUri(), root, input.getLocation());
+            return input != null && contains(
+                URI.create(location.toString()), root, input.getLocation());
           }
         });
   }
@@ -169,7 +169,7 @@ class FileSystemPartitionView<E> extends FileSystemView<E>
     }
 
     String scheme = location.getScheme();
-    String path = location.getPath();
+    String path = location.getRawPath();
     URI relative;
     if (scheme == null && !path.startsWith("/")) {
       // already a relative location
@@ -182,7 +182,7 @@ class FileSystemPartitionView<E> extends FileSystemView<E>
           "%s is not contained in %s", location, root);
 
       // use just the paths to avoid authority mismatch errors
-      URI rootPath = URI.create(root.getPath());
+      URI rootPath = URI.create(root.getRawPath());
       relative = rootPath.relativize(URI.create(path));
       if (relative.getPath().isEmpty()) {
         return null;
@@ -190,7 +190,7 @@ class FileSystemPartitionView<E> extends FileSystemView<E>
     }
 
     // remove a trailing slash
-    String relativePath = relative.getPath();
+    String relativePath = relative.getRawPath();
     if (relativePath.endsWith("/")) {
       relative = URI.create(relativePath.substring(0, relativePath.length()-1));
     }
@@ -225,16 +225,14 @@ class FileSystemPartitionView<E> extends FileSystemView<E>
     Schema schema = descriptor.getSchema();
     PartitionStrategy strategy = descriptor.getPartitionStrategy();
 
-    Iterator<String> parts = PATH_SPLITTER.split(relative.getPath()).iterator();
-    for (FieldPartitioner fp : Accessor.getDefault().getFieldPartitioners(strategy)) {
+    PathConversion conversion = new PathConversion(schema);
+    Iterator<String> parts = PATH_SPLITTER.split(relative.getRawPath()).iterator();
+    for (FieldPartitioner<?, ?> fp : Accessor.getDefault().getFieldPartitioners(strategy)) {
       if (!parts.hasNext()) {
         break;
       }
-      String directory = parts.next();
-      String value = Iterables.getLast(KV_SPLITTER.split(directory));
-      Schema fieldSchema = SchemaUtil.fieldSchema(schema, strategy, fp.getName());
       constraints = constraints.with(
-          fp.getName(), Conversions.convert(value, fieldSchema));
+          fp.getName(), conversion.valueForDirname(fp, parts.next()));
     }
 
     Preconditions.checkArgument(!parts.hasNext(),

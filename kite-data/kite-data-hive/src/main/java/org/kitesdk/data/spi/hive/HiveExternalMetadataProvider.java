@@ -84,7 +84,7 @@ class HiveExternalMetadataProvider extends HiveAbstractMetadataProvider {
           .build();
     }
 
-    Path managerPath = new Path(new Path(newDescriptor.getLocation()),
+    Path managerPath = new Path(new Path(newDescriptor.getLocation().toString()),
         SCHEMA_DIRECTORY);
 
     // Store the schema with the schema manager and use the

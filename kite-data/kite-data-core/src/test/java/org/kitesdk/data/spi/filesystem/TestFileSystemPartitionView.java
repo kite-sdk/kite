@@ -75,6 +75,49 @@ public class TestFileSystemPartitionView {
   }
 
   @Test
+  public void testEscapedURIs() {
+    Datasets.delete("dataset:file:/tmp/datasets/string_partitioned");
+
+    // build a new dataset with a string partition field
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .partitionStrategy(new PartitionStrategy.Builder()
+            .identity("data", "d_copy")
+            .build())
+        .schema(TestRecord.class)
+        .build();
+
+    FileSystemDataset<TestRecord> d = Datasets.create(
+        "dataset:file:/tmp/datasets/string_partitioned",
+        descriptor, TestRecord.class);
+
+    writeTestRecords(d);
+
+    FileSystemPartitionView<TestRecord> partition = d.getPartitionView(
+        URI.create("file:/tmp/datasets/string_partitioned/d_copy=test%2F-0"));
+    Assert.assertEquals("Should accept escaped full URI",
+        URI.create("file:/tmp/datasets/string_partitioned/d_copy=test%2F-0"),
+        partition.getLocation());
+    Assert.assertEquals("Should should have correctly escaped relative URI",
+        URI.create("d_copy=test%2F-0"), partition.getRelativeLocation());
+    Assert.assertEquals("Should have correctly escaped constraints",
+        d.unbounded.getConstraints().with("d_copy", "test/-0"),
+        partition.getConstraints());
+
+    partition = d.getPartitionView(
+        new Path("file:/tmp/datasets/string_partitioned/d_copy=test%2F-0"));
+    Assert.assertEquals("Should accept escaped full URI",
+        URI.create("file:/tmp/datasets/string_partitioned/d_copy=test%2F-0"),
+        partition.getLocation());
+    Assert.assertEquals("Should should have correctly escaped relative URI",
+        URI.create("d_copy=test%2F-0"), partition.getRelativeLocation());
+    Assert.assertEquals("Should have correctly escaped constraints",
+        d.unbounded.getConstraints().with("d_copy", "test/-0"),
+        partition.getConstraints());
+
+    Datasets.delete("dataset:file:/tmp/datasets/string_partitioned");
+  }
+
+  @Test
   public void testFullPaths() {
     FileSystemPartitionView<TestRecord> partition = partitioned
         .getPartitionView(URI.create("file:/tmp/datasets/partitioned"));
@@ -388,7 +431,7 @@ public class TestFileSystemPartitionView {
       for (int i = 0; i < 10; i += 1) {
         TestRecord record = new TestRecord();
         record.id = i;
-        record.data = "test-" + i;
+        record.data = "test/-" + i;
         writer.write(record);
       }
 

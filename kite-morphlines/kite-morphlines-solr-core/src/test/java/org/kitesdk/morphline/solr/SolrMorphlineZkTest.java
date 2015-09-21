@@ -18,6 +18,7 @@
 package org.kitesdk.morphline.solr;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.Iterator;
 
 import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
@@ -58,7 +59,12 @@ public class SolrMorphlineZkTest extends AbstractSolrMorphlineZkTest {
     assertEquals(1, collector.getNumStartEvents());
     Notifications.notifyBeginTransaction(morphline);
     assertTrue(morphline.process(record));
-    
+
+    record = new Record();
+    record.put(Fields.ID, "id0-innsbruck");
+    record.put("user_screen_name", Collections.singletonMap("set", "bar"));
+    assertTrue(morphline.process(record));
+
     record = new Record();
     record.put(Fields.ID, "id1-innsbruck");
     record.put("text", "mytext1");
@@ -69,17 +75,12 @@ public class SolrMorphlineZkTest extends AbstractSolrMorphlineZkTest {
     Record expected = new Record();
     expected.put(Fields.ID, "id0-innsbruck");
     expected.put("text", "mytext");
-    expected.put("user_screen_name", "foo");
-    Iterator<Record> citer = collector.getRecords().iterator();
-    assertEquals(expected, citer.next());
+    expected.put("user_screen_name", "bar");
     
     Record expected2 = new Record();
     expected2.put(Fields.ID, "id1-innsbruck");
     expected2.put("text", "mytext1");
     expected2.put("user_screen_name", "foo1");
-    assertEquals(expected2, citer.next());
-    
-    assertFalse(citer.hasNext());
     
     commit();
     

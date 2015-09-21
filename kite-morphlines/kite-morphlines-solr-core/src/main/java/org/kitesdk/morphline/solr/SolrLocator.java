@@ -59,7 +59,14 @@ public class SolrLocator {
   private String solrUrl;
   private String solrHomeDir;
   private int batchSize = 10000;
+  private int zkClientSessionTimeout = DEFAULT_ZK_CLIENT_SESSION_TIMEOUT;
+  private int zkClientConnectTimeout = DEFAULT_ZK_CLIENT_CONNECT_TIMEOUT;
   
+  private static final int DEFAULT_ZK_CLIENT_SESSION_TIMEOUT = Integer.parseInt(System.getProperty(
+      SolrLocator.class.getName() + ".zkClientSessionTimeout", String.valueOf(60 * 1000)));
+  private static final int DEFAULT_ZK_CLIENT_CONNECT_TIMEOUT = Integer.parseInt(System.getProperty(
+      SolrLocator.class.getName() + ".zkClientConnectTimeout", String.valueOf(60 * 1000)));
+      
   private static final Logger LOG = LoggerFactory.getLogger(SolrLocator.class);
 
   protected SolrLocator(MorphlineContext context) {
@@ -76,6 +83,8 @@ public class SolrLocator {
     solrHomeDir = configs.getString(config, "solrHomeDir", null);
     solrUrl = configs.getString(config, "solrUrl", null);    
     batchSize = configs.getInt(config, "batchSize", batchSize);
+    zkClientSessionTimeout = configs.getInt(config, "zkClientSessionTimeout", zkClientSessionTimeout);
+    zkClientConnectTimeout = configs.getInt(config, "zkClientConnectTimeout", zkClientConnectTimeout);
     LOG.trace("Constructed solrLocator: {}", this);
     configs.validateArguments(config);
   }
@@ -87,6 +96,8 @@ public class SolrLocator {
       }
       CloudSolrServer cloudSolrServer = new CloudSolrServer(zkHost);
       cloudSolrServer.setDefaultCollection(collectionName);
+      cloudSolrServer.setZkClientTimeout(zkClientSessionTimeout); 
+      cloudSolrServer.setZkConnectTimeout(zkClientConnectTimeout); 
       return cloudSolrServer;
     } else {
       if (solrUrl == null && solrHomeDir != null) {
@@ -156,7 +167,7 @@ public class SolrLocator {
               "Parameter 'zkHost' requires that you also pass parameter 'collection'", config);
         }
         ZooKeeperDownloader zki = new ZooKeeperDownloader();
-        SolrZkClient zkClient = zki.getZkClient(zkHost);
+        SolrZkClient zkClient = zki.getZkClient(zkHost, zkClientSessionTimeout, zkClientConnectTimeout);
         try {
           String configName = zki.readConfigName(zkClient, collectionName);
           downloadedSolrHomeDir = Files.createTempDir();
@@ -224,7 +235,9 @@ public class SolrLocator {
         " zkHost : " + toJson(zkHost) + ", " +
         " solrUrl : " + toJson(solrUrl) + ", " +
         " solrHomeDir : " + toJson(solrHomeDir) + ", " +
-        " batchSize : " + toJson(batchSize) + " " +
+        " batchSize : " + toJson(batchSize) + ", " +
+        " zkClientSessionTimeout : " + toJson(zkClientSessionTimeout) + ", " +
+        " zkClientConnectTimeout : " + toJson(zkClientConnectTimeout) + " " +
         "}";
     return ConfigFactory.parseString(json);
   }

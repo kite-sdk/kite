@@ -28,6 +28,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetOperationException;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.DataModelUtil;
@@ -58,7 +59,14 @@ class CSVInputFormat<E> extends FileInputFormat<E, Void> {
       throws IOException, InterruptedException {
     Configuration conf = Hadoop.TaskAttemptContext
         .getConfiguration.invoke(context);
-    Path path = ((FileSplit) split).getPath();
+    Path path;
+    if (split instanceof FileSplit) {
+      path = ((FileSplit) split).getPath();
+    } else {
+      throw new DatasetOperationException(
+          "Split is not a FileSplit: %s:%s",
+          split.getClass().getCanonicalName(), split);
+    }
     CSVFileReader<E> reader = new CSVFileReader<E>(
         path.getFileSystem(conf), path, descriptor, accessor);
     reader.initialize();

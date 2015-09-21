@@ -45,7 +45,7 @@ public class SignalManager {
   /**
    * Creates a new signal manager using the given signal directory.
    *
-   * @param conf the Hadoop configuration
+   * @param fileSystem a FileSystem that holds the signalDirectory
    * @param signalDirectory directory in which the manager
    *                        stores signals.
    *

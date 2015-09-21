@@ -43,13 +43,17 @@ final class ZooKeeperDownloader {
   private static final Logger LOG = LoggerFactory.getLogger(ZooKeeperDownloader.class);
   
   public SolrZkClient getZkClient(String zkHost) {
+    return getZkClient(zkHost, 60000, 60000);
+  }
+  
+  public SolrZkClient getZkClient(String zkHost, int zkClientSessionTimeout, int zkClientConnectTimeout) {
     if (zkHost == null) {
       throw new IllegalArgumentException("zkHost must not be null");
     }
 
     SolrZkClient zkClient;
     try {
-      zkClient = new SolrZkClient(zkHost, 30000);
+      zkClient = new SolrZkClient(zkHost, zkClientSessionTimeout, zkClientConnectTimeout);
     } catch (Exception e) {
       throw new IllegalArgumentException("Cannot connect to ZooKeeper: " + zkHost, e);
     }

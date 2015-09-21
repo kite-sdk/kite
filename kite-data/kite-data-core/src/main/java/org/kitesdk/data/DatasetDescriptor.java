@@ -179,6 +179,10 @@ public class DatasetDescriptor {
   /**
    * Get the URL location where the data for this {@link Dataset} is stored
    * (optional).
+   * <p>
+   * Due to a bug in Hadoop's {@link Path}, the URI returned by this method
+   * should not be used to create a path using its {@link URI} constructor.
+   * Instead, use {@code new Path(desc.getLocation().toString())}.
    *
    * @return a location URL or null if one is not set
    *
@@ -563,13 +567,13 @@ public class DatasetDescriptor {
     /**
      * Configure the dataset's location (optional).
      *
-     * @param uri A location Path
+     * @param path A location Path
      * @return An instance of the builder for method chaining.
      *
      * @since 0.8.0
      */
-    public Builder location(Path uri) {
-      return location(uri.toUri());
+    public Builder location(Path path) {
+      return location(path.toString());
     }
 
     /**

@@ -142,6 +142,7 @@ if [ -x "$HADOOP_COMMON_HOME/bin/hadoop" ]; then
 else
   echo "ERROR: Cannot find Hadoop installation!"
   echo "You can fix this warning by setting HADOOP_HOME"
+  exit 1
 fi
 
 exit
