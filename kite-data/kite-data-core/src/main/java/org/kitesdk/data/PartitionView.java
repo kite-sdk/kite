@@ -32,11 +32,17 @@ import javax.annotation.concurrent.Immutable;
 public interface PartitionView<E> extends View<E> {
   /**
    * Returns the location of this partition as a {@link URI}.
+   * <p>
+   * Due to a bug in Hadoop's {@link org.apache.hadoop.fs.Path}, the URI
+   * returned by this method should not be used to create a path using its
+   * {@link URI} constructor. Instead, use
+   * {@code new Path(desc.getLocation().toString())}.
+   *
    *
    * @return a {@code URI} for the location of this partition.
    * @since 1.1.0
    */
-  public URI getLocation();
+  URI getLocation();
 
   /**
    * Deletes the entities included in this {@link View}.

@@ -97,7 +97,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
   @Before
   public void setUp() throws IOException {
     testDirectory = fileSystem.makeQualified(
-        new Path(Files.createTempDir().getAbsolutePath()));
+        new Path(Files.createTempDir().getAbsolutePath() + "/test%2F-0"));
   }
 
   @After
