@@ -40,8 +40,8 @@ import org.kitesdk.morphline.base.Fields;
 import org.kitesdk.morphline.base.Metrics;
 import org.kitesdk.morphline.stdio.AbstractParser;
 
-import parquet.avro.AvroParquetReader;
-import parquet.avro.AvroReadSupport;
+import org.apache.parquet.avro.AvroParquetReader;
+import org.apache.parquet.avro.AvroReadSupport;
 
 import com.codahale.metrics.Meter;
 import org.kitesdk.morphline.shaded.com.google.common.io.Closeables;
