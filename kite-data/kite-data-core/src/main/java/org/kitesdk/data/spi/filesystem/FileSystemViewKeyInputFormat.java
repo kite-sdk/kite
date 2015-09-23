@@ -35,8 +35,6 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.lib.input.CombineFileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.CombineFileRecordReader;
 import org.apache.hadoop.mapreduce.lib.input.CombineFileSplit;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.kitesdk.compat.DynMethods;
@@ -49,8 +47,8 @@ import org.kitesdk.data.spi.DataModelUtil;
 import org.kitesdk.data.spi.FilteredRecordReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import parquet.avro.AvroParquetInputFormat;
-import parquet.avro.AvroReadSupport;
+import org.apache.parquet.avro.AvroParquetInputFormat;
+import org.apache.parquet.avro.AvroReadSupport;
 
 class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
 
