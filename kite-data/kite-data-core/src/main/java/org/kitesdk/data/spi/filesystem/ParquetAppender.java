@@ -76,9 +76,7 @@ class ParquetAppender<E extends IndexedRecord> implements FileSystemWriter.FileA
 
   @Override
   public long pos() throws IOException {
-    // TODO: add a callback to set the position when Parquet decides to flush
-    // this is not a good way to find out the current position
-    return fileSystem.getFileStatus(path).getLen();
+    return avroParquetWriter.getDataSize();
   }
 
   @Override

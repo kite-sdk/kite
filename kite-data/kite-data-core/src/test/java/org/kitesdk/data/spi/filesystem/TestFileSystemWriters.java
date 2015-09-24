@@ -96,6 +96,8 @@ public abstract class TestFileSystemWriters extends MiniDFSTest {
         written, Lists.newArrayList((Iterator) init(reader)));
   }
 
+  public abstract long getTargetFileSize();
+
   @Test
   public void testTargetFileSize() throws IOException {
     init(fsWriter);
@@ -139,7 +141,7 @@ public abstract class TestFileSystemWriters extends MiniDFSTest {
     Assert.assertTrue("Should match written records",
         Sets.newHashSet(written).equals(Sets.newHashSet(actualContent)));
 
-    double ratioToTarget = (((double) rolledFile.getLen()) / 2 / 1024 / 1024);
+    double ratioToTarget = (((double) rolledFile.getLen()) / getTargetFileSize());
     Assert.assertTrue(
         "Should be within 10% of target size: " + ratioToTarget * 100,
         ratioToTarget > 0.90 && ratioToTarget < 1.10);
