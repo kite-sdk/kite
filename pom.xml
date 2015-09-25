@@ -149,7 +149,7 @@
     <vers.hbase2>0.98.3-hadoop2</vers.hbase2>
     <vers.hbase-cdh4>0.94.6-cdh${cdh4.version}</vers.hbase-cdh4>
     <vers.hbase-cdh5>1.0.0-cdh${cdh5.version}</vers.hbase-cdh5>
-    <vers.hive>0.13.0</vers.hive>
+    <vers.hive>1.1.0</vers.hive>
     <vers.hive-cdh5>1.1.0-cdh${cdh5.version}</vers.hive-cdh5>
     <vers.jetty>8.1.14.v20131031</vers.jetty>
     <vers.jexl>2.1.1</vers.jexl>
