@@ -64,6 +64,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+          <reuseForks>false</reuseForks>
           <systemProperties>
             <property>
               <!-- Make sure derby.log goes to target/ subdir
