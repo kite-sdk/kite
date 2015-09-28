@@ -149,6 +149,10 @@
     <vers.hbase2>0.98.3-hadoop2</vers.hbase2>
     <vers.hbase-cdh4>0.94.6-cdh${cdh4.version}</vers.hbase-cdh4>
     <vers.hbase-cdh5>1.0.0-cdh${cdh5.version}</vers.hbase-cdh5>
+    <!-- When changing Hive versions, be careful that the required jars are
+         pulled in by the TransformTask in kite-tools. New dependencies
+         should be added to the distributed cache by class.
+         -->
     <vers.hive>1.1.0</vers.hive>
     <vers.hive-cdh5>1.1.0-cdh${cdh5.version}</vers.hive-cdh5>
     <vers.jetty>8.1.14.v20131031</vers.jetty>
@@ -792,6 +796,12 @@
       </dependency>
 
       <!-- Hive dependencies -->
+
+      <!-- When changing Hive dependencies, be careful that the required jars are
+           pulled in by the TransformTask in kite-tools. New dependencies
+           should be added to the distributed cache by class.
+           -->
+
       <dependency>
         <groupId>org.apache.hive</groupId>
         <artifactId>hive-exec</artifactId>
