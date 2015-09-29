@@ -46,6 +46,7 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
 
 public class TestDeleteCommand {
 
@@ -71,6 +72,15 @@ public class TestDeleteCommand {
   }
 
   @Test
+  public void testBasicUseDryRun() throws Exception {
+    command.targets = Lists.newArrayList("users");
+    command.dryRun = true;
+    command.run();
+    verify(repo, never()).delete("default", "users");
+    verify(console).debug(contains("Deleted"), eq("users"));
+  }
+
+  @Test
   public void testMultipleDatasets() throws Exception {
     command.targets = Lists.newArrayList("users", "moreusers");
     command.run();
@@ -90,6 +100,20 @@ public class TestDeleteCommand {
     command.targets = Lists.newArrayList(datasetUri);
     command.run();
     verify(repo).delete("ns", "test");
+    verify(console).debug(contains("Deleted"), eq(datasetUri));
+  }
+
+  @Test
+  public void testDatasetUriDryRun() throws Exception {
+    String datasetUri = new URIBuilder(repo.getUri(), "ns", "test")
+        .build()
+        .toString();
+    Assert.assertTrue("Should be a dataset URI",
+        datasetUri.startsWith("dataset:"));
+    command.targets = Lists.newArrayList(datasetUri);
+    command.dryRun = true;
+    command.run();
+    verify(repo, never()).delete("ns", "test");
     verify(console).debug(contains("Deleted"), eq(datasetUri));
   }
 
@@ -119,6 +143,36 @@ public class TestDeleteCommand {
 
     verify(repo).load("ns", "test", GenericRecord.class);
     verify(view).deleteAll();
+    verify(console).debug(contains("Deleted"), eq(viewUri));
+  }
+
+  @Test
+  public void testViewUriDryRun() throws Exception {
+    DatasetDescriptor desc = new DatasetDescriptor.Builder()
+        .schema(SchemaBuilder.record("Test").fields().requiredInt("prop").endRecord())
+        .build();
+
+    URI actualViewUri = new URIBuilder(repo.getUri(), "ns", "test")
+        .with("prop", "34")
+        .build();
+    String viewUri = actualViewUri.toString();
+
+    Assert.assertTrue("Should be a view URI",
+        viewUri.startsWith("view:"));
+
+    AbstractDataset ds = mock(AbstractDataset.class);
+    when(repo.load("ns", "test", GenericRecord.class)).thenReturn(ds);
+    when(ds.getDescriptor()).thenReturn(desc);
+    AbstractRefinableView view = mock(AbstractRefinableView.class);
+    when(ds.filter(any(Constraints.class))).thenReturn(view);
+    when(view.getUri()).thenReturn(actualViewUri);
+
+    command.targets = Lists.newArrayList(viewUri);
+    command.dryRun = true;
+    command.run();
+
+    verify(repo).load("ns", "test", GenericRecord.class);
+    verify(view, never()).deleteAll();
     verify(console).debug(contains("Deleted"), eq(viewUri));
   }
 
