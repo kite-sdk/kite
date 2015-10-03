@@ -19,10 +19,13 @@ package org.kitesdk.compat;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Maps;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Arrays;
+import java.util.Map;
 
 public class DynConstructors {
   public static class Ctor<C> extends DynMethods.UnboundMethod {
@@ -96,6 +99,7 @@ public class DynConstructors {
     private final Class<?> baseClass;
     private ClassLoader loader = Thread.currentThread().getContextClassLoader();
     private Ctor ctor = null;
+    private Map<String, Throwable> problems = Maps.newHashMap();
 
     public Builder(Class<?> baseClass) {
       this.baseClass = baseClass;
@@ -134,8 +138,10 @@ public class DynConstructors {
         impl(targetClass, types);
       } catch (NoClassDefFoundError e) {
         // cannot load this implementation
+        problems.put(className, e);
       } catch (ClassNotFoundException e) {
         // not the right implementation
+        problems.put(className, e);
       }
       return this;
     }
@@ -150,6 +156,7 @@ public class DynConstructors {
         ctor = new Ctor<T>(targetClass.getConstructor(types), targetClass);
       } catch (NoSuchMethodException e) {
         // not the right implementation
+        problems.put(methodName(targetClass, types), e);
       }
       return this;
     }
@@ -171,8 +178,10 @@ public class DynConstructors {
         hiddenImpl(targetClass, types);
       } catch (NoClassDefFoundError e) {
         // cannot load this implementation
+        problems.put(className, e);
       } catch (ClassNotFoundException e) {
         // not the right implementation
+        problems.put(className, e);
       }
       return this;
     }
@@ -189,8 +198,10 @@ public class DynConstructors {
         ctor = new Ctor<T>(hidden, targetClass);
       } catch (SecurityException e) {
         // unusable
+        problems.put(methodName(targetClass, types), e);
       } catch (NoSuchMethodException e) {
         // not the right implementation
+        problems.put(methodName(targetClass, types), e);
       }
       return this;
     }
@@ -200,8 +211,8 @@ public class DynConstructors {
       if (ctor != null) {
         return ctor;
       }
-      throw new NoSuchMethodException(
-          "Cannot find constructor for " + baseClass);
+      throw new NoSuchMethodException("Cannot find constructor for " +
+          baseClass + "\n" + formatProblems(problems));
     }
 
     @SuppressWarnings("unchecked")
@@ -209,7 +220,8 @@ public class DynConstructors {
       if (ctor != null) {
         return ctor;
       }
-      throw new RuntimeException("Cannot find constructor for " + baseClass);
+      throw new RuntimeException("Cannot find constructor for " +
+          baseClass + "\n" + formatProblems(problems));
     }
   }
 
@@ -225,5 +237,37 @@ public class DynConstructors {
       hidden.setAccessible(true);
       return null;
     }
+  }
+
+  private static String formatProblems(Map<String, Throwable> problems) {
+    StringBuilder sb = new StringBuilder();
+    boolean first = true;
+    for (Map.Entry<String, Throwable> problem : problems.entrySet()) {
+      if (first) {
+        first = false;
+      } else {
+        sb.append("\n");
+      }
+      sb.append("\tMissing ").append(problem.getKey()).append(" [")
+          .append(problem.getValue().getClass().getName()).append(": ")
+          .append(problem.getValue().getMessage()).append("]");
+    }
+    return sb.toString();
+  }
+
+  private static String methodName(Class<?> targetClass, Class<?>... types) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(targetClass.getName()).append("(");
+    boolean first = true;
+    for (Class<?> type : types) {
+      if (first) {
+        first = false;
+      } else {
+        sb.append(",");
+      }
+      sb.append(type.getName());
+    }
+    sb.append(")");
+    return sb.toString();
   }
 }

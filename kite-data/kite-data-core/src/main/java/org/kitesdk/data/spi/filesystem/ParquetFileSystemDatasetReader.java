@@ -27,14 +27,13 @@ import com.google.common.base.Preconditions;
 import java.io.EOFException;
 import java.io.IOException;
 import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.IndexedRecord;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import parquet.avro.AvroParquetReader;
-import parquet.avro.AvroReadSupport;
+import org.apache.parquet.avro.AvroParquetReader;
+import org.apache.parquet.avro.AvroReadSupport;
 
 class ParquetFileSystemDatasetReader<E extends IndexedRecord> extends AbstractDatasetReader<E> {
 

@@ -137,7 +137,7 @@
       <artifactId>avro</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.twitter</groupId>
+      <groupId>org.apache.parquet</groupId>
       <artifactId>parquet-avro</artifactId>
       <exclusions>
         <exclusion>

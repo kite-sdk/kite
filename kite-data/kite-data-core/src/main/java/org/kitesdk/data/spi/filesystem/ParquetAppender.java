@@ -28,10 +28,9 @@ import org.kitesdk.data.CompressionType;
 import org.kitesdk.data.Formats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import parquet.avro.AvroParquetWriter;
-import parquet.hadoop.ParquetFileWriter;
-import parquet.hadoop.ParquetWriter;
-import parquet.hadoop.metadata.CompressionCodecName;
+import org.apache.parquet.avro.AvroParquetWriter;
+import org.apache.parquet.hadoop.ParquetWriter;
+import org.apache.parquet.hadoop.metadata.CompressionCodecName;
 
 class ParquetAppender<E extends IndexedRecord> implements FileSystemWriter.FileAppender<E> {
 
