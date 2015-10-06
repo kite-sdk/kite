@@ -201,9 +201,9 @@ public class MarkerRange {
     }
 
     public Boundary(MarkerComparator comparator, Marker bound, boolean isInclusive) {
-      parquet.Preconditions.checkArgument(comparator != null,
+      Preconditions.checkArgument(comparator != null,
           "Comparator cannot be null");
-      parquet.Preconditions.checkArgument(bound != null,
+      Preconditions.checkArgument(bound != null,
           "Bound cannot be null");
 
       this.comparator = comparator;

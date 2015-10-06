@@ -207,6 +207,11 @@
          in the dependency modules
          -->
 
+    <!-- When changing Hive dependencies, be careful that the required jars are
+         pulled in by the TransformTask. New dependencies should be added to
+         the distributed cache by class.
+         -->
+
     <dependency>
       <groupId>org.apache.hive</groupId>
       <artifactId>hive-exec</artifactId>

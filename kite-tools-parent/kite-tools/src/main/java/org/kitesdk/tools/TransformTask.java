@@ -21,6 +21,9 @@ import com.google.common.collect.Iterables;
 import java.io.IOException;
 import java.net.URI;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.codec.Encoder;
+import org.apache.commons.compress.compressors.CompressorInputStream;
+import org.apache.commons.logging.Log;
 import org.apache.crunch.DoFn;
 import org.apache.crunch.MapFn;
 import org.apache.crunch.PCollection;
@@ -35,17 +38,24 @@ import org.apache.crunch.types.avro.Avros;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.hive.conf.HiveConf;
+import org.apache.hadoop.hive.metastore.HiveMetaStore;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.thrift.DelegationTokenIdentifier;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.security.token.Token;
 import org.apache.thrift.TException;
+import org.datanucleus.api.ApiAdapter;
+import org.datanucleus.api.jdo.JDOAdapter;
+import org.datanucleus.store.rdbms.query.SQLQuery;
 import org.kitesdk.compat.DynMethods;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetException;
+import org.kitesdk.data.DatasetOperationException;
 import org.kitesdk.data.View;
 import org.kitesdk.data.crunch.CrunchDatasets;
+import javax.jdo.JDOHelper;
+import javax.transaction.Transaction;
 
 /**
  * @since 0.16.0
@@ -144,7 +154,8 @@ public class TransformTask<S, T> extends Configured {
   }
 
   public PipelineResult run() throws IOException {
-    if (isLocal(from.getDataset()) || isLocal(to.getDataset())) {
+    boolean isLocal = (isLocal(from.getDataset()) || isLocal(to.getDataset()));
+    if (isLocal) {
       // copy to avoid making changes to the caller's configuration
       Configuration conf = new Configuration(getConf());
       conf.set("mapreduce.framework.name", "local");
@@ -153,13 +164,47 @@ public class TransformTask<S, T> extends Configured {
 
     if (isHive(from) || isHive(to)) {
       setConf(addHiveDelegationToken(getConf()));
+
+      // add jars needed for metastore interaction to the classpath
+      if (!isLocal) {
+        Class<?> fb303Class, thriftClass;
+        try {
+          // attempt to use libfb303 and libthrift 0.9.2 when async was added
+          fb303Class = Class.forName(
+              "com.facebook.fb303.FacebookService.AsyncProcessor");
+          thriftClass = Class.forName(
+              "org.apache.thrift.TBaseAsyncProcessor");
+        } catch (ClassNotFoundException e) {
+          try {
+            // fallback to 0.9.0 or earlier
+            fb303Class = Class.forName(
+                "com.facebook.fb303.FacebookBase");
+            thriftClass = Class.forName(
+                "org.apache.thrift.TBase");
+          } catch (ClassNotFoundException real) {
+            throw new DatasetOperationException(
+                "Cannot find thrift dependencies", real);
+          }
+        }
+
+        TaskUtil.configure(getConf())
+            .addJarForClass(Encoder.class) // commons-codec
+            .addJarForClass(Log.class) // commons-logging
+            .addJarForClass(CompressorInputStream.class) // commons-compress
+            .addJarForClass(ApiAdapter.class) // datanucleus-core
+            .addJarForClass(JDOAdapter.class) // datanucleus-api-jdo
+            .addJarForClass(SQLQuery.class) // datanucleus-rdbms
+            .addJarForClass(JDOHelper.class) // jdo-api
+            .addJarForClass(Transaction.class) // jta
+            .addJarForClass(fb303Class) // libfb303
+            .addJarForClass(thriftClass) // libthrift
+            .addJarForClass(HiveMetaStore.class) // hive-metastore
+            .addJarForClass(HiveConf.class); // hive-exec
+      }
     }
 
     PType<T> toPType = ptype(to);
     MapFn<T, T> validate = new CheckEntityClass<T>(to.getType());
-
-    TaskUtil.configure(getConf())
-        .addJarPathForClass(HiveConf.class);
 
     Pipeline pipeline = new MRPipeline(getClass(), getConf());
 
