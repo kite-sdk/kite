@@ -45,6 +45,10 @@ public abstract class TestFileSystemWriters extends MiniDFSTest {
       .requiredLong("id")
       .requiredString("message")
       .endRecord();
+  
+  public static final Schema SCHEMA = SchemaBuilder.record("Message").fields()
+	      .requiredLong("id")
+	      .endRecord();
 
   public abstract FileSystemWriter<Record> newWriter(Path directory, Schema schema);
   public abstract DatasetReader<Record> newReader(Path path, Schema schema);
@@ -52,7 +56,7 @@ public abstract class TestFileSystemWriters extends MiniDFSTest {
   protected FileSystem fs = null;
   protected Path testDirectory = null;
   protected FileSystemWriter<Record> fsWriter = null;
-
+  
   @Before
   public void setup() throws IOException {
     this.fs = getDFS();
@@ -67,6 +71,38 @@ public abstract class TestFileSystemWriters extends MiniDFSTest {
 
   @Test
   public void testBasicWrite() throws IOException {
+    init(fsWriter);
+
+    FileStatus[] stats = fs.listStatus(testDirectory, PathFilters.notHidden());
+    Assert.assertEquals("Should contain no visible files", 0, stats.length);
+    stats = fs.listStatus(testDirectory);
+    Assert.assertEquals("Should contain a hidden file", 1, stats.length);
+
+    List<Record> written = Lists.newArrayList();
+    for (long i = 0; i < 10000; i += 1) {
+      Record record = record(i, "test-" + i);
+      fsWriter.write(record);
+      written.add(record);
+    }
+
+    stats = fs.listStatus(testDirectory, PathFilters.notHidden());
+    Assert.assertEquals("Should contain no visible files", 0, stats.length);
+    stats = fs.listStatus(testDirectory);
+    Assert.assertEquals("Should contain a hidden file", 1, stats.length);
+
+    fsWriter.close();
+
+    stats = fs.listStatus(testDirectory, PathFilters.notHidden());
+    Assert.assertEquals("Should contain a visible data file", 1, stats.length);
+
+    DatasetReader<Record> reader = newReader(stats[0].getPath(), TEST_SCHEMA);
+    Assert.assertEquals("Should match written records",
+        written, Lists.newArrayList((Iterator) init(reader)));
+  }
+  
+  @Test
+  public void testWriteWithOldSchema() throws IOException {
+    fsWriter = newWriter(testDirectory, SCHEMA);  
     init(fsWriter);
 
     FileStatus[] stats = fs.listStatus(testDirectory, PathFilters.notHidden());

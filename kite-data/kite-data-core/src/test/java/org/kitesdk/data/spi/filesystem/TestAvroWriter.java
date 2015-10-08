@@ -44,9 +44,9 @@ public class TestAvroWriter extends TestFileSystemWriters {
                 String.valueOf(32 * 1024 * 1024)) // 32 MB
             .schema(schema)
             .format("avro")
-            .build());
+            .build(), TEST_SCHEMA);
   }
-
+ 
   @Override
   public DatasetReader<Record> newReader(Path path, Schema schema) {
     return new FileSystemDatasetReader<Record>(fs, path, schema, Record.class);
