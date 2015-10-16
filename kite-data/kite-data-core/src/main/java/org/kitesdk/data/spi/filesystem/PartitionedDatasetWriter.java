@@ -267,7 +267,7 @@ abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>>
           dataset.getFileSystem(),
           new Path(dataset.getDirectory(), partition),
           conf.getRollIntervalMillis(), conf.getTargetFileSize(),
-          dataset.getDescriptor(), view.getSchema());
+          dataset.getDescriptor(), view.getAccessor().getWriteSchema());
 
       PartitionListener listener = dataset.getPartitionListener();
       if (listener != null) {
@@ -315,7 +315,7 @@ abstract class PartitionedDatasetWriter<E, W extends FileSystemWriter<E>>
           dataset.getFileSystem(),
           new Path(dataset.getDirectory(), partition),
           conf.getRollIntervalMillis(), conf.getTargetFileSize(),
-          dataset.getDescriptor(), view.getSchema());
+          dataset.getDescriptor(), view.getAccessor().getWriteSchema());
 
       PartitionListener listener = dataset.getPartitionListener();
       if (listener != null) {

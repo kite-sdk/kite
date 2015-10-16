@@ -45,18 +45,15 @@ public abstract class TestFileSystemWriters extends MiniDFSTest {
       .requiredLong("id")
       .requiredString("message")
       .endRecord();
-  
-  public static final Schema SCHEMA = SchemaBuilder.record("Message").fields()
-	      .requiredLong("id")
-	      .endRecord();
 
   public abstract FileSystemWriter<Record> newWriter(Path directory, Schema schema);
+  public abstract FileSystemWriter<Record> newWriter(Path directory, Schema datasetSchema, Schema writerSchema);
   public abstract DatasetReader<Record> newReader(Path path, Schema schema);
 
   protected FileSystem fs = null;
   protected Path testDirectory = null;
   protected FileSystemWriter<Record> fsWriter = null;
-  
+
   @Before
   public void setup() throws IOException {
     this.fs = getDFS();
@@ -102,7 +99,11 @@ public abstract class TestFileSystemWriters extends MiniDFSTest {
   
   @Test
   public void testWriteWithOldSchema() throws IOException {
-    fsWriter = newWriter(testDirectory, SCHEMA);  
+    Schema writerSchema = SchemaBuilder.record("Message").fields()
+        .requiredLong("id")
+        .endRecord();
+
+    fsWriter = newWriter(testDirectory, TEST_SCHEMA, writerSchema);
     init(fsWriter);
 
     FileStatus[] stats = fs.listStatus(testDirectory, PathFilters.notHidden());
@@ -112,7 +113,8 @@ public abstract class TestFileSystemWriters extends MiniDFSTest {
 
     List<Record> written = Lists.newArrayList();
     for (long i = 0; i < 10000; i += 1) {
-      Record record = record(i, "test-" + i);
+      Record record = new Record(writerSchema);
+      record.put("id", i);
       fsWriter.write(record);
       written.add(record);
     }
@@ -127,7 +129,7 @@ public abstract class TestFileSystemWriters extends MiniDFSTest {
     stats = fs.listStatus(testDirectory, PathFilters.notHidden());
     Assert.assertEquals("Should contain a visible data file", 1, stats.length);
 
-    DatasetReader<Record> reader = newReader(stats[0].getPath(), TEST_SCHEMA);
+    DatasetReader<Record> reader = newReader(stats[0].getPath(), writerSchema);
     Assert.assertEquals("Should match written records",
         written, Lists.newArrayList((Iterator) init(reader)));
   }

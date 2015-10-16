@@ -46,7 +46,21 @@ public class TestAvroWriter extends TestFileSystemWriters {
             .format("avro")
             .build(), TEST_SCHEMA);
   }
- 
+
+  @Override
+  public FileSystemWriter<Record> newWriter(Path directory, Schema datasetSchema, Schema writerSchema) {
+    return FileSystemWriter.newWriter(fs, directory, 100, 2 * 1024 * 1024,
+        new DatasetDescriptor.Builder()
+            .property(
+                "kite.writer.roll-interval-seconds", String.valueOf(10))
+            .property(
+                "kite.writer.target-file-size",
+                String.valueOf(32 * 1024 * 1024)) // 32 MB
+            .schema(datasetSchema)
+            .format("avro")
+            .build(), writerSchema);
+  }
+
   @Override
   public DatasetReader<Record> newReader(Path path, Schema schema) {
     return new FileSystemDatasetReader<Record>(fs, path, schema, Record.class);

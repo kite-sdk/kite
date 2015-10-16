@@ -340,7 +340,7 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> implements RollingWri
   @VisibleForTesting
   @SuppressWarnings("unchecked")
   <E> FileAppender<E> newAppender(Path temp) {
-    Format format = descriptor.getFormat(); 
+    Format format = descriptor.getFormat();
     if (Formats.PARQUET.equals(format)) {
       // by default, Parquet is not durable
       if (DescriptorUtil.isDisabled(
