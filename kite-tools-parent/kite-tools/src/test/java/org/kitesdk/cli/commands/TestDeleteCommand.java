@@ -77,7 +77,7 @@ public class TestDeleteCommand {
     command.dryRun = true;
     command.run();
     verify(repo, never()).delete("default", "users");
-    verify(console).debug(contains("Deleted"), eq("users"));
+    verify(console).debug(contains("Would have deleted"), eq("users"));
   }
 
   @Test
@@ -114,7 +114,7 @@ public class TestDeleteCommand {
     command.dryRun = true;
     command.run();
     verify(repo, never()).delete("ns", "test");
-    verify(console).debug(contains("Deleted"), eq(datasetUri));
+    verify(console).debug(contains("Would have deleted"), eq(datasetUri));
   }
 
   @Test
@@ -173,7 +173,7 @@ public class TestDeleteCommand {
 
     verify(repo).load("ns", "test", GenericRecord.class);
     verify(view, never()).deleteAll();
-    verify(console).debug(contains("Deleted"), eq(viewUri));
+    verify(console).debug(contains("Would have deleted"), eq(viewUri));
   }
 
   @Test

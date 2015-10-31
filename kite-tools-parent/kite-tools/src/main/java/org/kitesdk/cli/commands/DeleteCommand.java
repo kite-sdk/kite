@@ -32,7 +32,7 @@ public class DeleteCommand extends BaseDatasetCommand {
   @Parameter(description = "<dataset or view>")
   List<String> targets;
 
-  @Parameter(names="--dryRun",
+  @Parameter(names="--dry-run",
       description="Displays the view or dataset uris that would be deleted but does not perform actual deletion.")
   boolean dryRun=false;
 
@@ -70,7 +70,7 @@ public class DeleteCommand extends BaseDatasetCommand {
           getDatasetRepository().delete(namespace, uriOrName);
         }
       }
-      console.debug("Deleted {}", uriOrName);
+      console.debug(dryRun ? "Would have deleted {}" : "Deleted {}", uriOrName);
     }
 
     return 0;
