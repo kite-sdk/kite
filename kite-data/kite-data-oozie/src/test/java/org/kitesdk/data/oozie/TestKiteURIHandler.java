@@ -329,6 +329,11 @@ public class TestKiteURIHandler extends MiniDFSTest {
     }
 
     @Override
+    public boolean canDelete() {
+      return false;
+    }
+
+    @Override
     public Iterable<PartitionView<E>> getCoveringPartitions() {
       return null;
     }

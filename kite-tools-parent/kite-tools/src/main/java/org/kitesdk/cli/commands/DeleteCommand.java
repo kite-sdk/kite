@@ -54,7 +54,11 @@ public class DeleteCommand extends BaseDatasetCommand {
 
         if(console.isDebugEnabled()){
           for(PartitionView<?> pv: (Iterable<PartitionView<?>>) view.getCoveringPartitions()){
-            console.debug("Deleting partition {}", pv.getLocation());
+            if(pv.canDelete()) {
+              console.debug("Deleting partition {}", pv.getLocation());
+            }else{
+              console.debug("Deleting is not supported for partition {}", pv.getLocation());
+            }
           }
         }
 

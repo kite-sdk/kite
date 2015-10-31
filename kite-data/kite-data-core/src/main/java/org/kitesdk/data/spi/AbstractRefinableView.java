@@ -153,6 +153,12 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
   }
 
   @Override
+  public boolean canDelete() {
+    throw new UnsupportedOperationException(
+            "This Dataset does not support checking bulk deletion");
+  }
+
+  @Override
   public Class<E> getType() {
     return accessor.getType();
   }

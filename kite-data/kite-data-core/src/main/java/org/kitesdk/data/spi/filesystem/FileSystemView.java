@@ -165,6 +165,11 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
   }
 
   @Override
+  public boolean canDelete() {
+    return constraints.alignedWithBoundaries();
+  }
+
+  @Override
   public InputFormat<E, Void> getInputFormat(Configuration conf) {
     return new FileSystemViewKeyInputFormat<E>(this, conf);
   }

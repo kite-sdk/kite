@@ -150,6 +150,12 @@ public abstract class AbstractDataset<E> implements Dataset<E>, RefinableView<E>
   }
 
   @Override
+  public boolean canDelete() {
+    throw new UnsupportedOperationException(
+            "This Dataset does not support checking deletion");
+  }
+
+  @Override
   public boolean equals(Object obj) {
     if (this == obj) {
       return true;
