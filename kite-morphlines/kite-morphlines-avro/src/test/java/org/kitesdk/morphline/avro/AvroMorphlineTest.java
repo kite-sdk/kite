@@ -679,6 +679,37 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
     }
   }
 
+  @Test
+  /**
+   * Test that schema caching in readAvroContainer works even if the Avro writer schema of each input
+   * file is different (yet compatible). Test writer schema A before B and B before A.
+   */
+  public void testReadAvroContainerWithMultipleSchemas() throws IOException {
+    for (int reverse = 0; reverse < 2; reverse++) {
+      morphline = createMorphline("test-morphlines/readAvroContainer");
+      for (int run = 0; run < 10; run++) {
+        collector.reset();
+        int version = run % 2;
+        version = (version + reverse) % 2; // reverse direction with reverse == 1: 0 -> 1  as well as 1 -> 0
+        byte[] fileContents = Files.toByteArray(
+            new File(RESOURCES_DIR + "/test-documents/avroContainerWithWriterschema" + version + ".avro"));
+        Record inputRecord = new Record();
+        inputRecord.put(Fields.ATTACHMENT_BODY, fileContents);
+        assertTrue(morphline.process(inputRecord));
+  
+        int numRecords = 5;
+        assertEquals(numRecords, collector.getRecords().size());
+        
+        String[] expectedUids = new String[] {"sdfsdf", "fhgfgh", "werwer", "345trgt", "dfgdg"};
+        for (int i = 0; i < numRecords; i++) {
+          Record record = collector.getRecords().get(i);
+          GenericData.Record avroRecord = (GenericData.Record)record.getFirstValue(Fields.ATTACHMENT_BODY);
+          assertEquals(expectedUids[i], avroRecord.get("sc_uid").toString());
+        }
+      }
+    }
+  }
+  
   private void processAndVerifySuccess(Record input, Record expected, boolean isSame) {
     collector.reset();
     startSession();
