@@ -31,6 +31,7 @@ import org.apache.avro.file.DataFileConstants;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.SeekableInput;
 import org.apache.avro.generic.GenericContainer;
+import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.ResolvingDecoder;
 import org.kitesdk.morphline.api.Command;
@@ -112,6 +113,9 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
     protected boolean doProcess(Record inputRecord, InputStream in) throws IOException {
       if (datumReader == null) { // reuse for performance
         datumReader = new FastGenericDatumReader(null, readerSchema);
+      } else {
+        datumReader.setSchema(null);
+        datumReader.setExpected(readerSchema);
       }
       DataFileReader<GenericContainer> reader = null;
       try {
@@ -127,8 +131,8 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
         if (resolver == null) { 
           resolver = createResolver(datumReader.getSchema(), datumReader.getExpected());
           resolverCache.put(writerSchemaKey, resolver);
-          datumReader.setResolver(resolver);
         }
+        datumReader.setResolver(resolver);
         Record template = inputRecord.copy();
         removeAttachments(template);
         template.put(Fields.ATTACHMENT_MIME_TYPE, ReadAvroBuilder.AVRO_MEMORY_MIME_TYPE);
