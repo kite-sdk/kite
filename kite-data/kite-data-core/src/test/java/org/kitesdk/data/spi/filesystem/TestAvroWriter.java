@@ -44,7 +44,7 @@ public class TestAvroWriter extends TestFileSystemWriters {
                 String.valueOf(32 * 1024 * 1024)) // 32 MB
             .schema(schema)
             .format("avro")
-            .build(), TEST_SCHEMA);
+            .build(), schema);
   }
 
   @Override

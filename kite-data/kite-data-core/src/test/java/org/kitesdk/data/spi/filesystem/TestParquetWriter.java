@@ -45,7 +45,7 @@ public class TestParquetWriter extends TestFileSystemWriters {
                 "kite.writer.roll-interval-seconds", String.valueOf(1))
             .schema(schema)
             .format("parquet")
-            .build(), TEST_SCHEMA);
+            .build(), schema);
   }
 
   @Override
