@@ -28,11 +28,23 @@ import org.junit.Test;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.TestHelpers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class TestCSVSchemaInference {
+  private static final Logger LOG = LoggerFactory.getLogger(TestCSVSchemaInference.class);
+
   String csvLines = (
       "long,float,double,double2,string,nullable_long,nullable_string\n" +
       "34,12.3f,99.9d,81.0,s,,\n" +
       "35,\"1.2f\",,,\"\",1234\n"
+  );
+
+  String csvLines2 = (
+     "long,nullable_double,nullable_double2,string\n" +
+     "0,,,5.0\n" +
+     "23,53,3.5,s\n" +
+     "43,82.12,4,2\n"
   );
 
   public Schema nullable(Schema.Type type) {
@@ -281,6 +293,32 @@ public class TestCSVSchemaInference {
         nullable(Schema.Type.STRING), schema.getField("field_6").schema());
     Assert.assertEquals("Should have default value null",
         schema.getField("field_6").defaultValue(), nullDefault);
+  }
+
+  @Test
+  public void testSchemaTypePromotion() throws Exception {
+        LOG.debug("########## testSchemaTypePromotion ##############");
+    InputStream stream = new ByteArrayInputStream(csvLines2.getBytes("utf8"));
+    Schema schema = CSVUtil.inferSchema("TestRecord", stream,
+        new CSVProperties.Builder().hasHeader().build());
+
+    Assert.assertNotNull(schema.getField("long"));
+    Assert.assertNotNull(schema.getField("nullable_double"));
+    Assert.assertNotNull(schema.getField("nullable_double2"));
+    Assert.assertNotNull(schema.getField("string"));
+
+    Assert.assertEquals("Should infer a long",
+        schema(Schema.Type.LONG), schema.getField("long").schema());
+    Assert.assertEquals("Should infer a double (third row is decimal)",
+        nullable(Schema.Type.DOUBLE),
+        schema.getField("nullable_double").schema());
+    Assert.assertEquals("Should infer a double (second row is decimal)",
+        nullable(Schema.Type.DOUBLE),
+        schema.getField("nullable_double2").schema());
+    Assert.assertEquals("Should infer a nullable string (third row is string)",
+        schema(Schema.Type.STRING), schema.getField("string").schema());
+
+    LOG.debug("########## END typePromotion ############");
   }
 
   @Test

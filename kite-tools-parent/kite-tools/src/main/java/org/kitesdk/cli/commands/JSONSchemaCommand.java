@@ -73,6 +73,8 @@ public class JSONSchemaCommand extends BaseCommand {
         "Sample JSON path is required");
     Preconditions.checkArgument(samplePaths.size() == 1,
         "Only one JSON sample can be given");
+    Preconditions.checkArgument(numRecords > 0,
+        "At least one record must be examined");
 
     // assume fields are nullable by default, users can easily change this
     Schema sampleSchema = JsonUtil.inferSchema(
