@@ -180,7 +180,7 @@ public class TestCSVSchemaCommand {
   public void testNoSamplesFail() throws Exception {
     command.samplePaths = Lists.newArrayList("target/users.csv");
     command.recordName = "User";
-    command.linesToSample = 0;
+    command.numRecords = 0;
     TestHelpers.assertThrows("Should complain when number of samples is too few",
         IllegalArgumentException.class, new Callable<Void>() {
           @Override
