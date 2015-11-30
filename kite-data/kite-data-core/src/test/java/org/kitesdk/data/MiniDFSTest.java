@@ -54,6 +54,7 @@ public class MiniDFSTest {
   public static void setupFS() throws IOException {
     if (cluster == null) {
       Configuration c = new Configuration();
+      c.setLong("fs.trash.interval", 1);
       c.setBoolean("dfs.webhdfs.enabled", true);
       // if this fails with "The directory is already locked" set umask to 0022
       cluster = new MiniDFSCluster(c, 1, true, null);

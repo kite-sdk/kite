@@ -177,6 +177,11 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
   }
 
   @Override
+  public boolean moveToTrash(String namespace, String name) {
+    throw new UnsupportedOperationException("Moving datasets to trash is not supported for HBase.");
+  }
+
+  @Override
   public boolean exists(String namespace, String name) {
     Preconditions.checkArgument(DEFAULT_NAMESPACE.equals(namespace),
         "Non-default namespaces are not supported");

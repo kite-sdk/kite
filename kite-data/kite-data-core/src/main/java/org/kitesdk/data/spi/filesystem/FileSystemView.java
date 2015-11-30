@@ -161,7 +161,16 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
       throw new UnsupportedOperationException(
           "Cannot cleanly delete view: " + this);
     }
-    return deleteAllUnsafe();
+    return deleteAllUnsafe(false);
+  }
+
+  @Override
+  public boolean moveToTrash() {
+    if (!constraints.alignedWithBoundaries()) {
+      throw new UnsupportedOperationException(
+          "Cannot cleanly move view to trash: " + this);
+    }
+    return deleteAllUnsafe(true);
   }
 
   @Override
@@ -209,11 +218,12 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
     }
   }
 
-  boolean deleteAllUnsafe() {
+  boolean deleteAllUnsafe(boolean useTrash) {
     boolean deleted = false;
     if (dataset.getDescriptor().isPartitioned()) {
       for (StorageKey key : partitionIterator()) {
-        deleted = FileSystemUtil.cleanlyDelete(fs, root, key.getPath()) || deleted;
+        deleted = (useTrash ? FileSystemUtil.cleanlyMoveToTrash(fs, root, key.getPath())
+            : FileSystemUtil.cleanlyDelete(fs, root, key.getPath())) || deleted;
 
         if (listener != null) {
 
@@ -227,7 +237,8 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
     }
     else {
       for (Path path : pathIterator()) {
-        deleted = FileSystemUtil.cleanlyDelete(fs, root, path) || deleted;
+        deleted = (useTrash ? FileSystemUtil.cleanlyMoveToTrash(fs, root, path)
+            : FileSystemUtil.cleanlyDelete(fs, root, path)) || deleted;
       }
     }
     return deleted;

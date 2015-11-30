@@ -364,6 +364,11 @@ public class TestKiteURIHandler extends MiniDFSTest {
     }
 
     @Override
+    public boolean moveToTrash(String namespace, String name) {
+      return false;
+    }
+
+    @Override
     public boolean delete(String namespace, String name) {
       return false;
     }
@@ -440,6 +445,11 @@ public class TestKiteURIHandler extends MiniDFSTest {
 
     @Override
     public boolean deleteAll() {
+      return false;
+    }
+
+    @Override
+    public boolean moveToTrash() {
       return false;
     }
 

@@ -20,6 +20,9 @@ import com.google.common.io.Closeables;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
+
+import org.apache.hadoop.fs.Trash;
+import org.apache.hadoop.fs.TrashPolicy;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.kitesdk.data.*;
@@ -85,6 +88,7 @@ public abstract class TestRefinableViews extends MiniDFSTest {
 
   protected Configuration conf = null;
   protected FileSystem fs;
+  protected TrashPolicy trashPolicy;
   protected PartitionStrategy strategy = null;
   protected DatasetDescriptor testDescriptor = null;
   protected RefinableView<StandardEvent> unbounded = null;
@@ -95,6 +99,8 @@ public abstract class TestRefinableViews extends MiniDFSTest {
         MiniDFSTest.getConfiguration() :
         new Configuration());
     this.fs = FileSystem.get(conf);
+
+    this.trashPolicy = TrashPolicy.getInstance(conf, fs, fs.getHomeDirectory());
 
     this.repo = newRepo();
     this.strategy = new PartitionStrategy.Builder()

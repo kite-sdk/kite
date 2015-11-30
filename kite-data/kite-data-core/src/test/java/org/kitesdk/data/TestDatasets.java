@@ -547,6 +547,43 @@ public class TestDatasets {
   }
 
   @Test
+  public void testMoveToTrash() {
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
+
+    Datasets.moveToTrash(datasetUri);
+
+    verify(repo).moveToTrash("ns", "test");
+    verifyNoMoreInteractions(repo);
+  }
+
+  @Test
+  public void testMoveToTrashStringUri() {
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
+
+    Datasets.moveToTrash(datasetUri.toString());
+
+    verify(repo).moveToTrash("ns", "test");
+    verifyNoMoreInteractions(repo);
+  }
+
+  @Test
+  public void testMoveToTrashRejectsViewUri() {
+    final URI datasetUri = new URIBuilder(repoUri, "ns", "test")
+        .with("field", 34)
+        .build();
+
+    TestHelpers.assertThrows("Should reject view URI",
+        IllegalArgumentException.class, new Runnable() {
+          @Override
+          public void run() {
+            Datasets.moveToTrash(datasetUri);
+          }
+        });
+
+    verifyNoMoreInteractions(repo);
+  }
+
+  @Test
   public void testExists() {
     URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
 

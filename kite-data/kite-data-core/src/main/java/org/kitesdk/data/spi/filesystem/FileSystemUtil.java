@@ -29,6 +29,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.Trash;
 import org.kitesdk.compat.DynMethods;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetIOException;
@@ -178,7 +179,7 @@ public class FileSystemUtil {
           // destination is deleted last
           continue;
         }
-        FileSystemUtil.cleanlyDelete(fs, root, toRemove);
+        FileSystemUtil.cleanlyDelete(fs, root, toRemove, false);
       }
 
       // remove the directory that will be replaced with a move
@@ -197,6 +198,14 @@ public class FileSystemUtil {
   }
 
   static boolean cleanlyDelete(FileSystem fs, Path root, Path path) {
+    return cleanlyDelete(fs, root, path, false);
+  }
+
+  static boolean cleanlyMoveToTrash(FileSystem fs, Path root, Path path) {
+    return cleanlyDelete(fs, root, path, true);
+  }
+
+  private static boolean cleanlyDelete(FileSystem fs, Path root, Path path, boolean useTrash) {
     Preconditions.checkNotNull(fs, "File system cannot be null");
     Preconditions.checkNotNull(root, "Root path cannot be null");
     Preconditions.checkNotNull(path, "Path to delete cannot be null");
@@ -213,12 +222,14 @@ public class FileSystemUtil {
       if (relativePath.isAbsolute()) {
         // path is not relative to the root. delete just the path
         LOG.debug("Deleting path {}", path);
-        deleted = fs.delete(path, true /* include any files */ );
+        deleted = useTrash ? Trash.moveToAppropriateTrash(fs, path, fs.getConf())
+            : fs.delete(path, true /* include any files */);
       } else {
         // the is relative to the root path
         Path absolute = new Path(root, relativePath);
         LOG.debug("Deleting path {}", absolute);
-        deleted = fs.delete(absolute, true /* include any files */ );
+        deleted = useTrash ? Trash.moveToAppropriateTrash(fs, absolute, fs.getConf())
+            : fs.delete(absolute, true /* include any files */);
         // iterate up to the root, removing empty directories
         for (Path current = absolute.getParent();
              !current.equals(root) && !(current.getParent() == null);

@@ -66,7 +66,7 @@ public class TestDeleteCommand {
   public void testBasicUse() throws Exception {
     command.targets = Lists.newArrayList("users");
     command.run();
-    verify(repo).delete("default", "users");
+    verify(repo).moveToTrash("default", "users");
     verify(console).debug(contains("Deleted"), eq("users"));
   }
 
@@ -74,9 +74,9 @@ public class TestDeleteCommand {
   public void testMultipleDatasets() throws Exception {
     command.targets = Lists.newArrayList("users", "moreusers");
     command.run();
-    verify(repo).delete("default", "users");
+    verify(repo).moveToTrash("default", "users");
     verify(console).debug(contains("Deleted"), eq("users"));
-    verify(repo).delete("default", "moreusers");
+    verify(repo).moveToTrash("default", "moreusers");
     verify(console).debug(contains("Deleted"), eq("moreusers"));
   }
 
@@ -89,7 +89,7 @@ public class TestDeleteCommand {
         datasetUri.startsWith("dataset:"));
     command.targets = Lists.newArrayList(datasetUri);
     command.run();
-    verify(repo).delete("ns", "test");
+    verify(repo).moveToTrash("ns", "test");
     verify(console).debug(contains("Deleted"), eq(datasetUri));
   }
 
@@ -115,6 +115,70 @@ public class TestDeleteCommand {
     when(view.getUri()).thenReturn(actualViewUri);
 
     command.targets = Lists.newArrayList(viewUri);
+    command.run();
+
+    verify(repo).load("ns", "test", GenericRecord.class);
+    verify(view).moveToTrash();
+    verify(console).debug(contains("Deleted"), eq(viewUri));
+  }
+
+  @Test
+  public void testBasicUseSkipTrash() throws Exception {
+    command.targets = Lists.newArrayList("users");
+    command.skipTrash = true;
+    command.run();
+    verify(repo).delete("default", "users");
+    verify(console).debug(contains("Deleted"), eq("users"));
+  }
+
+  @Test
+  public void testMultipleDatasetsSkipTrash() throws Exception {
+    command.targets = Lists.newArrayList("users", "moreusers");
+    command.skipTrash = true;
+    command.run();
+    verify(repo).delete("default", "users");
+    verify(console).debug(contains("Deleted"), eq("users"));
+    verify(repo).delete("default", "moreusers");
+    verify(console).debug(contains("Deleted"), eq("moreusers"));
+  }
+
+  @Test
+  public void testDatasetUriSkipTrash() throws Exception {
+    String datasetUri = new URIBuilder(repo.getUri(), "ns", "test")
+        .build()
+        .toString();
+    Assert.assertTrue("Should be a dataset URI",
+        datasetUri.startsWith("dataset:"));
+    command.targets = Lists.newArrayList(datasetUri);
+    command.skipTrash = true;
+    command.run();
+    verify(repo).delete("ns", "test");
+    verify(console).debug(contains("Deleted"), eq(datasetUri));
+  }
+
+  @Test
+  public void testViewUriSkipTrash() throws Exception {
+    DatasetDescriptor desc = new DatasetDescriptor.Builder()
+        .schema(SchemaBuilder.record("Test").fields().requiredInt("prop").endRecord())
+        .build();
+
+    URI actualViewUri = new URIBuilder(repo.getUri(), "ns", "test")
+        .with("prop", "34")
+        .build();
+    String viewUri = actualViewUri.toString();
+
+    Assert.assertTrue("Should be a view URI",
+        viewUri.startsWith("view:"));
+
+    AbstractDataset ds = mock(AbstractDataset.class);
+    when(repo.load("ns", "test", GenericRecord.class)).thenReturn(ds);
+    when(ds.getDescriptor()).thenReturn(desc);
+    AbstractRefinableView view = mock(AbstractRefinableView.class);
+    when(ds.filter(any(Constraints.class))).thenReturn(view);
+    when(view.getUri()).thenReturn(actualViewUri);
+
+    command.targets = Lists.newArrayList(viewUri);
+    command.skipTrash = true;
     command.run();
 
     verify(repo).load("ns", "test", GenericRecord.class);
