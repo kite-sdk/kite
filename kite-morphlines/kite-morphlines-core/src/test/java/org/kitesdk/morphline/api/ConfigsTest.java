@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.kitesdk.morphline.base.Configs;
 
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigException;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValue;
 
@@ -57,6 +58,23 @@ public class ConfigsTest extends Assert {
   private void assertTimeUnitEquals(TimeUnit unit, String str) {
     Config config = ConfigFactory.parseString("foo : " + str);
     assertSame(unit, new Configs().getTimeUnit(config, "foo"));    
+  }
+  
+  @Test
+  public void testDurations() throws Exception {
+    Config config = ConfigFactory.parseString("duration : 2seconds");
+    Configs configs = new Configs();
+    assertEquals(2000, configs.getMilliseconds(config, "duration", 1000));
+
+    config = ConfigFactory.parseString("xxx : 2seconds");
+    assertEquals(1000, configs.getMilliseconds(config, "duration", 1000));
+    
+    try {
+      assertEquals(1000, configs.getMilliseconds(config, "duration"));
+      fail();
+    } catch (ConfigException e) {
+      ; // expected
+    }
   }
   
   @Test
