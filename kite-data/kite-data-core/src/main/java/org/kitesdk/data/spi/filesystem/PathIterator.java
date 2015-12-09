@@ -112,11 +112,13 @@ public class PathIterator implements Iterator<Path>, Iterable<Path> {
           nextFileSet.add(stat.getPath());
         }
       }
+
       if (nextFileSet.size() > 0) {
         this.files = nextFileSet.iterator();
         return true;
+      } else if (partitions == null) {
+          return false;
       }
-      return false;
     }
   }
 

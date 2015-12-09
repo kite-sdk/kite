@@ -16,8 +16,10 @@
 
 package org.kitesdk.data.spi.filesystem;
 
+import org.kitesdk.data.RefinableView;
 import org.kitesdk.data.Signalable;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 import java.util.Iterator;
 import java.util.Map;
@@ -323,5 +325,40 @@ public class TestFileSystemView extends TestRefinableViews {
       assertTrue("Directory should not exist: " + path,
           !fs.exists(path));
     }
+  }
+
+  @Test
+  public void testRangeWithEmptyDirectory() throws Exception {
+    long start = new DateTime(2013, 9, 1, 0, 0, DateTimeZone.UTC).getMillis();
+    long end = new DateTime(2013, 11, 14, 0, 0, DateTimeZone.UTC).getMillis();
+    final RefinableView<StandardEvent> range = unbounded
+        .from("timestamp", start).toBefore("timestamp", end);
+
+    DatasetWriter<StandardEvent> writer = null;
+    try {
+      writer = range.newWriter();
+      writer.write(sepEvent);
+      writer.write(novEvent);
+    } finally {
+      Closeables.close(writer, false);
+    }
+
+    // All expected datasets are present
+    final Path root = new Path("target/data/ns/test");
+    final Path y2013 = new Path("target/data/ns/test/year=2013");
+    final Path sep = new Path("target/data/ns/test/year=2013/month=09");
+    final Path sep12 = new Path("target/data/ns/test/year=2013/month=09/day=12");
+    final Path nov = new Path("target/data/ns/test/year=2013/month=11");
+    final Path nov11 = new Path("target/data/ns/test/year=2013/month=11/day=11");
+    assertDirectoriesExist(fs, root, y2013, sep, sep12, nov, nov11);
+
+    // Recreate the october 12 as an empty directory.
+    final Path oct = new Path("target/data/ns/test/year=2013/month=10");
+    final Path oct12 = new Path("target/data/ns/test/year=2013/month=10/day=12");
+    assertTrue("mkdir should return true to indicate FS changed.", fs.mkdirs(oct12));
+    assertDirectoriesExist(fs, oct, oct12);
+
+    // Test reading from September thru November. The range includes the empty directory.
+    assertContentEquals(Sets.newHashSet(sepEvent, novEvent), range);
   }
 }
