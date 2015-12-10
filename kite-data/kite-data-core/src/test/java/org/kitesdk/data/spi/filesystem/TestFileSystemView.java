@@ -343,7 +343,7 @@ public class TestFileSystemView extends TestRefinableViews {
       Closeables.close(writer, false);
     }
 
-    // All expected datasets are present
+    // All expected datasets and partitions are present
     final Path root = new Path("target/data/ns/test");
     final Path y2013 = new Path("target/data/ns/test/year=2013");
     final Path sep = new Path("target/data/ns/test/year=2013/month=09");
@@ -352,7 +352,7 @@ public class TestFileSystemView extends TestRefinableViews {
     final Path nov11 = new Path("target/data/ns/test/year=2013/month=11/day=11");
     assertDirectoriesExist(fs, root, y2013, sep, sep12, nov, nov11);
 
-    // Recreate the october 12 as an empty directory.
+    // Recreate an empty directory that represents a valid partition for october 12.
     final Path oct = new Path("target/data/ns/test/year=2013/month=10");
     final Path oct12 = new Path("target/data/ns/test/year=2013/month=10/day=12");
     assertTrue("mkdir should return true to indicate FS changed.", fs.mkdirs(oct12));
