@@ -117,7 +117,7 @@ public class PathIterator implements Iterator<Path>, Iterable<Path> {
         this.files = nextFileSet.iterator();
         return true;
       } else if (partitions == null) {
-          return false;
+        return false;
       }
     }
   }
