@@ -175,12 +175,21 @@ public final class Configs {
     return charset;
   }  
 
-  public long getNanoseconds(Config config, String path, long defaults) {    
+  public long getMilliseconds(Config config, String path, long defaultMillis) {    
+    long defaultNanos = TimeUnit.MILLISECONDS.toNanos(defaultMillis); 
+    return TimeUnit.NANOSECONDS.toMillis(getNanoseconds(config, path, defaultNanos));
+  }
+  
+  public long getMilliseconds(Config config, String path) {    
+    return TimeUnit.NANOSECONDS.toMillis(getNanoseconds(config, path));
+  }
+  
+  public long getNanoseconds(Config config, String path, long defaultNanos) {    
     addRecognizedArgument(path);
     if (config.hasPath(path)) {
       return getNanoseconds(config, path);
     } else {
-      return defaults;
+      return defaultNanos;
     }
   }
   
