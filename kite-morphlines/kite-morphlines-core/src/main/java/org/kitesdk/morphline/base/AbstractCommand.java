@@ -126,6 +126,11 @@ public abstract class AbstractCommand implements Command {
     return configs;
   }
   
+  /** Returns the name of this command that was assigned by the builder. */ 
+  protected final String getName() {
+    return name;
+  }
+  
   @Override
   public final void notify(Record notification) {
     beforeNotify(notification);
@@ -207,7 +212,7 @@ public abstract class AbstractCommand implements Command {
   }
   
   private String getMetricName(String... names) {
-    return MetricRegistry.name(name, names);
+    return MetricRegistry.name(getName(), names);
   }
   
   /** Returns whether or not metrics should be measured. */
