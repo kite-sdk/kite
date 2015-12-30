@@ -99,7 +99,7 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> implements RollingWri
   final Configuration conf;
 
   private FileSystemWriter(FileSystem fs, Path path, long rollIntervalMillis,
-                           long targetFileSize, DatasetDescriptor descriptor, Schema schema) {
+                           long targetFileSize, DatasetDescriptor descriptor, Schema writerSchema) {
     Preconditions.checkNotNull(fs, "File system is not defined");
     Preconditions.checkNotNull(path, "Destination directory is not defined");
     Preconditions.checkNotNull(descriptor, "Descriptor is not defined");
@@ -111,7 +111,7 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> implements RollingWri
     this.descriptor = descriptor;
     this.conf = new Configuration(fs.getConf());
     this.state = ReaderWriterState.NEW;
-    this.schema = schema;
+    this.schema = writerSchema;
 
     // copy file format settings from custom properties to the Configuration
     for (String prop : descriptor.listProperties()) {
@@ -367,24 +367,24 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> implements RollingWri
   static <E> FileSystemWriter<E> newWriter(FileSystem fs, Path path,
                                            long rollIntervalMillis,
                                            long targetFileSize,
-                                           DatasetDescriptor descriptor, Schema schema) {
+                                           DatasetDescriptor descriptor, Schema writerSchema) {
     Format format = descriptor.getFormat();
     if (Formats.PARQUET.equals(format)) {
       // by default, Parquet is not durable
       if (DescriptorUtil.isDisabled(
           FileSystemProperties.NON_DURABLE_PARQUET_PROP, descriptor)) {
         return new IncrementalWriter<E>(
-            fs, path, rollIntervalMillis, targetFileSize, descriptor, schema);
+            fs, path, rollIntervalMillis, targetFileSize, descriptor, writerSchema);
       } else {
         return new FileSystemWriter<E>(
-            fs, path, rollIntervalMillis, targetFileSize, descriptor, schema);
+            fs, path, rollIntervalMillis, targetFileSize, descriptor, writerSchema);
       }
     } else if (Formats.AVRO.equals(format) || Formats.CSV.equals(format)) {
       return new IncrementalWriter<E>(
-          fs, path, rollIntervalMillis, targetFileSize, descriptor, schema);
+          fs, path, rollIntervalMillis, targetFileSize, descriptor, writerSchema);
     } else {
       return new FileSystemWriter<E>(
-          fs, path, rollIntervalMillis, targetFileSize, descriptor, schema);
+          fs, path, rollIntervalMillis, targetFileSize, descriptor, writerSchema);
     }
   }
 
@@ -392,8 +392,8 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> implements RollingWri
       implements Flushable, Syncable {
     private IncrementalWriter(FileSystem fs, Path path,
                               long rollIntervalMillis, long targetFileSize,
-                              DatasetDescriptor descriptor, Schema schema) {
-      super(fs, path, rollIntervalMillis, targetFileSize, descriptor, schema);
+                              DatasetDescriptor descriptor, Schema writerSchema) {
+      super(fs, path, rollIntervalMillis, targetFileSize, descriptor, writerSchema);
     }
 
     @Override
