@@ -292,6 +292,8 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
       }
     }
 
+    DefaultConfiguration.set(conf);
+
     String schemaStr = conf.get(KITE_READER_SCHEMA);
     Schema projection = null;
     if (schemaStr != null) {

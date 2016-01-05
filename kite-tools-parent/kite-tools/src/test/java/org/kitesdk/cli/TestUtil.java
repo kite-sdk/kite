@@ -42,7 +42,7 @@ public class TestUtil {
   }
 
   public static int run(Logger console, String... args) throws Exception {
-    return run(console, DefaultConfiguration.get(), args);
+    return run(console, new Configuration(), args);
   }
 
   public static int run(Configuration conf, String... args) throws Exception {
