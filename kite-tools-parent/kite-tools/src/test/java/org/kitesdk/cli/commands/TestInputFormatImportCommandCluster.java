@@ -90,8 +90,8 @@ public class TestInputFormatImportCommandCluster extends MiniDFSTest {
   public void createTargetDataset() throws Exception {
     removeTargetDataset();
     String avsc = temp.newFile("schema.avsc").toString();
-    TestUtil.run("obj-schema", Measurement.class.getName(), "-o", avsc);
-    TestUtil.run("create", datasetUri, "-s", avsc);
+    TestUtil.run(getConfiguration(), "obj-schema", Measurement.class.getName(), "-o", avsc);
+    TestUtil.run(getConfiguration(), "create", datasetUri, "-s", avsc);
   }
 
   @Before
@@ -106,7 +106,7 @@ public class TestInputFormatImportCommandCluster extends MiniDFSTest {
 
   @After
   public void removeTargetDataset() throws Exception {
-    TestUtil.run("delete", datasetUri);
+    TestUtil.run(getConfiguration(), "delete", datasetUri);
   }
 
   @Test
