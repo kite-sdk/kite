@@ -1,3 +1,4 @@
 [
+  { "type": "identity", "source": "part1" },
   { "type": "identity", "source": "part2" }
 ]

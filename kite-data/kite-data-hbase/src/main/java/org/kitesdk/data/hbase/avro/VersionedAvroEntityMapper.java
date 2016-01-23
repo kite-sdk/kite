@@ -15,10 +15,11 @@
  */
 package org.kitesdk.data.hbase.avro;
 
+import org.kitesdk.data.ColumnMapping;
 import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.SchemaNotFoundException;
 import org.kitesdk.data.ValidationException;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.hbase.impl.BaseEntityMapper;
 import org.kitesdk.data.hbase.impl.EntityMapper;
 import org.kitesdk.data.hbase.impl.EntitySchema;
@@ -170,7 +171,13 @@ public class VersionedAvroEntityMapper<ENTITY extends IndexedRecord> implements
         // will be or schema we'll use to write with.
         String entitySchemaString = entityClass.getField("SCHEMA$").get(null)
             .toString();
-        entitySchema = schemaParser.parseEntitySchema(entitySchemaString);
+        AvroEntitySchema schema = schemaParser.parseEntitySchema(entitySchemaString);
+
+        if (isColumnMappingMissing(schema)) {
+          schema = parseSchemaWithExternalMapping(mostRecentEntitySchema, entitySchemaString);
+        }
+
+        entitySchema = schema;
 
         // verify that this schema exists in the managed schema table, and get
         // its
@@ -206,6 +213,19 @@ public class VersionedAvroEntityMapper<ENTITY extends IndexedRecord> implements
     // Initialize the entity mapper used to deserialize the special
     // ManagedSchemaEntityVersion record from each row.
     initializeEntityVersionEntityMapper();
+  }
+
+  private AvroEntitySchema parseSchemaWithExternalMapping(
+      AvroEntitySchema mostRecentEntitySchema, String entitySchemaString) {
+    AvroEntitySchema schema;ColumnMapping mostRecentColumnMapping =
+        mostRecentEntitySchema.getColumnMappingDescriptor();
+    schema = schemaParser.parseEntitySchema(entitySchemaString,
+        mostRecentColumnMapping);
+    return schema;
+  }
+
+  private boolean isColumnMappingMissing(AvroEntitySchema schema) {
+    return schema.getColumnMappingDescriptor() == null;
   }
 
   @Override
