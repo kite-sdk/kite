@@ -121,4 +121,16 @@ public class AvroKeyEntitySchemaParser implements
     return new AvroEntitySchema(
         descriptor.getSchema(), rawSchema, descriptor.getColumnMapping());
   }
+
+  @Override
+  public AvroEntitySchema parseEntitySchema(String schema,
+      ColumnMapping columnMapping, PartitionStrategy partitionStrategy) {
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+            .schemaLiteral(schema)
+            .columnMapping(columnMapping)
+            .partitionStrategy(partitionStrategy)
+            .build();
+    return new AvroEntitySchema(
+        descriptor.getSchema(), schema, descriptor.getColumnMapping());
+  }
 }

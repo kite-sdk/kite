@@ -74,4 +74,20 @@ public interface KeyEntitySchemaParser<KEY_SCHEMA extends KeySchema, ENTITY_SCHE
    */
   public ENTITY_SCHEMA parseEntitySchema(String schema,
       ColumnMapping mappingDescriptor);
+
+  /**
+   * Parse the entity schema. Use the ColumnMapping and the
+   * PartitionStrategy passed instead of the embedded on the schema.
+   *
+   * @param schema
+   *          the schema string
+   * @param columnMapping
+   *          The ColumnMapping that defines the column mappings for
+   *          this entity.
+   * @param partitionStrategy
+   *          The partition strategy that defines the key.
+   * @return the ENTITY_SCHEMA
+   */
+  public ENTITY_SCHEMA parseEntitySchema(String schema,
+      ColumnMapping columnMapping, PartitionStrategy partitionStrategy);
 }
