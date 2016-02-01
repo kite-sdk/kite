@@ -23,6 +23,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.impl.CloudSolrServer;
+import org.apache.solr.client.solrj.retry.MetricsFacade;
+import org.apache.solr.client.solrj.retry.RetryPolicyFactory;
+import org.apache.solr.client.solrj.retry.RetryingSolrServer;
 import org.apache.solr.common.cloud.SolrZkClient;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.SolrConfig;
@@ -117,6 +120,10 @@ public class SolrLocator {
   }
 
   public DocumentLoader getLoader() {
+    return getLoader(null, null);
+  }
+  
+  DocumentLoader getLoader(RetryPolicyFactory retryPolicyFactory, MetricsFacade retryMetricsFacade) {
     if (context instanceof SolrMorphlineContext) {
       DocumentLoader loader = ((SolrMorphlineContext)context).getDocumentLoader();
       if (loader != null) {
@@ -136,6 +143,10 @@ public class SolrLocator {
         }
         throw new RuntimeException(e); // rethrow root cause
       }      
+    }
+
+    if (retryPolicyFactory != null) {
+      solrServer = new RetryingSolrServer(solrServer, retryPolicyFactory, retryMetricsFacade);
     }
     
     return new SolrServerDocumentLoader(solrServer, batchSize);

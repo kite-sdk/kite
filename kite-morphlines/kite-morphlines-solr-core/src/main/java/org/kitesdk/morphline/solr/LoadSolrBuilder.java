@@ -21,8 +21,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.retry.MetricsFacade;
+import org.apache.solr.client.solrj.retry.RetryPolicyFactory;
 import org.apache.solr.common.SolrInputDocument;
 import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.CommandBuilder;
@@ -35,7 +38,9 @@ import org.kitesdk.morphline.base.Configs;
 import org.kitesdk.morphline.base.Metrics;
 import org.kitesdk.morphline.base.Notifications;
 
+import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.base.Preconditions;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -47,7 +52,10 @@ public final class LoadSolrBuilder implements CommandBuilder {
   public static final String SOLR_LOCATOR_PARAM = "solrLocator";
   public static final String LOAD_SOLR_DELETE_BY_ID = "_loadSolr_deleteById";
   public static final String LOAD_SOLR_DELETE_BY_QUERY = "_loadSolr_deleteByQuery";
-  public static final String LOAD_SOLR_CHILD_DOCUMENTS = "_loadSolr_childDocuments";  
+  public static final String LOAD_SOLR_CHILD_DOCUMENTS = "_loadSolr_childDocuments";
+  
+  private static final boolean DISABLE_RETRY_POLICY_BY_DEFAULT = Boolean.parseBoolean(System.getProperty(
+      LoadSolrBuilder.class.getName() + ".disableRetryPolicyByDefault", "false"));
 
   @Override
   public Collection<String> getNames() {
@@ -67,6 +75,7 @@ public final class LoadSolrBuilder implements CommandBuilder {
     
     private final DocumentLoader loader;
     private final Map<String, Float> boosts = new HashMap();
+    private final RateLimiter rateLimiter;
     private final Timer elapsedTime;    
     private final boolean isDryRun;
     
@@ -75,7 +84,9 @@ public final class LoadSolrBuilder implements CommandBuilder {
       Config solrLocatorConfig = getConfigs().getConfig(config, SOLR_LOCATOR_PARAM);
       SolrLocator locator = new SolrLocator(solrLocatorConfig, context);
       LOG.debug("solrLocator: {}", locator);
-      this.loader = locator.getLoader();
+      RetryPolicyFactory retryPolicyFactory = parseRetryPolicyFactory(
+          getConfigs().getConfig(config, "retryPolicy", null));
+      this.loader = locator.getLoader(retryPolicyFactory, new CodahaleMetricsFacade(context.getMetricRegistry()));
 
       Config boostsConfig = getConfigs().getConfig(config, "boosts", ConfigFactory.empty());
       for (Map.Entry<String, Object> entry : new Configs().getEntrySet(boostsConfig)) {
@@ -83,9 +94,23 @@ public final class LoadSolrBuilder implements CommandBuilder {
         float boost = Float.parseFloat(entry.getValue().toString().trim());
         boosts.put(fieldName, boost);
       }
+      this.rateLimiter = RateLimiter.create(getConfigs().getDouble(config, "maxRecordsPerSecond", Double.MAX_VALUE));
       this.isDryRun = context.getTypedSettings().getBoolean(TypedSettings.DRY_RUN_SETTING_NAME, false);
       validateArguments();
       this.elapsedTime = getTimer(Metrics.ELAPSED_TIME);
+    }
+
+    private RetryPolicyFactory parseRetryPolicyFactory(Config retryPolicyConfig) {      
+      if (retryPolicyConfig == null && !DISABLE_RETRY_POLICY_BY_DEFAULT) {
+        // ask RetryPolicyFactoryParser to return a retry policy with reasonable defaults
+        retryPolicyConfig = ConfigFactory.parseString(
+            "{" + RetryPolicyFactoryParser.BOUNDED_EXPONENTIAL_BACKOFF_RETRY_NAME + "{}}");
+      }
+      if (retryPolicyConfig == null) {
+        return null;
+      } else {
+        return new RetryPolicyFactoryParser().parse(retryPolicyConfig);
+      }
     }
 
     @Override
@@ -132,6 +157,7 @@ public final class LoadSolrBuilder implements CommandBuilder {
     
     @Override
     protected boolean doProcess(Record record) {
+      rateLimiter.acquire(); 
       Timer.Context timerContext = elapsedTime.time();
       List deleteById = record.get(LOAD_SOLR_DELETE_BY_ID);
       List deleteByQuery = record.get(LOAD_SOLR_DELETE_BY_QUERY);
@@ -211,4 +237,38 @@ public final class LoadSolrBuilder implements CommandBuilder {
     }
     
   }
+  
+  
+  ///////////////////////////////////////////////////////////////////////////////
+  // Nested classes:
+  ///////////////////////////////////////////////////////////////////////////////
+  /**
+   * A facade using codahale metrics as a backend.
+   */
+  private static final class CodahaleMetricsFacade implements MetricsFacade {
+    
+    private final MetricRegistry registry;
+
+    public CodahaleMetricsFacade(MetricRegistry registry) {
+      Preconditions.checkNotNull(registry);
+      this.registry = registry;
+    }
+    
+    @Override
+    public void markMeter(String name, long increment) {
+      registry.meter(name).mark(increment);
+    }
+
+    @Override
+    public void updateHistogram(String name, long value) {
+      registry.histogram(name).update(value);
+    }
+    
+    @Override
+    public void updateTimer(String name, long duration, TimeUnit unit) {
+      registry.timer(name).update(duration, unit);
+    }
+    
+  }
+
 }

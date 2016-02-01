@@ -26,6 +26,7 @@ import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrServer;
 import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.client.solrj.retry.RetryingSolrServer;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,8 +62,9 @@ public class SolrServerDocumentLoader implements DocumentLoader {
     LOGGER.trace("beginTransaction");
     batch.clear();
     numSentItems = 0;
-    if (server instanceof SafeConcurrentUpdateSolrServer) {
-      ((SafeConcurrentUpdateSolrServer) server).clearException();
+    SolrServer s = getNonRetryingSolrServer();
+    if (s instanceof SafeConcurrentUpdateSolrServer) {
+      ((SafeConcurrentUpdateSolrServer) s).clearException();
     }
   }
 
@@ -94,8 +96,9 @@ public class SolrServerDocumentLoader implements DocumentLoader {
       sendBatch();
     }
     if (numSentItems > 0) {
-      if (server instanceof ConcurrentUpdateSolrServer) {
-        ((ConcurrentUpdateSolrServer) server).blockUntilFinished();
+      SolrServer s = getNonRetryingSolrServer();
+      if (s instanceof ConcurrentUpdateSolrServer) {
+        ((ConcurrentUpdateSolrServer) s).blockUntilFinished();
       }
     }
   }
@@ -165,7 +168,8 @@ public class SolrServerDocumentLoader implements DocumentLoader {
   @Override
   public UpdateResponse rollbackTransaction() throws SolrServerException, IOException {
     LOGGER.trace("rollback");
-    if (!(server instanceof CloudSolrServer)) {
+    SolrServer s = getNonRetryingSolrServer();
+    if (!(s instanceof CloudSolrServer)) {
       return server.rollback();
     } else {
       return new UpdateResponse();
@@ -182,6 +186,18 @@ public class SolrServerDocumentLoader implements DocumentLoader {
   public SolrPingResponse ping() throws SolrServerException, IOException {
     LOGGER.trace("ping");
     return server.ping();
+  }
+
+  public int getBatchSize() {
+    return batchSize;
+  }
+  
+  private SolrServer getNonRetryingSolrServer() {
+    SolrServer s = server;
+    while (s instanceof RetryingSolrServer) {
+      s = ((RetryingSolrServer)s).getUnderlyingSolrServer();
+    }
+    return s;
   }
 
   public SolrServer getSolrServer() {
