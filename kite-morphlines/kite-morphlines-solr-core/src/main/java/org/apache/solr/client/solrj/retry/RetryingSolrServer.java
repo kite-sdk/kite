@@ -38,7 +38,14 @@ import com.google.common.annotations.VisibleForTesting;
 
 /**
  * A wrapper around an underlying solrj {@link SolrServer} object; On exceptions, the wrapper
- * retries solrj requests according to the given {@link RetryPolicyFactory}.
+ * retries solrj requests according to the given configurable {@link RetryPolicyFactory}.
+ * 
+ * This is useful in case solr servers are temporarily overloaded, or if there are transient network
+ * issues, etc.
+ * 
+ * For example, this class can be configured with a {@link DefaultRetryPolicyFactory} in combination
+ * with the {@link FlexibleBoundedExponentialBackoffRetry}. Metrics events are forwarded to a
+ * {@link MetricsFacade} object.
  */
 public class RetryingSolrServer extends SolrServer {
 
