@@ -3223,10 +3223,10 @@ loadSolr {
   maxRecordsPerSecond : 1000000  # maximum number of morphline records to ingest per second (for rate limiting)
   retryPolicy : { 
     # retry solrj requests until a total of 100 times or 3 minutes, whichever comes first
-    # first sleep between retries lasts for random(1000..1999) milliseconds, 
-    # subsequently the duration between retries grows exponentionally, capped at 10 seconds between retries 
+    # first sleep between retries lasts for random(125..249) milliseconds, 
+    # subsequently the duration between retries grows exponentionally, capped at 10 second sleeps between retries 
     BoundedExponentialBackoffRetry {
-      baseSleepTime : "1000 milliseconds"
+      baseSleepTime : "125 milliseconds"
       maxSleepTime : "10 seconds"
       maxRetries : 100 # set this parameter to 0 to disable the retry feature
       maxElapsedTime : "3 minutes"
