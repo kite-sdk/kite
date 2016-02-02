@@ -17,7 +17,6 @@ package org.apache.solr.client.solrj.retry;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.solr.SolrTestCaseJ4;
@@ -265,7 +264,7 @@ public class RetryingSolrServerTest extends SolrTestCaseJ4 {
       
       @Override
       public void updateTimer(String name, long duration, TimeUnit unit) {
-        LOG.info("updateTimer name:{}, duration:{}, unit:{}", Arrays.asList(name, duration, unit));
+        LOG.info("updateTimer name:{}, duration:{}, unit:{}", new Object[]{name, duration, unit});
       }
       
       @Override

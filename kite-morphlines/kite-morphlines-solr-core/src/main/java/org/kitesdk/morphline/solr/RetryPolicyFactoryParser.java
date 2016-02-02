@@ -15,7 +15,6 @@
  */
 package org.kitesdk.morphline.solr;
 
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.solr.client.solrj.retry.DefaultRetryPolicyFactory;
@@ -37,7 +36,7 @@ final class RetryPolicyFactoryParser {
     final Config boundedExponentialBackoffRetryConfig = new Configs().getConfig(retryPolicyConfig, 
         BOUNDED_EXPONENTIAL_BACKOFF_RETRY_NAME);
     final long baseSleepTime = new Configs()
-        .getNanoseconds(boundedExponentialBackoffRetryConfig, "baseSleepTime", TimeUnit.MILLISECONDS.toNanos(1000));
+        .getNanoseconds(boundedExponentialBackoffRetryConfig, "baseSleepTime", TimeUnit.MILLISECONDS.toNanos(125));
     final long maxSleepTime = new Configs()
         .getNanoseconds(boundedExponentialBackoffRetryConfig, "maxSleepTime", TimeUnit.SECONDS.toNanos(10));
     final int maxRetries = new Configs()
@@ -46,7 +45,7 @@ final class RetryPolicyFactoryParser {
         .getNanoseconds(boundedExponentialBackoffRetryConfig, "maxElapsedTime", TimeUnit.SECONDS.toNanos(3 * 60));
     LOG.debug("Parsed retry policy BoundedExponentialBackoffRetry with "
         + "baseSleepTime:{}, maxSleepTime:{}, maxRetries:{}, maxElapsedTime:{}",
-        Arrays.asList(baseSleepTime, maxSleepTime, maxRetries, maxElapsedTime));
+        new Object[]{baseSleepTime, maxSleepTime, maxRetries, maxElapsedTime});
     if (maxRetries <= 0 || maxElapsedTime <= 0) {
       return null;
     }
