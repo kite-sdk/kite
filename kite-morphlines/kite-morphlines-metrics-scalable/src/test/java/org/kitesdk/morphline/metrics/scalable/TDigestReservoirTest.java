@@ -17,7 +17,6 @@ package org.kitesdk.morphline.metrics.scalable;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.kitesdk.morphline.metrics.scalable.TDigestReservoir;
 
 import com.codahale.metrics.Reservoir;
 

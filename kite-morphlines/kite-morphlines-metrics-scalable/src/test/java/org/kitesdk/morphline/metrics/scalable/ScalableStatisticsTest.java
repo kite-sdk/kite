@@ -19,7 +19,6 @@ import java.util.Random;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.kitesdk.morphline.metrics.scalable.ScalableStatistics;
 
 import com.tdunning.math.stats.AVLTreeDigest;
 import com.tdunning.math.stats.TDigest;
