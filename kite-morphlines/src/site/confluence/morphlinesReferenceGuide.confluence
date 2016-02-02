@@ -3224,7 +3224,7 @@ loadSolr {
   retryPolicy : { 
     # retry solrj requests until a total of 100 times or 3 minutes, whichever comes first
     # first sleep between retries lasts for random(125..249) milliseconds, 
-    # subsequently the duration between retries grows exponentionally, capped at 10 second sleeps between retries 
+    # subsequently the duration between retries grows exponentially, capped at 10 second sleeps between retries 
     BoundedExponentialBackoffRetry {
       baseSleepTime : "125 milliseconds"
       maxSleepTime : "10 seconds"
