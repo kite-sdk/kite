@@ -3185,7 +3185,7 @@ random(100..199), random(200..399), random(400..799), min(random(800..1599), 100
 The {{BoundedExponentialBackoffRetry}} policy provides the following configuration options, 
 with all durations specified in [HOCON duration format|https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format]:
 || Property Name || Default || Description ||
-| baseSleepTime | "1000 milliseconds" | initial amount of time to wait between retries. |
+| baseSleepTime | "125 milliseconds" | initial amount of time to wait between retries. |
 | maxSleepTime | "10 seconds" | The maximum time to sleep on each retry. |
 | maxRetries | 100 | The maximum number of times to retry. Set this parameter to 0 to disable the retry feature. |
 | maxElapsedTime | "180 seconds" | The maximum time to spend across all retries. |
