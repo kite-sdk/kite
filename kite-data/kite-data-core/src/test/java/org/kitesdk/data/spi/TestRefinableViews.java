@@ -99,7 +99,7 @@ public abstract class TestRefinableViews extends MiniDFSTest {
   protected PartitionStrategy strategy = null;
   protected DatasetDescriptor testDescriptor = null;
   protected RefinableView<StandardEvent> unbounded = null;
-  protected DatasetDescriptor testValueDescriptor = null;
+  protected DatasetDescriptor valueDescriptor = null;
   protected RefinableView<TestValue> testValueView = null;
   protected RefinableView<Value> valueView = null;
  
@@ -123,10 +123,10 @@ public abstract class TestRefinableViews extends MiniDFSTest {
     repo.delete("ns", "test");
     this.unbounded = repo.create("ns", "test", testDescriptor);
     
-    this.testValueDescriptor = new DatasetDescriptor.Builder().schemaUri("resource:test_value.avsc").build();
-    repo.delete("ns", "value_test");
-    this.testValueView = repo.create("ns", "value_test", testValueDescriptor);
-    this.valueView = repo.load("ns", "value_test", Value.class);
+    this.valueDescriptor = new DatasetDescriptor.Builder().schemaUri("resource:value.avsc").build();
+    repo.delete("ns", "value");
+    this.valueView = repo.create("ns", "value", valueDescriptor); 
+    this.testValueView = repo.load("ns", "value", TestValue.class);
   }
 
   public static <E> void assertContentEquals(Set<E> expected, View<E> view) throws IOException {
