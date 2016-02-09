@@ -135,6 +135,7 @@ public class StorageKey extends Marker implements Comparable<StorageKey> {
    */
   public void replaceValues(List<Object> values) {
     Preconditions.checkArgument(values != null, "Values cannot be null");
+    Preconditions.checkArgument(values.size() <= fields.size(), "Values cannot be larger than fields size");
     this.values = values;
   }
 
