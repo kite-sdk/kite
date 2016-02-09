@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
@@ -127,10 +128,9 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
         return new CSVInputFormat().getSplits(jobContext);
       } else if (Formats.INPUTFORMAT.equals(format)) {
         return InputFormatUtil.newInputFormatInstance(dataset.getDescriptor())
-            .getSplits(jobContext);
+                .getSplits(jobContext);
       } else {
-        throw new UnsupportedOperationException(
-            "Not a supported format: " + format);
+        throw new UnsupportedOperationException("Not a supported format: " + format);
       }
     } else {
       return ImmutableList.of();
@@ -141,7 +141,6 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
   private boolean setInputPaths(JobContext jobContext, Job job) throws IOException {
     List<Path> paths = Lists.newArrayList((Iterator)
         (view == null ? dataset.pathIterator() : view.pathIterator()));
-    LOG.debug("Input paths: {}", paths);
     if (paths.isEmpty()) {
       return false;
     }

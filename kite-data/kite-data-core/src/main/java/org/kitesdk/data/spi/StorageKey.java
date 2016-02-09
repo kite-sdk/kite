@@ -96,12 +96,15 @@ public class StorageKey extends Marker implements Comparable<StorageKey> {
 
   @Override
   public boolean has(String name) {
-    return fields.containsKey(name);
+    //check if id value exists and it is less than the size meaning we have a value.
+    Integer id = fields.get(name);
+    return id != null && id < values.size();
   }
 
   @Override
   public Object get(String name) {
-    return values.get(fields.get(name));
+    int index = fields.get(name);
+    return index < values.size() ? values.get(index) : null;
   }
 
   /**
@@ -132,8 +135,6 @@ public class StorageKey extends Marker implements Comparable<StorageKey> {
    */
   public void replaceValues(List<Object> values) {
     Preconditions.checkArgument(values != null, "Values cannot be null");
-    Preconditions.checkArgument(values.size() == fields.size(),
-        "Not enough values for a complete StorageKey");
     this.values = values;
   }
 
@@ -182,6 +183,7 @@ public class StorageKey extends Marker implements Comparable<StorageKey> {
   public StorageKey reuseFor(Path path, PathConversion conversion) {
     conversion.toKey(path, this);
     this.path = path;
+
     return this;
   }
 
@@ -204,6 +206,10 @@ public class StorageKey extends Marker implements Comparable<StorageKey> {
       }
     }
     return 0;
+  }
+
+  public int size(){
+    return values.size();
   }
 
   @Override

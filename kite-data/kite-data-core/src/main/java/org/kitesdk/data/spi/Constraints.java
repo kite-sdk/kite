@@ -727,7 +727,9 @@ public class Constraints {
       }
 
       // this is fail-fast: if the key fails a constraint, then drop it
-      for (int i = 0; i < partitionPredicates.size(); i += 1) {
+      //only check for the number of values in the key in case the key does not
+      //have all fields populated yet
+      for (int i = 0; i < key.size(); i += 1) {
         Object pValue = key.get(i);
         if (!partitionPredicates.get(i).apply(pValue)) {
           return false;
