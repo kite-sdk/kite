@@ -32,15 +32,23 @@ import org.kitesdk.data.LocalFileSystem;
 import org.kitesdk.data.Syncable;
 
 public class TestParquetWriter extends TestFileSystemWriters {
+
+  private static final Schema SCHEMA = SchemaBuilder.record("test").fields()
+      .requiredString("s")
+      .endRecord();
+
   @Override
-  public FileSystemWriter<Record> newWriter(Path directory, Schema schema) {
-    return FileSystemWriter.newWriter(fs, directory, 1, -1,
+  public FileSystemWriter<Record> newWriter(Path directory, Schema datasetSchema, Schema writerSchema) {
+    return FileSystemWriter.newWriter(fs, directory, 100, 2 * 1024 * 1024,
         new DatasetDescriptor.Builder()
             .property(
-                "kite.writer.roll-interval-seconds", String.valueOf(1))
-            .schema(schema)
+                "kite.writer.roll-interval-seconds", String.valueOf(10))
+            .property(
+                "kite.writer.target-file-size",
+                String.valueOf(32 * 1024 * 1024)) // 32 MB
+            .schema(datasetSchema)
             .format("parquet")
-            .build());
+            .build(), writerSchema);
   }
 
   @Override
@@ -66,11 +74,9 @@ public class TestParquetWriter extends TestFileSystemWriters {
         fs, new Path("/tmp"), -1, -1,
         new DatasetDescriptor.Builder()
             .property("parquet.block.size", "34343434")
-            .schema(SchemaBuilder.record("test").fields()
-                .requiredString("s")
-                .endRecord())
+            .schema(SCHEMA)
             .format("parquet")
-            .build());
+            .build(), SCHEMA);
     Assert.assertEquals("Should copy properties to Configuration",
         34343434, writer.conf.getInt("parquet.block.size", -1));
   }
@@ -88,11 +94,9 @@ public class TestParquetWriter extends TestFileSystemWriters {
         fs, new Path("/tmp"), -1, -1,
         new DatasetDescriptor.Builder()
             .property(FileSystemProperties.NON_DURABLE_PARQUET_PROP, "false")
-            .schema(SchemaBuilder.record("test").fields()
-                .requiredString("s")
-                .endRecord())
+            .schema(SCHEMA)
             .format("parquet")
-            .build());
+            .build(), SCHEMA);
     Assert.assertEquals("Disabling the non-durable parquet appender should get us a durable appender",
         DurableParquetAppender.class, writer.newAppender(testDirectory).getClass());
   }
@@ -104,11 +108,9 @@ public class TestParquetWriter extends TestFileSystemWriters {
         fs, new Path("/tmp"), -1, -1,
         new DatasetDescriptor.Builder()
             .property(FileSystemProperties.NON_DURABLE_PARQUET_PROP, "true")
-            .schema(SchemaBuilder.record("test").fields()
-                .requiredString("s")
-                .endRecord())
+            .schema(SCHEMA)
             .format("parquet")
-            .build());
+            .build(), SCHEMA);
     Assert.assertEquals("Enabling the non-durable parquet appender should get us a non-durable appender",
         ParquetAppender.class, writer.newAppender(testDirectory).getClass());
   }

@@ -20,12 +20,15 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
+import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -44,9 +47,10 @@ public abstract class TestFileSystemWriters extends MiniDFSTest {
   public static final Schema TEST_SCHEMA = SchemaBuilder.record("Message").fields()
       .requiredLong("id")
       .requiredString("message")
+      .nullableString("name","")
       .endRecord();
 
-  public abstract FileSystemWriter<Record> newWriter(Path directory, Schema schema);
+  public abstract FileSystemWriter<Record> newWriter(Path directory, Schema datasetSchema, Schema writerSchema);
   public abstract DatasetReader<Record> newReader(Path path, Schema schema);
 
   protected FileSystem fs = null;
@@ -57,7 +61,7 @@ public abstract class TestFileSystemWriters extends MiniDFSTest {
   public void setup() throws IOException {
     this.fs = getDFS();
     this.testDirectory = new Path(Files.createTempDir().getAbsolutePath());
-    this.fsWriter = newWriter(testDirectory, TEST_SCHEMA);
+    this.fsWriter = newWriter(testDirectory, TEST_SCHEMA, TEST_SCHEMA);
   }
 
   @After
@@ -94,6 +98,31 @@ public abstract class TestFileSystemWriters extends MiniDFSTest {
     DatasetReader<Record> reader = newReader(stats[0].getPath(), TEST_SCHEMA);
     Assert.assertEquals("Should match written records",
         written, Lists.newArrayList((Iterator) init(reader)));
+  }
+  
+  @Test
+  public void testWriteWithOldSchema() throws IOException {
+    
+    Schema writerSchema = SchemaBuilder.record("Message").fields()
+        .requiredLong("id")
+        .requiredString("message")
+        .endRecord();
+
+    fsWriter = newWriter(testDirectory, TEST_SCHEMA, writerSchema);
+    init(fsWriter);
+
+    for (long i = 0; i < 1000; i += 1) {
+    
+    GenericRecordBuilder recordBuilder = new GenericRecordBuilder(TEST_SCHEMA)
+        .set("id", i).set("message","test-"+ i);
+      fsWriter.write(recordBuilder.build());
+    }
+
+    fsWriter.close();
+
+    final FileStatus[]   stats = fs.listStatus(testDirectory, PathFilters.notHidden());
+    Assert.assertEquals("Should match with writer schema",
+        writerSchema, FileSystemUtil.schema("record", fs, stats[0].getPath()));
   }
 
   @Test

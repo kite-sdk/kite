@@ -3159,12 +3159,40 @@ h2. loadSolr
 
 The {{loadSolr}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-solr-core/src/main/java/org/kitesdk/morphline/solr/LoadSolrBuilder.java]) 
 inserts, updates or deletes records into a Solr server or MapReduce Reducer.
-
+It has an optional ingestion rate limiting feature that is implemented with the Guava [RateLimiter|http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/util/concurrent/RateLimiter.html].
+ 
 The command provides the following configuration options:
 
 || Property Name || Default || Description ||
 | solrLocator | n/a | Solr location parameters as described separately above. |
 | boosts | \[\] | An optional JSON object containing zero or more fieldName\-boostValue mappings where the fieldName is a String and the boostValue is a float. The default boost is {{1.0}}. |
+| maxRecordsPerSecond | Double.MAX_VALUE | The maximum number of morphline records to ingest per second (for rate limiting). This default is to not limit the rate. |
+| retryPolicy | see below | On exceptions, the loadSolr commmand retries solrj requests according to this configurable policy, as detailed below here: [#retryPolicy]. |
+
+{anchor:retryPolicy}
+\\
+\\
+h3. retryPolicy
+
+On exceptions, the {{loadSolr}} commmand retries solrj requests according to a configurable {{retryPolicy}}.
+This is useful in case solr servers are temporarily overloaded, or if there are transient network issues, etc.
+The {{BoundedExponentialBackoffRetry}} policy retries with exponentially increasing sleep time between retries until it has
+reached either a) the given max number of retries or b) more than the given amount of 
+time has elapsed since the start of the operation, whichever occurs first.
+For example, with baseSleepTime=100, maxSleepTime=1000 we sleep as follows in each iteration:
+random(100..199), random(200..399), random(400..799), min(random(800..1599), 1000), 1000, 1000, ... and so on.
+
+The {{BoundedExponentialBackoffRetry}} policy provides the following configuration options, 
+with all durations specified in [HOCON duration format|https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format]:
+|| Property Name || Default || Description ||
+| baseSleepTime | "125 milliseconds" | initial amount of time to wait between retries. |
+| maxSleepTime | "10 seconds" | The maximum time to sleep on each retry. |
+| maxRetries | 100 | The maximum number of times to retry. Set this parameter to 0 to disable the retry feature. |
+| maxElapsedTime | "180 seconds" | The maximum time to spend across all retries. |
+
+Defaults: If the {{retryPolicy}} parameter is absent then the {{loadSolr}} command defaults to reasonable {{BoundedExponentialBackoffRetry}} policy values
+as described above unless the Java System Property {{org.kitesdk.morphline.solr.LoadSolrBuilder.disableRetryPolicyByDefault=true}} is present 
+(this system property in turn is absent by default). Set the {{maxRetries}} parameter to 0 to disable the retry feature.
 
 Examples:
 - [#loadSolrUpdate]
@@ -3192,6 +3220,18 @@ loadSolr {
   boosts : {
     id : 2.0 # assign to the id field a boost value 2.0
   }
+  maxRecordsPerSecond : 1000000  # maximum number of morphline records to ingest per second (for rate limiting)
+  retryPolicy : { 
+    # retry solrj requests until a total of 100 times or 3 minutes, whichever comes first
+    # first sleep between retries lasts for random(125..249) milliseconds, 
+    # subsequently the duration between retries grows exponentially, capped at 10 second sleeps between retries 
+    BoundedExponentialBackoffRetry {
+      baseSleepTime : "125 milliseconds"
+      maxSleepTime : "10 seconds"
+      maxRetries : 100 # set this parameter to 0 to disable the retry feature
+      maxElapsedTime : "3 minutes"
+    }
+  }  
 }
 {code}
 {anchor:loadSolrPartialUpdate}

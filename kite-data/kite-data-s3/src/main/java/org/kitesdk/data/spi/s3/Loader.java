@@ -90,8 +90,8 @@ public class Loader implements Loadable {
         new URIPattern("s3n:/*path/:namespace/:dataset"),
         builder);
     Registration.register(
-        new URIPattern("s3a:/"),
-        new URIPattern("s3a:/:namespace/:dataset"),
+        new URIPattern("s3a:/*path"),
+        new URIPattern("s3a:/*path/:namespace/:dataset"),
         builder);
   }
 

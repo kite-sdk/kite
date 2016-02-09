@@ -31,6 +31,7 @@
     <module>kite-morphlines-avro</module>
     <module>kite-morphlines-json</module>
     <module>kite-morphlines-maxmind</module>
+    <module>kite-morphlines-metrics-scalable</module>
     <module>kite-morphlines-metrics-servlets</module>
     <module>kite-morphlines-protobuf</module>
     <module>kite-morphlines-saxon</module>
