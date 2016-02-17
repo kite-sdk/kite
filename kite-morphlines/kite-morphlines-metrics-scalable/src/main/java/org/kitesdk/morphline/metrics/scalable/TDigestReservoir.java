@@ -42,9 +42,7 @@ public final class TDigestReservoir implements Reservoir {
   
   @Override
   synchronized public int size() {
-    long size = stats.getCount();
-    Preconditions.checkArgument(size <= Integer.MAX_VALUE);
-    return (int) size;
+    return (int) Math.min(stats.getCount(), Integer.MAX_VALUE);
   }
 
   @Override
@@ -76,14 +74,12 @@ public final class TDigestReservoir implements Reservoir {
         
     @Override
     public int size() {
-      long size = stats.getCount();
-      Preconditions.checkArgument(size <= Integer.MAX_VALUE);
-      return (int) size;
+      return (int) Math.min(stats.getCount(), Integer.MAX_VALUE);
     }
 
     @Override
     public long getMax() {
-      if (size() == 0) {
+      if (stats.getCount() == 0) {
         return 0;
       }
       return Math.round(stats.getMax());
@@ -91,7 +87,7 @@ public final class TDigestReservoir implements Reservoir {
 
     @Override
     public long getMin() {
-      if (size() == 0) {
+      if (stats.getCount() == 0) {
         return 0;
       }
       return Math.round(stats.getMin());
@@ -99,24 +95,24 @@ public final class TDigestReservoir implements Reservoir {
 
     @Override
     public double getMean() {
-      if (size() == 0) {
-        return 0;
+      if (stats.getCount() == 0) {
+        return 0.0;
       }
       return stats.getMean();
     }
 
     @Override
     public double getStdDev() {
-      if (size() == 0) {
-        return 0;
+      if (stats.getCount() == 0) {
+        return 0.0;
       }
       return stats.getStandardDeviation();
     }
 
     @Override
     public double getValue(double quantile) {
-      if (size() == 0) {
-        return 0;
+      if (stats.getCount() == 0) {
+        return 0.0;
       }
       return stats.getQuantile(quantile);
     }

@@ -31,6 +31,18 @@ import com.codahale.metrics.Timer;
  * Utilities for codahale metrics library.
  */
 class MetricBuilders {
+  
+  private static final boolean DISABLE_COORDINATED_OMISSION_CORRECTION = 
+      Boolean.getBoolean("disableCoordinatedOmissionCorrection");
+  
+  private static final long MAX_CORRECTED_SLIDING_TIME_WINDOW_SAMPLES = 
+      Long.getLong("maxCorrectedSlidingTimeWindowSamples", 10 * 1000);
+  
+  private static final String COORDINATED_OMISSION_CORRECTION = "_corrected";
+  
+  private String coordinatedOmissionCorrectionName(String name) {
+    return name + COORDINATED_OMISSION_CORRECTION;
+  }
 
   public Counter getCounter(MetricRegistry registry, String name) {
     return getOrAdd(registry, name, COUNTERS);
@@ -46,6 +58,13 @@ class MetricBuilders {
 
   public Timer getTimer(MetricRegistry registry, String name) {
     return getOrAdd(registry, name, TIMERS);
+  }
+
+  public CoordinatedOmissionTimer getTimer(MetricRegistry registry, String name, long expectedNanoIntervalBetweenSamples) {
+    return new CoordinatedOmissionTimer(
+        getTimer(registry, name), 
+        DISABLE_COORDINATED_OMISSION_CORRECTION ? null : getTimer(registry, coordinatedOmissionCorrectionName(name)), 
+        expectedNanoIntervalBetweenSamples);
   }
 
   public Histogram getSlidingWindowHistogram(MetricRegistry registry, String name, final int size) {
@@ -88,6 +107,14 @@ class MetricBuilders {
     });
   }
 
+  public CoordinatedOmissionTimer getSlidingWindowTimer(MetricRegistry registry, String name, int size, 
+      long expectedNanoIntervalBetweenSamples) {
+    return new CoordinatedOmissionTimer(
+        getSlidingWindowTimer(registry, name, size), 
+        DISABLE_COORDINATED_OMISSION_CORRECTION ? null : getSlidingWindowTimer(registry, coordinatedOmissionCorrectionName(name), size), 
+        expectedNanoIntervalBetweenSamples);
+  }
+
   public Timer getSlidingTimeWindowTimer(MetricRegistry registry, String name, final long window,
       final TimeUnit windowUnit) {
     return getOrAdd(registry, name, new MetricBuilder<Timer>() {
@@ -100,6 +127,21 @@ class MetricBuilders {
         return Timer.class.isInstance(metric);
       }          
     });
+  }
+  
+  public CoordinatedOmissionTimer getSlidingTimeWindowTimer(MetricRegistry registry, String name, long window,
+      TimeUnit windowUnit, long expectedNanoIntervalBetweenSamples) {
+    Timer correctedTimer;    
+    if (!DISABLE_COORDINATED_OMISSION_CORRECTION && expectedNanoIntervalBetweenSamples > 0 
+        && windowUnit.toNanos(window) / expectedNanoIntervalBetweenSamples <= MAX_CORRECTED_SLIDING_TIME_WINDOW_SAMPLES) {
+      correctedTimer = getSlidingTimeWindowTimer(registry, coordinatedOmissionCorrectionName(name), window, windowUnit);
+    } else { // at such a high rate the sliding window would likely consume too much main memory - so we disable it
+      correctedTimer = null;
+    }
+    return new CoordinatedOmissionTimer(
+        getSlidingTimeWindowTimer(registry, name, window, windowUnit),
+        correctedTimer,
+        expectedNanoIntervalBetweenSamples);
   }
 
   @SuppressWarnings("unchecked")
