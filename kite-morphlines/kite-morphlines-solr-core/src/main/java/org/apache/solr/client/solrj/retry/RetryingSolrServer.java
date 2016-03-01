@@ -371,18 +371,19 @@ public class RetryingSolrServer extends SolrServer {
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
   /**
-   * A {@link MetricsFacade implementation that ignores all metrics events - does nothing.
+   * A {@link MetricsFacade} implementation that ignores all metrics events - does nothing.
    */
   private static final class NullMetricsFacade implements MetricsFacade {
 
-      @Override
-      public void markMeter(String name, long increment) {}
+    @Override
+    public void markMeter(String name, long increment) {}
 
-      @Override
-      public void updateHistogram(String name, long value) {}
+    @Override
+    public void updateHistogram(String name, long value) {}
 
-      @Override
-      public void updateTimer(String name, long duration, TimeUnit unit) {}        
+    @Override
+    public void updateTimer(String name, long duration, TimeUnit unit) {}        
+
   };
     
 }
