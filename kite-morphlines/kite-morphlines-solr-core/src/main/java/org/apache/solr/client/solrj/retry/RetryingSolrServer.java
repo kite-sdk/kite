@@ -121,7 +121,7 @@ public class RetryingSolrServer extends SolrServer {
     }
     this.retryPolicyFactory = retryPolicyFactory;
     if (metrics == null) {
-      throw new IllegalArgumentException("metrics param must not be null");
+      metrics = new NullMetricsFacade(); 
     }
     this.metrics = metrics;
   }
@@ -366,4 +366,23 @@ public class RetryingSolrServer extends SolrServer {
     solrServer.shutdown();
   }
   
+  
+  ///////////////////////////////////////////////////////////////////////////////
+  // Nested classes:
+  ///////////////////////////////////////////////////////////////////////////////
+  /**
+   * A {@link MetricsFacade implementation that ignores all metrics events - does nothing.
+   */
+  private static final class NullMetricsFacade implements MetricsFacade {
+
+      @Override
+      public void markMeter(String name, long increment) {}
+
+      @Override
+      public void updateHistogram(String name, long value) {}
+
+      @Override
+      public void updateTimer(String name, long duration, TimeUnit unit) {}        
+  };
+    
 }
