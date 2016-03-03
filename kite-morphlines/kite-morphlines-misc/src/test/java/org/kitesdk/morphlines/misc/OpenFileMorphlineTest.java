@@ -10,7 +10,6 @@ import java.util.zip.GZIPOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
-import org.kitesdk.morphline.api.AbstractMorphlineTest;
 import org.kitesdk.morphline.api.Collector;
 import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.MorphlineContext;
@@ -21,9 +20,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
-/**
- * Unit test for simple App.
- */
+
 public class OpenFileMorphlineTest {
 
 	private String testDirectory;

@@ -37,7 +37,7 @@ import org.kitesdk.morphline.stdio.AbstractParser;
 import com.typesafe.config.Config;
 
 /**
- * Opens an HDFS file for read and return a corresponding InputStream.
+ * Opens an Local file for read and return a corresponding InputStream.
  */
 public final class OpenLocalFileBuilder implements CommandBuilder {
 
