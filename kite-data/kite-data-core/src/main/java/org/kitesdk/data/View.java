@@ -101,6 +101,19 @@ public interface View<E> {
    */
   public boolean deleteAll();
 
+
+  /**
+   * Checks to see if the data in the {@link View} could be deleted.
+   *
+   * @return true if any data can be deleted, false if the View cannot be deleted
+   *
+   * @throws UnsupportedOperationException
+   *          if the requested delete cannot be completed by the implementation
+   * @throws if the requested delete failed because of an IOException
+   * @since 1.2.0
+   */
+  public boolean canDelete();
+
   /**
    * Get the runtime type of entities contained in this {@code View}.
    *

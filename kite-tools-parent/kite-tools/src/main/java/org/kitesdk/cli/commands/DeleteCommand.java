@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
 import org.kitesdk.data.Datasets;
+import org.kitesdk.data.PartitionView;
 import org.kitesdk.data.View;
 import org.slf4j.Logger;
 
@@ -30,6 +31,10 @@ public class DeleteCommand extends BaseDatasetCommand {
 
   @Parameter(description = "<dataset or view>")
   List<String> targets;
+
+  @Parameter(names="--dry-run",
+      description="Displays the view or dataset uris that would be deleted but does not perform actual deletion.")
+  boolean dryRun=false;
 
   public DeleteCommand(Logger console) {
     super(console);
@@ -46,13 +51,30 @@ public class DeleteCommand extends BaseDatasetCommand {
         View view = Datasets.load(uriOrName);
         Preconditions.checkArgument(viewMatches(view.getUri(), uriOrName),
             "Resolved view does not match requested view: " + view.getUri());
-        view.deleteAll();
+
+        if(console.isDebugEnabled()){
+          for(PartitionView<?> pv: (Iterable<PartitionView<?>>) view.getCoveringPartitions()){
+            if(pv.canDelete()) {
+              console.debug("Deleting partition {}", pv.getLocation());
+            }else{
+              console.debug("Deleting is not supported for partition {}", pv.getLocation());
+            }
+          }
+        }
+
+        if(!dryRun) {
+          view.deleteAll();
+        }
       } else if (isDatasetUri(uriOrName)) {
-        Datasets.delete(uriOrName);
+        if (!dryRun){
+          Datasets.delete(uriOrName);
+        }
       } else {
-        getDatasetRepository().delete(namespace, uriOrName);
+        if(!dryRun) {
+          getDatasetRepository().delete(namespace, uriOrName);
+        }
       }
-      console.debug("Deleted {}", uriOrName);
+      console.debug(dryRun ? "Would have deleted {}" : "Deleted {}", uriOrName);
     }
 
     return 0;
@@ -69,5 +91,4 @@ public class DeleteCommand extends BaseDatasetCommand {
         "dataset:hbase:zk1,zk2/users"
     );
   }
-
 }
