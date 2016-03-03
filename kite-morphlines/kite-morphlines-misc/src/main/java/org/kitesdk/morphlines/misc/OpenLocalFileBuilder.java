@@ -61,8 +61,8 @@ public final class OpenLocalFileBuilder implements CommandBuilder {
 	// Nested classes:
 	///////////////////////////////////////////////////////////////////////////////
 	private static final class OpenLocalFile extends AbstractCommand {
-		private String deafultPath = "";
-
+		private String deafultPath	 = "";
+		public static String PATH_SEPERATOR ="/";
 		public OpenLocalFile(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
 			super(builder, config, parent, child, context);
 
@@ -80,7 +80,7 @@ public final class OpenLocalFileBuilder implements CommandBuilder {
 				Record outputRecord = record.copy();
 				AbstractParser.removeAttachments(outputRecord);
 				String pathString = body.toString();
-				File file = new File(pathString);
+				File file = new File(getFullPath(pathString));
 
 				InputStream in = null;
 				try {
@@ -111,5 +111,14 @@ public final class OpenLocalFileBuilder implements CommandBuilder {
 			return true;
 		}
 
+		
+		private String getFullPath(String path){
+			if(deafultPath != null && deafultPath.trim().length()>0){
+				return deafultPath + ((deafultPath.endsWith(PATH_SEPERATOR)?"":PATH_SEPERATOR)) + path;
+			}
+			return path;
+		}
 	}
+	
+	
 }
