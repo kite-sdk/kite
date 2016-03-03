@@ -55,7 +55,7 @@ public abstract class AbstractCommand implements Command {
       "true".equals(System.getProperty("isMeasuringMetrics", "true"));
 
   protected final Logger LOG = LoggerFactory.getLogger(getClass());
-    
+  
   /**
    * Using the given <code>builder</code>, constructs a command rooted at the given morphline JSON
    * <code>config</code>.
@@ -304,6 +304,13 @@ public abstract class AbstractCommand implements Command {
           + CommandBuilder.class.getName() + " but is: " + cmdClass.getName(), cmdConfig);
     } 
     CommandBuilder builder = (CommandBuilder) obj;
+    
+    // Since a Command can be invoked by multiple names,
+    // it could be useful to save the current name used to invoke it
+    // in order to make it available to the builder.
+    // In this way we avoid to modify Command interface
+    getContext().getSettings().put("currentCommandName", cmdName);
+    
     Command cmd = builder.build(cmdConfig.getConfig(cmdName), currentParent, finalChild, getContext());
     return cmd;
   }
