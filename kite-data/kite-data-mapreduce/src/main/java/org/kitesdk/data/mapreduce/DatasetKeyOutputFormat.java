@@ -55,6 +55,7 @@ import org.kitesdk.data.spi.TemporaryDatasetRepository;
 import org.kitesdk.data.spi.TemporaryDatasetRepositoryAccessor;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 import org.kitesdk.data.spi.filesystem.FileSystemProperties;
+import org.kitesdk.data.spi.filesystem.FileSystemUtil;
 
 /**
  * A MapReduce {@code OutputFormat} for writing to a {@link Dataset}.
@@ -444,7 +445,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     View<E> target = load(taskAttemptContext);
     View<E> working;
 
-    if (usePerTaskAttemptDatasets(target)) {
+    if (usePerTaskAttemptDatasets(target, conf)) {
       working = loadOrCreateTaskAttemptView(taskAttemptContext);
     } else {
       working = target;
@@ -503,11 +504,17 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     Configuration conf = Hadoop.TaskAttemptContext.getConfiguration.invoke(taskAttemptContext);
     DefaultConfiguration.init(conf);
     View<E> view = load(taskAttemptContext);
-    return usePerTaskAttemptDatasets(view) ?
+    return usePerTaskAttemptDatasets(view, conf) ?
         new MergeOutputCommitter<E>() : new NullOutputCommitter();
   }
 
-  private static <E> boolean usePerTaskAttemptDatasets(View<E> target) {
+  private static <E> boolean usePerTaskAttemptDatasets(View<E> target, Configuration conf) {
+    // For performance reasons we should skip the intermediate task attempt and job output datasets if the
+    // file system does not support efficient renaming (such as S3), and write to the target dataset directly.
+    if (!FileSystemUtil.supportsRename(URI.create(target.getUri().getSchemeSpecificPart()), conf)) {
+      return false;
+    }
+
     // new API output committers are not called properly in Hadoop 1
     return !Hadoop.isHadoop1() && target.getDataset() instanceof Mergeable;
   }
