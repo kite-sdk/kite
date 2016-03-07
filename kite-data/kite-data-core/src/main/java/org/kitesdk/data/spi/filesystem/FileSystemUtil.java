@@ -21,6 +21,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -658,5 +659,24 @@ public class FileSystemUtil {
     } else {
       return SchemaUtil.merge(left, right);
     }
+  }
+
+  /**
+   * Check if an object store FileSystem such as S3 is being used.
+   *
+   * @param fsUri the FileSystem URI
+   * @param conf the FileSystem Configuration
+   * @return {@code true} if the FileSystem URI or {@link FileSystemProperties#OBJECTSTORE_FILESYSTEM
+   *     configuration} indicates that we are using an object store FileSystem implementation,
+   *     {@code false} otherwise.
+   */
+  public static boolean isObjectStoreFileSystem(URI fsUri, Configuration conf) {
+    String fsUriScheme = fsUri.getScheme();
+
+    // Only S3 is an object store by default, but allow configuration override.
+    // This logic is intended as a temporary placeholder solution and should
+    // be revisited once HADOOP-9565 has been completed.
+    return conf.getBoolean(FileSystemProperties.OBJECTSTORE_FILESYSTEM,
+        fsUriScheme.equals("s3n") || fsUriScheme.equals("s3a"));
   }
 }

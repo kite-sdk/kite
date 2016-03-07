@@ -60,4 +60,12 @@ public class FileSystemProperties {
    * be closed and finalized once they reach this age.
    */
   public static final String ROLL_INTERVAL_S_PROP = "kite.writer.roll-interval-seconds";
+
+  /**
+   * Until HADOOP-9565 is available and fully adopted, need to make this configurable so that
+   * we can avoid multiple expensive copy operations when writing output to a file system that
+   * does not support fast file renaming. Default is false unless the FileSystem URI scheme is
+   * s3n or s3a.
+   */
+  public static final String OBJECTSTORE_FILESYSTEM = "kite.writer.object-store";
 }
