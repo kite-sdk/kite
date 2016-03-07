@@ -510,8 +510,8 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
 
   private static <E> boolean usePerTaskAttemptDatasets(View<E> target, Configuration conf) {
     // For performance reasons we should skip the intermediate task attempt and job output datasets if the
-    // file system is an object store such as S3, and write to the target dataset directly.
-    if (FileSystemUtil.isObjectStoreFileSystem(URI.create(target.getUri().getSchemeSpecificPart()), conf)) {
+    // file system does not support efficient renaming (such as S3), and write to the target dataset directly.
+    if (!FileSystemUtil.supportsRename(URI.create(target.getUri().getSchemeSpecificPart()), conf)) {
       return false;
     }
 

@@ -698,37 +698,37 @@ public class TestFileSystemUtil {
   }
 
   @Test
-  public void testObjectStoreConfigNotSet() {
-    Assert.assertTrue("Should default to object store for S3A",
-        FileSystemUtil.isObjectStoreFileSystem(URI.create("s3a://bucket/path"), new Configuration()));
-    Assert.assertTrue("Should default to object store for S3N",
-        FileSystemUtil.isObjectStoreFileSystem(URI.create("s3n://bucket/path"), new Configuration()));
-    Assert.assertFalse("Should default to not object store for HDFS",
-        FileSystemUtil.isObjectStoreFileSystem(URI.create("hdfs://cluster/path"), new Configuration()));
-    Assert.assertFalse("Should default to not object store for FILE",
-        FileSystemUtil.isObjectStoreFileSystem(URI.create("file:///path"), new Configuration()));
+  public void testSupportsRenameConfigNotSet() {
+    Assert.assertFalse("Should default to false for S3A",
+        FileSystemUtil.supportsRename(URI.create("s3a://bucket/path"), new Configuration()));
+    Assert.assertFalse("Should default to false for S3N",
+        FileSystemUtil.supportsRename(URI.create("s3n://bucket/path"), new Configuration()));
+    Assert.assertTrue("Should default to true for HDFS",
+        FileSystemUtil.supportsRename(URI.create("hdfs://cluster/path"), new Configuration()));
+    Assert.assertTrue("Should default to true for FILE",
+        FileSystemUtil.supportsRename(URI.create("file:///path"), new Configuration()));
   }
 
   @Test
-  public void testObjectStoreConfigFalse() {
+  public void testSupportsRenameConfigFalse() {
     Configuration conf = new Configuration();
-    conf.setBoolean(FileSystemProperties.OBJECTSTORE_FILESYSTEM, false);
+    conf.setBoolean(FileSystemProperties.SUPPORTS_RENAME_PROP, false);
 
-    Assert.assertFalse("Should override via config to not object store for S3A",
-        FileSystemUtil.isObjectStoreFileSystem(URI.create("s3a://bucket/path"), conf));
-    Assert.assertFalse("Should override via config to not object store for S3N",
-        FileSystemUtil.isObjectStoreFileSystem(URI.create("s3n://bucket/path"), conf));
+    Assert.assertFalse("Should override via config to false for HDFS",
+        FileSystemUtil.supportsRename(URI.create("hdfs://cluster/path"), conf));
+    Assert.assertFalse("Should override via config to false for FILE",
+        FileSystemUtil.supportsRename(URI.create("file:///path"), conf));
   }
 
   @Test
-  public void testObjectStoreConfigTrue() {
+  public void testSupportsRenameConfigTrue() {
     Configuration conf = new Configuration();
-    conf.setBoolean(FileSystemProperties.OBJECTSTORE_FILESYSTEM, true);
+    conf.setBoolean(FileSystemProperties.SUPPORTS_RENAME_PROP, true);
 
-    Assert.assertTrue("Should override via config to object store for HDFS",
-        FileSystemUtil.isObjectStoreFileSystem(URI.create("hdfs://cluster/path"), conf));
-    Assert.assertTrue("Should override via config to object store for FILE",
-        FileSystemUtil.isObjectStoreFileSystem(URI.create("file:///path"), conf));
+    Assert.assertTrue("Should override via config to true for S3A",
+        FileSystemUtil.supportsRename(URI.create("s3a://bucket/path"), conf));
+    Assert.assertTrue("Should override via config true for S3N",
+        FileSystemUtil.supportsRename(URI.create("s3n://bucket/path"), conf));
   }
 
   private URI parent(URI file) {

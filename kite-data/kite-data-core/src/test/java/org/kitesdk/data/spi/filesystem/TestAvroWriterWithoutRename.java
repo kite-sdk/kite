@@ -21,7 +21,7 @@ import org.apache.avro.generic.GenericData.Record;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.DatasetDescriptor;
 
-public class TestAvroObjectStoreWriter extends TestAvroWriter {
+public class TestAvroWriterWithoutRename extends TestAvroWriter {
   @Override
   public FileSystemWriter<Record> newWriter(Path directory, Schema datasetSchema, Schema writerSchema) {
     return FileSystemWriter.newWriter(fs, directory, 100, 2 * 1024 * 1024,
@@ -32,7 +32,7 @@ public class TestAvroObjectStoreWriter extends TestAvroWriter {
                 "kite.writer.target-file-size",
                 String.valueOf(32 * 1024 * 1024)) // 32 MB
             .property(
-                "kite.writer.object-store", String.valueOf(true))
+                "kite.writer.fs-supports-rename", String.valueOf(false))
             .schema(datasetSchema)
             .format("avro")
             .build(), writerSchema);

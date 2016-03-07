@@ -662,21 +662,22 @@ public class FileSystemUtil {
   }
 
   /**
-   * Check if an object store FileSystem such as S3 is being used.
+   * Determine whether a FileSystem that supports efficient file renaming is being used. Two known
+   * FileSystem implementations that currently lack this feature are S3N and S3A.
    *
    * @param fsUri the FileSystem URI
    * @param conf the FileSystem Configuration
-   * @return {@code true} if the FileSystem URI or {@link FileSystemProperties#OBJECTSTORE_FILESYSTEM
-   *     configuration} indicates that we are using an object store FileSystem implementation,
-   *     {@code false} otherwise.
+   * @return {@code true} if the FileSystem URI or {@link FileSystemProperties#SUPPORTS_RENAME_PROP
+   *     configuration override} indicates that the FileSystem implementation supports efficient
+   *     rename operations, {@code false} otherwise.
    */
-  public static boolean isObjectStoreFileSystem(URI fsUri, Configuration conf) {
+  public static boolean supportsRename(URI fsUri, Configuration conf) {
     String fsUriScheme = fsUri.getScheme();
 
-    // Only S3 is an object store by default, but allow configuration override.
+    // Only S3 is known to not support renaming, but allow configuration override.
     // This logic is intended as a temporary placeholder solution and should
     // be revisited once HADOOP-9565 has been completed.
-    return conf.getBoolean(FileSystemProperties.OBJECTSTORE_FILESYSTEM,
-        fsUriScheme.equals("s3n") || fsUriScheme.equals("s3a"));
+    return conf.getBoolean(FileSystemProperties.SUPPORTS_RENAME_PROP,
+        !(fsUriScheme.equalsIgnoreCase("s3n") || fsUriScheme.equalsIgnoreCase("s3a")));
   }
 }

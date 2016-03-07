@@ -121,9 +121,9 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> implements RollingWri
       conf.set(prop, descriptor.getProperty(prop));
     }
 
-    // For performance reasons we will likely wish to skip temp file creation if the file system is an
-    // object store such as S3, and write the file directly.
-    this.useTempPath = !FileSystemUtil.isObjectStoreFileSystem(fs.getUri(), conf);
+    // For performance reasons we will skip temp file creation if the file system does not support
+    // efficient renaming, and write the file directly.
+    this.useTempPath = FileSystemUtil.supportsRename(fs.getUri(), conf);
   }
 
   @Override

@@ -64,8 +64,8 @@ public class FileSystemProperties {
   /**
    * Until HADOOP-9565 is available and fully adopted, need to make this configurable so that
    * we can avoid multiple expensive copy operations when writing output to a file system that
-   * does not support fast file renaming. Default is false unless the FileSystem URI scheme is
-   * s3n or s3a.
+   * does not support efficient file renaming. Default is true unless the FileSystem URI scheme
+   * is s3n or s3a.
    */
-  public static final String OBJECTSTORE_FILESYSTEM = "kite.writer.object-store";
+  public static final String SUPPORTS_RENAME_PROP = "kite.writer.fs-supports-rename";
 }
