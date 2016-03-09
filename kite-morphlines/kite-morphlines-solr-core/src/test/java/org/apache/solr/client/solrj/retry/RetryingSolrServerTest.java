@@ -63,6 +63,24 @@ public class RetryingSolrServerTest extends SolrTestCaseJ4 {
   }
   
   @Test
+  public void testGoodRequestNeedsNoRetriesWithNonNullMetricsFacade() throws Exception {
+    testGoodRequestNeedsNoRetries(getMetricsFacade());
+  }
+  
+  @Test
+  public void testGoodRequestNeedsNoRetriesWithNullMetricsFacade() throws Exception {
+    testGoodRequestNeedsNoRetries(null);
+  }
+  
+  private void testGoodRequestNeedsNoRetries(MetricsFacade metricsFacade) throws Exception {
+    CountingSolrServer countingSolrServer = new CountingSolrServer(solrServer);
+    SolrServer solr = new RetryingSolrServer(countingSolrServer, getNoRetryPolicyFactory(), metricsFacade);
+    SolrQuery query = getDefaultQuery();
+    solr.query(query);
+    Assert.assertEquals(1, countingSolrServer.getNumRequests());
+  }
+  
+  @Test
   public void testNoRetries() throws Exception {
     SolrQuery query = getDefaultQuery();
     solrServer.query(query);

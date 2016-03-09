@@ -98,6 +98,9 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> implements RollingWri
   @VisibleForTesting
   final Configuration conf;
 
+  @VisibleForTesting
+  final boolean useTempPath;
+
   private FileSystemWriter(FileSystem fs, Path path, long rollIntervalMillis,
                            long targetFileSize, DatasetDescriptor descriptor, Schema writerSchema) {
     Preconditions.checkNotNull(fs, "File system is not defined");
@@ -117,6 +120,10 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> implements RollingWri
     for (String prop : descriptor.listProperties()) {
       conf.set(prop, descriptor.getProperty(prop));
     }
+
+    // For performance reasons we will skip temp file creation if the file system does not support
+    // efficient renaming, and write the file directly.
+    this.useTempPath = FileSystemUtil.supportsRename(fs.getUri(), conf);
   }
 
   @Override
@@ -142,7 +149,7 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> implements RollingWri
     // initialize paths
     try {
       this.finalPath = new Path(directory, uniqueFilename(descriptor.getFormat()));
-      this.tempPath = tempFilename(finalPath);
+      this.tempPath = useTempPath ? tempFilename(finalPath) : finalPath;
     } catch (RuntimeException e) {
       this.state = ReaderWriterState.ERROR;
       throw new DatasetOperationException(e,
@@ -218,17 +225,20 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> implements RollingWri
       // been flushed or the writer is not in an error state. Only instances of
       // IncrementalWriter set flushed to true.
       if (count > 0 && (flushed || ReaderWriterState.OPEN.equals(state))) {
-        // commit the temp file
-        try {
-          if (!fs.rename(tempPath, finalPath)) {
-            throw new DatasetOperationException(
-                "Failed to move %s to %s", tempPath, finalPath);
+        // commit the temp file if using one (otherwise temp=final so no action
+        // is necessary)
+        if (useTempPath) {
+          try {
+            if (!fs.rename(tempPath, finalPath)) {
+              throw new DatasetOperationException(
+                  "Failed to move %s to %s", tempPath, finalPath);
+            }
+          } catch (RuntimeException e) {
+            throw new DatasetOperationException(e,
+                "Failed to commit %s", finalPath);
+          } catch (IOException e) {
+            throw new DatasetIOException("Failed to commit " + finalPath, e);
           }
-        } catch (RuntimeException e) {
-          throw new DatasetOperationException(e,
-              "Failed to commit %s", finalPath);
-        } catch (IOException e) {
-          throw new DatasetIOException("Failed to commit " + finalPath, e);
         }
 
         LOG.debug("Committed {} for appender {} ({} entities)",

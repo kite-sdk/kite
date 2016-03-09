@@ -42,7 +42,7 @@ import java.util.Map;
 public class PathConversion {
 
   private final Schema schema;
-
+  
   public PathConversion(Schema schema) {
     this.schema = schema;
   }

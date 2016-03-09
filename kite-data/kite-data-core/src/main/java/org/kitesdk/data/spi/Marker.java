@@ -120,6 +120,13 @@ public abstract class Marker {
   }
 
   /**
+   * Returns the number of elements in the marker.
+   * @return the number of elements in the marker.
+   * @since 1.2.0
+   */
+  public abstract int size();
+
+  /**
    * A basic Marker implementation backed by a Map.
    *
    * @since 0.9.0
@@ -162,6 +169,11 @@ public abstract class Marker {
         return false;
       }
       return Objects.equal(this.values, ((ImmutableMarker) obj).values);
+    }
+
+    @Override
+    public int size() {
+      return values.size();
     }
   }
 
