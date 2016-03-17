@@ -65,6 +65,20 @@ class HiveAbstractDatasetRepository extends FileSystemDatasetRepository {
   }
 
   @Override
+  public boolean moveToTrash(String namespace, String name) {
+    try {
+      if (isManaged(namespace, name)) {
+        // avoids calling fsRepository.delete, which deletes the data path
+        // managed tables by default go to trash if it is enabled so call delete
+        return getMetadataProvider().delete(namespace, name);
+      }
+      return super.moveToTrash(namespace, name);
+    } catch (DatasetNotFoundException e) {
+      return false;
+    }
+  }
+
+  @Override
   public URI getUri() {
     return repoUri;
   }

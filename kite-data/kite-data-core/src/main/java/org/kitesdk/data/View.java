@@ -102,6 +102,26 @@ public interface View<E> {
   public boolean deleteAll();
 
   /**
+   * Moves the entities included in this {@link View} to storage trash location or
+   * throws an {@link UnsupportedOperationException}.
+   *
+   * Implementations are allowed to throw {@code UnsupportedOperationException}
+   * if the {@code View} could require additional work to move data to trash. For example,
+   * if some but not all of the data in an underlying data file must be removed,
+   * then the implementation is allowed to reject the move to trash rather than
+   * copy the remaining records to a new file. Implementations must  document
+   * what moves to trash are supported and under what conditions requests are rejected.
+   *
+   * @return true if any data was moved to trash, false if the View was already empty
+   * @throws UnsupportedOperationException
+   *          if the requested move to trash cannot be completed by the implementation
+   * @throws DatasetIOException
+   *          if the requested move to trash failed because of an IOException
+   * @since 1.2.0
+   */
+  public boolean moveToTrash();
+
+  /**
    * Get the runtime type of entities contained in this {@code View}.
    *
    * @return the runtime type of entities contained in this view

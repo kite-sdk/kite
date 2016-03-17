@@ -331,6 +331,28 @@ public class TestFileSystemPartitionView {
   }
 
   @Test
+  public void testMoveToTrashPartitions() {
+    Iterable<PartitionView<TestRecord>> partitions = partitioned
+        .getCoveringPartitions();
+
+    Set<PartitionView<TestRecord>> expected = Sets.newHashSet(partitions);
+    for (PartitionView<TestRecord> partition : partitions) {
+      Assert.assertTrue("Should move to trash data", partition.moveToTrash());
+
+      expected.remove(partition);
+      Set<PartitionView<TestRecord>> actual = Sets.newHashSet(
+          partitioned.getCoveringPartitions());
+      Assert.assertEquals("Should only list remaining partitions",
+          expected, actual);
+    }
+
+    for (PartitionView<TestRecord> partition : partitions) {
+      Assert.assertFalse("Should indicate no data was present",
+          partition.moveToTrash());
+    }
+  }
+
+  @Test
   public void testRestrictedRead() throws IOException {
     FileSystemPartitionView<TestRecord> partition0 = partitioned
         .getPartitionView(URI.create("id_hash=0"));

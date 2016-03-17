@@ -562,18 +562,7 @@ public class Datasets {
    * @throws IllegalArgumentException if {@code uri} is not a dataset URI
    */
   public static boolean delete(URI uri) {
-    Preconditions.checkArgument(
-        URIBuilder.DATASET_SCHEME.equals(uri.getScheme()),
-        "Not a dataset URI: " + uri);
-
-    Pair<DatasetRepository, Map<String, String>> pair =
-        Registration.lookupDatasetUri(URI.create(uri.getRawSchemeSpecificPart()));
-    DatasetRepository repo = pair.first();
-    Map<String, String> uriOptions = pair.second();
-
-    return repo.delete(
-        uriOptions.get(URIBuilder.NAMESPACE_OPTION),
-        uriOptions.get(URIBuilder.DATASET_NAME_OPTION));
+    return deleteWithTrash(uri, false);
   }
 
   /**
@@ -603,6 +592,79 @@ public class Datasets {
    */
   public static boolean delete(String uri) {
     return delete(URI.create(uri));
+  }
+
+  /**
+   * Move a {@link Dataset} identified by the given dataset URI to trash.
+   * <p>
+   * When you call this method using a dataset URI, both data and metadata are
+   * moved to trash. After you call this method, the dataset no longer exists, unless
+   * an exception is thrown.
+   * <p>
+   * When you call this method using a view URI, data in that view is moved to trash.
+   * The dataset's metadata is not changed. This can throw an
+   * {@code UnsupportedOperationException} if the move to trash requires additional
+   * work. For example, if some, but not all, of the data in an underlying data
+   * file must be removed, then the implementation is allowed to reject the
+   * move to trash rather than copy the remaining records to a new file.
+   * An implementation must document under what conditions it accepts moves to trash,
+   * and under what conditions it rejects them.
+   * <p>
+   * URIs must begin with {@code dataset:}. The remainder of
+   * the URI is implementation specific, depending on the dataset scheme.
+   *
+   * @param uri a {@code Dataset} URI
+   * @return {@code true} if any data or metadata is removed, {@code false}
+   *          otherwise
+   * @throws NullPointerException if {@code uri} is null
+   * @throws IllegalArgumentException if {@code uri} is not a dataset URI
+   */
+  public static boolean moveToTrash(URI uri) {
+    return deleteWithTrash(uri, true);
+  }
+
+  private static boolean deleteWithTrash(URI uri, boolean useTrash){
+    Preconditions.checkArgument(
+            URIBuilder.DATASET_SCHEME.equals(uri.getScheme()),
+            "Not a dataset URI: " + uri);
+
+    Pair<DatasetRepository, Map<String, String>> pair =
+            Registration.lookupDatasetUri(URI.create(uri.getRawSchemeSpecificPart()));
+    DatasetRepository repo = pair.first();
+    Map<String, String> uriOptions = pair.second();
+
+    return useTrash ? repo.moveToTrash(uriOptions.get(URIBuilder.NAMESPACE_OPTION),
+            uriOptions.get(URIBuilder.DATASET_NAME_OPTION)) : repo.delete(uriOptions.get(URIBuilder.NAMESPACE_OPTION),
+            uriOptions.get(URIBuilder.DATASET_NAME_OPTION));
+  }
+
+  /**
+   * Move a {@link Dataset} identified by the given dataset URI string to trash.
+   * <p>
+   * When you call this method using a dataset URI, both data and metadata are
+   * removed. After you call this method, the dataset no longer exists, unless
+   * an exception is thrown.
+   * <p>
+   * When you call this method using a view URI, data in that view is moved to trash.
+   * The dataset's metadata is not changed. This can throw an
+   * {@code UnsupportedOperationException} if the move to trash requires additional
+   * work. For example, if some, but not all, of the data in an underlying data
+   * file must be removed, then the implementation is allowed to reject the
+   * move to trash rather than copy the remaining records to a new file.
+   * An implementation must document under what conditions it accepts moves to trash,
+   * and under what conditions it rejects them.
+   * <p>
+   * URIs must begin with {@code dataset:}. The remainder of
+   * the URI is implementation specific, depending on the dataset scheme.
+   *
+   * @param uri a {@code Dataset} URI string
+   * @return {@code true} if any data or metadata is removed, {@code false}
+   *          otherwise
+   * @throws NullPointerException if {@code uri} is null
+   * @throws IllegalArgumentException if {@code uri} is not a dataset URI
+   */
+  public static boolean moveToTrash(String uri) {
+    return moveToTrash(URI.create(uri));
   }
 
   /**

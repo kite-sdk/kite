@@ -154,6 +154,11 @@ abstract class HiveAbstractMetadataProvider extends AbstractMetadataProvider imp
   }
 
   @Override
+  public boolean moveToTrash(String namespace, String name) {
+    return delete(namespace, name);
+  }
+
+  @Override
   public boolean exists(String namespace, String name) {
     Compatibility.checkDatasetName(namespace, name);
     return (resolveNamespace(namespace, name) != null);

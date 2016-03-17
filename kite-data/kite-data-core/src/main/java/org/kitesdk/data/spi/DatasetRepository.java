@@ -240,6 +240,29 @@ public interface DatasetRepository {
   boolean delete(String namespace, String name);
 
   /**
+   * Moves data to trash for the {@link Dataset} named {@code name} and remove its
+   * {@link DatasetDescriptor} from the underlying metadata provider.
+   *
+   * After this method is called, there is no {@code Dataset} with the given
+   * {@code name}, unless an exception is thrown. If either data or metadata
+   * are removed, this method returns {@code true}. If there is no
+   * {@code Dataset} corresponding to the given {@code name}, this
+   * method makes no changes and returns {@code false}.
+   *
+   * @param namespace A namespace, or logical group name, for the dataset.
+   * @param name The name of the dataset to delete.
+   * @return {@code true} if any data or metadata is moved,
+   *         {@code false} if no action is taken.
+   * @throws IllegalArgumentException if {@code name} is null
+   * @throws ConcurrentSchemaModificationException
+   *                                  if the {@code Dataset}
+   *                                  schema is updated concurrently.
+   *
+   * @since 1.2.0
+   */
+  boolean moveToTrash(String namespace, String name);
+
+  /**
    * Checks if there is a {@link Dataset} in this repository named {@code name}.
    *
    * @param namespace A namespace, or logical group name, for the dataset.

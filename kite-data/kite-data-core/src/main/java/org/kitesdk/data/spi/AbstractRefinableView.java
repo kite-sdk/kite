@@ -153,6 +153,12 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
   }
 
   @Override
+  public boolean moveToTrash() {
+    throw new UnsupportedOperationException(
+        "This Dataset does not support bulk data removal to trash");
+  }
+
+  @Override
   public Class<E> getType() {
     return accessor.getType();
   }

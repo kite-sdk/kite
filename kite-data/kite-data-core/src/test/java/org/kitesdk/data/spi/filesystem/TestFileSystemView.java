@@ -17,6 +17,9 @@
 package org.kitesdk.data.spi.filesystem;
 
 import org.kitesdk.data.RefinableView;
+import org.apache.hadoop.fs.LocatedFileStatus;
+import org.apache.hadoop.fs.RemoteIterator;
+import org.apache.hadoop.fs.TrashPolicy;
 import org.kitesdk.data.Signalable;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -253,6 +256,152 @@ public class TestFileSystemView extends TestRefinableViews {
 
   @Test
   @SuppressWarnings("unchecked")
+  public void testMoveToTrash() throws Exception {
+    // NOTE: this is an un-restricted write so all should succeed
+    DatasetWriter<StandardEvent> writer = null;
+    try {
+      writer = unbounded.newWriter();
+      writer.write(sepEvent);
+      writer.write(octEvent);
+      writer.write(novEvent);
+    } finally {
+      Closeables.close(writer, false);
+    }
+
+    final Path root = new Path("target/data/ns/test");
+    final Path y2013 = new Path("target/data/ns/test/year=2013");
+    final Path sep = new Path("target/data/ns/test/year=2013/month=09");
+    final Path sep12 = new Path("target/data/ns/test/year=2013/month=09/day=12");
+    final Path oct = new Path("target/data/ns/test/year=2013/month=10");
+    final Path oct12 = new Path("target/data/ns/test/year=2013/month=10/day=12");
+    final Path nov = new Path("target/data/ns/test/year=2013/month=11");
+    final Path nov11 = new Path("target/data/ns/test/year=2013/month=11/day=11");
+    assertDirectoriesExist(fs, root, y2013, sep, sep12, oct, oct12, nov, nov11);
+
+    long julStart = new DateTime(2013, 6, 1, 0, 0, DateTimeZone.UTC).getMillis();
+    long sepStart = new DateTime(2013, 9, 1, 0, 0, DateTimeZone.UTC).getMillis();
+    final long nov11Start = new DateTime(2013, 11, 11, 0, 0, DateTimeZone.UTC).getMillis();
+    final long nov12Start = new DateTime(2013, 11, 12, 0, 0, DateTimeZone.UTC).getMillis();
+    long decStart = new DateTime(2013, 12, 1, 0, 0, DateTimeZone.UTC).getMillis();
+    final long sepInstant = sepEvent.getTimestamp();
+    final long sep12End = new DateTime(2013, 9, 13, 0, 0, DateTimeZone.UTC).getMillis() - 1;
+    final long octInstant = octEvent.getTimestamp();
+    // aligned with second boundaries, but not partition boundaries
+    final long oct12Start = new DateTime(2013, 10, 12, 0, 0, 0, DateTimeZone.UTC).getMillis();
+    final long oct12BadStart = new DateTime(2013, 10, 12, 0, 1, 0, DateTimeZone.UTC).getMillis();
+    final long oct12End = new DateTime(2013, 10, 12, 23, 59, 59, 999, DateTimeZone.UTC).getMillis();
+    final long oct12BadEnd = new DateTime(2013, 10, 12, 23, 59, 57, 999, DateTimeZone.UTC).getMillis();
+
+    Assert.assertFalse("Delete should return false to indicate no changes",
+        unbounded.from("timestamp", decStart).moveToTrash());
+    Assert.assertFalse("Delete should return false to indicate no changes",
+        unbounded.from("timestamp", julStart).toBefore("timestamp", sepStart).moveToTrash());
+
+    // cannot delete mid-partition
+    TestHelpers.assertThrows(
+        "Delete should fail if not aligned with partition boundary",
+        UnsupportedOperationException.class, new Runnable() {
+          @Override
+          public void run() {
+            unbounded.to("timestamp", sepInstant).deleteAll();
+          }
+        });
+    TestHelpers.assertThrows(
+        "Delete should fail if not aligned with partition boundary",
+        UnsupportedOperationException.class, new Runnable() {
+          @Override
+          public void run() {
+            unbounded.toBefore("timestamp", sep12End).moveToTrash();
+          }
+        });
+
+    // delete everything up through September
+    assertTrue("Delete should return true to indicate FS changed",
+        unbounded.to("timestamp", sep12End).moveToTrash());
+    assertDirectoriesDoNotExist(fs, sep12, sep);
+    assertDirectoriesInTrash(fs, trashPolicy, sep12, sep);
+    assertDirectoriesExist(fs, root, y2013, oct, oct12, nov, nov11);
+    Assert.assertFalse("Delete should return false to indicate no changes",
+        unbounded.to("timestamp", sep12End).moveToTrash());
+    assertDirectoriesDoNotExist(fs, sep12, sep);
+    assertDirectoriesExist(fs, root, y2013, oct, oct12, nov, nov11);
+
+    // cannot delete mid-partition
+    TestHelpers.assertThrows(
+        "Delete should fail if not aligned with partition boundary",
+        UnsupportedOperationException.class, new Runnable() {
+          @Override
+          public void run() {
+            unbounded.from("timestamp", nov11Start).to("timestamp", nov12Start).moveToTrash();
+          }
+        });
+    TestHelpers.assertThrows(
+        "Delete should fail if not aligned with partition boundary",
+        UnsupportedOperationException.class, new Runnable() {
+          @Override
+          public void run() {
+            unbounded.fromAfter("timestamp", nov11Start).toBefore("timestamp", nov12Start).moveToTrash();
+          }
+        });
+
+    // delete November 11 and later
+    assertTrue("Delete should return true to indicate FS changed",
+        unbounded.from("timestamp", nov11Start).toBefore("timestamp", nov12Start).moveToTrash());
+    assertDirectoriesDoNotExist(fs, sep12, sep, nov11, nov);
+    assertDirectoriesExist(fs, root, y2013, oct, oct12);
+    Assert.assertFalse("Delete should return false to indicate no changes",
+        unbounded.from("timestamp", nov11Start).toBefore("timestamp", nov12Start).moveToTrash());
+    assertDirectoriesDoNotExist(fs, sep12, sep, nov11, nov);
+    assertDirectoriesInTrash(fs, trashPolicy, sep12, sep, nov11, nov);
+    assertDirectoriesExist(fs, root, y2013, oct, oct12);
+
+    // cannot delete mid-partition
+    TestHelpers.assertThrows(
+        "Delete should fail if not aligned with partition boundary",
+        UnsupportedOperationException.class, new Runnable() {
+          @Override
+          public void run() {
+            unbounded.from("timestamp", octInstant).to("timestamp", octInstant).moveToTrash();
+          }
+        });
+    TestHelpers.assertThrows(
+        "Delete should fail if not aligned with partition boundary",
+        UnsupportedOperationException.class, new Runnable() {
+          @Override
+          public void run() {
+            unbounded.from("timestamp", oct12BadStart).to("timestamp", oct12End).moveToTrash();
+          }
+        });
+    TestHelpers.assertThrows(
+        "Delete should fail if not aligned with partition boundary",
+        UnsupportedOperationException.class, new Runnable() {
+          @Override
+          public void run() {
+            unbounded.from("timestamp", oct12Start).to("timestamp", oct12BadEnd).moveToTrash();
+          }
+        });
+
+    // delete October and the 2013 directory
+    assertTrue("Delete should return true to indicate FS changed",
+        unbounded.from("timestamp", oct12Start).to("timestamp", oct12End).moveToTrash());
+    assertDirectoriesDoNotExist(fs, y2013, sep12, sep, oct12, oct, nov11, nov);
+    assertDirectoriesInTrash(fs, trashPolicy, y2013, sep12, sep, oct12, oct, nov11, nov);
+    assertDirectoriesExist(fs, root);
+    Assert.assertFalse("Delete should return false to indicate no changes",
+        unbounded.from("timestamp", oct12Start).to("timestamp", oct12End).moveToTrash());
+    assertDirectoriesDoNotExist(fs, y2013, sep12, sep, oct12, oct, nov11, nov);
+    assertDirectoriesInTrash(fs, trashPolicy, y2013, sep12, sep, oct12, oct, nov11, nov);
+    assertDirectoriesExist(fs, root);
+
+    Assert.assertFalse("Delete should return false to indicate no changes",
+        unbounded.moveToTrash());
+    assertDirectoriesDoNotExist(fs, y2013, sep12, sep, oct12, oct, nov11, nov);
+    assertDirectoriesInTrash(fs, trashPolicy, y2013, sep12, sep, oct12, nov11, nov);
+    assertDirectoriesExist(fs, root);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
   public void testUnboundedDelete() throws Exception {
     // NOTE: this is an un-restricted write so all should succeed
     DatasetWriter<StandardEvent> writer = null;
@@ -277,6 +426,36 @@ public class TestFileSystemView extends TestRefinableViews {
 
     Assert.assertTrue("Delete should return true to indicate data was deleted.",
         unbounded.deleteAll());
+    assertDirectoriesDoNotExist(fs, y2013, sep12, sep, oct12, oct, nov11, nov);
+    assertDirectoriesExist(fs, root);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testUnboundedMoveToTrash() throws Exception {
+    // NOTE: this is an un-restricted write so all should succeed
+    DatasetWriter<StandardEvent> writer = null;
+    try {
+      writer = unbounded.newWriter();
+      writer.write(sepEvent);
+      writer.write(octEvent);
+      writer.write(novEvent);
+    } finally {
+      Closeables.close(writer, false);
+    }
+
+    final Path root = new Path("target/data/ns/test");
+    final Path y2013 = new Path("target/data/ns/test/year=2013");
+    final Path sep = new Path("target/data/ns/test/year=2013/month=09");
+    final Path sep12 = new Path("target/data/ns/test/year=2013/month=09/day=12");
+    final Path oct = new Path("target/data/ns/test/year=2013/month=10");
+    final Path oct12 = new Path("target/data/ns/test/year=2013/month=10/day=12");
+    final Path nov = new Path("target/data/ns/test/year=2013/month=11");
+    final Path nov11 = new Path("target/data/ns/test/year=2013/month=11/day=11");
+    assertDirectoriesExist(fs, root, y2013, sep, sep12, oct, oct12, nov, nov11);
+
+    Assert.assertTrue("Delete should return true to indicate data was deleted.",
+        unbounded.moveToTrash());
     assertDirectoriesDoNotExist(fs, y2013, sep12, sep, oct12, oct, nov11, nov);
     assertDirectoriesExist(fs, root);
   }
@@ -332,7 +511,7 @@ public class TestFileSystemView extends TestRefinableViews {
     long start = new DateTime(2013, 9, 1, 0, 0, DateTimeZone.UTC).getMillis();
     long end = new DateTime(2013, 11, 14, 0, 0, DateTimeZone.UTC).getMillis();
     final RefinableView<StandardEvent> range = unbounded
-        .from("timestamp", start).toBefore("timestamp", end);
+            .from("timestamp", start).toBefore("timestamp", end);
 
     DatasetWriter<StandardEvent> writer = null;
     try {
@@ -360,5 +539,16 @@ public class TestFileSystemView extends TestRefinableViews {
 
     // Test reading from September thru November. The range includes the empty directory.
     assertContentEquals(Sets.newHashSet(sepEvent, novEvent), range);
+
+  }
+  
+  public static void assertDirectoriesInTrash(FileSystem fs, TrashPolicy trashPolicy, Path... dirs)
+          throws IOException {
+    Path trashDir = trashPolicy.getCurrentTrashDir();
+
+    for (Path path : dirs) {
+      Path trashPath = Path.mergePaths(trashDir, fs.makeQualified(path));
+      assertTrue("Directory should exist in trash: " + trashPath, fs.exists(trashPath));
+    }
   }
 }
