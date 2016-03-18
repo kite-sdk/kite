@@ -16,6 +16,7 @@
 package org.kitesdk.data.spi.filesystem;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.hadoop.fs.*;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetExistsException;
@@ -33,9 +34,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 import java.io.FileNotFoundException;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+
 import org.kitesdk.data.spi.Compatibility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +46,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 
 /**
  * <p>
@@ -250,10 +248,19 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public boolean delete(String namespace, String name) {
+    return deleteWithTrash(namespace, name, false);
+  }
+
+  @Override
+  public boolean moveToTrash(String namespace, String name) {
+    return deleteWithTrash(namespace, name, true);
+  }
+
+  private boolean deleteWithTrash(String namespace, String name, boolean useTrash){
     Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
-    LOG.debug("Deleting dataset metadata name: {}", name);
+    LOG.debug("Deleting remove metadata name: {}", name);
 
     Path metadataDirectory;
     try {
@@ -264,19 +271,28 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
     try {
       if (rootFileSystem.exists(metadataDirectory)) {
-        if (rootFileSystem.delete(metadataDirectory, true)) {
-          return true;
-        } else {
-          throw new IOException("Failed to delete metadata directory:"
-            + metadataDirectory);
+        if(useTrash){
+          if (Trash.moveToAppropriateTrash(rootFileSystem, metadataDirectory, conf)) {
+            return true;
+          } else {
+            throw new IOException("Failed to trash metadata directory:"
+                    + metadataDirectory);
+          }
+        }else {
+          if (rootFileSystem.delete(metadataDirectory, true)) {
+            return true;
+          } else {
+            throw new IOException("Failed to delete metadata directory:"
+                    + metadataDirectory);
+          }
         }
       } else {
         return false;
       }
     } catch (IOException e) {
       throw new DatasetIOException(
-          "Unable to find or delete metadata directory:" + metadataDirectory +
-          " for dataset:" + name, e);
+              "Unable to find or remove metadata directory:" + metadataDirectory +
+                      " for dataset:" + name, e);
     }
   }
 

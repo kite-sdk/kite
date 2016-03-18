@@ -612,6 +612,25 @@ public class TestFileSystemDataset extends MiniDFSTest {
   }
 
   @Test
+  public void testMoveToTrashWithoutPartitions() {
+    final FileSystemDataset<Record> ds = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
+        .name("users")
+        .configuration(getConfiguration())
+        .descriptor(
+            new DatasetDescriptor.Builder().schema(USER_SCHEMA).format(format)
+                .location(testDirectory).build())
+        .type(Record.class)
+        .build();
+
+    writeTestUsers(ds, 10);
+
+    Assert.assertTrue(ds.moveToTrash());
+
+    checkReaderBehavior(ds.newReader(), 0, (RecordValidator<Record>) null);
+  }
+
+  @Test
   public void signalReadyOnUnboundedDataset() {
     final FileSystemDataset<Record> ds = new FileSystemDataset.Builder<Record>()
         .namespace("ns")

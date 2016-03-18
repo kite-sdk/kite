@@ -21,4 +21,8 @@
     <name>kite.hive.allow-local-metastore</name>
     <value>true</value>
   </property>
+  <property>
+    <name>fs.trash.interval</name>
+    <value>1</value>
+  </property>
 </configuration>
