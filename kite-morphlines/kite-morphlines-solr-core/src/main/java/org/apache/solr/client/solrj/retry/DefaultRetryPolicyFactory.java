@@ -57,6 +57,9 @@ public final class DefaultRetryPolicyFactory implements RetryPolicyFactory {
       if (sex.code() == ErrorCode.UNSUPPORTED_MEDIA_TYPE.code) {
         return RetryPolicyFactory.DONT_RETRY; // no point retrying that - would never succeed
       }
+      if (sex.getMessage().startsWith("undefined field")) { // schema.xml mismatch, see IndexSchema.java
+        return RetryPolicyFactory.DONT_RETRY; // no point retrying that - would never succeed
+      }
     }
     if (currentPolicy == null) {
       return initialRetryPolicy; // init

@@ -153,7 +153,8 @@ public final class ToAvroBuilder implements CommandBuilder {
         }
         
         if (avroResult == AvroConversions.ERROR) {
-          LOG.debug("Cannot convert item: {} to schema: {}", list, schema);
+          LOG.debug("Cannot convert field: {} of item: {} to schema: {}", 
+        		  new Object[] {morphlineFieldName, list, schema});
           return false;          
         }
         avroRecord.put(field.pos(), avroResult);

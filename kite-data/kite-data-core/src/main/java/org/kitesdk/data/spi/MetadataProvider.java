@@ -110,6 +110,26 @@ public interface MetadataProvider {
   boolean delete(String namespace, String name);
 
   /**
+   * Move all metadata associated with the dataset named {@code name} to trash.
+   *
+   * After this method is called, there will be no {@code DatasetDescriptor}
+   * stored for the given {@code name}, unless an exception has been thrown. If
+   * metadata was moved to trash, this method will return {@code true}. If there was
+   * no {@code DatasetDescriptor} corresponding to the given name, then this
+   * method will not make any changes and will return {@code false}.
+   *
+   * @param namespace A namespace, or logical group name, for the dataset.
+   * @param name The name of a dataset.
+   * @return {@code true} if the metadata is successfully moved to trash,
+   *         {@code false} if no action was taken.
+   * @throws org.kitesdk.data.DatasetException If the dataset metadata exists but can
+   *                                   not be moved to trash.
+   *
+   * @since 1.2.0
+   */
+  boolean moveToTrash(String namespace, String name);
+
+  /**
    * Checks if there is a {@link DatasetDescriptor} for the dataset named
    * {@code name}.
    *

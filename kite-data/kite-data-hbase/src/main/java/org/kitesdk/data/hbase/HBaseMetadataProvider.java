@@ -226,6 +226,11 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
   }
 
   @Override
+  public boolean moveToTrash(String namespace, String name) {
+    throw new UnsupportedOperationException("Moving to trash is not supported in metadata provider.");
+  }
+
+  @Override
   public boolean exists(String namespace, String name) {
     Preconditions.checkArgument(DEFAULT_NAMESPACE.equals(namespace),
         "Non-default namespaces are not supported");

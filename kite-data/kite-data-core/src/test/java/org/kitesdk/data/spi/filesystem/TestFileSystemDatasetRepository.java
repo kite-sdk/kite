@@ -52,7 +52,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
     // this purposely does not set the Configuration to test that the code
     // relies on filesystem URIs set in the DatasetDescriptor.
     return new FileSystemDatasetRepository(
-        new Configuration(), testDirectory, provider);
+        conf, testDirectory, provider);
   }
 
   @Test

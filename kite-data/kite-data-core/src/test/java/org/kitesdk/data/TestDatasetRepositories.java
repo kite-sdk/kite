@@ -83,9 +83,11 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
   public void setUp() throws IOException {
     this.testSchema = DatasetTestUtilities.USER_SCHEMA;
 
+    Configuration tempConfig = new Configuration();
+    tempConfig.setLong("fs.trash.interval", 1);
+
     this.conf = (distributed ?
-        MiniDFSTest.getConfiguration() :
-        new Configuration());
+        MiniDFSTest.getConfiguration() : tempConfig);
 
     this.fileSystem = FileSystem.get(conf);
     this.testDirectory = fileSystem.makeQualified(
@@ -354,6 +356,17 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
     Assert.assertTrue("Delete dataset should return true", result);
 
     result = repo.delete(NAMESPACE, NAME);
+    Assert.assertFalse("Delete nonexistent dataset should return false", result);
+  }
+
+  @Test
+  public void testMoveToTrash() {
+    ensureCreated();
+
+    boolean result = repo.moveToTrash(NAMESPACE, NAME);
+    Assert.assertTrue("Delete dataset should return true", result);
+
+    result = repo.moveToTrash(NAMESPACE, NAME);
     Assert.assertFalse("Delete nonexistent dataset should return false", result);
   }
 }

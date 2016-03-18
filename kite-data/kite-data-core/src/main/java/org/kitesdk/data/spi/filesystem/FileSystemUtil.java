@@ -21,6 +21,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -29,6 +30,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.Trash;
 import org.kitesdk.compat.DynMethods;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetIOException;
@@ -178,7 +180,7 @@ public class FileSystemUtil {
           // destination is deleted last
           continue;
         }
-        FileSystemUtil.cleanlyDelete(fs, root, toRemove);
+        FileSystemUtil.cleanlyDelete(fs, root, toRemove, false);
       }
 
       // remove the directory that will be replaced with a move
@@ -197,6 +199,14 @@ public class FileSystemUtil {
   }
 
   static boolean cleanlyDelete(FileSystem fs, Path root, Path path) {
+    return cleanlyDelete(fs, root, path, false);
+  }
+
+  static boolean cleanlyMoveToTrash(FileSystem fs, Path root, Path path) {
+    return cleanlyDelete(fs, root, path, true);
+  }
+
+  private static boolean cleanlyDelete(FileSystem fs, Path root, Path path, boolean useTrash) {
     Preconditions.checkNotNull(fs, "File system cannot be null");
     Preconditions.checkNotNull(root, "Root path cannot be null");
     Preconditions.checkNotNull(path, "Path to delete cannot be null");
@@ -213,12 +223,14 @@ public class FileSystemUtil {
       if (relativePath.isAbsolute()) {
         // path is not relative to the root. delete just the path
         LOG.debug("Deleting path {}", path);
-        deleted = fs.delete(path, true /* include any files */ );
+        deleted = useTrash ? Trash.moveToAppropriateTrash(fs, path, fs.getConf())
+            : fs.delete(path, true /* include any files */);
       } else {
         // the is relative to the root path
         Path absolute = new Path(root, relativePath);
         LOG.debug("Deleting path {}", absolute);
-        deleted = fs.delete(absolute, true /* include any files */ );
+        deleted = useTrash ? Trash.moveToAppropriateTrash(fs, absolute, fs.getConf())
+            : fs.delete(absolute, true /* include any files */);
         // iterate up to the root, removing empty directories
         for (Path current = absolute.getParent();
              !current.equals(root) && !(current.getParent() == null);
@@ -658,5 +670,25 @@ public class FileSystemUtil {
     } else {
       return SchemaUtil.merge(left, right);
     }
+  }
+
+  /**
+   * Determine whether a FileSystem that supports efficient file renaming is being used. Two known
+   * FileSystem implementations that currently lack this feature are S3N and S3A.
+   *
+   * @param fsUri the FileSystem URI
+   * @param conf the FileSystem Configuration
+   * @return {@code true} if the FileSystem URI or {@link FileSystemProperties#SUPPORTS_RENAME_PROP
+   *     configuration override} indicates that the FileSystem implementation supports efficient
+   *     rename operations, {@code false} otherwise.
+   */
+  public static boolean supportsRename(URI fsUri, Configuration conf) {
+    String fsUriScheme = fsUri.getScheme();
+
+    // Only S3 is known to not support renaming, but allow configuration override.
+    // This logic is intended as a temporary placeholder solution and should
+    // be revisited once HADOOP-9565 has been completed.
+    return conf.getBoolean(FileSystemProperties.SUPPORTS_RENAME_PROP,
+        !(fsUriScheme.equalsIgnoreCase("s3n") || fsUriScheme.equalsIgnoreCase("s3a")));
   }
 }

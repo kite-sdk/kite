@@ -139,6 +139,11 @@ public class MemoryMetadataProvider extends AbstractMetadataProvider {
   }
 
   @Override
+  public boolean moveToTrash(String namespace, String name) {
+    return delete(namespace, name);
+  }
+
+  @Override
   public boolean exists(String namespace, String name) {
     Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Name cannot be null");
