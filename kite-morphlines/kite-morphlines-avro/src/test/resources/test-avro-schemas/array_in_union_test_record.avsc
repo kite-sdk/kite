@@ -1,0 +1,8 @@
+{ "namespace": "org.kitesdk.morphline.avro",
+  "type": "record",
+  "name": "ArrayInUnionTestRecord",
+  "fields": [
+        {"name": "items", "type": {"type": "array", "items": "string"}},
+        {"name": "itemsInUnion", "type": ["null", {"type": "array", "items":"string"}], "default": null}
+   ]
+}

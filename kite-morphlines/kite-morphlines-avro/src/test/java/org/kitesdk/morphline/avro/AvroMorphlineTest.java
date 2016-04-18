@@ -369,6 +369,23 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
+  public void testExtractAvroPathsArrayInUnion() throws Exception {
+    List<String> items = Arrays.asList("a", "b", "c");
+    ArrayInUnionTestRecord avroRecord = new ArrayInUnionTestRecord(items, items);
+
+    morphline = createMorphline("test-morphlines/extractAvroPathsArrayInUnion");
+    deleteAllDocuments();
+    Record record = new Record();
+    record.put(Fields.ATTACHMENT_BODY, avroRecord);
+    startSession();
+
+    assertTrue(morphline.process(record));
+    assertEquals(1, collector.getRecords().size());
+    assertEquals(Arrays.asList(items), collector.getFirstRecord().get("/items[]"));
+    assertEquals(Arrays.asList(items), collector.getFirstRecord().get("/itemsInUnion[]"));
+  }
+
+  @Test
   public void testAvroComplexDocuments() throws Exception {
     Schema documentSchema = Schema.createRecord("Document", "adoc", null, false);
     List<Field> docFields = new ArrayList<Field>();

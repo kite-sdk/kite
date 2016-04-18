@@ -160,6 +160,9 @@ public final class ExtractAvroPathsBuilder implements CommandBuilder {
               extractPath(iter.next(), schema.getElementType(), fieldName, steps, record, level + 1);
             }
           }
+        } else if (schema.getType() == Type.UNION) {
+          int index = GenericData.get().resolveUnion(schema, datum);
+          extractPath(datum, schema.getTypes().get(index), fieldName, steps, record, level);
         }
       } else {
         if (schema.getType() == Type.RECORD) {
