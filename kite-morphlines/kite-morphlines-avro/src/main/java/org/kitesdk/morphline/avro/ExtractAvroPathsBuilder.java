@@ -150,8 +150,37 @@ public final class ExtractAvroPathsBuilder implements CommandBuilder {
       }
       boolean isLeaf = (level + 1 == steps.size());
       String step = steps.get(level);
-      if (ARRAY_TOKEN == step) {
-        if (schema.getType() == Type.ARRAY) {
+      if (schema.getType() == Type.RECORD) {
+        GenericRecord genericAvroRecord = (GenericRecord) datum;
+        Object value = genericAvroRecord.get(step);
+        if (value != null) {
+          Schema childSchema = schema.getField(step).schema();
+          if (isLeaf) {
+            resolve(value, childSchema, record, fieldName);
+          } else {
+            extractPath(value, childSchema, fieldName, steps, record, level + 1);
+          }
+        }
+      } else if (schema.getType() == Type.MAP) {
+        Map<CharSequence, ?> map = (Map<CharSequence, ?>) datum;
+        Object value = map.get(step);
+        if (value == null) {
+          value = map.get(new Utf8(step)); // TODO: fix performance - maybe fix polymorphic weirdness in upstream avro?
+        }
+        if (value != null) {
+          Schema childSchema = schema.getValueType();
+          if (isLeaf) {
+            resolve(value, childSchema, record, fieldName);
+          } else {
+            extractPath(value, childSchema, fieldName, steps, record, level + 1);
+          }
+        }
+      } else if (schema.getType() == Type.UNION) {
+        int index = GenericData.get().resolveUnion(schema, datum);
+        //String typeName = schema.getTypes().get(index).getName();
+        extractPath(datum, schema.getTypes().get(index), fieldName, steps, record, level);
+      } else if (schema.getType() == Type.ARRAY) {
+        if (ARRAY_TOKEN == step) {
           if (isLeaf) {
             resolve(datum, schema, record, fieldName);
           } else {
@@ -161,38 +190,7 @@ public final class ExtractAvroPathsBuilder implements CommandBuilder {
             }
           }
         }
-      } else {
-        if (schema.getType() == Type.RECORD) {
-          GenericRecord genericAvroRecord = (GenericRecord) datum;
-          Object value = genericAvroRecord.get(step);
-          if (value != null) {
-            Schema childSchema = schema.getField(step).schema();
-            if (isLeaf) {
-              resolve(value, childSchema, record, fieldName);
-            } else {
-              extractPath(value, childSchema, fieldName, steps, record, level + 1);
-            }
-          }
-        } else if (schema.getType() == Type.MAP) {
-          Map<CharSequence, ?> map = (Map<CharSequence, ?>) datum;
-          Object value = map.get(step);
-          if (value == null) {
-            value = map.get(new Utf8(step)); // TODO: fix performance - maybe fix polymorphic weirdness in upstream avro?
-          }
-          if (value != null) {
-            Schema childSchema = schema.getValueType();
-            if (isLeaf) {
-              resolve(value, childSchema, record, fieldName);
-            } else {
-              extractPath(value, childSchema, fieldName, steps, record, level + 1);
-            }
-          }            
-        } else if (schema.getType() == Type.UNION) {
-          int index = GenericData.get().resolveUnion(schema, datum);
-          //String typeName = schema.getTypes().get(index).getName();
-          extractPath(datum, schema.getTypes().get(index), fieldName, steps, record, level);
-        }
-      } 
+      }
     }
     
     private void resolve(Object datum, Schema schema, Record record, String fieldName) { 
