@@ -65,6 +65,7 @@ h3. kite\-morphlines\-core\-stdlib
 | [#findReplace] | Examines each string value in a given field and replaces each substring of the string value that matches the given string literal or grok pattern with the given replacement. |
 | [#generateUUID] | Sets a universally unique identifier on all records that are intercepted. |
 | [#grok] | Uses regular expression pattern matching to extract structured fields from unstructured log or text data. |
+| [#hashDigest] | Compute a hash digest of the input field. |
 | [#head] | Ignores all input records beyond the N\-th record, akin to the Unix {{head}} command. |
 | [#if] | Implements if\-then\-else conditional control flow. |
 | [#java] | Scripting support for Java. Dynamically compiles and executes the given Java code block. | 
@@ -873,6 +874,30 @@ grok {
 {note}
 Note: An easy way to test grok out is to use the [online grok debugger|http://grokdebug.herokuapp.com/] from the logstash project. There is also a corresponding [YouTube video|http://www.youtube.com/watch?v=YIKm6WUgFTY].
 {note}
+
+h2. hashDigest
+
+The {{hashDigest}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/HashDigestBuilder.java]) computes a cryptographic hash digest of the input field, writing the hash digest to the specified output field. The algorithm must be specified using the {{hashType}} property. See the [Java Cryptography Architecture
+Standard Algorithm Name Document|http://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html#MessageDigest] for information about standard message digest algorithm names. See the [Supported Encodings Document|https://docs.oracle.com/javase/8/docs/technotes/guides/intl/encoding.doc.html] for the constants used by the {{charset}} parameter. N.B. The character sets and hashing algorithms available may depend on your JVM, your locale and also installation of JCE Unlimited Strength Jurisdiction Policy Files.
+
+The command provides the following configuration options:
+|| Property Name || Default || Description ||
+| inputField | n/a | The input to the hash digest function |
+| outputField | n/a | The field in which to store the computed hash digest |
+| hashType | n/a | The hashing algorithm to use |
+| preserveExisting | true | Whether to preserve the field value if one is already present. |
+| charset | UTF\-8 | The character encoding to use when converting the inputField into a byte\[\] for submission to the hashing algorithm. |
+
+Example usage:
+{code}
+hashDigest {
+  inputField : inputData
+  outputField : sha256HashDigest
+  preserveExisting : false
+  hashType : SHA-256
+  charset : UTF-8
+}
+{code}
 
 h2. head
 
