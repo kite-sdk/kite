@@ -33,7 +33,7 @@ public class TestEmbeddedSolrServer extends EmbeddedSolrServer {
   }
 
   @Override
-  public void shutdown() {
+  public void close() {
     ; // NOP
   }
 

@@ -1,11 +1,10 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -21,35 +20,28 @@ import java.io.File;
 import java.util.Collections;
 import java.util.Iterator;
 
-import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
+import com.carrotsearch.randomizedtesting.annotations.ThreadLeakFilters;
+import org.apache.lucene.util.LuceneTestCase.Slow;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.util.BadHdfsThreadsFilter;
+import org.junit.Test;
 import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.Fields;
 import org.kitesdk.morphline.base.Notifications;
 
-import com.carrotsearch.randomizedtesting.annotations.ThreadLeakAction;
-import com.carrotsearch.randomizedtesting.annotations.ThreadLeakAction.Action;
-import com.carrotsearch.randomizedtesting.annotations.ThreadLeakLingering;
-import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope;
-import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope.Scope;
-import com.carrotsearch.randomizedtesting.annotations.ThreadLeakZombies;
-import com.carrotsearch.randomizedtesting.annotations.ThreadLeakZombies.Consequence;
-
-@ThreadLeakAction({Action.WARN})
-@ThreadLeakLingering(linger = 0)
-@ThreadLeakZombies(Consequence.CONTINUE)
-@ThreadLeakScope(Scope.NONE)
-@SuppressCodecs({"Lucene3x", "Lucene40"})
+@ThreadLeakFilters(defaultFilters = true, filters = {
+    BadHdfsThreadsFilter.class // hdfs currently leaks thread(s)
+})
+@Slow
 public class SolrMorphlineZkTest extends AbstractSolrMorphlineZkTest {
+
+  @Test
+  public void test() throws Exception {
     
-  @Override
-  public void doTest() throws Exception {
-    
-    waitForRecoveriesToFinish(false);
-    
-    morphline = parse("test-morphlines" + File.separator + "loadSolrBasic");    
+    morphline = parse("test-morphlines" + File.separator + "loadSolrBasic");
     Record record = new Record();
     record.put(Fields.ID, "id0-innsbruck");
     record.put("text", "mytext");
@@ -59,7 +51,7 @@ public class SolrMorphlineZkTest extends AbstractSolrMorphlineZkTest {
     assertEquals(1, collector.getNumStartEvents());
     Notifications.notifyBeginTransaction(morphline);
     assertTrue(morphline.process(record));
-
+    
     record = new Record();
     record.put(Fields.ID, "id0-innsbruck");
     record.put("user_screen_name", Collections.singletonMap("set", "bar"));
@@ -82,9 +74,11 @@ public class SolrMorphlineZkTest extends AbstractSolrMorphlineZkTest {
     expected2.put("text", "mytext1");
     expected2.put("user_screen_name", "foo1");
     
-    commit();
+    Notifications.notifyCommitTransaction(morphline);
+    new UpdateRequest().commit(cluster.getSolrClient(), COLLECTION);
     
-    QueryResponse rsp = cloudClient.query(new SolrQuery("*:*").setRows(100000).addSort(Fields.ID, SolrQuery.ORDER.asc));
+    QueryResponse rsp = cluster.getSolrClient()
+        .query(COLLECTION, new SolrQuery("*:*").setRows(100000).addSort(Fields.ID, SolrQuery.ORDER.asc));
     //System.out.println(rsp);
     Iterator<SolrDocument> iter = rsp.getResults().iterator();
     assertEquals(expected.getFields(), next(iter));
@@ -93,7 +87,7 @@ public class SolrMorphlineZkTest extends AbstractSolrMorphlineZkTest {
     
     Notifications.notifyRollbackTransaction(morphline);
     Notifications.notifyShutdown(morphline);
-    cloudClient.shutdown();
+
   }
 
 }

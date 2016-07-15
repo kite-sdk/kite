@@ -18,22 +18,34 @@ package org.kitesdk.morphline.solr;
 
 import static org.junit.Assert.assertTrue;
 
-import org.apache.solr.client.solrj.SolrServer;
+import java.io.File;
+
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.common.SolrInputDocument;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kitesdk.morphline.api.MorphlineContext;
 
 /** Verify that the correct Solr Server is selected based on parameters given the locator */
 public class SolrLocatorTest {
 
+  private static final String RESOURCES_DIR = "target" + File.separator + "test-classes";
+  
   @Test
-  public void testSelectsEmbeddedSolrServer() {
+  @Ignore
+  public void testSelectsEmbeddedSolrServer() throws Exception {
     //Solr locator should select EmbeddedSolrServer only solrHome is specified
     SolrLocator solrLocator = new SolrLocator(new MorphlineContext.Builder().build());
-    solrLocator.setSolrHomeDir("ignored");
+    solrLocator.setSolrHomeDir(RESOURCES_DIR + "/solr");
+    solrLocator.setCollectionName("collection1");
     SolrServerDocumentLoader documentLoader = (SolrServerDocumentLoader)solrLocator.getLoader();
-    SolrServer solrServer = documentLoader.getSolrServer();
+    SolrClient solrServer = documentLoader.getSolrServer();
     assertTrue(solrServer instanceof EmbeddedSolrServer);
+    SolrInputDocument doc = new SolrInputDocument();
+    doc.addField("id", "myval");
+    solrServer.add(doc);
+    solrServer.commit();
   }
 
 }

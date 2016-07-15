@@ -1,11 +1,12 @@
 /*
- * Copyright 2013 Cloudera Inc.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +19,7 @@ package org.kitesdk.morphline.solr;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.text.NumberFormat;
+import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -31,16 +32,22 @@ import java.util.Map.Entry;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.codahale.metrics.MetricRegistry;
+import com.google.common.base.Joiner;
+import com.google.common.io.Files;
+import com.typesafe.config.Config;
+import org.apache.commons.io.FileUtils;
+import org.apache.lucene.util.Constants;
 import org.apache.solr.SolrTestCaseJ4;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.kitesdk.morphline.api.Collector;
@@ -55,16 +62,11 @@ import org.kitesdk.morphline.stdlib.PipeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.MetricRegistry;
-import com.google.common.base.Joiner;
-import com.google.common.io.Files;
-import com.typesafe.config.Config;
-
 public class AbstractSolrMorphlineTest extends SolrTestCaseJ4 {
-
+  private static Locale savedLocale;
   protected Collector collector;
   protected Command morphline;
-  protected SolrServer solrServer;
+  protected SolrClient solrClient;
   protected DocumentLoader testServer;
   
   protected static final boolean TEST_WITH_EMBEDDED_SOLR_SERVER = true;
@@ -78,13 +80,31 @@ public class AbstractSolrMorphlineTest extends SolrTestCaseJ4 {
   
   protected static final Object NON_EMPTY_FIELD = new Object();
   
-  private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSolrMorphlineTest.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  
+  protected String tempDir;
 
   @BeforeClass
   public static void beforeClass() throws Exception {
+    assumeFalse("This test fails on Java 9 (https://issues.apache.org/jira/browse/SOLR-8876)", Constants.JRE_IS_MINIMUM_JAVA9);
+    
+    // TODO: test doesn't work with some Locales, see SOLR-6458
+    savedLocale = Locale.getDefault();
+    Locale.setDefault(Locale.ENGLISH);
+    
+    // we leave this in case the above is addressed
     assumeFalse("This test fails on UNIX with Turkish default locale (https://issues.apache.org/jira/browse/SOLR-6387)",
         new Locale("tr").getLanguage().equals(Locale.getDefault().getLanguage()));
+    
     myInitCore(DEFAULT_BASE_DIR);
+  }
+  
+  @AfterClass
+  public static void afterClass() throws Exception {
+    if (savedLocale != null) {
+      Locale.setDefault(savedLocale);
+    }
+    savedLocale = null;
   }
 
   protected static void myInitCore(String baseDirName) throws Exception {
@@ -103,27 +123,29 @@ public class AbstractSolrMorphlineTest extends SolrTestCaseJ4 {
     if (EXTERNAL_SOLR_SERVER_URL != null) {
       //solrServer = new ConcurrentUpdateSolrServer(EXTERNAL_SOLR_SERVER_URL, 2, 2);
       //solrServer = new SafeConcurrentUpdateSolrServer(EXTERNAL_SOLR_SERVER_URL, 2, 2);
-      solrServer = new HttpSolrServer(EXTERNAL_SOLR_SERVER_URL);
-      ((HttpSolrServer)solrServer).setParser(new XMLResponseParser());
+      solrClient = getHttpSolrClient(EXTERNAL_SOLR_SERVER_URL);
+      ((HttpSolrClient) solrClient).setParser(new XMLResponseParser());
     } else {
       if (TEST_WITH_EMBEDDED_SOLR_SERVER) {
-        solrServer = new TestEmbeddedSolrServer(h.getCoreContainer(), "");
+        solrClient = new TestEmbeddedSolrServer(h.getCoreContainer(), DEFAULT_TEST_CORENAME);
       } else {
         throw new RuntimeException("Not yet implemented");
-        //solrServer = new TestSolrServer(getSolrServer());
+        //solrServer = new TestSolrServer(getSolrClient());
       }
     }
 
     int batchSize = SEQ_NUM2.incrementAndGet() % 2 == 0 ? 100 : 1; //SolrInspector.DEFAULT_SOLR_SERVER_BATCH_SIZE : 1;
-    testServer = new SolrServerDocumentLoader(solrServer, batchSize);
+    testServer = new SolrServerDocumentLoader(solrClient, batchSize);
     deleteAllDocuments();
+    
+    tempDir = createTempDir().toFile().getAbsolutePath();
   }
   
   @After
   public void tearDown() throws Exception {
     collector = null;
-    solrServer.shutdown();
-    solrServer = null;
+    solrClient.close();
+    solrClient = null;
     super.tearDown();
   }
 
@@ -131,11 +153,9 @@ public class AbstractSolrMorphlineTest extends SolrTestCaseJ4 {
       String[] files, 
       Map<String,Integer> expectedRecords, 
       Map<String, Map<String, Object>> expectedRecordContents) throws Exception {
-    
+
     assumeTrue("This test has issues with this locale: https://issues.apache.org/jira/browse/SOLR-5778", 
         "GregorianCalendar".equals(Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault()).getClass().getSimpleName()));
-    assumeTrue("This test has issues with locales with non-Arabic digits",
-        "1".equals(NumberFormat.getInstance().format(1)));
     deleteAllDocuments();
     int numDocs = 0;    
     for (int i = 0; i < 1; i++) {
@@ -184,19 +204,21 @@ public class AbstractSolrMorphlineTest extends SolrTestCaseJ4 {
   protected QueryResponse query(String query) {
     try {
       testServer.commitTransaction();
-      solrServer.commit(false, true, true);
-      QueryResponse rsp = solrServer.query(
+      solrClient.commit(false, true, true);
+      QueryResponse rsp = solrClient.query(
           new SolrQuery(query).setRows(Integer.MAX_VALUE).setSort(Fields.ID, SolrQuery.ORDER.asc));
       return rsp;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
-
+  
   protected int queryResultSetSize(String query) {
-    // return collector.getRecords().size();
+//    return collector.getRecords().size();
     try {
-      QueryResponse rsp = query(query);
+      testServer.commitTransaction();
+      solrClient.commit(false, true, true);
+      QueryResponse rsp = solrClient.query(new SolrQuery(query).setRows(Integer.MAX_VALUE));
       LOGGER.debug("rsp: {}", rsp);
       int i = 0;
       for (SolrDocument doc : rsp.getResults()) {
@@ -208,10 +230,10 @@ public class AbstractSolrMorphlineTest extends SolrTestCaseJ4 {
       throw new RuntimeException(e);
     }
   }
-
+  
   private void deleteAllDocuments() throws SolrServerException, IOException {
     collector.reset();
-    SolrServer s = solrServer;
+    SolrClient s = solrClient;
     s.deleteByQuery("*:*"); // delete everything!
     s.commit();
   }
@@ -231,8 +253,14 @@ public class AbstractSolrMorphlineTest extends SolrTestCaseJ4 {
   
   private Config parse(String file) throws IOException {
     SolrLocator locator = new SolrLocator(createMorphlineContext());
-    locator.setSolrHomeDir(testSolrHome + File.separator + "collection1");
-    Config config = new Compiler().parse(new File(RESOURCES_DIR + File.separator + file + ".conf"), locator.toConfig("SOLR_LOCATOR"));
+    locator.setSolrHomeDir(testSolrHome + "/collection1");
+    File morphlineFile;
+    if (new File(file).isAbsolute()) {
+      morphlineFile = new File(file + ".conf");
+    } else {
+      morphlineFile = new File(RESOURCES_DIR + "/" + file + ".conf");
+    }
+    Config config = new Compiler().parse(morphlineFile, locator.toConfig("SOLR_LOCATOR"));
     config = config.getConfigList("morphlines").get(0);
     return config;
   }
@@ -243,7 +271,7 @@ public class AbstractSolrMorphlineTest extends SolrTestCaseJ4 {
 
   protected void testDocumentContent(HashMap<String, ExpectedResult> expectedResultMap)
   throws Exception {
-    QueryResponse rsp = solrServer.query(new SolrQuery("*:*").setRows(Integer.MAX_VALUE));
+    QueryResponse rsp = solrClient.query(new SolrQuery("*:*").setRows(Integer.MAX_VALUE));
     // Check that every expected field/values shows up in the actual query
     for (Entry<String, ExpectedResult> current : expectedResultMap.entrySet()) {
       String field = current.getKey();
@@ -291,5 +319,16 @@ public class AbstractSolrMorphlineTest extends SolrTestCaseJ4 {
     }
     public HashSet<String> getFieldValues() { return fieldValues; }
     public CompareType getCompareType() { return compareType; }
+  }
+  
+  private static void setupMorphline(String tempDir, String file, boolean replaceSolrLocator) throws IOException {
+    String morphlineText = FileUtils.readFileToString(new File(RESOURCES_DIR + "/" + file + ".conf"), "UTF-8");
+    morphlineText = morphlineText.replace("RESOURCES_DIR", new File(tempDir).getAbsolutePath());
+    if (replaceSolrLocator) {
+      morphlineText = morphlineText.replace("${SOLR_LOCATOR}",
+          "{ collection : collection1 }");
+    }
+    new File(tempDir + "/" + file + ".conf").getParentFile().mkdirs();
+    FileUtils.writeStringToFile(new File(tempDir + "/" + file + ".conf"), morphlineText, "UTF-8");
   }
 }

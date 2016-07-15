@@ -31,8 +31,8 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.common.params.SolrParams;
-import org.apache.solr.common.util.DateUtil;
 import org.apache.solr.handler.extraction.ExtractingParams;
+import org.apache.solr.handler.extraction.ExtractionDateUtil;
 import org.apache.solr.handler.extraction.SolrContentHandler;
 import org.apache.solr.handler.extraction.SolrContentHandlerFactory;
 import org.apache.solr.schema.IndexSchema;
@@ -147,7 +147,7 @@ public final class SolrCellBuilder implements CommandBuilder {
         cellParams.put(ExtractingParams.XPATH_EXPRESSION, xpathExpr);
       }
       
-      this.dateFormats = getConfigs().getStringList(config, "dateFormats", new ArrayList<String>(DateUtil.DEFAULT_DATE_FORMATS));
+      this.dateFormats = getConfigs().getStringList(config, "dateFormats", new ArrayList<String>(ExtractionDateUtil.DEFAULT_DATE_FORMATS));
       
       String handlerStr = getConfigs().getString(config, "solrContentHandlerFactory", TrimSolrContentHandlerFactory.class.getName());
       Class<? extends SolrContentHandlerFactory> factoryClass;

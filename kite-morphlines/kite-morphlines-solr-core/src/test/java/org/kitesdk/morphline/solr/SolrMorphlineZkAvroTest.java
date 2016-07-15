@@ -1,11 +1,12 @@
 /*
- * Copyright 2013 Cloudera Inc.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,64 +17,60 @@
 package org.kitesdk.morphline.solr;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.avro.Schema.Field;
+import com.carrotsearch.randomizedtesting.annotations.ThreadLeakFilters;
+import com.google.common.base.Preconditions;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumReader;
-import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
+import org.apache.lucene.util.LuceneTestCase.Slow;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.util.BadHdfsThreadsFilter;
+import org.junit.Test;
 import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.Fields;
 import org.kitesdk.morphline.base.Notifications;
 
-import com.carrotsearch.randomizedtesting.annotations.ThreadLeakAction;
-import com.carrotsearch.randomizedtesting.annotations.ThreadLeakAction.Action;
-import com.carrotsearch.randomizedtesting.annotations.ThreadLeakLingering;
-import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope;
-import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope.Scope;
-import com.carrotsearch.randomizedtesting.annotations.ThreadLeakZombies;
-import com.carrotsearch.randomizedtesting.annotations.ThreadLeakZombies.Consequence;
-import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
-import com.google.common.io.Files;
-
-@ThreadLeakAction({Action.WARN})
-@ThreadLeakLingering(linger = 0)
-@ThreadLeakZombies(Consequence.CONTINUE)
-@ThreadLeakScope(Scope.NONE)
-@SuppressCodecs({"Lucene3x", "Lucene40"})
+@ThreadLeakFilters(defaultFilters = true, filters = {
+    BadHdfsThreadsFilter.class // hdfs currently leaks thread(s)
+})
+@Slow
 public class SolrMorphlineZkAvroTest extends AbstractSolrMorphlineZkTest {
-  
-  @Override
-  public void doTest() throws Exception {
-    Joiner joiner = Joiner.on(File.separator);
-    File file = new File(joiner.join(RESOURCES_DIR, "test-documents", "sample-statuses-20120906-141433-medium.avro"));
-    
-    waitForRecoveriesToFinish(false);
-    
+
+
+  @Test
+  public void test() throws Exception {
+
+    Path avro = Paths.get(RESOURCES_DIR).resolve("test-documents").resolve("sample-statuses-20120906-141433-medium.avro");
+
     // load avro records via morphline and zk into solr
     morphline = parse("test-morphlines" + File.separator + "tutorialReadAvroContainer");    
     Record record = new Record();
-    byte[] body = Files.toByteArray(file);    
+    byte[] body = Files.readAllBytes(avro);
     record.put(Fields.ATTACHMENT_BODY, body);
     startSession();
     Notifications.notifyBeginTransaction(morphline);
     assertTrue(morphline.process(record));
     assertEquals(1, collector.getNumStartEvents());
     
-    commit();
+    Notifications.notifyCommitTransaction(morphline);
+    new UpdateRequest().commit(cluster.getSolrClient(), COLLECTION);
     
     // fetch sorted result set from solr
-    QueryResponse rsp = cloudClient.query(new SolrQuery("*:*").setRows(100000).addSort("id", SolrQuery.ORDER.asc));   
+    QueryResponse rsp = cluster.getSolrClient()
+        .query(COLLECTION, new SolrQuery("*:*").setRows(100000).addSort("id", SolrQuery.ORDER.asc));
     assertEquals(2104, collector.getRecords().size());
     assertEquals(collector.getRecords().size(), rsp.getResults().size());
     
@@ -86,7 +83,7 @@ public class SolrMorphlineZkAvroTest extends AbstractSolrMorphlineZkTest {
 
     // fetch test input data and sort like solr result set
     List<GenericData.Record> records = new ArrayList();
-    FileReader<GenericData.Record> reader = new DataFileReader(file, new GenericDatumReader());
+    FileReader<GenericData.Record> reader = new DataFileReader(avro.toFile(), new GenericDatumReader());
     while (reader.hasNext()) {
       GenericData.Record expected = reader.next();
       records.add(expected);
@@ -129,7 +126,7 @@ public class SolrMorphlineZkAvroTest extends AbstractSolrMorphlineZkTest {
     
     Notifications.notifyRollbackTransaction(morphline);
     Notifications.notifyShutdown(morphline);
-    cloudClient.shutdown();
+
   }
   
   private void assertTweetEquals(GenericData.Record expected, Record actual, int i) {
@@ -150,14 +147,6 @@ public class SolrMorphlineZkAvroTest extends AbstractSolrMorphlineZkTest {
           expected.get(fieldName).toString(), 
           actual.getFirstValue(fieldName).toString());
     }
-  }
-
-  private String toString(GenericData.Record avroRecord) {
-    Record record = new Record();
-    for (Field field : avroRecord.getSchema().getFields()) {
-      record.put(field.name(), avroRecord.get(field.pos()));
-    }
-    return record.toString(); // prints sorted by key for human readability
   }
 
 }

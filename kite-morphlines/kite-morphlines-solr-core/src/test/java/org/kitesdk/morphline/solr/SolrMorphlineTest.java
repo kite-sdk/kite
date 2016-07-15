@@ -41,7 +41,7 @@ public class SolrMorphlineTest extends AbstractSolrMorphlineTest {
   public void testLoadSchema() throws Exception {
     SolrLocator locator = new SolrLocator(new MorphlineContext.Builder().build());
     locator.setCollectionName("collection1");
-    locator.setSolrHomeDir("solr" + File.separator + "collection1");
+    locator.setSolrHomeDir(SOLR_INSTANCE_DIR + File.separator + "collection1");
     assertNotNull(locator.getIndexSchema());
   }
   

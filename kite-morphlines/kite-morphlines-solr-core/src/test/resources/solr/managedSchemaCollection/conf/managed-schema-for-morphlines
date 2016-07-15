@@ -54,7 +54,6 @@
     <fieldType name="ignored" class="solr.StrField" multiValued="true" indexed="false" stored="false"/>
     <fieldType name="int" class="solr.TrieIntField" precisionStep="0" positionIncrementGap="0"/>
     <fieldType name="location" class="solr.LatLonType" subFieldSuffix="_coordinate"/>
-    <fieldType name="location_rpt" class="solr.SpatialRecursivePrefixTreeFieldType" distErrPct="0.025" geo="true" maxDistErr="0.000009" units="degrees"/>
     <fieldType name="long" class="solr.TrieLongField" precisionStep="0" positionIncrementGap="0"/>
     <fieldType name="lowercase" class="solr.TextField" positionIncrementGap="100">
       <analyzer>
@@ -68,17 +67,17 @@
         <filter class="solr.DelimitedPayloadTokenFilterFactory" encoder="float"/>
       </analyzer>
     </fieldType>
-    <fieldType name="pdate" class="solr.DateField" sortMissingLast="true"/>
-    <fieldType name="pdouble" class="solr.DoubleField"/>
-    <fieldType name="pfloat" class="solr.FloatField"/>
+    <fieldType name="pdate" class="solr.TrieDateField" sortMissingLast="true"/>
+    <fieldType name="pdouble" class="solr.TrieDoubleField"/>
+    <fieldType name="pfloat" class="solr.TrieFloatField"/>
     <fieldType name="phonetic" class="solr.TextField" indexed="true" stored="false">
       <analyzer>
         <tokenizer class="solr.StandardTokenizerFactory"/>
         <filter class="solr.DoubleMetaphoneFilterFactory" inject="false"/>
       </analyzer>
     </fieldType>
-    <fieldType name="pint" class="solr.IntField"/>
-    <fieldType name="plong" class="solr.LongField"/>
+    <fieldType name="pint" class="solr.TrieIntField"/>
+    <fieldType name="plong" class="solr.TrieLongField"/>
     <fieldType name="point" class="solr.PointType" dimension="2" subFieldSuffix="_d"/>
     <fieldType name="random" class="solr.RandomSortField" indexed="true"/>
     <fieldType name="string" class="solr.StrField" sortMissingLast="true"/>
@@ -404,10 +403,9 @@
     </fieldType>
     <fieldType name="text_th" class="solr.TextField" positionIncrementGap="100">
       <analyzer>
-        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <tokenizer class="solr.ThaiTokenizerFactory"/>
         <filter class="solr.LowerCaseFilterFactory"/>
-        <filter class="solr.ThaiWordFilterFactory"/>
-        <filter class="solr.StopFilterFactory" words="lang/stopwords_th.txt" ignoreCase="true"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_th.txt"/>
       </analyzer>
     </fieldType>
     <fieldType name="text_tr" class="solr.TextField" positionIncrementGap="100">
