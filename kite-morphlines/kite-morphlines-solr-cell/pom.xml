@@ -154,13 +154,9 @@
 
   <profiles>
     <profile>
-      <id>jdk1.7-</id>
+      <id>skip-kite-morphlines-solr</id>
       <activation>
         <jdk>[,1.8)</jdk>
-        <property>
-          <name>skip-kite-morphlines-solr</name>
-          <value>true</value>
-        </property>
       </activation>
       <!-- don't compile or run unit tests for JDK < 1.8 since Solr6 and Jetty9 require Java 1.8+ -->
       <build>
