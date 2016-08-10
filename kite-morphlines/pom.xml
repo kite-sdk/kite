@@ -47,6 +47,7 @@
     <module>kite-morphlines-solr-cell</module>
     <module>kite-morphlines-all</module>
     <module>kite-morphlines-all-except-solr</module>
+    <module>kite-morphlines-elasticsearch</module>
   </modules>
 
   <dependencyManagement>
