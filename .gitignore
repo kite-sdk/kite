@@ -15,3 +15,4 @@ derby.log
 *.iml
 nbactions.xml
 dependency-reduced-pom.xml
+**/derby.log

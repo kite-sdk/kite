@@ -67,6 +67,11 @@
   </scm>
 
   <properties>
+    <!-- Scala versions -->
+    <scala.base.version>2.10</scala.base.version>
+    <scala.version>2.10.5</scala.version>
+    <scalatest.version>2.2.4</scalatest.version>
+
     <!-- dependency version properties -->
     <kite.version>1.1.1-SNAPSHOT</kite.version>
     <kite.avro.version>1.7.6-cdh5.4.2</kite.avro.version>
@@ -401,6 +406,32 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-sql_${scala.base.version}</artifactId>
+      <scope>provided</scope>
+      <optional>true</optional>
+      <exclusions>
+        <!-- Exclude Spark's Hadoop dependencies -->
+        <exclusion>
+          <artifactId>hadoop-annotations</artifactId>
+          <groupId>org.apache.hadoop</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>hadoop-auth</artifactId>
+          <groupId>org.apache.hadoop</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>hadoop-client</artifactId>
+          <groupId>org.apache.hadoop</groupId>
+        </exclusion>
+        <!-- Exclude conflicting servlet-api -->
+        <exclusion>
+          <artifactId>servlet-api</artifactId>
+          <groupId>javax.servlet</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
 
   </dependencies>
 
@@ -408,7 +439,7 @@
     <dependencies>
       <dependency>
         <groupId>org.apache.spark</groupId>
-        <artifactId>spark-core_2.10</artifactId>
+        <artifactId>spark-core_${scala.base.version}</artifactId>
         <version>${kite.spark.version}</version>
         <scope>provided</scope>
         <optional>true</optional>
@@ -433,6 +464,35 @@
           </exclusion>
         </exclusions>
       </dependency>
+      <dependency>
+        <groupId>org.apache.spark</groupId>
+        <artifactId>spark-sql_${scala.base.version}</artifactId>
+        <version>${kite.spark.version}</version>
+        <scope>provided</scope>
+        <optional>true</optional>
+        <exclusions>
+          <!-- Exclude Spark's Hadoop dependencies -->
+          <exclusion>
+            <artifactId>hadoop-annotations</artifactId>
+            <groupId>org.apache.hadoop</groupId>
+          </exclusion>
+          <exclusion>
+            <artifactId>hadoop-auth</artifactId>
+            <groupId>org.apache.hadoop</groupId>
+          </exclusion>
+          <exclusion>
+            <artifactId>hadoop-client</artifactId>
+            <groupId>org.apache.hadoop</groupId>
+          </exclusion>
+          <!-- Exclude conflicting servlet-api -->
+          <exclusion>
+            <artifactId>servlet-api</artifactId>
+            <groupId>javax.servlet</groupId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+
       <!-- manage parquet dependency versions !-->
       <dependency>
         <groupId>org.apache.parquet</groupId>
