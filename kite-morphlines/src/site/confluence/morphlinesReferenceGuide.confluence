@@ -1513,7 +1513,7 @@ h4. Example startReportingMetricsToCSV usage
 startReportingMetricsToCSV {
   outputDir : "mytest/metricsLogs"
   frequency : "10 seconds"
-  locale : en_US
+  locale : en-US
 }
 {code}
 
@@ -1522,7 +1522,7 @@ h4. More example startReportingMetricsToCSV usage
 startReportingMetricsToCSV {
   outputDir : "mytest/metricsLogs"
   frequency : "10 seconds"
-  locale : en_US
+  locale : en-US
   defaultDurationUnit : milliseconds
   defaultRateUnit : seconds
   metricFilter : {

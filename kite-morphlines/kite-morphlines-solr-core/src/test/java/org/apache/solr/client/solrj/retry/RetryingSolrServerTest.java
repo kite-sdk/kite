@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.beans.DocumentObjectBinder;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
@@ -33,6 +33,7 @@ import org.apache.solr.common.util.NamedList;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
 public class RetryingSolrServerTest extends SolrTestCaseJ4 {
 
-  private SolrServer solrServer;
+  private SolrClient solrServer;
   
   private static final String RESOURCES_DIR = "target" + File.separator + "test-classes";
   private static final String DEFAULT_BASE_DIR = "solr";
@@ -58,8 +59,8 @@ public class RetryingSolrServerTest extends SolrTestCaseJ4 {
 
   @Before
   public void setUp() throws Exception {
-    super.setUp();
-    solrServer = new EmbeddedSolrServer(h.getCoreContainer(), "");
+    super.setUp();    
+    solrServer = new EmbeddedSolrServer(h.getCoreContainer(), h.getCore().getName());
   }
   
   @Test
@@ -74,7 +75,7 @@ public class RetryingSolrServerTest extends SolrTestCaseJ4 {
   
   private void testGoodRequestNeedsNoRetries(MetricsFacade metricsFacade) throws Exception {
     CountingSolrServer countingSolrServer = new CountingSolrServer(solrServer);
-    SolrServer solr = new RetryingSolrServer(countingSolrServer, getNoRetryPolicyFactory(), metricsFacade);
+    SolrClient solr = new RetryingSolrServer(countingSolrServer, getNoRetryPolicyFactory(), metricsFacade);
     SolrQuery query = getDefaultQuery();
     solr.query(query);
     Assert.assertEquals(1, countingSolrServer.getNumRequests());
@@ -85,7 +86,7 @@ public class RetryingSolrServerTest extends SolrTestCaseJ4 {
     SolrQuery query = getDefaultQuery();
     solrServer.query(query);
     FailingSolrServer failingSolrServer = new FailingSolrServer(solrServer);
-    SolrServer solr = new RetryingSolrServer(failingSolrServer, getNoRetryPolicyFactory(), getMetricsFacade());
+    SolrClient solr = new RetryingSolrServer(failingSolrServer, getNoRetryPolicyFactory(), getMetricsFacade());
     try {
       solr.query(query);
       fail();
@@ -101,7 +102,7 @@ public class RetryingSolrServerTest extends SolrTestCaseJ4 {
     SolrQuery query = getDefaultQuery();
     solrServer.query(query);
     FailingSolrServer failingSolrServer = new FailingSolrServer(solrServer);
-    SolrServer solr = new RetryingSolrServer(failingSolrServer, getRetryTwicePolicyFactory(), getMetricsFacade());
+    SolrClient solr = new RetryingSolrServer(failingSolrServer, getRetryTwicePolicyFactory(), getMetricsFacade());
     try {
       solr.query(query);
       fail();
@@ -118,7 +119,7 @@ public class RetryingSolrServerTest extends SolrTestCaseJ4 {
     new DefaultRetryPolicyFactory();
     SolrQuery query = getDefaultQuery();
     FailingSolrServer failingSolrServer = new FailingSolrServer(solrServer);
-    SolrServer solr = new RetryingSolrServer(
+    SolrClient solr = new RetryingSolrServer(
         failingSolrServer, 
         new DefaultRetryPolicyFactory(new FlexibleBoundedExponentialBackoffRetry(
             TimeUnit.MILLISECONDS.toNanos(1), 
@@ -144,7 +145,7 @@ public class RetryingSolrServerTest extends SolrTestCaseJ4 {
     
     // verify that after shutdown() is called, requests fail immediately without retries 
     failingSolrServer.reset();
-    solr.shutdown();
+    solr.close();
     try { 
       solr.query(query);
       fail();
@@ -169,7 +170,7 @@ public class RetryingSolrServerTest extends SolrTestCaseJ4 {
         
     // RetryingSolrServer, retry twice
     CountingSolrServer countingSolrServer = new CountingSolrServer(solrServer);
-    SolrServer solr = new RetryingSolrServer(countingSolrServer, getRetryTwicePolicyFactory(), getMetricsFacade());
+    SolrClient solr = new RetryingSolrServer(countingSolrServer, getRetryTwicePolicyFactory(), getMetricsFacade());
     try {
       solr.add(doc);
       fail();
@@ -248,7 +249,7 @@ public class RetryingSolrServerTest extends SolrTestCaseJ4 {
     return new RetryPolicyFactory() {
 
       @Override
-      public RetryPolicy getRetryPolicy(Throwable exception, SolrRequest request, SolrServer server,
+      public RetryPolicy getRetryPolicy(Throwable exception, SolrRequest request, SolrClient server,
           RetryPolicy currentPolicy) {
         if (currentPolicy == null) {
           return new FlexibleBoundedExponentialBackoffRetry(0, 0, 2, Long.MAX_VALUE);
@@ -264,7 +265,7 @@ public class RetryingSolrServerTest extends SolrTestCaseJ4 {
     return new RetryPolicyFactory() {
 
       @Override
-      public RetryPolicy getRetryPolicy(Throwable exception, SolrRequest request, SolrServer server,
+      public RetryPolicy getRetryPolicy(Throwable exception, SolrRequest request, SolrClient server,
           RetryPolicy currentPolicy) {
         return null;
       }
@@ -302,12 +303,12 @@ public class RetryingSolrServerTest extends SolrTestCaseJ4 {
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
   /** Helper that counts the number of solrj requests */
-  private static final class CountingSolrServer extends SolrServer {
+  private static final class CountingSolrServer extends SolrClient {
     
-    private final SolrServer solrServer;
+    private final SolrClient solrServer;
     private long numRequests = 0;
     
-    public CountingSolrServer(SolrServer solrServer) {
+    public CountingSolrServer(SolrClient solrServer) {
       this.solrServer = solrServer;
     }
    
@@ -316,9 +317,9 @@ public class RetryingSolrServerTest extends SolrTestCaseJ4 {
     }
     
     @Override
-    public NamedList<Object> request(final SolrRequest request) throws SolrServerException, IOException {
+    public NamedList<Object> request(final SolrRequest request, String collection) throws SolrServerException, IOException {
       numRequests++;
-      return solrServer.request(request);
+      return solrServer.request(request, collection);
     }
     
     @Override
@@ -327,7 +328,7 @@ public class RetryingSolrServerTest extends SolrTestCaseJ4 {
     }
 
     @Override
-    public void shutdown() {
+    public void close() {
       // NOP necessary for testing with EmbeddedSolrServer
       // solrServer.shutdown();
     }
@@ -341,15 +342,15 @@ public class RetryingSolrServerTest extends SolrTestCaseJ4 {
    * Test helper that simulates an erratic SolrServer. Injects exceptions on the first N solrj
    * requests and succeeds on requests thereafter.
    */
-  private static final class FailingSolrServer extends SolrServer {
+  private static final class FailingSolrServer extends SolrClient {
     
-    private final SolrServer solrServer;
+    private final SolrClient solrServer;
     private long numRequests = 0;
     private long numInjectedFailures = 0;
     
     public static final int SUCCESS = 5;
     
-    public FailingSolrServer(SolrServer solrServer) {
+    public FailingSolrServer(SolrClient solrServer) {
       this.solrServer = solrServer;
     }
    
@@ -367,7 +368,7 @@ public class RetryingSolrServerTest extends SolrTestCaseJ4 {
     }
 
     @Override
-    public NamedList<Object> request(final SolrRequest request) throws SolrServerException, IOException {
+    public NamedList<Object> request(final SolrRequest request, String collection) throws SolrServerException, IOException {
       if (++numRequests < SUCCESS) {
         numInjectedFailures++;
         if (numRequests % 2 == 0) {
@@ -379,7 +380,7 @@ public class RetryingSolrServerTest extends SolrTestCaseJ4 {
           throw new InjectedSolrServerException("Injected failure", e); 
         }
       }
-      return solrServer.request(request);
+      return solrServer.request(request, collection);
     }
     
     @Override
@@ -388,7 +389,7 @@ public class RetryingSolrServerTest extends SolrTestCaseJ4 {
     }
 
     @Override
-    public void shutdown() {
+    public void close() {
       // NOP necessary for testing with EmbeddedSolrServer
       // solrServer.shutdown();
     }

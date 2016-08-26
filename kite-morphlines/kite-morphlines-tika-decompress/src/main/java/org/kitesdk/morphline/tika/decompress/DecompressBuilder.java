@@ -63,7 +63,7 @@ public final class DecompressBuilder implements CommandBuilder {
     
     private static final MediaType BZIP = MediaType.application("x-bzip");
     private static final MediaType BZIP2 = MediaType.application("x-bzip2");
-    private static final MediaType GZIP = MediaType.application("x-gzip");
+    private static final MediaType GZIP = MediaType.application("gzip");
     private static final MediaType XZ = MediaType.application("x-xz");
     private static final MediaType PACK = MediaType.application("application/x-java-pack200");
 

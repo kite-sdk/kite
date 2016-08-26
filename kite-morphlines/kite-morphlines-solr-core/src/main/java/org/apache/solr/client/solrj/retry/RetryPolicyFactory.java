@@ -16,7 +16,7 @@
 package org.apache.solr.client.solrj.retry;
 
 import org.apache.solr.client.solrj.SolrRequest;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 
 /**
  * Pluggable API to enable users to specify exactly what kind of exceptions for what kind of solrj
@@ -51,7 +51,7 @@ public interface RetryPolicyFactory {
   public RetryPolicy getRetryPolicy(
       Throwable exception, 
       SolrRequest request, 
-      SolrServer solrServer,
+      SolrClient solrServer,
       RetryPolicy currentPolicy);
 
 }

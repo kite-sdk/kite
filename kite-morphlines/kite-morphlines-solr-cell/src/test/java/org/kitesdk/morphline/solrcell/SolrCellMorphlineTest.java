@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.MapSolrParams;
-import org.apache.solr.common.util.DateUtil;
+import org.apache.solr.handler.extraction.ExtractionDateUtil;
 import org.apache.solr.handler.extraction.SolrContentHandler;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.tika.metadata.Metadata;
@@ -252,7 +252,7 @@ public class SolrCellMorphlineTest extends AbstractSolrMorphlineTest {
     // which will cause the ContentHandler to be invoked.
     metadata.set(fieldName, getFoobarWithNonChars());
     StripNonCharSolrContentHandlerFactory contentHandlerFactory =
-      new StripNonCharSolrContentHandlerFactory(DateUtil.DEFAULT_DATE_FORMATS);
+      new StripNonCharSolrContentHandlerFactory(ExtractionDateUtil.DEFAULT_DATE_FORMATS);
     IndexSchema schema = h.getCore().getLatestSchema();
     SolrContentHandler contentHandler =
       contentHandlerFactory.createSolrContentHandler(metadata, new MapSolrParams(new HashMap()), schema);

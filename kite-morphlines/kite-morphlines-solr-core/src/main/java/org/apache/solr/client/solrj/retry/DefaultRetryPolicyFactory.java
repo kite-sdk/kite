@@ -18,7 +18,7 @@ package org.apache.solr.client.solrj.retry;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.solr.client.solrj.SolrRequest;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 
@@ -47,7 +47,7 @@ public final class DefaultRetryPolicyFactory implements RetryPolicyFactory {
   }
   
   @Override
-  public RetryPolicy getRetryPolicy(Throwable exception, SolrRequest request, SolrServer server,
+  public RetryPolicy getRetryPolicy(Throwable exception, SolrRequest request, SolrClient server,
       RetryPolicy currentPolicy) {
     if (exception instanceof SolrException) {
       SolrException sex = (SolrException) exception;

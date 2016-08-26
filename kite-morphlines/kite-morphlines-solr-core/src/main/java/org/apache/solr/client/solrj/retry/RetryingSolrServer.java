@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.solr.client.solrj.SolrRequest;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.beans.DocumentObjectBinder;
 import org.apache.solr.client.solrj.request.QueryRequest;
@@ -37,7 +37,7 @@ import com.google.common.annotations.VisibleForTesting;
 
 
 /**
- * A wrapper around an underlying solrj {@link SolrServer} object; On exceptions, the wrapper
+ * A wrapper around an underlying solrj {@link SolrClient} object; On exceptions, the wrapper
  * retries solrj requests according to the given configurable {@link RetryPolicyFactory}.
  * 
  * This is useful in case solr servers are temporarily overloaded, or if there are transient network
@@ -47,9 +47,9 @@ import com.google.common.annotations.VisibleForTesting;
  * with the {@link FlexibleBoundedExponentialBackoffRetry}. Metrics events are forwarded to a
  * {@link MetricsFacade} object.
  */
-public class RetryingSolrServer extends SolrServer {
+public class RetryingSolrServer extends SolrClient {
 
-  private final SolrServer solrServer;
+  private final SolrClient solrServer;
   
   private final RetryPolicyFactory retryPolicyFactory;
 
@@ -109,7 +109,7 @@ public class RetryingSolrServer extends SolrServer {
    * Caution: retryPolicyFactory and metrics params must be thread-safe if multiple threads are
    * concurrently calling the same {@link RetryingSolrServer}.
    */
-  public RetryingSolrServer(SolrServer solrServer, 
+  public RetryingSolrServer(SolrClient solrServer, 
                             RetryPolicyFactory retryPolicyFactory, 
                             MetricsFacade metrics) {
     if (solrServer == null) {
@@ -127,7 +127,7 @@ public class RetryingSolrServer extends SolrServer {
   }
 
   /** Returns the backing solr proxy */
-  public final SolrServer getUnderlyingSolrServer() {
+  public final SolrClient getUnderlyingSolrServer() {
     return solrServer;
   }
   
@@ -146,7 +146,7 @@ public class RetryingSolrServer extends SolrServer {
   }
 
   @Override
-  public NamedList<Object> request(final SolrRequest request) throws SolrServerException, IOException {
+  public NamedList<Object> request(final SolrRequest request, String collection) throws SolrServerException, IOException {
     int retryCount = 0;
     RetryPolicy retryPolicy = null;
     totalRequestCount.incrementAndGet();
@@ -164,7 +164,7 @@ public class RetryingSolrServer extends SolrServer {
       final long lastStartTime = System.nanoTime();
       NamedList response;
       try {
-        response = solrServer.request(request);
+        response = solrServer.request(request, collection);
       } catch (Exception exception) {
         long requestDuration = System.nanoTime() - lastStartTime;
         String exceptionTopLevelMsg = limitStringLength(getExceptionKey(exception));
@@ -361,9 +361,13 @@ public class RetryingSolrServer extends SolrServer {
   }
 
   @Override
-  public void shutdown() {
+  public void close() {
     isShuttingDown.countDown();
-    solrServer.shutdown();
+    try {
+      solrServer.close();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
   
   
