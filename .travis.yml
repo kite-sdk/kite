@@ -13,7 +13,7 @@ cache:
 install: mvn -q install -DskipTests=true -Dmaven.javadoc.skip=true -Dsource.skip=true -DjavaVersion=1.7
 before_script: umask 0022
 before_install: echo "127.0.0.1 "`hostname` | sudo tee -a /etc/hosts
-script: mvn test -P $HADOOP_PROFILE
+script: mvn test -P $HADOOP_PROFILE -D tests.locale=en-US
 
 notifications:
   webhooks:
