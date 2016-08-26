@@ -173,7 +173,7 @@
     <vers.typesafe.config>1.0.2</vers.typesafe.config>
     <vers.solr>6.2.0</vers.solr>
     <solr.expected.version>6.2.0</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->
-    <vers.solr-cdh5>4.10.3</vers.solr-cdh5>
+    <vers.solr-cdh5>6.2.0</vers.solr-cdh5>
     <vers.tika>1.13</vers.tika>
     <vers.jackson>2.3.1</vers.jackson>
     <vers.opencsv>2.3</vers.opencsv>
@@ -251,7 +251,7 @@
               <version>[3.0.0,)</version>
             </requireMavenVersion>
             <requireJavaVersion>
-              <version>[${javaVersion}.0,${javaVersion}.1000}]</version>
+              <version>[${javaVersion}.0,)</version>
             </requireJavaVersion>
           </rules>
         </configuration>
