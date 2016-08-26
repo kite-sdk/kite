@@ -251,7 +251,7 @@
               <version>[3.0.0,)</version>
             </requireMavenVersion>
             <requireJavaVersion>
-              <version>[${javaVersion}.0,${javaVersion}.1000}]</version>
+              <version>[${javaVersion}.0,)</version>
             </requireJavaVersion>
           </rules>
         </configuration>
