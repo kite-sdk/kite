@@ -115,7 +115,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <argLine>-Dtests.locale=en_us</argLine>
+          <argLine>-Dtests.locale=en-US</argLine>
           <!--<forkMode>always</forkMode>-->
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <systemPropertyVariables>
