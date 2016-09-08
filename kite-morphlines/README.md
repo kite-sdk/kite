@@ -52,7 +52,7 @@ cd kite
 #git tag # list available releases
 #git checkout master
 #git checkout release-1.0.0 # or whatever the latest version is
-mvn clean install -DskipTests -DjavaVersion=1.7
+mvn clean install -DskipTests
 cd kite-morphlines
 mvn clean package
 find kite-morphlines-core/target -name '*.jar'
@@ -84,7 +84,7 @@ log4j.logger.org.kitesdk.morphline=TRACE
 
 ```bash
 cd kite
-mvn eclipse:eclipse -DjavaVersion=1.7
+mvn eclipse:eclipse
 ```
 
 * `mvn eclipse:eclipse` creates several Eclipse projects, one for each maven submodule.
