@@ -73,6 +73,12 @@
       <artifactId>jcl-over-slf4j</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <dependencyManagement>
@@ -90,8 +96,9 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <version>${vers.maven-surefire-plugin}</version>
         <configuration>
-          <argLine>-Dtests.locale=en-US</argLine>
+          <argLine>-Xmx2048m -Dtests.locale=en-US</argLine>
           <!--<forkMode>always</forkMode>-->
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <systemPropertyVariables>
