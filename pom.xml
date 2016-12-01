@@ -199,7 +199,7 @@
     <vers.maven-shade-plugin>2.3</vers.maven-shade-plugin>
     <vers.maven-site-plugin>3.3</vers.maven-site-plugin>
     <vers.maven-source-plugin>2.2.1</vers.maven-source-plugin>
-    <vers.maven-surefire-plugin>2.14.1</vers.maven-surefire-plugin>
+    <vers.maven-surefire-plugin>2.19.1</vers.maven-surefire-plugin>
     <vers.maven-antrun-plugin>1.7</vers.maven-antrun-plugin>
     <vers.maven-jar-plugin>2.4</vers.maven-jar-plugin>
     <vers.maven-exec-plugin>1.2.1</vers.maven-exec-plugin>
