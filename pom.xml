@@ -428,7 +428,7 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${vers.maven-compiler-plugin}</version>
           <configuration>
-            <source>1.6</source>
+            <source>${javaVersion}</source>
             <target>${targetJavaVersion}</target>
             <compilerArgs>
               <arg>-Xlint:unchecked</arg>
