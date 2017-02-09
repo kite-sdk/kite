@@ -191,6 +191,7 @@ class HiveUtils {
    * Returns the first non-null value from the sequence or null if there is no
    * non-null value.
    */
+  @SafeVarargs
   private static <T> T coalesce(T... values) {
     for (T value : values) {
       if (value != null) {
