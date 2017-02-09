@@ -24,6 +24,7 @@ import java.io.File;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.schema.IndexSchema;
@@ -58,6 +59,11 @@ public class SolrLocatorTest {
     
     SolrDocument resultDoc = solrServer.getById("myId");
     assertTrue(resultDoc.getFieldValues("text").contains("myValue"));
+    
+    UpdateResponse deleteResponse = solrServer.deleteById("myId");
+    assertEquals(0, deleteResponse.getStatus());
+    solrServer.commit();
+    solrServer.close();
   }
   
   @Test
