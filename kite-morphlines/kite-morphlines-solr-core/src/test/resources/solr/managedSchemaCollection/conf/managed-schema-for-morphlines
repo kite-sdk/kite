@@ -17,7 +17,7 @@
 -->
 
 <!-- Solr managed schema - automatically generated - DO NOT EDIT -->
-<schema name="example-schemaless" version="1.5">
+<schema name="example-managed" version="1.5">
   <uniqueKey>id</uniqueKey>
   <types>
     <fieldType name="alphaOnlySort" class="solr.TextField" sortMissingLast="true" omitNorms="true">

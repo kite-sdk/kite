@@ -28,6 +28,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.ManagedIndexSchema;
+import org.apache.solr.schema.ManagedIndexSchemaFactory;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.kitesdk.morphline.api.MorphlineContext;
@@ -69,6 +70,9 @@ public class SolrLocatorTest {
     IndexSchema indexSchema = solrLocator.getIndexSchema();
     
     assertNotNull(indexSchema);
+
+    assertEquals("example", indexSchema.getSchemaName());
+    assertEquals("schema.xml", indexSchema.getResourceName());
   }
 
   @Test
@@ -76,12 +80,14 @@ public class SolrLocatorTest {
     //Solr locator should select EmbeddedSolrServer only solrHome is specified
     SolrLocator solrLocator = new SolrLocator(new SolrMorphlineContext.Builder().build());
     solrLocator.setSolrHomeDir(RESOURCES_DIR + "/solr/managedSchemaCollection");
-    solrLocator.setCollectionName("collection1");
+    solrLocator.setCollectionName("example-managed");
 
     IndexSchema indexSchema = solrLocator.getIndexSchema();
 
     assertNotNull(indexSchema);
     assertTrue(indexSchema instanceof ManagedIndexSchema);
+    
+    assertEquals("example-managed", indexSchema.getSchemaName());
   }
 
 }
