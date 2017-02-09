@@ -16,13 +16,18 @@
  */
 package org.kitesdk.morphline.solr;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.schema.IndexSchema;
+import org.apache.solr.schema.ManagedIndexSchema;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.kitesdk.morphline.api.MorphlineContext;
@@ -33,20 +38,50 @@ public class SolrLocatorTest {
   private static final String RESOURCES_DIR = "target" + File.separator + "test-classes";
   
   @Test
-  @Ignore
-  public void testSelectsEmbeddedSolrServer() throws Exception {
+  public void testSelectsEmbeddedSolrServerAndAddDocument() throws Exception {
     //Solr locator should select EmbeddedSolrServer only solrHome is specified
-    SolrLocator solrLocator = new SolrLocator(new MorphlineContext.Builder().build());
+    SolrLocator solrLocator = new SolrLocator(new SolrMorphlineContext.Builder().build());
     solrLocator.setSolrHomeDir(RESOURCES_DIR + "/solr");
     solrLocator.setCollectionName("collection1");
+
     SolrServerDocumentLoader documentLoader = (SolrServerDocumentLoader)solrLocator.getLoader();
     SolrClient solrServer = documentLoader.getSolrServer();
+    
     assertTrue(solrServer instanceof EmbeddedSolrServer);
+    
     SolrInputDocument doc = new SolrInputDocument();
-    doc.addField("id", "myval");
+    doc.addField("id", "myId");
+    doc.addField("text", "myValue");
     solrServer.add(doc);
     solrServer.commit();
+    
+    SolrDocument resultDoc = solrServer.getById("myId");
+    assertTrue(resultDoc.getFieldValues("text").contains("myValue"));
+  }
+  
+  @Test
+  public void testIndexSchemaCreation() {
+    //Solr locator should select EmbeddedSolrServer only solrHome is specified
+    SolrLocator solrLocator = new SolrLocator(new SolrMorphlineContext.Builder().build());
+    solrLocator.setSolrHomeDir(RESOURCES_DIR + "/solr/collection1");
+    solrLocator.setCollectionName("collection1");
+    
+    IndexSchema indexSchema = solrLocator.getIndexSchema();
+    
+    assertNotNull(indexSchema);
+  }
+
+  @Test
+  public void testManagedIndexSchemaCreation() {
+    //Solr locator should select EmbeddedSolrServer only solrHome is specified
+    SolrLocator solrLocator = new SolrLocator(new SolrMorphlineContext.Builder().build());
+    solrLocator.setSolrHomeDir(RESOURCES_DIR + "/solr/managedSchemaCollection");
+    solrLocator.setCollectionName("collection1");
+
+    IndexSchema indexSchema = solrLocator.getIndexSchema();
+
+    assertNotNull(indexSchema);
+    assertTrue(indexSchema instanceof ManagedIndexSchema);
   }
 
 }
-

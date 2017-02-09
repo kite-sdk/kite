@@ -30,10 +30,12 @@ import org.apache.solr.client.solrj.retry.RetryPolicyFactory;
 import org.apache.solr.client.solrj.retry.RetryingSolrServer;
 import org.apache.solr.common.cloud.SolrZkClient;
 import org.apache.solr.core.CoreContainer;
+import org.apache.solr.core.PluginInfo;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrResourceLoader;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.IndexSchemaFactory;
+import org.apache.solr.schema.ManagedIndexSchemaFactory;
 import org.apache.zookeeper.KeeperException;
 import org.kitesdk.morphline.api.MorphlineCompilationException;
 import org.kitesdk.morphline.api.MorphlineContext;
@@ -203,17 +205,27 @@ public class SolrLocator {
       try {
         SolrResourceLoader loader = new SolrResourceLoader(Paths.get(mySolrHomeDir));
         SolrConfig solrConfig = new SolrConfig(loader, "solrconfig.xml", null);
+
+        PluginInfo info = solrConfig.getPluginInfo(IndexSchemaFactory.class.getName());
+        IndexSchemaFactory factory = null;
+        if (null != info) {
+          factory = solrConfig.getResourceLoader().newInstance(info.className, IndexSchemaFactory.class);
+          factory.init(info.initArgs);
+        }
         
-        IndexSchema schema = IndexSchemaFactory.buildIndexSchema("schema.xml", solrConfig);
+        String resourceName;
+        if (factory != null && factory instanceof ManagedIndexSchemaFactory) {
+          resourceName = ((ManagedIndexSchemaFactory)factory).getManagedSchemaResourceName();
+        } else {
+          resourceName = IndexSchemaFactory.getResourceNameToBeUsed(null, solrConfig);
+        }
+
+        IndexSchema schema = IndexSchemaFactory.buildIndexSchema(resourceName, solrConfig);
         validateSchema(schema);
         return schema;
-      } catch (ParserConfigurationException e) {
+      } catch (ParserConfigurationException | IOException | SAXException e) {
         throw new MorphlineRuntimeException(e);
-      } catch (IOException e) {
-        throw new MorphlineRuntimeException(e);
-      } catch (SAXException e) {
-        throw new MorphlineRuntimeException(e);
-      }
+      } 
     } finally {
       if (downloadedSolrHomeDir != null) {
         try {
