@@ -112,7 +112,7 @@
 
     <!-- Java versions -->
     <javaVersion>1.7</javaVersion>
-    <targetJavaVersion>1.6</targetJavaVersion>
+    <targetJavaVersion>1.7</targetJavaVersion>
     <Xdoclint /> <!-- set by the java8 profile to turn off doclint -->
 
     <!-- used by jdiff, semver rule -->
@@ -428,7 +428,7 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${vers.maven-compiler-plugin}</version>
           <configuration>
-            <source>1.6</source>
+            <source>${javaVersion}</source>
             <target>${targetJavaVersion}</target>
             <compilerArgs>
               <arg>-Xlint:unchecked</arg>
