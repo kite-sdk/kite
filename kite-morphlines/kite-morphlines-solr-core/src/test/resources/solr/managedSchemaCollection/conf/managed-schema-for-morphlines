@@ -432,6 +432,7 @@
     <field name="_version_" type="long" indexed="true" stored="true"/>
     <field name="test-managed-morphline-field" type="text_general"/>
     <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
+    <field name="text" type="text_en" indexed="true" stored="true" multiValued="true"/>
     <dynamicField name="*_coordinate" type="tdouble" indexed="true" stored="false"/>
     <dynamicField name="ignored_*" type="ignored" multiValued="true"/>
     <dynamicField name="random_*" type="random"/>
