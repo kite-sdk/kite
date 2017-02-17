@@ -97,6 +97,7 @@
      and back compatibility is not guaranteed.  Names with both leading and
      trailing underscores (e.g. _version_) are reserved.
   -->
+  <uniqueKey>id</uniqueKey>
 
   <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false"/>
   <field name="user_friends_count" type="tint" indexed="true" stored="true"/>
