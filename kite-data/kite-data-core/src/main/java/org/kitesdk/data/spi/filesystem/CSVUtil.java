@@ -38,10 +38,12 @@ import org.apache.avro.Schema;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.spi.Compatibility;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static java.lang.Math.min;
 
 public class CSVUtil {
-
   public static CSVParser newParser(CSVProperties props) {
     return new CSVParser(
         props.delimiter.charAt(0), props.quote.charAt(0),
@@ -69,39 +71,55 @@ public class CSVUtil {
   private static final Pattern LONG = Pattern.compile("\\d+");
   private static final Pattern DOUBLE = Pattern.compile("\\d*\\.\\d*[dD]?");
   private static final Pattern FLOAT = Pattern.compile("\\d*\\.\\d*[fF]?");
-  private static final int DEFAULT_INFER_LINES = 25;
   private static final Set<String> NO_REQUIRED_FIELDS = ImmutableSet.of();
+  private static final int DEFAULT_NUM_RECORDS = 10;
 
   public static Schema inferNullableSchema(String name, InputStream incoming,
                                            CSVProperties props)
       throws IOException {
-    return inferSchemaInternal(name, incoming, props, NO_REQUIRED_FIELDS, true);
+    return inferSchemaInternal(name, incoming, props, NO_REQUIRED_FIELDS, true, DEFAULT_NUM_RECORDS);
   }
 
   public static Schema inferNullableSchema(String name, InputStream incoming,
                                            CSVProperties props,
                                            Set<String> requiredFields)
       throws IOException {
-    return inferSchemaInternal(name, incoming, props, requiredFields, true);
+    return inferSchemaInternal(name, incoming, props, requiredFields, true, DEFAULT_NUM_RECORDS);
+  }
+
+  public static Schema inferNullableSchema(String name, InputStream incoming,
+                                           CSVProperties props,
+                                           int numRecords)
+      throws IOException {
+    return inferSchemaInternal(name, incoming, props, NO_REQUIRED_FIELDS, true, numRecords);
+  }
+
+  public static Schema inferNullableSchema(String name, InputStream incoming,
+                                           CSVProperties props,
+                                           Set<String> requiredFields,
+                                           int numRecords)
+      throws IOException {
+    return inferSchemaInternal(name, incoming, props, requiredFields, true, numRecords);
   }
 
   public static Schema inferSchema(String name, InputStream incoming,
                                    CSVProperties props)
       throws IOException {
-    return inferSchemaInternal(name, incoming, props, NO_REQUIRED_FIELDS, false);
+    return inferSchemaInternal(name, incoming, props, NO_REQUIRED_FIELDS, false, DEFAULT_NUM_RECORDS);
   }
 
   public static Schema inferSchema(String name, InputStream incoming,
                                    CSVProperties props,
                                    Set<String> requiredFields)
       throws IOException {
-    return inferSchemaInternal(name, incoming, props, requiredFields, false);
+    return inferSchemaInternal(name, incoming, props, requiredFields, false, DEFAULT_NUM_RECORDS);
   }
 
   private static Schema inferSchemaInternal(String name, InputStream incoming,
                                             CSVProperties props,
                                             Set<String> requiredFields,
-                                            boolean makeNullable)
+                                            boolean makeNullable,
+                                            int numRecords)
       throws IOException {
     CSVReader reader = newReader(incoming, props);
 
@@ -133,19 +151,23 @@ public class CSVUtil {
     boolean[] nullable = new boolean[header.length];
     boolean[] empty = new boolean[header.length];
 
-    for (int processed = 0; processed < DEFAULT_INFER_LINES; processed += 1) {
+    for (int processed = 0; processed < numRecords; processed += 1) {
       if (line == null) {
         break;
       }
 
       for (int i = 0; i < header.length; i += 1) {
         if (i < line.length) {
-          if (types[i] == null) {
-            types[i] = inferFieldType(line[i]);
+          Schema.Type prevType = types[i];
+          Schema.Type currType = inferFieldType(line[i]);
+          if (prevType == null) {
+            types[i] = currType;
             if (types[i] != null) {
-              // keep track of the value used
               values[i] = line[i];
             }
+          } else if (mergeTypes(prevType, currType)) {
+            types[i] = currType;
+            values[i] = line[i];
           }
 
           if (line[i] == null) {
@@ -252,5 +274,34 @@ public class CSVUtil {
       return Schema.Type.FLOAT;
     }
     return Schema.Type.STRING;
+  }
+
+  private static boolean mergeTypes(Schema.Type prevType, Schema.Type currType) {
+    if (Schema.Type.LONG.equals(prevType)) {
+      if (Schema.Type.FLOAT.equals(currType)) {
+        return true;
+      }
+      if (Schema.Type.DOUBLE.equals(currType)) {
+        return true;
+      }
+      if (Schema.Type.STRING.equals(currType)) {
+        return true;
+      }
+    }
+    if (Schema.Type.FLOAT.equals(prevType)) {
+      if (Schema.Type.DOUBLE.equals(currType)) {
+        return true;
+      }
+      if (Schema.Type.STRING.equals(currType)) {
+        return true;
+      }
+    }
+    if (Schema.Type.DOUBLE.equals(prevType)) {
+      if (Schema.Type.STRING.equals(currType)) {
+        return true;
+      }
+    }
+
+  return false;
   }
 }

@@ -79,6 +79,9 @@ public class CSVSchemaCommand extends BaseCommand {
   @Parameter(names="--skip-lines", description="Lines to skip before CSV start")
   int linesToSkip = 0;
 
+  @Parameter(names={"-n", "--num-records"}, description="Number of lines to use when building a schema")
+  int numRecords = 10;
+
   @Parameter(names="--charset", description="Character set name", hidden = true)
   String charsetName = Charset.defaultCharset().displayName();
 
@@ -96,6 +99,8 @@ public class CSVSchemaCommand extends BaseCommand {
         "Sample CSV path is required");
     Preconditions.checkArgument(samplePaths.size() == 1,
         "Only one CSV sample can be given");
+    Preconditions.checkArgument(numRecords > 0,
+        "At least one row must be sampled");
 
     if (header != null) {
       // if a header is given on the command line, do assume one is in the file
@@ -120,7 +125,7 @@ public class CSVSchemaCommand extends BaseCommand {
     // assume fields are nullable by default, users can easily change this
     String sampleSchema = CSVUtil
         .inferNullableSchema(
-            recordName, open(samplePaths.get(0)), props, required)
+            recordName, open(samplePaths.get(0)), props, required, numRecords)
         .toString(!minimize);
 
     output(sampleSchema, console, outputPath);
