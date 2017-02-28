@@ -1,0 +1,11 @@
+[
+  { "source": "part1", "type": "column", "value": "meta:part1" },
+  { "source": "part2", "type": "column", "value": "meta:part2" },
+  { "source": "field1", "type": "column", "value": "meta:field1" },
+  { "source": "field2", "type": "column", "value": "meta:field2" },
+  { "source": "enum", "type": "column", "value": "meta:enum" },
+  { "source": "field3", "type": "keyAsColumn", "value": "string:" },
+  { "source": "field4", "type": "keyAsColumn", "value": "embedded:" },
+  { "source": "field5", "type": "column", "value": "meta:field5" },
+  { "source": "version", "type": "occVersion" }
+]

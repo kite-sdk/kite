@@ -15,6 +15,19 @@
  */
 package org.kitesdk.data.hbase;
 
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.IndexedRecord;
+import org.apache.avro.util.Utf8;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.util.Bytes;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
@@ -32,18 +45,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.generic.IndexedRecord;
-import org.apache.avro.util.Utf8;
-import org.apache.hadoop.hbase.client.HTable;
-import org.apache.hadoop.hbase.util.Bytes;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -52,15 +53,26 @@ import static org.junit.Assert.assertTrue;
 public class HBaseDatasetRepositoryTest {
 
   private static final String testEntity;
+  private static final String testEntityWithoutMappingPartitioning;
+  private static final String testEntityColumnMapping;
+  private static final String testEntityPartitioning;
   private static final String testGenericEntity;
   private static final String testGenericEntity2;
   private static final String tableName = "testtable";
   private static final String managedTableName = "managed_schemas";
+  private static final String NAMESPACE = "default";
 
   static {
     try {
       testEntity = AvroUtils.inputStreamToString(HBaseDatasetRepositoryTest.class
           .getResourceAsStream("/TestEntity.avsc"));
+      testEntityWithoutMappingPartitioning = AvroUtils.inputStreamToString(
+          HBaseDatasetRepositoryTest.class
+          .getResourceAsStream("/TestEntityWithoutMappingPartitioning.avsc"));
+      testEntityColumnMapping = AvroUtils.inputStreamToString(HBaseDatasetRepositoryTest.class
+          .getResourceAsStream("/column_mapping/TestEntity.json"));
+      testEntityPartitioning = AvroUtils.inputStreamToString(HBaseDatasetRepositoryTest.class
+          .getResourceAsStream("/partition_strategy/TestEntity.json"));
       testGenericEntity = AvroUtils.inputStreamToString(HBaseDatasetRepositoryTest.class
           .getResourceAsStream("/TestGenericEntity.avsc"));
       testGenericEntity2 = AvroUtils.inputStreamToString(HBaseDatasetRepositoryTest.class
@@ -69,6 +81,8 @@ public class HBaseDatasetRepositoryTest {
       throw new RuntimeException(e);
     }
   }
+
+  private HBaseDatasetRepository repository;
 
   @BeforeClass
   public static void beforeClass() throws Exception {
@@ -82,6 +96,12 @@ public class HBaseDatasetRepositoryTest {
     HBaseTestUtils.util.deleteTable(Bytes.toBytes(tableName));
   }
 
+  @Before
+  public void setUp() {
+    repository = new HBaseDatasetRepository.Builder()
+        .configuration(HBaseTestUtils.getConf()).build();
+  }
+
   @After
   public void after() throws Exception {
     HBaseTestUtils.util.truncateTable(Bytes.toBytes(tableName));
@@ -92,13 +112,11 @@ public class HBaseDatasetRepositoryTest {
   @SuppressWarnings("unchecked")
   public void testGeneric() throws Exception {
     String datasetName = tableName + ".TestGenericEntity";
-    HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
-        .configuration(HBaseTestUtils.getConf()).build();
-    
+
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testGenericEntity)
         .build();
-    DaoDataset<GenericRecord> ds = (DaoDataset) repo.create("default", datasetName, descriptor);
+    DaoDataset<GenericRecord> ds = (DaoDataset) repository.create(NAMESPACE, datasetName, descriptor);
 
     // Create the new entities
     ds.put(createGenericEntity(0));
@@ -117,7 +135,7 @@ public class HBaseDatasetRepositoryTest {
     }
 
     // reload
-    ds = (DaoDataset) repo.load("default", datasetName);
+    ds = (DaoDataset) repository.load(NAMESPACE, datasetName);
 
     // ensure the new entities are what we expect with get operations
     for (int i = 0; i < 10; ++i) {
@@ -170,15 +188,70 @@ public class HBaseDatasetRepositoryTest {
   }
 
   @Test
+  public void testSpecificWhenSchemaDoesNotContainMappingAndGeneratedAvroClassDoesExist() throws Exception {
+    String datasetName = tableName + ".TestEntityWithoutMappingPartitioning";
+
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+            .schemaLiteral(testEntityWithoutMappingPartitioning)
+            .columnMappingLiteral(testEntityColumnMapping)
+            .partitionStrategyLiteral(testEntityPartitioning)
+            .build();
+    RandomAccessDataset<TestEntity> ds = repository.create(NAMESPACE, datasetName, descriptor);
+
+    // Create the new entities
+    ds.put(createSpecificEntity(0));
+    ds.put(createSpecificEntity(1));
+
+    DatasetWriter<TestEntity> writer = ds.newWriter();
+    try {
+      for (int i = 2; i < 10; ++i) {
+        TestEntity entity = createSpecificEntity(i);
+        writer.write(entity);
+      }
+    } finally {
+      writer.close();
+    }
+
+    // ensure the new entities are what we expect with get operations
+    for (int i = 0; i < 10; ++i) {
+      String iStr = Long.toString(i);
+      Key key = new Key.Builder(ds)
+              .add("part1", "part1_" + iStr)
+              .add("part2", "part2_" + iStr).build();
+      compareEntitiesWithString(i, ds.get(key));
+    }
+
+    // ensure the new entities are what we expect with scan operations
+    int cnt = 0;
+    DatasetReader<TestEntity> reader = ds.newReader();
+    try {
+      for (TestEntity entity : reader) {
+        compareEntitiesWithString(cnt, entity);
+        cnt++;
+      }
+      assertEquals(10, cnt);
+    } finally {
+      reader.close();
+    }
+
+    Key key = new Key.Builder(ds)
+            .add("part1", "part1_5")
+            .add("part2", "part2_5").build();
+
+    // test delete
+    ds.delete(key);
+    TestEntity deletedRecord = ds.get(key);
+    assertNull(deletedRecord);
+  }
+
+  @Test
   public void testSpecific() throws Exception {
     String datasetName = tableName + ".TestEntity";
-    HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
-        .configuration(HBaseTestUtils.getConf()).build();
 
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testEntity)
         .build();
-    RandomAccessDataset<TestEntity> ds = repo.create("default", datasetName, descriptor);
+    RandomAccessDataset<TestEntity> ds = repository.create(NAMESPACE, datasetName, descriptor);
 
     // Create the new entities
     ds.put(createSpecificEntity(0));
@@ -230,13 +303,11 @@ public class HBaseDatasetRepositoryTest {
   public void testDeleteDataset() throws Exception {
 
     String datasetName = tableName + ".TestGenericEntity";
-    HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
-        .configuration(HBaseTestUtils.getConf()).build();
 
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testGenericEntity)
         .build();
-    RandomAccessDataset<GenericRecord> ds = repo.create("default", datasetName, descriptor);
+    RandomAccessDataset<GenericRecord> ds = repository.create(NAMESPACE, datasetName, descriptor);
 
     // Create a new entity
     ds.put(createGenericEntity(0));
@@ -249,17 +320,17 @@ public class HBaseDatasetRepositoryTest {
     compareEntitiesWithUtf8(0, ds.get(key));
 
     // delete dataset
-    boolean success = repo.delete("default", datasetName);
+    boolean success = repository.delete(NAMESPACE, datasetName);
     assertTrue("dataset should have been successfully deleted", success);
 
-    assertFalse("second delete should return false", repo.delete("default", datasetName));
+    assertFalse("second delete should return false", repository.delete(NAMESPACE, datasetName));
 
     // check that tables have no rows
     assertEquals(0, HBaseTestUtils.util.countRows(new HTable(HBaseTestUtils.getConf(), managedTableName)));
     assertEquals(0, HBaseTestUtils.util.countRows(new HTable(HBaseTestUtils.getConf(), tableName)));
 
     // create the dataset again
-    ds = repo.create("default", datasetName, descriptor);
+    ds = repository.create(NAMESPACE, datasetName, descriptor);
 
     // Create a new entity
     ds.put(createGenericEntity(0));
@@ -270,16 +341,12 @@ public class HBaseDatasetRepositoryTest {
 
   @Test
   public void testUpdateDataset() throws Exception {
-
     String datasetName = tableName + ".TestGenericEntity";
-
-    HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
-        .configuration(HBaseTestUtils.getConf()).build();
 
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testGenericEntity)
         .build();
-    RandomAccessDataset<GenericRecord> ds = repo.create("default", datasetName, descriptor);
+    RandomAccessDataset<GenericRecord> ds = repository.create(NAMESPACE, datasetName, descriptor);
 
     // Create a new entity
     ds.put(createGenericEntity(0));
@@ -287,13 +354,23 @@ public class HBaseDatasetRepositoryTest {
     DatasetDescriptor newDescriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testGenericEntity2)
         .build();
-    repo.update("default", datasetName, newDescriptor);
+    repository.update(NAMESPACE, datasetName, newDescriptor);
   }
 
   // TODO: remove duplication from ManagedDaoTest
 
   public static GenericRecord createGenericEntity(long uniqueIdx) {
     return createGenericEntity(uniqueIdx, testGenericEntity);
+  }
+
+  private static <E> RandomAccessDataset<E> createDataset(String datasetName,
+      DatasetDescriptor descriptor) {
+    Configuration config = HBaseTestUtils.getConf();
+    HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
+        .configuration(config)
+        .build();
+    RandomAccessDataset<E> ds = repo.create(NAMESPACE, datasetName, descriptor);
+    return ds;
   }
 
   /**

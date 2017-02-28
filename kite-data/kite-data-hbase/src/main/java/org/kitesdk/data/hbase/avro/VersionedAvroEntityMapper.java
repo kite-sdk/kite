@@ -15,10 +15,11 @@
  */
 package org.kitesdk.data.hbase.avro;
 
+import org.kitesdk.data.ColumnMapping;
 import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.SchemaNotFoundException;
 import org.kitesdk.data.ValidationException;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.hbase.impl.BaseEntityMapper;
 import org.kitesdk.data.hbase.impl.EntityMapper;
 import org.kitesdk.data.hbase.impl.EntitySchema;
@@ -170,7 +171,10 @@ public class VersionedAvroEntityMapper<ENTITY extends IndexedRecord> implements
         // will be or schema we'll use to write with.
         String entitySchemaString = entityClass.getField("SCHEMA$").get(null)
             .toString();
-        entitySchema = schemaParser.parseEntitySchema(entitySchemaString);
+        ColumnMapping mostRecentColumnMapping =
+            mostRecentEntitySchema.getColumnMappingDescriptor();
+        entitySchema = schemaParser.parseEntitySchema(entitySchemaString,
+            mostRecentColumnMapping);
 
         // verify that this schema exists in the managed schema table, and get
         // its
