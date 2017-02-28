@@ -35,7 +35,6 @@ import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Order;
@@ -45,7 +44,6 @@ import org.apache.hadoop.hive.metastore.api.StorageDescriptor;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorUtils;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
-import org.kitesdk.compat.DynMethods;
 import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
@@ -60,7 +58,7 @@ import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.SchemaUtil;
 
 class HiveUtils {
-  static final String HDFS_SCHEME = "hdfs";
+  private static final String HDFS_SCHEME = "hdfs";
 
   private static final String CUSTOM_PROPERTIES_PROPERTY_NAME = "kite.custom.property.names";
   private static final String PARTITION_EXPRESSION_PROPERTY_NAME = "kite.partition.expression";
@@ -181,7 +179,7 @@ class HiveUtils {
   private static List<FieldSchema> getPartCols(Table table) {
     List<FieldSchema> partKeys = table.getPartitionKeys();
     if (partKeys == null) {
-      partKeys = new ArrayList<FieldSchema>();
+      partKeys = new ArrayList<>();
       table.setPartitionKeys(partKeys);
     }
     return partKeys;
@@ -219,6 +217,8 @@ class HiveUtils {
       table.setTableType(TableType.EXTERNAL_TABLE.toString());
       // but it doesn't work without some additional magic:
       table.getParameters().put("EXTERNAL", "TRUE");
+
+      Preconditions.checkNotNull(descriptor.getLocation(), "Descriptor.location cannot be null");
       table.getSd().setLocation(descriptor.getLocation().toString());
     } else {
       table.setTableType(TableType.MANAGED_TABLE.toString());
@@ -239,10 +239,11 @@ class HiveUtils {
 
     if (includeSchema) {
       URL schemaURL = descriptor.getSchemaUrl();
-      if (useSchemaURL(schemaURL)) {
+      
+      if (schemaURL != null && useSchemaURL(schemaURL)) {
         table.getParameters().put(
             AVRO_SCHEMA_URL_PROPERTY_NAME,
-            descriptor.getSchemaUrl().toExternalForm());
+                schemaURL.toExternalForm());
       } else {
         table.getParameters().put(
             AVRO_SCHEMA_LITERAL_PROPERTY_NAME,
@@ -269,8 +270,7 @@ class HiveUtils {
 
   private static boolean useSchemaURL(@Nullable URL schemaURL) {
     try {
-      return ((schemaURL != null) &&
-          HDFS_SCHEME.equals(schemaURL.toURI().getScheme()));
+      return schemaURL != null && HDFS_SCHEME.equals(schemaURL.toURI().getScheme());
     } catch (URISyntaxException ex) {
       return false;
     }
@@ -301,11 +301,11 @@ class HiveUtils {
     return table;
   }
 
-  public static void updateTableSchema(Table table, DatasetDescriptor descriptor) {
+  static void updateTableSchema(Table table, DatasetDescriptor descriptor) {
     URL schemaURL = descriptor.getSchemaUrl();
 
     if (table.getParameters().get(AVRO_SCHEMA_LITERAL_PROPERTY_NAME) != null) {
-      if (useSchemaURL(schemaURL)) {
+      if (schemaURL != null && useSchemaURL(schemaURL)) {
         table.getParameters().remove(AVRO_SCHEMA_LITERAL_PROPERTY_NAME);
         table.getParameters().put(AVRO_SCHEMA_URL_PROPERTY_NAME,
             schemaURL.toExternalForm());
@@ -328,7 +328,7 @@ class HiveUtils {
     } else {
       // neither the literal or the URL are set, so add the URL if specified
       // and the schema literal if not.
-      if (useSchemaURL(schemaURL)) {
+      if (schemaURL != null && useSchemaURL(schemaURL)) {
         table.getParameters().put(
                 AVRO_SCHEMA_URL_PROPERTY_NAME,
                 schemaURL.toExternalForm());
@@ -359,7 +359,7 @@ class HiveUtils {
         HiveSchemaConverter.convertSchema(descriptor.getSchema()));
   }
 
-  static FileSystem fsForPath(Configuration conf, Path path) {
+  private static FileSystem fsForPath(Configuration conf, Path path) {
     try {
       return path.getFileSystem(conf);
     } catch (IOException ex) {
@@ -479,7 +479,7 @@ class HiveUtils {
     }
   }
 
-  public static void addResource(Configuration hiveConf, Configuration conf) {
+  static void addResource(Configuration hiveConf, Configuration conf) {
     if (Hadoop.Configuration.addResource.isNoop()) {
       for (Map.Entry<String, String> entry : conf) {
         hiveConf.set(entry.getKey(), entry.getValue());
