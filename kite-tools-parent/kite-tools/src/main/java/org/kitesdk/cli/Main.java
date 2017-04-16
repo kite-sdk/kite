@@ -55,6 +55,7 @@ import org.kitesdk.cli.commands.SchemaCommand;
 import org.kitesdk.cli.commands.ShowRecordsCommand;
 import org.kitesdk.cli.commands.TarImportCommand;
 import org.kitesdk.cli.commands.TransformCommand;
+import org.kitesdk.cli.commands.TarImportCommand;
 import org.kitesdk.cli.commands.UpdateDatasetCommand;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetNotFoundException;
