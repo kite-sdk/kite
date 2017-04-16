@@ -28,6 +28,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.kitesdk.data.spi.Compatibility.isCompatibleName;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.kitesdk.data.spi.Compatibility.isCompatibleName;
+
 public class TestCompatibilityChecks {
 
   public static final Schema PROVIDED_TEST_SCHEMA = SchemaBuilder
