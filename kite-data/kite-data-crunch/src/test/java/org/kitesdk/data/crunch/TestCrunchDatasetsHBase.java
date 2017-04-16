@@ -28,6 +28,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
@@ -43,6 +44,7 @@ import org.kitesdk.data.spi.DatasetRepository;
 import static org.junit.Assert.assertEquals;
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.datasetSize;
 
+@Ignore
 public class TestCrunchDatasetsHBase {
   private static final String testGenericEntity;
 
@@ -161,6 +163,11 @@ public class TestCrunchDatasetsHBase {
     } finally {
       reader.close();
     }
+  }
+
+  @AfterClass
+  public static void delayForHadoop1() throws InterruptedException {
+    Thread.sleep(5);
   }
 
 }
