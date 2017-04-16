@@ -42,6 +42,9 @@
 
   <inceptionYear>2013</inceptionYear>
   <url>${url.project}</url>
+  <organization>
+    <name>Cloudera, Inc</name>
+  </organization>
 
   <developers>
     <developer>
@@ -530,6 +533,9 @@
             <!-- https://issues.apache.org/jira/browse/ZOOKEEPER-1661-->
             <!-- https://issues.apache.org/jira/browse/ZOOKEEPER-1476-->
             <argLine>-Xmx512m -XX:MaxPermSize=128m -Djava.net.preferIPv4Stack=true</argLine> <!-- 512MB needed for HBase 2 -->
+            <systemPropertyVariables>
+              <buildDirectory>${project.build.directory}</buildDirectory>
+            </systemPropertyVariables>
           </configuration>
         </plugin>
         <plugin>
