@@ -503,6 +503,13 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
       deleteAll(); // remove all existing files
       FileSystemUtil.finishMove(fileSystem, staged);
     }
+    
+    Path metadataDirectory = new Path(update.getDirectory(), ".metadata");
+    try {
+      fileSystem.delete(metadataDirectory, true);
+    } catch (IOException e) {
+      throw new DatasetIOException("Dataset merge failed", e);
+    }
   }
 
   @Override
