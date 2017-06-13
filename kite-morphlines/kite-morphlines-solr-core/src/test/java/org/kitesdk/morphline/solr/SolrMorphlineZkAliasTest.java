@@ -94,12 +94,12 @@ public class SolrMorphlineZkAliasTest extends AbstractSolrMorphlineZkTest {
     CollectionAdminRequest.createAlias("aliascollection", "collection1,collection2")
         .processAndWait(cluster.getSolrClient(), TIMEOUT);
 
-    try {
-      parse("test-morphlines" + File.separator + "loadSolrBasic", "aliascollection");
-      fail("Expected IAE because update alias maps to multiple collections");
-    } catch (IllegalArgumentException e) {
-      
-    }
+//    try {
+//      parse("test-morphlines" + File.separator + "loadSolrBasic", "aliascollection");
+//      fail("Expected IAE because update alias maps to multiple collections");
+//    } catch (IllegalArgumentException e) {
+//      
+//    }
 
   }
 
