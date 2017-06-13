@@ -33,7 +33,7 @@
     </dependency>
 
     <dependency> <!-- see http://metrics.codahale.com -->
-      <groupId>com.codahale.metrics</groupId>
+      <groupId>io.dropwizard.metrics</groupId>
       <artifactId>metrics-core</artifactId>
     </dependency>
     
