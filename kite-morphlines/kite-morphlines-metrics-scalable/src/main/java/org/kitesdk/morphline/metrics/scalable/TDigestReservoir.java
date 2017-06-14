@@ -64,7 +64,7 @@ public final class TDigestReservoir implements Reservoir {
     private final ScalableStatistics stats;
     
     private TDigestSnapshot(ScalableStatistics stats) {
-      super(new long[0]); // FIXME change to super() with metrics-core-3.1.x
+      super();
       this.stats = stats;
     }
     

@@ -169,11 +169,11 @@
     <vers.plexus-utils>3.0</vers.plexus-utils>
     <vers.rat>0.9</vers.rat>
     <vers.slf4j>1.6.1</vers.slf4j>
-    <vers.codahale.metrics>3.0.2</vers.codahale.metrics>
+    <vers.dropwizard.metrics>3.2.2</vers.dropwizard.metrics>
     <vers.typesafe.config>1.0.2</vers.typesafe.config>
-    <vers.solr>6.3.0</vers.solr>
-    <solr.expected.version>6.3.0</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->
-    <vers.solr-cdh5>6.3.0</vers.solr-cdh5>
+    <vers.solr>6.6.0</vers.solr>
+    <solr.expected.version>6.6.0</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->
+    <vers.solr-cdh5>6.6.0</vers.solr-cdh5>
     <vers.tika>1.13</vers.tika>
     <vers.jackson>2.3.1</vers.jackson>
     <vers.opencsv>2.3</vers.opencsv>
@@ -1000,19 +1000,19 @@
 
       <!-- Morphlines deps -->
       <dependency>
-        <groupId>com.codahale.metrics</groupId>
+        <groupId>io.dropwizard.metrics</groupId>
         <artifactId>metrics-core</artifactId>
-        <version>${vers.codahale.metrics}</version>
+        <version>${vers.dropwizard.metrics}</version>
       </dependency>
       <dependency>
-        <groupId>com.codahale.metrics</groupId>
+        <groupId>io.dropwizard.metrics</groupId>
         <artifactId>metrics-healthchecks</artifactId>
-        <version>${vers.codahale.metrics}</version>
+        <version>${vers.dropwizard.metrics}</version>
       </dependency>
       <dependency>
-        <groupId>com.codahale.metrics</groupId>
+        <groupId>io.dropwizard.metrics</groupId>
         <artifactId>metrics-servlets</artifactId>
-        <version>${vers.codahale.metrics}</version>
+        <version>${vers.dropwizard.metrics}</version>
       </dependency>
       <dependency>
         <groupId>org.eclipse.jetty</groupId>

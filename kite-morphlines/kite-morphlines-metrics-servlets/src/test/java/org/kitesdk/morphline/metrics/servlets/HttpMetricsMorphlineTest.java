@@ -69,7 +69,7 @@ public class HttpMetricsMorphlineTest extends AbstractMorphlineTest {
     assertEquals("pong", response.trim());
     
     response = httpGet(port, "/threads");
-    assertTrue(response.startsWith("main id="));
+    assertTrue(response.startsWith("\"main\" id="));
     
     response = httpGet(port, "/healthcheck");
     assertTrue(response.startsWith("{\"deadlocks\":{\"healthy\":true}}"));
