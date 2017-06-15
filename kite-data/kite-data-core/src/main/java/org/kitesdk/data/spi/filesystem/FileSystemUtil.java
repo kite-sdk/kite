@@ -21,6 +21,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
@@ -239,7 +240,12 @@ public class FileSystemUtil {
           if (stats == null || stats.length == 0) {
             // dir is empty and should be removed
             LOG.debug("Deleting empty path {}", current);
-            deleted = fs.delete(current, true) || deleted;
+            try{
+                deleted = fs.delete(current, true) || deleted;
+            }
+            catch(FileNotFoundException ex){
+                // safely ignored, since anther job just deleted this directory
+            }
           } else {
             // all parent directories will be non-empty
             break;
