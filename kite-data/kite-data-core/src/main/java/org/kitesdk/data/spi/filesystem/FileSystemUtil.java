@@ -20,6 +20,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
@@ -232,24 +234,47 @@ public class FileSystemUtil {
         deleted = useTrash ? Trash.moveToAppropriateTrash(fs, absolute, fs.getConf())
             : fs.delete(absolute, true /* include any files */);
         // iterate up to the root, removing empty directories
-        for (Path current = absolute.getParent();
-             !current.equals(root) && !(current.getParent() == null);
-             current = current.getParent()) {
-          final FileStatus[] stats = fs.listStatus(current);
-          if (stats == null || stats.length == 0) {
-            // dir is empty and should be removed
-            LOG.debug("Deleting empty path {}", current);
-            deleted = fs.delete(current, true) || deleted;
-          } else {
-            // all parent directories will be non-empty
-            break;
-          }
-        }
+        deleted |= deleteParentDirectoriesIfEmpty(fs, root, absolute);
       }
       return deleted;
     } catch (IOException ex) {
       throw new DatasetIOException("Could not cleanly delete path:" + path, ex);
     }
+  }
+
+  /**
+   * Deletes the empty parent directories of the specified path.
+   * The method catches and ignores FileNotFoundException as it is possible that multiple parallel Kite instances are
+   * importing into a directory under the same root directory and it can happen that a Kite instance founds an empty
+   * directory which needs to be deleted but when it tries execute the delete command the folder is missing
+   * because it has been already deleted by another Kite instance.
+   *
+   * @param fs   the FileSystem
+   * @param root The empty parent directories have to be deleted up to this root directory.
+   * @param path The parent directories of this path will be deleted.
+   * @return True if at least one empty parent directory was deleted false otherwise.
+   * @throws IOException
+   */
+  static boolean deleteParentDirectoriesIfEmpty(FileSystem fs, Path root, Path path) throws IOException {
+    boolean deleted = false;
+    try {
+      for (Path current = path.getParent();
+           !current.equals(root) && !(current.getParent() == null);
+           current = current.getParent()) {
+        final FileStatus[] stats = fs.listStatus(current);
+        if (stats == null || stats.length == 0) {
+          // dir is empty and should be removed
+          LOG.debug("Deleting empty path {}", current);
+          deleted = fs.delete(current, true) || deleted;
+        } else {
+          // all parent directories will be non-empty
+          break;
+        }
+      }
+    } catch (FileNotFoundException e) {
+      LOG.debug("Path does not exist it may have been deleted by another process.", e);
+    }
+    return deleted;
   }
 
   public static Schema schema(String name, FileSystem fs, Path location) throws IOException {

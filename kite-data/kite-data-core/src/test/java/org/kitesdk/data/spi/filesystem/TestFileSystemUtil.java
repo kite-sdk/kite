@@ -48,7 +48,12 @@ import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.DescriptorUtil;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.kitesdk.data.CompressionType.Uncompressed;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class TestFileSystemUtil {
   private static final Schema USER_SCHEMA = SchemaBuilder.record("User").fields()
@@ -729,6 +734,40 @@ public class TestFileSystemUtil {
         FileSystemUtil.supportsRename(URI.create("s3a://bucket/path"), conf));
     Assert.assertTrue("Should override via config true for S3N",
         FileSystemUtil.supportsRename(URI.create("s3n://bucket/path"), conf));
+  }
+
+  @Test
+  public void testDeleteParentDirectoriesIfEmptyCatchesFileNotFoundException() throws Exception {
+    FileSystem fs = mock(FileSystem.class);
+    Path root = mock(Path.class);
+    Path path = mock(Path.class);
+    Path firstParent = mock(Path.class);
+
+    when(path.getParent()).thenReturn(firstParent);
+    when(firstParent.getParent()).thenReturn(root);
+    when(fs.listStatus(firstParent)).thenThrow(FileNotFoundException.class);
+
+    boolean pathDeleted = FileSystemUtil.deleteParentDirectoriesIfEmpty(fs, root, path);
+
+    verify(fs).listStatus(firstParent);
+    assertFalse(pathDeleted);
+  }
+
+  @Test
+  public void testDeleteParentDirectoriesIfEmpty() throws Exception {
+    Path root = new Path(temp.getRoot().toURI() + "/");
+
+    File subFolder = temp.newFolder("subFolder");
+    File subSubFolder = new File(subFolder, "subSubFolder");
+    Path subSubFolderPath = new Path(subSubFolder.toURI());
+
+    FileSystem fs = LocalFileSystem.getInstance();
+
+    boolean pathDeleted = FileSystemUtil.deleteParentDirectoriesIfEmpty(fs, root, subSubFolderPath);
+
+    assertTrue(pathDeleted);
+    assertFalse(subFolder.exists());
+    assertTrue(temp.getRoot().exists());
   }
 
   private URI parent(URI file) {
