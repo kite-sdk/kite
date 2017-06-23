@@ -200,11 +200,17 @@ public class Loader implements Loadable {
       } else {
         String defaultScheme;
         try {
-          defaultScheme = FileSystem.get(conf).getUri().getScheme();
+          defaultScheme = FileSystem.get(new URI(match.get("path")),conf).getUri().getScheme();
         } catch (IOException e) {
           throw new DatasetIOException("Cannot determine the default FS", e);
         }
-        return new URI(defaultScheme, userInfo, "", UNSPECIFIED_PORT, "/", null, null);
+
+        if(defaultScheme.equals("s3a")||defaultScheme.equals("swift"))
+        {
+         return new URI(match.get("path"));
+        } else {
+          return new URI(defaultScheme, userInfo, "", UNSPECIFIED_PORT, "/", null, null);
+        }
       }
     } catch (URISyntaxException ex) {
       throw new DatasetOperationException("Could not build FS URI", ex);
