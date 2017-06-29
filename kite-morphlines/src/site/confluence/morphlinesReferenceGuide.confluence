@@ -3184,7 +3184,7 @@ h2. loadSolr
 
 The {{loadSolr}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-solr-core/src/main/java/org/kitesdk/morphline/solr/LoadSolrBuilder.java]) 
 inserts, updates or deletes records into a Solr server or MapReduce Reducer.
-It has an optional ingestion rate limiting feature that is implemented with the Guava [RateLimiter|http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/util/concurrent/RateLimiter.html].
+It has an optional ingestion rate limiting feature that is implemented with the Guava [RateLimiter|https://google.github.io/guava/releases/22.0/api/docs/com/google/common/util/concurrent/RateLimiter.html].
  
 The command provides the following configuration options:
 
