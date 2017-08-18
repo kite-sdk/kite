@@ -27,6 +27,8 @@ import org.kitesdk.data.spi.MetadataProvider;
 
 class HiveAbstractDatasetRepository extends FileSystemDatasetRepository {
 
+  private static final String HIVE_METASTORE_URIS_SEPARATOR = ",";
+
   private final MetadataProvider provider;
   private final URI repoUri;
 
@@ -99,7 +101,7 @@ class HiveAbstractDatasetRepository extends FileSystemDatasetRepository {
 
   private URI getRepositoryUri(Configuration conf,
                                @Nullable Path rootDirectory) {
-    String hiveMetaStoreUriProperty = conf.get(Loader.HIVE_METASTORE_URI_PROP);
+    String hiveMetaStoreUriProperty = getHiveMetastoreUri(conf);
     StringBuilder uri = new StringBuilder("repo:hive");
     if (hiveMetaStoreUriProperty != null) {
       URI hiveMetaStoreUri = URI.create(hiveMetaStoreUriProperty);
@@ -121,5 +123,24 @@ class HiveAbstractDatasetRepository extends FileSystemDatasetRepository {
       }
     }
     return URI.create(uri.toString());
+  }
+
+  /**
+   * This method extracts one URI for the Hive metastore. The hive.metastore.uris property in the parameter
+   * Configuration object can contain a list of uris but since Kite does not support highly available Hive metastore
+   * currently we need to make sure that only the first one is retrieved.
+   *
+   * @param conf The Configuration object potentially containing the hive.metastore.uris property.
+   * @return The first URI from the hive.metastore.uris property if it is set, null otherwise.
+   */
+  String getHiveMetastoreUri(Configuration conf) {
+    String metastoreUris = conf.get(Loader.HIVE_METASTORE_URI_PROP);
+    if (metastoreUris == null) {
+      return null;
+    }
+
+    String[] uriArray = metastoreUris.split(HIVE_METASTORE_URIS_SEPARATOR);
+
+    return uriArray[0];
   }
 }
