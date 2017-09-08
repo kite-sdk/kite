@@ -110,6 +110,15 @@ public class Loader implements Loadable {
         builder);
 
     Registration.register(
+        new URIPattern("viewfs:/*path?absolute=true"),
+        new URIPattern("viewfs:/*path/:namespace/:dataset?absolute=true"),
+        builder);
+    Registration.register(
+        new URIPattern("viewfs:*path"),
+        new URIPattern("viewfs:*path/:namespace/:dataset"),
+        builder);
+
+    Registration.register(
         new URIPattern("webhdfs:/*path?absolute=true"),
         new URIPattern("webhdfs:/*path/:namespace/:dataset?absolute=true"),
         builder);
