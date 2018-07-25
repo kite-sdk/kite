@@ -18,6 +18,8 @@ package org.kitesdk.data.mapreduce;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.util.Utf8;
@@ -26,6 +28,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
@@ -59,6 +62,24 @@ public class TestMapReduce extends FileSystemTestBase {
         Context context)
         throws IOException, InterruptedException {
       context.write(new Text(record.get("text").toString()), new IntWritable(1));
+    }
+  }
+
+  private static class SchemaVerifyingMapper
+      extends Mapper<GenericData.Record, Void, Void, Void> {
+
+    private transient Schema expectedSchema;
+
+    @Override
+    protected void setup(Context context) {
+      this.expectedSchema = new Schema.Parser().parse(context.getConfiguration().get("expectedSchema"));
+    }
+
+    @Override
+    protected void map(GenericData.Record record, Void value, Context context) {
+      if (!expectedSchema.equals(record.getSchema())) {
+        throw new IllegalStateException("Record schema is not as expected: " + record.getSchema());
+      }
     }
   }
 
@@ -119,6 +140,34 @@ public class TestMapReduce extends FileSystemTestBase {
 
     Job job = createJob();
     job.waitForCompletion(true);
+  }
+
+  @Test
+  public void testSchemaEvolution() throws Exception {
+    populateInputDataset();
+
+    Schema updatedSchema = SchemaBuilder.record("mystring").fields()
+        .requiredString("text")
+        .optionalString("newText")
+        .endRecord();
+
+    // update the schema of the dataset (one additional field)
+    DatasetDescriptor updatedDescriptor = new DatasetDescriptor.Builder(inputDataset.getDescriptor())
+        .schema(updatedSchema)
+        .build();
+    inputDataset = repo.update("ns", "in", updatedDescriptor, Record.class);
+
+    @SuppressWarnings("deprecation")
+    Job job = new Job();
+
+    DatasetKeyInputFormat.configure(job).readFrom(inputDataset).withType(GenericData.Record.class);
+
+    job.getConfiguration().set("expectedSchema", updatedSchema.toString());
+
+    job.setMapperClass(SchemaVerifyingMapper.class);
+    job.setOutputFormatClass(NullOutputFormat.class);
+
+    Assert.assertTrue(job.waitForCompletion(true));
   }
 
   @Test(expected = DatasetException.class)
