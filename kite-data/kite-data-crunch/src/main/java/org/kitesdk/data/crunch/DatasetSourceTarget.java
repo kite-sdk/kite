@@ -1,12 +1,12 @@
 /**
  * Copyright 2014 Cloudera Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,10 +15,6 @@
  */
 package org.kitesdk.data.crunch;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Map;
-import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 import org.apache.avro.generic.GenericData;
 import org.apache.crunch.ReadableData;
@@ -41,8 +37,14 @@ import org.kitesdk.data.View;
 import org.kitesdk.data.mapreduce.DatasetKeyInputFormat;
 import org.kitesdk.data.spi.LastModifiedAccessor;
 import org.kitesdk.data.spi.SizeAccessor;
+import org.kitesdk.data.spi.filesystem.AvroConfigurationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.Map;
+import java.util.Set;
 
 class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceTarget<E> {
 
@@ -72,8 +74,10 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
     this.view = view;
     this.avroType = avroType;
 
-    Configuration temp = new Configuration(false /* use an empty conf */ );
+    Configuration temp = new Configuration(false /* use an empty conf */);
     DatasetKeyInputFormat.configure(temp).readFrom(view);
+    AvroConfigurationUtil.configure(temp, view.getDataset().getDescriptor().getFormat(),
+        view.getSchema(), view.getDataset().getType());
     this.formatBundle = inputBundle(temp);
   }
 
@@ -85,7 +89,7 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
   private static <E> AvroType<E> toAvroType(View<E> view, Class<E> type) {
     if (type.isAssignableFrom(GenericData.Record.class)) {
       return (AvroType<E>) Avros.generics(
-        view.getDataset().getDescriptor().getSchema());
+          view.getDataset().getDescriptor().getSchema());
     } else {
       return Avros.records(type);
     }

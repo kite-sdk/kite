@@ -16,54 +16,33 @@
 package org.kitesdk.data.crunch;
 
 import com.google.common.io.Files;
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericData.Record;
+import org.apache.crunch.*;
+import org.apache.crunch.impl.mr.MRPipeline;
+import org.apache.crunch.types.avro.Avros;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.kitesdk.compat.Hadoop;
+import org.kitesdk.data.*;
+import org.kitesdk.data.spi.DatasetRepository;
+import org.kitesdk.data.spi.LastModifiedAccessor;
+import org.kitesdk.data.spi.PartitionKey;
+import org.kitesdk.data.spi.PartitionedDataset;
+import org.kitesdk.data.spi.filesystem.DatasetTestUtilities;
+import org.kitesdk.data.user.NewUserRecord;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
-import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericData.Record;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.crunch.CrunchRuntimeException;
-import org.apache.crunch.MapFn;
-import org.apache.crunch.PCollection;
-import org.apache.crunch.Pipeline;
-import org.apache.crunch.Target;
-import org.apache.crunch.impl.mr.MRPipeline;
-import org.apache.crunch.types.avro.Avros;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.kitesdk.compat.Hadoop;
-import org.kitesdk.data.Dataset;
-import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetReader;
-import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.Datasets;
-import org.kitesdk.data.Formats;
-import org.kitesdk.data.MiniDFSTest;
-import org.kitesdk.data.Signalable;
-import org.kitesdk.data.spi.PartitionKey;
-import org.kitesdk.data.PartitionStrategy;
-import org.kitesdk.data.spi.DatasetRepository;
-import org.kitesdk.data.spi.PartitionedDataset;
-import org.kitesdk.data.View;
-import org.kitesdk.data.spi.LastModifiedAccessor;
-import org.kitesdk.data.URIBuilder;
-import org.kitesdk.data.user.NewUserRecord;
-
-import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.USER_SCHEMA;
-import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.checkTestUsers;
-import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.datasetSize;
-import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.writeTestUsers;
+import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.*;
 
 @RunWith(Parameterized.class)
 public abstract class TestCrunchDatasets extends MiniDFSTest {
@@ -653,5 +632,93 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     pipeline.run();
 
     checkTestUsers(outputDataset, 10);
+  }
+
+  @Test
+  public void testMultipleFileReadingFromCrunchWithDifferentReaderWriterSchemas() {
+    Schema userNameOnlySchema = SchemaBuilder.record("userNameOnlyRecord")
+        .fields()
+        .requiredString("username")
+        .endRecord();
+
+    Schema emailOnlySchema = SchemaBuilder.record("emailOnlyRecord")
+        .fields()
+        .requiredString("email")
+        .endRecord();
+
+    // write two files, each of 5 records, using the original schema (username and email)
+    Dataset<GenericData.Record> writeDatasetA = repo.create("ns", "inA", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).build());
+    Dataset<GenericData.Record> writeDatasetB = repo.create("ns", "inB", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).build());
+    writeTestUsers(writeDatasetA, 5, 0);
+    writeTestUsers(writeDatasetB, 5, 5);
+
+    // update the schema of the repositories (using a schema with only the username or email field)
+    repo.update("ns", "inA", new DatasetDescriptor.Builder(repo.load("ns", "inA").getDescriptor())
+        .schema(userNameOnlySchema).build());
+    repo.update("ns", "inB", new DatasetDescriptor.Builder(repo.load("ns", "inB").getDescriptor())
+        .schema(emailOnlySchema).build());
+
+    // run a crunch singleInputPipeline to read/write the records using the reduced schemas
+    Dataset<GenericData.Record> inputA = repo.load("ns", "inA");
+    Dataset<GenericData.Record> inputB = repo.load("ns", "inB");
+
+    Dataset<GenericData.Record> outputDataset = repo.create("ns", "out", new DatasetDescriptor.Builder()
+        .schema(userNameOnlySchema).build());
+
+    Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
+    PCollection<GenericData.Record> dataA = pipeline.read(CrunchDatasets.asSource(inputA))
+        .filter("remove records that don't have the correct schema",
+            new FilterRecordsWithExpectedSchemaFn(userNameOnlySchema.toString()));
+    PCollection<GenericData.Record> dataB = pipeline.read(CrunchDatasets.asSource(inputB))
+        .filter("remove records that don't have the correct schema",
+            new FilterRecordsWithExpectedSchemaFn(emailOnlySchema.toString()));
+    pipeline.write(dataA.union(dataB), CrunchDatasets.asTarget(outputDataset), Target.WriteMode.APPEND);
+    pipeline.run();
+
+    // If the records did not have the correct schema, they would have been filtered. So this checks that they all had the
+    // expected schema indeed.
+    checkReaderIteration(outputDataset.newReader(), 10, new NopRecordValidator());
+
+    // Repeat the same test with only a single input, to ensure that the simple case also works
+    Dataset<GenericData.Record> singleInputOutputDataset = repo.create("ns", "out2", new DatasetDescriptor.Builder()
+        .schema(userNameOnlySchema).build());
+
+    Pipeline singleInputPipeline = new MRPipeline(TestCrunchDatasets.class);
+    PCollection<GenericData.Record> singleInputFiltered = singleInputPipeline.read(CrunchDatasets.asSource(inputA))
+        .filter("remove records that don't have the correct schema",
+            new FilterRecordsWithExpectedSchemaFn(userNameOnlySchema.toString()));
+    singleInputPipeline.write(singleInputFiltered, CrunchDatasets.asTarget(singleInputOutputDataset), Target.WriteMode.APPEND);
+    singleInputPipeline.run();
+
+    checkReaderIteration(singleInputOutputDataset.newReader(), 5, new NopRecordValidator());
+  }
+
+  private static final class FilterRecordsWithExpectedSchemaFn extends FilterFn<Record> {
+
+    private final String expectedSchemaString;
+    private transient Schema expectedSchema;
+
+    private FilterRecordsWithExpectedSchemaFn(String expectedSchemaString) {
+      this.expectedSchemaString = expectedSchemaString;
+    }
+
+    @Override
+    public void initialize() {
+      this.expectedSchema = new Schema.Parser().parse(expectedSchemaString);
+    }
+
+    @Override
+    public boolean accept(GenericData.Record record) {
+      return expectedSchema.equals(record.getSchema());
+    }
+  }
+
+  private static class NopRecordValidator implements RecordValidator<Record> {
+    @Override
+    public void validate(Record record, int recordNum) {
+      // nop
+    }
   }
 }
