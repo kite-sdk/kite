@@ -140,6 +140,7 @@
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305> <!-- don't update to 3.0.0 since that is JDK 1.7 or later -->
     <vers.flume>1.4.0</vers.flume>
     <vers.guava>11.0.2</vers.guava>
+    <vers.guava.gcs>22.0</vers.guava.gcs>
     <vers.hadoop1>1.2.1</vers.hadoop1>
     <vers.hadoop2>2.6.0</vers.hadoop2>
     <vers.hadoop-cdh4>2.0.0-cdh${cdh4.version}</vers.hadoop-cdh4>
@@ -181,7 +182,7 @@
     <vers.jcommander>1.35</vers.jcommander>
     <vers.spark>1.0.0</vers.spark>
     <vers.hadoop-aws>2.6.0</vers.hadoop-aws>
-    <vers.hadoop-gcs>hadoop${hadoop.profile}-1.9.10</vers.hadoop-gcs>
+    <vers.hadoop-gcs>hadoop2-1.9.10</vers.hadoop-gcs>
 
     <!-- Plugin versions -->
     <vers.doxia-module-markdown>1.4</vers.doxia-module-markdown>
@@ -1255,7 +1256,6 @@
         <vers.flume>1.4.0-cdh${cdh4.version}</vers.flume>
         <vers.hive>0.10.0-cdh${cdh4.version}</vers.hive>
         <vers.oozie>3.3.2-cdh${cdh4.version}</vers.oozie>
-        <vers.hadoop-gcs>hadoop2-1.9.10</vers.hadoop-gcs>
         <test.aws.access.key /> <!-- don't test S3 -->
         <test.google.gcs.bucket /> <!-- don't test GCS -->
       </properties>
@@ -1285,7 +1285,6 @@
         <solr.expected.version>${vers.solr-cdh5}</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->
         <vers.hadoop-aws>2.6.0-cdh${cdh5.version}</vers.hadoop-aws>
         <vers.spark>1.3.0-cdh${cdh5.version}</vers.spark>
-        <vers.hadoop-gcs>hadoop2-1.9.10</vers.hadoop-gcs>
       </properties>
     </profile>
 
