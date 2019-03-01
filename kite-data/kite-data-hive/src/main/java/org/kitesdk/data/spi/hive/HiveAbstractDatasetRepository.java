@@ -24,13 +24,24 @@ import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
 import org.kitesdk.data.spi.MetadataProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class HiveAbstractDatasetRepository extends FileSystemDatasetRepository {
+
+  private static final Logger LOG = LoggerFactory
+      .getLogger(HiveAbstractDatasetRepository.class);
 
   private static final String HIVE_METASTORE_URIS_SEPARATOR = ",";
 
   private final MetadataProvider provider;
   private final URI repoUri;
+
+  private static Path getRootDirectory(Configuration conf) {
+    String pathString = conf.get("kite.hive.tmp.root", "/tmp");
+    LOG.info("Using root directory: " + pathString);
+    return new Path(pathString);
+  }
 
   /**
    * Create an HCatalog dataset repository with external tables.
@@ -48,7 +59,7 @@ class HiveAbstractDatasetRepository extends FileSystemDatasetRepository {
   HiveAbstractDatasetRepository(Configuration conf, MetadataProvider provider) {
     // Because the managed provider overrides dataset locations, the only time
     // the storage path is used is to create temporary dataset repositories
-    super(conf, new Path("/tmp"), provider);
+    super(conf, getRootDirectory(conf), provider);
     this.provider = provider;
     this.repoUri = getRepositoryUri(conf, null);
   }
