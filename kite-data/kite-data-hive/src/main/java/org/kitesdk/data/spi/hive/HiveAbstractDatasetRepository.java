@@ -39,7 +39,7 @@ class HiveAbstractDatasetRepository extends FileSystemDatasetRepository {
 
   private static Path getRootDirectory(Configuration conf) {
     String pathString = conf.get("kite.hive.tmp.root", "/tmp");
-    LOG.info("Using root directory: " + pathString);
+    LOG.debug("Using root directory: " + pathString);
     return new Path(pathString);
   }
 
