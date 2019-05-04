@@ -16,6 +16,7 @@
 
 package org.kitesdk.cli.commands;
 
+import com.beust.jcommander.DynamicParameter;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.beust.jcommander.internal.Lists;
@@ -24,7 +25,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.apache.hadoop.conf.Configuration;
 import org.kitesdk.data.spi.filesystem.CSVProperties;
@@ -90,6 +93,10 @@ public class CSVSchemaCommand extends BaseCommand {
       description="Do not allow null values for the given field")
   List<String> requiredFields;
 
+  @DynamicParameter(names="--field-type",
+      description="Specify the type for a field. Format is field_name=field_type. Valid types are string, int, boolean, long, float, and double.")
+  Map<String,String> fieldTypes = new HashMap<String,String>();
+
   @Override
   public int run() throws IOException {
     Preconditions.checkArgument(samplePaths != null && !samplePaths.isEmpty(),
@@ -120,7 +127,7 @@ public class CSVSchemaCommand extends BaseCommand {
     // assume fields are nullable by default, users can easily change this
     String sampleSchema = CSVUtil
         .inferNullableSchema(
-            recordName, open(samplePaths.get(0)), props, required)
+            recordName, open(samplePaths.get(0)), props, required, fieldTypes)
         .toString(!minimize);
 
     output(sampleSchema, console, outputPath);

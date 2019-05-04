@@ -16,10 +16,14 @@
 
 package org.kitesdk.data.spi.filesystem;
 
+import static java.lang.Math.min;
+
 import au.com.bytecode.opencsv.CSVParser;
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 import com.google.common.collect.ImmutableSet;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
 import org.apache.avro.SchemaBuilder;
@@ -37,8 +41,6 @@ import java.util.regex.Pattern;
 import org.apache.avro.Schema;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.spi.Compatibility;
-
-import static java.lang.Math.min;
 
 public class CSVUtil {
 
@@ -69,38 +71,55 @@ public class CSVUtil {
   private static final Pattern LONG = Pattern.compile("\\d+");
   private static final Pattern DOUBLE = Pattern.compile("\\d*\\.\\d*[dD]?");
   private static final Pattern FLOAT = Pattern.compile("\\d*\\.\\d*[fF]?");
+  private static final Pattern BOOLEAN = Pattern.compile("^(true|false)$");
   private static final int DEFAULT_INFER_LINES = 25;
   private static final Set<String> NO_REQUIRED_FIELDS = ImmutableSet.of();
+  private static final Map<String,String> NO_SPECIFIED_TYPES = null;
 
   public static Schema inferNullableSchema(String name, InputStream incoming,
                                            CSVProperties props)
       throws IOException {
-    return inferSchemaInternal(name, incoming, props, NO_REQUIRED_FIELDS, true);
+    return inferSchemaInternal(name, incoming, props, NO_REQUIRED_FIELDS, NO_SPECIFIED_TYPES, true);
   }
 
   public static Schema inferNullableSchema(String name, InputStream incoming,
                                            CSVProperties props,
                                            Set<String> requiredFields)
       throws IOException {
-    return inferSchemaInternal(name, incoming, props, requiredFields, true);
+    return inferSchemaInternal(name, incoming, props, requiredFields, NO_SPECIFIED_TYPES, true);
+  }
+
+  public static Schema inferNullableSchema(String name, InputStream incoming,
+                                           CSVProperties props,
+                                           Set<String> requiredFields, Map<String,String> fieldTypes)
+      throws IOException {
+    return inferSchemaInternal(name, incoming, props, requiredFields, fieldTypes, true);
   }
 
   public static Schema inferSchema(String name, InputStream incoming,
                                    CSVProperties props)
       throws IOException {
-    return inferSchemaInternal(name, incoming, props, NO_REQUIRED_FIELDS, false);
+    return inferSchemaInternal(name, incoming, props, NO_REQUIRED_FIELDS, NO_SPECIFIED_TYPES, false);
   }
 
   public static Schema inferSchema(String name, InputStream incoming,
                                    CSVProperties props,
                                    Set<String> requiredFields)
       throws IOException {
-    return inferSchemaInternal(name, incoming, props, requiredFields, false);
+    return inferSchemaInternal(name, incoming, props, requiredFields, NO_SPECIFIED_TYPES, false);
+  }
+
+  public static Schema inferSchema(String name, InputStream incoming,
+                                   CSVProperties props,
+                                   Set<String> requiredFields, Map<String,String> fieldTypes)
+      throws IOException {
+    return inferSchemaInternal(name, incoming, props, requiredFields, fieldTypes, false);
   }
 
   private static Schema inferSchemaInternal(String name, InputStream incoming,
                                             CSVProperties props,
                                             Set<String> requiredFields,
+                                            Map<String,String> specifiedTypes,
                                             boolean makeNullable)
       throws IOException {
     CSVReader reader = newReader(incoming, props);
@@ -130,9 +149,10 @@ public class CSVUtil {
 
     Schema.Type[] types = new Schema.Type[header.length];
     String[] values = new String[header.length];
+    String[] specifiedValues = new String[header.length];
     boolean[] nullable = new boolean[header.length];
     boolean[] empty = new boolean[header.length];
-
+    
     for (int processed = 0; processed < DEFAULT_INFER_LINES; processed += 1) {
       if (line == null) {
         break;
@@ -186,19 +206,51 @@ public class CSVUtil {
       // the empty string is not considered null for string fields
       boolean foundNull = (nullable[i] ||
           (empty[i] && types[i] != Schema.Type.STRING));
+      
+      if (specifiedTypes != null && specifiedTypes.containsKey(fieldName)) {
+        String specifiedTypeString = specifiedTypes.get(fieldName);
+        Schema.Type specifiedType = stringToFieldType(specifiedTypeString);
+        if (areCompatibleTypes(types[i], specifiedType)) {
+          if (specifiedType == Schema.Type.BOOLEAN
+              && BOOLEAN.matcher(values[i].trim()).matches() == false) {
+            throw new DatasetException("Field '" + fieldName
+                + "' is specified as type '" + specifiedType + "', but value '"
+                + values[i] + "' appears to be of type '" + types[i] + "'.");
+          }
+          types[i] = specifiedType; // override inferred type with specified type
+          specifiedValues[i] = "--field-type " + fieldName + "=" + specifiedTypeString;
+        } else {
+          throw new DatasetException("Field '" + fieldName
+              + "' is specified as type '" + specifiedType + "', but value '"
+              + values[i] + "' appears to be of type '" + types[i] + "'.");
+        }
+      }
 
       if (requiredFields.contains(fieldName)) {
         if (foundNull) {
           throw new DatasetException("Found null value for required field: " +
               fieldName + " (" + types[i] + ")");
         }
-        fieldAssembler = fieldAssembler.name(fieldName)
-            .doc("Type inferred from '" + sample(values[i]) + "'")
-            .type(schema(types[i], false)).noDefault();
+        if (specifiedValues[i] != null) {
+          fieldAssembler = fieldAssembler.name(fieldName)
+              .doc("Type specified by '" + sample(specifiedValues[i]) + "'")
+              .type(schema(types[i], false)).noDefault();
+        } else {
+          fieldAssembler = fieldAssembler.name(fieldName)
+              .doc("Type inferred from '" + sample(values[i]) + "'")
+              .type(schema(types[i], false)).noDefault();
+        }
       } else {
-        SchemaBuilder.GenericDefault<Schema> defaultBuilder = fieldAssembler.name(fieldName)
-            .doc("Type inferred from '" + sample(values[i]) + "'")
-            .type(schema(types[i], makeNullable || foundNull));
+        SchemaBuilder.GenericDefault<Schema> defaultBuilder;
+        if (specifiedValues[i] != null) {
+          defaultBuilder = fieldAssembler.name(fieldName)
+              .doc("Type specified by '" + sample(specifiedValues[i]) + "'")
+              .type(schema(types[i], makeNullable || foundNull));
+        } else {
+          defaultBuilder = fieldAssembler.name(fieldName)
+              .doc("Type inferred from '" + sample(values[i]) + "'")
+              .type(schema(types[i], makeNullable || foundNull));
+        }
         if (makeNullable || foundNull) {
           fieldAssembler = defaultBuilder.withDefault(null);
         } else {
@@ -252,5 +304,50 @@ public class CSVUtil {
       return Schema.Type.FLOAT;
     }
     return Schema.Type.STRING;
+  }
+  
+  private static Schema.Type stringToFieldType(String typeString) {
+    if (typeString == null || typeString.isEmpty()) {
+      return null;
+    }
+      
+    String type = typeString.toLowerCase(Locale.ENGLISH);
+    if (type.equals("long")) {
+      return Schema.Type.LONG;
+    } else if (type.equals("int")) {
+      return Schema.Type.INT;
+    } else if (type.equals("double")) {
+      return Schema.Type.DOUBLE;
+    } else if (type.equals("float")) {
+      return Schema.Type.FLOAT;
+    } else if (type.equals("string")) {
+      return Schema.Type.STRING;
+    } else if (type.equals("boolean")) {
+      return Schema.Type.BOOLEAN;
+    }
+    return null; // type not recognized
+  }
+  
+  private static boolean areCompatibleTypes(Schema.Type inferredType, Schema.Type specifiedType) {
+    if (inferredType == specifiedType) {
+      return true;
+    } else if (specifiedType == Schema.Type.STRING) {
+      return true;
+    } else if (inferredType == Schema.Type.STRING) {
+      if (specifiedType == Schema.Type.BOOLEAN) {
+        return true;
+      }
+    } else if (inferredType == Schema.Type.LONG) {
+      if (specifiedType == Schema.Type.INT
+          || specifiedType == Schema.Type.DOUBLE
+          || specifiedType == Schema.Type.FLOAT) {
+        return true;
+      }
+    } else if (inferredType == Schema.Type.DOUBLE) {
+      if (specifiedType == Schema.Type.FLOAT) {
+        return true;
+      }
+    }
+    return false;
   }
 }
