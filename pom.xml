@@ -140,6 +140,7 @@
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305> <!-- don't update to 3.0.0 since that is JDK 1.7 or later -->
     <vers.flume>1.4.0</vers.flume>
     <vers.guava>11.0.2</vers.guava>
+    <vers.guava.gcs>22.0</vers.guava.gcs>
     <vers.hadoop1>1.2.1</vers.hadoop1>
     <vers.hadoop2>2.6.0</vers.hadoop2>
     <vers.hadoop-cdh4>2.0.0-cdh${cdh4.version}</vers.hadoop-cdh4>
@@ -181,6 +182,7 @@
     <vers.jcommander>1.35</vers.jcommander>
     <vers.spark>1.0.0</vers.spark>
     <vers.hadoop-aws>2.6.0</vers.hadoop-aws>
+    <vers.hadoop-gcs>hadoop2-1.9.10</vers.hadoop-gcs>
 
     <!-- Plugin versions -->
     <vers.doxia-module-markdown>1.4</vers.doxia-module-markdown>
@@ -215,6 +217,7 @@
     <test.aws.access.key>${env.AWS_ACCESS_KEY_ID}</test.aws.access.key>
     <test.aws.s3.secret.key>${env.AWS_SECRET_ACCESS_KEY}</test.aws.s3.secret.key>
     <test.aws.s3.bucket>${env.S3_BUCKET}</test.aws.s3.bucket>
+    <test.google.gcs.bucket>${env.GCS_BUCKET}</test.google.gcs.bucket>
   </properties>
 
   <repositories>
@@ -780,6 +783,12 @@
         <version>${vers.hadoop-aws}</version>
         <scope>provided</scope>
       </dependency>
+      <dependency>
+        <groupId>com.google.cloud.bigdataoss</groupId>
+        <artifactId>gcs-connector</artifactId>
+        <version>${vers.hadoop-gcs}</version>
+        <scope>provided</scope>
+      </dependency>
 
       <!-- HBase dependencies -->
       <dependency>
@@ -1248,6 +1257,7 @@
         <vers.hive>0.10.0-cdh${cdh4.version}</vers.hive>
         <vers.oozie>3.3.2-cdh${cdh4.version}</vers.oozie>
         <test.aws.access.key /> <!-- don't test S3 -->
+        <test.google.gcs.bucket /> <!-- don't test GCS -->
       </properties>
     </profile>
 
