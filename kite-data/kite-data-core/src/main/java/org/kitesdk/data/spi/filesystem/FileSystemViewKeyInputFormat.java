@@ -17,67 +17,45 @@ package org.kitesdk.data.spi.filesystem;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericData;
-import org.apache.avro.hadoop.io.AvroSerialization;
 import org.apache.avro.mapred.AvroKey;
-import org.apache.avro.mapreduce.AvroJob;
 import org.apache.avro.mapreduce.AvroKeyInputFormat;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapreduce.InputFormat;
-import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.RecordReader;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.*;
 import org.apache.hadoop.mapreduce.lib.input.CombineFileSplit;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.kitesdk.compat.DynMethods;
+import org.apache.parquet.avro.AvroParquetInputFormat;
 import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.spi.AbstractKeyRecordReaderWrapper;
 import org.kitesdk.data.spi.AbstractRefinableView;
-import org.kitesdk.data.spi.DataModelUtil;
 import org.kitesdk.data.spi.FilteredRecordReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.parquet.avro.AvroParquetInputFormat;
-import org.apache.parquet.avro.AvroReadSupport;
+
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
 
 class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
 
   private static final Logger LOG =
       LoggerFactory.getLogger(FileSystemViewKeyInputFormat.class);
 
-  // Constant from AvroJob copied here so we can set it on the Configuration
-  // given to this class.
-  private static final String AVRO_SCHEMA_INPUT_KEY = "avro.schema.input.key";
-
-  // this is required for 1.7.4 because setDataModelClass is not available
-  private static final DynMethods.StaticMethod setModel =
-      new DynMethods.Builder("setDataModelClass")
-          .impl(AvroSerialization.class, Configuration.class, Class.class)
-          .defaultNoop()
-          .buildStatic();
-
   private FileSystemDataset<E> dataset;
   private FileSystemView<E> view;
 
   public FileSystemViewKeyInputFormat(FileSystemDataset<E> dataset,
-      Configuration conf) {
+                                      Configuration conf) {
     this.dataset = dataset;
     this.view = null;
     LOG.debug("Dataset: {}", dataset);
 
     Format format = dataset.getDescriptor().getFormat();
 
-    setConfigProperties(conf, format, dataset.getSchema(), dataset.getType());
+    AvroConfigurationUtil.configure(conf, format, dataset.getSchema(), dataset.getType());
   }
 
   public FileSystemViewKeyInputFormat(FileSystemView<E> view, Configuration conf) {
@@ -87,22 +65,7 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
 
     Format format = dataset.getDescriptor().getFormat();
 
-    setConfigProperties(conf, format, view.getSchema(), view.getType());
-  }
-
-  private static void setConfigProperties(Configuration conf, Format format,
-                                          Schema schema, Class<?> type) {
-    GenericData model = DataModelUtil.getDataModelForType(type);
-    if (Formats.AVRO.equals(format)) {
-      setModel.invoke(conf, model.getClass());
-      conf.set(AVRO_SCHEMA_INPUT_KEY, schema.toString());
-
-    } else if (Formats.PARQUET.equals(format)) {
-      // TODO: update to a version of Parquet with setAvroDataSupplier
-      //AvroReadSupport.setAvroDataSupplier(conf,
-      //    DataModelUtil.supplierClassFor(model));
-      AvroReadSupport.setAvroReadSchema(conf, schema);
-    }
+    AvroConfigurationUtil.configure(conf, format, view.getSchema(), view.getType());
   }
 
   @Override
@@ -114,7 +77,6 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
 
     if (setInputPaths(jobContext, job)) {
       if (Formats.AVRO.equals(format)) {
-        AvroJob.setInputKeySchema(job, dataset.getDescriptor().getSchema());
         AvroCombineInputFormat<E> delegate = new AvroCombineInputFormat<E>();
         return delegate.getSplits(jobContext);
       } else if (Formats.PARQUET.equals(format)) {
