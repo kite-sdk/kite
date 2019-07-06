@@ -32,6 +32,7 @@
     <module>kite-data-hbase</module>
     <module>kite-data-mapreduce</module>
     <module>kite-data-spark</module>
+    <module>kite-data-camel</module>
   </modules>
 
   <parent>

@@ -181,6 +181,7 @@
     <vers.jcommander>1.35</vers.jcommander>
     <vers.spark>1.0.0</vers.spark>
     <vers.hadoop-aws>2.6.0</vers.hadoop-aws>
+    <vers.camel>2.15.2</vers.camel>
 
     <!-- Plugin versions -->
     <vers.doxia-module-markdown>1.4</vers.doxia-module-markdown>
@@ -204,6 +205,7 @@
     <vers.maven-jar-plugin>2.4</vers.maven-jar-plugin>
     <vers.maven-exec-plugin>1.2.1</vers.maven-exec-plugin>
     <vers.maven-assembly-plugin>2.4.1</vers.maven-assembly-plugin>
+    <vers.maven-resources-plugin>2.7</vers.maven-resources-plugin>
 
     <url.cloudera>http://www.cloudera.com</url.cloudera>
     <url.project>http://kitesdk.org/</url.project>
@@ -671,6 +673,14 @@
           <artifactId>maven-assembly-plugin</artifactId>
           <version>${vers.maven-assembly-plugin}</version>
         </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>${vers.maven-resources-plugin}</version>
+          <configuration>
+            <encoding>UTF-8</encoding>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
@@ -863,6 +873,19 @@
         <groupId>org.apache.spark</groupId>
         <artifactId>spark-core_2.10</artifactId>
         <version>${vers.spark}</version>
+      </dependency>
+
+      <!-- Camel -->
+      <dependency>
+        <groupId>org.apache.camel</groupId>
+        <artifactId>camel-core</artifactId>
+        <version>${vers.camel}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.camel</groupId>
+        <artifactId>camel-test</artifactId>
+        <version>${vers.camel}</version>
+        <scope>test</scope>
       </dependency>
 
       <!-- Misc -->
