@@ -195,6 +195,38 @@ public class Constraints {
   }
 
   /**
+   * Filter the entities returned by a given iterator by these constraints.
+   * This method applies server side filters based on the constraints set
+   * and uses the {@link ServerSideConstrainableReader} to apply these
+   * server side filters before applying the constraints on the client side
+   *
+   * @param <E> The type of entities to be matched
+   * @return an iterator filtered by these constraints
+   */
+  public <E> Iterator<E> filter(ServerSideConstrainableReader<E> reader,
+      EntityAccessor<E> accessor) {
+    Map<String, Object> serverSideFilters = Maps.newHashMap();
+    // All provided values can be applied as server-side filters
+    serverSideFilters.putAll(getProvidedValues());
+
+    for (Map.Entry<String, Predicate> constraintEntry : constraints
+        .entrySet()) {
+      // Only other Predicate currently supports server-side is Exists
+      if (constraintEntry.getValue() instanceof Exists) {
+        serverSideFilters.put(constraintEntry.getKey(), null);
+      }
+    }
+    // Apply the server-side predicates on the Reader Factory and
+    // then initialize the iterator
+    reader.applyFilters(serverSideFilters);
+    if(reader instanceof InitializeAccessor) {
+      ((InitializeAccessor) reader).initialize();
+    }
+    // apply the client side constraints
+    return filter(reader.iterator(), accessor);
+  }
+
+  /**
    * Get a {@link Predicate} that tests {@link StorageKey} objects.
    *
    * If a {@code StorageKey} matches the predicate, it <em>may</em> represent a
