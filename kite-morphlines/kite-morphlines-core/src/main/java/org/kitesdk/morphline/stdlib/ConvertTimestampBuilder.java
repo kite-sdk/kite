@@ -39,6 +39,8 @@ import org.kitesdk.morphline.base.Fields;
 import com.google.common.base.Joiner;
 import com.typesafe.config.Config;
 
+import javafx.util.Pair;
+
 /**
  * Command that converts the timestamps in a given field from one of a set of input date formats (in
  * an input timezone) to an output date format (in an output timezone), while respecting daylight
@@ -60,12 +62,14 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
-  private static final class ConvertTimestamp extends AbstractCommand {
+  public static final class ConvertTimestamp extends AbstractCommand {
 
     private final String fieldName;
-    private final List<SimpleDateFormat> inputFormats = new ArrayList<SimpleDateFormat>();
+    private final List<Pair<SimpleDateFormat, Boolean>> inputFormats = new ArrayList<Pair<SimpleDateFormat,Boolean>>();
     private final SimpleDateFormat outputFormat;
     private final String inputFormatsDebugString; // cached
+    private final int insertYearMonthOffset;
+    private final int insertYearOffset;
     
     private static final String NATIVE_SOLR_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"; // e.g. 2007-04-26T08:05:04.789Z
     private static final SimpleDateFormat UNIX_TIME_IN_MILLIS = new SimpleDateFormat("'unixTimeInMillis'");
@@ -75,20 +79,31 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
       DateUtil.DEFAULT_DATE_FORMATS.add(0, NATIVE_SOLR_FORMAT); 
     }    
 
-    public ConvertTimestamp(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+    ConvertTimestamp(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
       super(builder, config, parent, child, context);
       
       this.fieldName = getConfigs().getString(config, "field", Fields.TIMESTAMP);
       TimeZone inputTimeZone = getTimeZone(getConfigs().getString(config, "inputTimezone", "UTC"));
       Locale inputLocale = getLocale(getConfigs().getString(config, "inputLocale", ""));
+      
+      boolean insertYear = getConfigs().getBoolean(config, "insertMissingYear", false);
+      //Defaults to -5 which gives a rolling -11 through +1 month offset (assumes historic messages)
+      insertYearMonthOffset = getConfigs().getInt(config, "insertMissingYearMonthOffset", -5);
+      insertYearOffset = getConfigs().getInt(config,"insertMissingYearOffset", 0);
+      
       for (String inputFormat : getConfigs().getStringList(config, "inputFormats", DateUtil.DEFAULT_DATE_FORMATS)) {
         SimpleDateFormat dateFormat = getUnixTimeFormat(inputFormat, inputTimeZone);
+        boolean yearRequired = false;
         if (dateFormat == null) {
+          if (insertYear && !inputFormat.contains("yy")) {
+            inputFormat = "yyyy" + inputFormat;
+            yearRequired=true;
+          }
           dateFormat = new SimpleDateFormat(inputFormat, inputLocale);
           dateFormat.setTimeZone(inputTimeZone);
           dateFormat.set2DigitYearStart(DateUtil.DEFAULT_TWO_DIGIT_YEAR_START);
         }
-        this.inputFormats.add(dateFormat);
+        this.inputFormats.add(new Pair<SimpleDateFormat,Boolean>(dateFormat,yearRequired));
       }
       TimeZone outputTimeZone = getTimeZone(getConfigs().getString(config, "outputTimezone", "UTC"));
       Locale outputLocale = getLocale(getConfigs().getString(config, "outputLocale", ""));
@@ -99,19 +114,23 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
         dateFormat.setTimeZone(outputTimeZone);
       }
       this.outputFormat = dateFormat;
-      validateArguments();
-
+      
       List<String> inputFormatsStringList = new ArrayList<String>();
-      for (SimpleDateFormat inputFormat : inputFormats) {
+      for (Pair<SimpleDateFormat,Boolean> inputFormat : inputFormats) {
         // SimpleDateFormat.toString() doesn't print anything useful
-        inputFormatsStringList.add(inputFormat.toPattern()); 
+        inputFormatsStringList.add(inputFormat.getKey().toPattern()); 
       }
       this.inputFormatsDebugString = inputFormatsStringList.toString();
 
+      
+      validateArguments();
+
+      
       if (LOG.isTraceEnabled()) {
         LOG.trace("inputFormatsDebugString: {}", inputFormatsDebugString);
         LOG.trace("availableTimeZoneIDs: {}", Joiner.on("\n").join(TimeZone.getAvailableIDs()));
         LOG.trace("availableLocales: {}", Joiner.on("\n").join(Locale.getAvailableLocales()));
+        LOG.trace("insertMissingYear: {}", insertYear);
       }
     }
         
@@ -123,7 +142,9 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
       while (iter.hasNext()) {
         String timestamp = iter.next().toString();
         boolean foundMatchingFormat = false;
-        for (SimpleDateFormat inputFormat : inputFormats) {
+        for (Pair<SimpleDateFormat,Boolean> inputFormatPair : inputFormats) {
+          SimpleDateFormat inputFormat = inputFormatPair.getKey();
+          boolean yearRequired = inputFormatPair.getValue();
           Date date;
           boolean isUnixTime;
           if (inputFormat == UNIX_TIME_IN_MILLIS) {
@@ -135,7 +156,15 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
           } else {
             isUnixTime = false;
             pos.setIndex(0);
-            date = inputFormat.parse(timestamp, pos);
+            if (yearRequired) {
+              Calendar cal = Calendar.getInstance();
+              int targetYear = cal.get(Calendar.YEAR) + insertYearOffset;
+              timestamp = targetYear + timestamp;
+              date = inputFormat.parse(timestamp, pos);
+              date = DateUtil.insertYear(date, new Date(), insertYearMonthOffset, targetYear, inputFormat.getTimeZone());
+            } else {
+              date = inputFormat.parse(timestamp, pos);
+            }
           }
           if (date != null && (isUnixTime || pos.getIndex() == timestamp.length())) {
             String result;
@@ -208,6 +237,7 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
     }
     
     
+    
     ///////////////////////////////////////////////////////////////////////////////
     // Nested classes:
     ///////////////////////////////////////////////////////////////////////////////
@@ -230,7 +260,7 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
     /**
      * This class has some code from HttpClient DateUtil and Solrj DateUtil.
      */
-    private static final class DateUtil {
+    public static final class DateUtil {
       //start HttpClient
       /**
        * Date format pattern used to parse HTTP date headers in RFC 1123 format.
@@ -259,8 +289,6 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
         DEFAULT_TWO_DIGIT_YEAR_START = calendar.getTime();
       }
 
-//      private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
-
       //end HttpClient
 
       //---------------------------------------------------------------------------------------
@@ -280,7 +308,56 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
         DEFAULT_DATE_FORMATS.addAll(DateUtil.DEFAULT_HTTP_CLIENT_PATTERNS);
       }
 
+      //work around the fact that SimpleDateFormat doesn't handle missing year.
+      //Code inspired by Flume SyslogParser.java
+      //https://github.com/apache/flume/blob/trunk/flume-ng-core/src/main/java/org/apache/flume/source/SyslogParser.java
+      public static Date insertYear(Date inputDate, Date currentDate, int monthOffset, int targetYear, TimeZone tz) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeZone(tz);
+        cal.setTime(inputDate);
+        
+        //There are 12 months in a year. We offer a sliding window, for working out whether the parsed date falls within
+        //the window (for dealing with year rollover issues).
+        //Compute the upper and lower bound by moving +6 and -6 by the offset.
+        int upperBound = monthOffset + 6;
+        int lowerBound = monthOffset - 6;
+        
+        //We're now going to check to see whether the date falls outside of the
+        //upper or lower bounds by intentionally creating the wrong date and seeing
+        //whether that falls in the past (or future)
+        Calendar calMinusUpperBMonths = Calendar.getInstance();
+        calMinusUpperBMonths.setTime(inputDate);
+        calMinusUpperBMonths.set(Calendar.YEAR, targetYear);
+        calMinusUpperBMonths.add(Calendar.MONTH, upperBound * -1);
+        
+        Calendar calPlusLowerBMonths = Calendar.getInstance();
+        calPlusLowerBMonths.setTime(inputDate);
+        calPlusLowerBMonths.set(Calendar.YEAR, targetYear);
+        calPlusLowerBMonths.add(Calendar.MONTH, lowerBound * -1);
+        
+        Calendar calReferencePoint = Calendar.getInstance();
+        calReferencePoint.setTime(currentDate);
+        calReferencePoint.setTimeZone(tz);
+        calReferencePoint.set(Calendar.YEAR, targetYear);
+        
+        if (cal.getTimeInMillis() > calReferencePoint.getTimeInMillis() && 
+          calMinusUpperBMonths.getTimeInMillis() > calReferencePoint.getTimeInMillis()) {
+          //Date as is stands is in the future and also more than (upper bound) months in the future, therefore rolling back a year.
+          //Need to roll back a year
+          cal.add(Calendar.YEAR, -1);
+        } else if (cal.getTimeInMillis() < calReferencePoint.getTimeInMillis() && 
+          calPlusLowerBMonths.getTimeInMillis() < calReferencePoint.getTimeInMillis() ) {
+          //Date as it stands is in the past and indeed more than (lower bound) months in the past
+          //Need to roll forward a year
+          cal.add(Calendar.YEAR, -1);
+        }
+        // Else it's in the middle and no modification required
+        
+        return cal.getTime();
+        
+      }
+      
     }
   }
-  
+
 }
