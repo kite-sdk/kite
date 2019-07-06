@@ -27,6 +27,7 @@ h3. Table of Contents
 - [#kite\-morphlines\-hadoop\-rcfile]
 - [#kite\-morphlines\-maxmind]
 - [#kite\-morphlines\-metrics\-servlets]
+- [#kite\-morphlines\-phonenumber]
 - [#kite\-morphlines\-protobuf]
 - [#kite\-morphlines\-tika\-core]
 - [#kite\-morphlines\-tika\-decompress]
@@ -143,6 +144,13 @@ h3. kite\-morphlines\-maxmind
 h3. kite\-morphlines\-metrics\-servlets
 | [#registerJVMMetrics] | Registers metrics that are related to the Java Virtual Machine with the MorphlineContext. |
 | [#startReportingMetricsToHTTP] | Exposes liveness status, health check status, metrics state and thread dumps via a set of HTTP URLs served by Jetty, using the AdminServlet. |
+
+{anchor:kite\-morphlines\-phonenumber}
+\\
+\\
+h3. kite\-morphlines\-phonenumber
+| [#phoneNumber] | Parses a phone number using [Google libphonenumber|phoneNumber] and outputs a formatted version as well as extracted information. |
+
 
 {anchor:kite\-morphlines\-protobuf}
 \\
@@ -2743,6 +2751,35 @@ Reference Handler id=2 state=WAITING
 
 ... and so on
 {code}
+
+
+h1. kite\-morphlines\-phonenumber
+
+This Maven module contains morphline commands for phone number manipulation using the [Google libphonenumber|https://github.com/googlei18n/libphonenumber] library.
+
+h2. phoneNumber
+
+The {{phoneNumber}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-phonenumber/src/main/java/org/kitesdk/morphline/phonenumber/PhoneNumberBuilder.java]) parses a phone number and outputs a formatted version as well as some extracted information.
+
+If the phone field is not present or cannot be parsed, the command will fail.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| inputField | n/a | Name of the field that contains the phone number to be analyzed. |
+| outputFieldPrefix | phone_ | A prefix that will be prepended to the output field names. |
+| defaultRegionCode | US | A region code that will be used by default to infer the country code of the phone number when it cannot be determined unambiguously. |
+| regionCodeField | n/a | An optional field name containing the default region code to be used. |
+| outputPhoneFormat | INTERNATIONAL | The name of the format that will be used to output the phone number. It can be INTERNATIONAL, NATIONAL, E164 or RFC3966. |
+
+Example usage:
+{code}
+phoneNumber {
+  inputField : message
+}
+{code}
+
+In the given example, output fields will be phone_phone, phone_country_code and phone_region_code.
 
 h1. kite\-morphlines\-protobuf
 
