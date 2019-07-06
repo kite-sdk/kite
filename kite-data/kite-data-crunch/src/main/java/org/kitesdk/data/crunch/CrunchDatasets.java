@@ -29,6 +29,7 @@ import org.apache.crunch.PTable;
 import org.apache.crunch.Pair;
 import org.apache.crunch.Target;
 import org.apache.crunch.io.ReadableSource;
+import org.apache.crunch.lib.SecondarySort;
 import org.apache.crunch.types.PTableType;
 import org.apache.crunch.types.PType;
 import org.apache.crunch.types.avro.Avros;
@@ -231,6 +232,38 @@ public class CrunchDatasets {
     }
   }
 
+  public static <E, K> PCollection<E> partitionAndSort(PCollection<E> collection,
+      View<E> view, MapFn<E, GenericData.Record> getSortKeyFn, Schema sortKeySchema) {
+    return partitionAndSort(collection, view, getSortKeyFn, sortKeySchema, -1);
+  }
+
+  public static <E, K> PCollection<E> partitionAndSort(PCollection<E> collection,
+      View<E> view, MapFn<E, GenericData.Record> getSortKeyFn, Schema sortKeySchema,
+      int numWriters) {
+    return partitionAndSort(collection, view, getSortKeyFn, sortKeySchema, numWriters, 1);
+  }
+
+  public static <E, K> PCollection<E> partitionAndSort(PCollection<E> collection,
+      View<E> view, MapFn<E, GenericData.Record> getSortKeyFn, Schema sortKeySchema,
+      int numWriters, int numPartitionWriters) {
+    //ensure the number of writers is honored whether it is per partition or total.
+    DatasetDescriptor descriptor = view.getDataset().getDescriptor();
+    if (descriptor.isPartitioned()) {
+      GetStorageKey<E> getKey = new GetStorageKey<E>(view, numPartitionWriters);
+      PTable<Pair<GenericData.Record, Integer>, Pair<GenericData.Record, E>> table =
+          collection.parallelDo(new ExtractKeysFn<E>(getKey, getSortKeyFn),
+            Avros.tableOf(
+                Avros.pairs(Avros.generics(getKey.schema()), Avros.ints()),
+                Avros.pairs(Avros.generics(sortKeySchema), collection.getPType())));
+      @SuppressWarnings("unchecked")
+      PCollection<E> sorted = SecondarySort.sortAndApply(table, new ExtractEntityFn(),
+          collection.getPType(), numWriters);
+      return sorted;
+    } else {
+      return partition(collection, numWriters);
+    }
+  }
+
   private static <E> PCollection<E> partition(PCollection<E> collection,
                                               int numReducers) {
     PType<E> type = collection.getPType();
@@ -309,6 +342,49 @@ public class CrunchDatasets {
       int marker = count % numPartitionWriters;
       count += 1;
       return Pair.<GenericData.Record, Integer>of(key.reuseFor(entity, provided, accessor), marker);
+    }
+  }
+
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+      value={"SE_NO_SERIALVERSIONID"},
+      justification="Purposely not supported across versions")
+  private static class ExtractKeysFn<E>
+      extends DoFn<E, Pair<Pair<GenericData.Record, Integer>, Pair<GenericData.Record, E>>> {
+
+    private GetStorageKey<E> getStorageKey;
+    private final MapFn<E, GenericData.Record> getSortKey;
+
+    private ExtractKeysFn(GetStorageKey<E> getStorageKey, MapFn<E, GenericData.Record> getSortKey) {
+      this.getStorageKey = getStorageKey;
+      this.getSortKey = getSortKey;
+    }
+
+    @Override
+    public void initialize() {
+      getStorageKey.initialize();
+      getSortKey.initialize();
+    }
+
+    @Override
+    public void process(E entity,
+        Emitter<Pair<Pair<GenericData.Record, Integer>, Pair<GenericData.Record, E>>> emitter) {
+      Pair<GenericData.Record, Integer> storageKey = getStorageKey.map(entity);
+      GenericData.Record sortKey = getSortKey.map(entity);
+      emitter.emit(Pair.of(storageKey, Pair.of(sortKey, entity)));
+    }
+  }
+
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+      value={"SE_NO_SERIALVERSIONID"},
+      justification="Purposely not supported across versions")
+  private static class ExtractEntityFn<E>
+      extends DoFn<Pair<GenericData.Record, Iterable<Pair<GenericData.Record, E>>>, E> {
+    @Override
+    public void process(Pair<GenericData.Record,
+        Iterable<Pair<GenericData.Record, E>>> input, Emitter<E> emitter) {
+      for (Pair<GenericData.Record, E> pair : input.second()) {
+        emitter.emit(pair.second());
+      }
     }
   }
 
