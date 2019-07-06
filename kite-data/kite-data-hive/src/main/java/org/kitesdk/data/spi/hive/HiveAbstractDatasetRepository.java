@@ -125,12 +125,16 @@ class HiveAbstractDatasetRepository extends FileSystemDatasetRepository {
         uri.append(":");
       }
       URI rootUri = rootDirectory.toUri();
-      uri.append(rootUri.getPath());
-      if (rootUri.getHost() != null) {
-        uri.append("?").append("hdfs:host").append("=").append(rootUri.getHost());
-        if (rootUri.getPort() != -1) {
-          uri.append("&").append("hdfs:port").append("=").append(rootUri.getPort());
-        }
+
+      if(rootUri.getScheme().equals("hdfs")) {
+        if (rootUri.getHost() != null) {
+              uri.append("?").append("hdfs:host").append("=").append(rootUri.getHost());
+            if (rootUri.getPort() != -1) {
+              uri.append("&").append("hdfs:port").append("=").append(rootUri.getPort());
+            }
+          }
+      } else{
+        uri.append("/").append(rootUri);
       }
     }
     return URI.create(uri.toString());
