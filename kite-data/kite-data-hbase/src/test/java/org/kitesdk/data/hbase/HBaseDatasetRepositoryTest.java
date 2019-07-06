@@ -341,6 +341,8 @@ public class HBaseDatasetRepositoryTest {
 
     entity.put("field5", arrayRecordList);
 
+    // field6 is left as null
+
     return entity;
   }
 
@@ -374,6 +376,8 @@ public class HBaseDatasetRepositoryTest {
     assertEquals(1L, ((IndexedRecord) ((List<?>) record.get(7)).get(1)).get(1));
     assertEquals(new Utf8("subfield6"),
         ((IndexedRecord) ((List<?>) record.get(7)).get(1)).get(2));
+
+    assertNull(record.get(8)); // field6
   }
 
   @SuppressWarnings("unchecked")
@@ -408,6 +412,8 @@ public class HBaseDatasetRepositoryTest {
     assertEquals(1L, ((IndexedRecord) ((List<?>) record.get(7)).get(1)).get(1));
     assertEquals("subfield6",
         ((IndexedRecord) ((List<?>) record.get(7)).get(1)).get(2));
+
+    assertNull(record.get(8)); // field6
   }
 
   private TestEntity createSpecificEntity(long uniqueIdx) {
@@ -433,6 +439,6 @@ public class HBaseDatasetRepositoryTest {
         .setField1("field1_" + iStr)
         .setField2("field2_" + iStr).setEnum$(TestEnum.ENUM3)
         .setField3(field3Map).setField4(embeddedRecord)
-        .setField5(arrayRecordList).build();
+        .setField5(arrayRecordList).build(); // field6 is left as null
   }
 }

@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.Schema;
@@ -331,20 +332,32 @@ public class AvroEntitySerDe<E extends IndexedRecord> extends EntitySerDe<E> {
     }
   }
 
+  private static Schema unwrapNullable(Schema schema) {
+    if (schema.getType() == Schema.Type.UNION && schema.getTypes().size() == 2) {
+      List<Schema> types = schema.getTypes();
+      if (types.get(0).getType() == Schema.Type.NULL) {
+        return types.get(1);
+      } else if (types.get(1).getType() == Schema.Type.NULL) {
+        return types.get(0);
+      }
+    }
+    return schema;
+  }
+
   private DatumReader<Object> buildDatumReader(Schema schema,
       Schema writtenSchema) {
     if (specific) {
-      return new SpecificDatumReader<Object>(writtenSchema, schema);
+      return new SpecificDatumReader<Object>(unwrapNullable(writtenSchema), unwrapNullable(schema));
     } else {
-      return new GenericDatumReader<Object>(writtenSchema, schema);
+      return new GenericDatumReader<Object>(unwrapNullable(writtenSchema), unwrapNullable(schema));
     }
   }
 
   private DatumWriter<Object> buildDatumWriter(Schema schema) {
     if (specific) {
-      return new SpecificDatumWriter<Object>(schema);
+      return new SpecificDatumWriter<Object>(unwrapNullable(schema));
     } else {
-      return new GenericDatumWriter<Object>(schema);
+      return new GenericDatumWriter<Object>(unwrapNullable(schema));
     }
   }
 
@@ -357,11 +370,12 @@ public class AvroEntitySerDe<E extends IndexedRecord> extends EntitySerDe<E> {
    * @return The avro decoder.
    */
   private Decoder getColumnDecoder(Schema writtenFieldAvroSchema, InputStream in) {
+    Schema schema = unwrapNullable(writtenFieldAvroSchema);
     // Use a special Avro decoder that has special handling for int, long,
     // and String types. See ColumnDecoder for more information.
-    if (writtenFieldAvroSchema.getType() == Type.INT
-        || writtenFieldAvroSchema.getType() == Type.LONG
-        || writtenFieldAvroSchema.getType() == Type.STRING) {
+    if (schema.getType() == Type.INT
+        || schema.getType() == Type.LONG
+        || schema.getType() == Type.STRING) {
       return new ColumnDecoder(in);
     } else {
       return DecoderFactory.get().binaryDecoder(in, null);
@@ -377,11 +391,12 @@ public class AvroEntitySerDe<E extends IndexedRecord> extends EntitySerDe<E> {
    * @return The avro encoder
    */
   private Encoder getColumnEncoder(Schema fieldAvroSchema, OutputStream out) {
+    Schema schema = unwrapNullable(fieldAvroSchema);
     // Use a special Avro encoder that has special handling for int, long,
     // and String types. See ColumnEncoder for more information.
-    if (fieldAvroSchema.getType() == Type.INT
-        || fieldAvroSchema.getType() == Type.LONG
-        || fieldAvroSchema.getType() == Type.STRING) {
+    if (schema.getType() == Type.INT
+        || schema.getType() == Type.LONG
+        || schema.getType() == Type.STRING) {
       return new ColumnEncoder(out);
     } else {
       return EncoderFactory.get().binaryEncoder(out, null);

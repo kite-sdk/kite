@@ -21,7 +21,7 @@
       { "type": "column", "value": "meta:field1" }
     },
 
-    { "name": "field2", "type": "string", "mapping":
+    { "name": "field2", "type": ["null", "string"], "default" : null, "mapping":
       { "type": "column", "value": "meta:field2" }
     },
 
@@ -62,6 +62,10 @@
         }
       },
       "mapping": { "type": "column", "value": "meta:field5" }
+    },
+
+    { "name": "field6", "type": ["null", "string"], "default" : null, "mapping":
+      { "type": "column", "value": "meta:field6" }
     },
 
     {
