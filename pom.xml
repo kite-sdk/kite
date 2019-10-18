@@ -171,7 +171,7 @@
     <vers.slf4j>1.6.1</vers.slf4j>
     <vers.dropwizard.metrics>3.2.2</vers.dropwizard.metrics>
     <vers.typesafe.config>1.0.2</vers.typesafe.config>
-    <vers.solr>6.6.0</vers.solr>
+    <vers.solr>8.2.0</vers.solr>
     <solr.expected.version>6.6.0</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->
     <vers.solr-cdh5>6.6.0</vers.solr-cdh5>
     <vers.tika>1.13</vers.tika>
