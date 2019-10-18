@@ -175,7 +175,7 @@
     <solr.expected.version>6.6.0</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->
     <vers.solr-cdh5>6.6.0</vers.solr-cdh5>
     <vers.tika>1.13</vers.tika>
-    <vers.jackson>2.3.1</vers.jackson>
+    <vers.jackson>2.10.0</vers.jackson>
     <vers.opencsv>2.3</vers.opencsv>
     <vers.jodatime>2.3</vers.jodatime>
     <vers.jcommander>1.35</vers.jcommander>
