@@ -153,7 +153,7 @@
          pulled in by the TransformTask in kite-tools. New dependencies
          should be added to the distributed cache by class.
          -->
-    <vers.hive>1.1.0</vers.hive>
+    <vers.hive>3.1.2</vers.hive>
     <vers.hive-cdh5>1.1.0-cdh${cdh5.version}</vers.hive-cdh5>
     <vers.jetty>8.1.14.v20131031</vers.jetty>
     <vers.jetty.morphlines>9.3.8.v20160314</vers.jetty.morphlines>
