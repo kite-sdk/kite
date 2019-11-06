@@ -72,7 +72,7 @@
     <kite.avro.version>1.7.5</kite.avro.version>
     <kite.crunch.version>0.9.0-hadoop2</kite.crunch.version>
     <kite.findbugs.version>2.0.1</kite.findbugs.version>
-    <kite.hive.version>0.10.0-cdh4.4.0</kite.hive.version>
+    <kite.hive.version>3.1.2</kite.hive.version>
     <kite.oozie.version>3.3.2-cdh4.4.0</kite.oozie.version>
 
     <!-- other properties to help apps -->
