@@ -98,7 +98,7 @@
     <repository>
       <id>maven-twttr</id>
       <name>Twitter Public Maven Repo</name>
-      <url>http://maven.twttr.com</url>
+      <url>https://maven.twttr.com</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
