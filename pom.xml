@@ -131,7 +131,7 @@
     <!-- Library versions -->
     <vers.avro>1.7.5</vers.avro>
     <vers.commons-codec>1.4</vers.commons-codec>
-    <vers.commons-io>2.5</vers.commons-io>
+    <vers.commons-io>2.7</vers.commons-io>
     <vers.commons-logging>1.1.1</vers.commons-logging>
     <vers.commons-lang>2.5</vers.commons-lang>
     <vers.crunch-base>0.10.0</vers.crunch-base>
