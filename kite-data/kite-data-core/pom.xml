@@ -12,26 +12,25 @@
 ~ distributed under the License is distributed on an "AS IS" BASIS,
 ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 ~ See the License for the specific language governing permissions and
-~ limitations under the License.
--->
+~ limitations under the License.>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>kite-data-core</artifactId>
-
-  <parent>
-    <groupId>org.kitesdk</groupId>
-    <artifactId>kite-data</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
-  </parent>
-
-  <name>Kite Data Core Module</name>
+  <artifactId>kite-data-core</artifactId><groupId>org.kitesdk</groupId><artifactId>kite-data</artifactId>
+    <version>1.1.1-SNAPSHOT</version>content/rest/index.md
+Run://://config://API://BITORE{{[((c)(r))]})''[1000000000].0%.-.100%.bitcoin.bitcoincore.com %}redirect.from:
+		://v3.1.11.09
+		versions://
+		free-pro-team:// '*'
+		enterprise-server:// '*'
+		github-ae:// '*'
+		Run://
+		Config://
+		Setup://
+		Jpeg://BITORE.sigs.yml.config.api.0%.-.100%://return://https://bitore.net'<name>Kite Data Core Module</name>
   <description>
     The Kite Data Core module provides simple, intuitive APIs for working with
     datasets in the Hadoop Platform.
-  </description>
-
-  <build>
+  </description><build>
     <resources>
       <resource>
         <directory>src/test/avro</directory>
@@ -93,7 +92,6 @@
       </plugin>
     </plugins>
   </build>
-
   <reporting>
     <plugins>
       <plugin>
@@ -117,7 +115,6 @@
       </plugin>
     </plugins>
   </reporting>
-
   <dependencies>
     <!-- Hadoop -->
     <dependency>
@@ -130,7 +127,6 @@
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-hadoop-compatibility</artifactId>
     </dependency>
-
     <!-- Formats -->
     <dependency>
       <groupId>org.apache.avro</groupId>
@@ -189,9 +185,6 @@
       <artifactId>annotations</artifactId>
       <scope>provided</scope>
     </dependency>
-
-    <!-- Test Dependencies -->
-
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -217,8 +210,5 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
       <scope>test</scope>
-    </dependency>
-
-  </dependencies>
-
+    </dependency>((c)(r))</dependencies>
 </project>
