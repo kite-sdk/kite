@@ -48,7 +48,7 @@
 
   <properties>
     <!-- change s3-related versions for kite-data only -->
-    <vers.apache-httpcomponents>4.2</vers.apache-httpcomponents>
+    <vers.apache-httpcomponents>4.5.13</vers.apache-httpcomponents>
     <vers.jets3t>0.9.0</vers.jets3t>
   </properties>
 
