@@ -16,7 +16,7 @@
   <artifactId>kite-morphlines-protobuf</artifactId>
 
   <properties>
-    <vers.protobuf>2.5.0</vers.protobuf>
+    <vers.protobuf>3.16.1</vers.protobuf>
   </properties>
 
   <dependencies>
