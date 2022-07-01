@@ -166,7 +166,7 @@
     <vers.mojo-executor>1.5</vers.mojo-executor>
     <vers.oozie>3.3.2-cdh${cdh.version}</vers.oozie> <!-- OOZIE-1790 -->
     <vers.parquet>1.8.1</vers.parquet>
-    <vers.plexus-utils>3.0</vers.plexus-utils>
+    <vers.plexus-utils>3.0.16</vers.plexus-utils>
     <vers.rat>0.9</vers.rat>
     <vers.slf4j>1.6.1</vers.slf4j>
     <vers.dropwizard.metrics>3.2.2</vers.dropwizard.metrics>
