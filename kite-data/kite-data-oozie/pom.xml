@@ -31,7 +31,7 @@
   </description>
 
   <properties>
-    <vers.oozie4>4.1.0</vers.oozie4>
+    <vers.oozie4>5.0.0-cdh6.0.0</vers.oozie4>
   </properties>
 
   <build>
